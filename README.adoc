@@ -13,7 +13,7 @@
 :icons: font
 
 == Overview
-This repository contains _Linux Mantra_: a set of interconnected Bash/Lua scripts and configuration files, which perform fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra is composed of 3800+ lines and constitutes one of the most sophisticated programs of its kind.
+This repository contains _Linux Mantra_: a set of interconnected Bash/Lua scripts and configuration files, which perform automated fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra is composed of 3800+ lines and constitutes one of the most sophisticated programs of its kind.
 
 == Features
 [upperalpha]
