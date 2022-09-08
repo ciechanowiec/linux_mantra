@@ -1,0 +1,8 @@
+*.class
+*.iml
+*.log
+.idea
+.vscode
+target
+README.html
+README.pdf

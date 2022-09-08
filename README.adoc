@@ -1,0 +1,68 @@
+[.text-justify]
+= Linux Mantra
+:reproducible:
+:doctype: article
+:author: Herman Ciechanowiec
+:email: herman@ciechanowiec.eu
+:chapter-signifier:
+:sectnums:
+:sectnumlevels: 5
+:sectanchors:
+:toc: left
+:toclevels: 5
+:icons: font
+
+== Overview
+This repository contains _Linux Mantra_: a set of interconnected Bash/Lua scripts and configuration files, which perform fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra is composed of 3800+ lines and constitutes one of the most sophisticated programs of its kind.
+
+== Features
+[upperalpha]
+. Linux Mantra performs automized setup of personal Linux/Java/AEM development environment right after installation of an operating system. It installs basic packages (e.g. `curl`, `ffmpeg`, `xclip`, `traceroute`, `fzf`, `xdotool`, `tree`, `unzip`, `wget`, `htop`, `trash-cli`, `vim`), adjusts `.bashrc`, customizes fonts, fixes some bugs, sets up locale formats, personalizes directories in `$HOME`, remaps appropriate input keys, loads dumped `dconf`, configures terminal file manager (`xplr`), initiates often used Bash scripts, establishes GNOME extensions, modifies run modes (`.desktop`) of certain default applications, associates mime types etc.
+. With Linux Mantra, time required to perform the whole setup of personal Linux/Java/AEM development environment is usually less than 30 minutes (depends on the quality of internet connection).
+. Linux Mantra was tested and can be run on Linux Ubuntu 20.x or 22.x. Other Linux distributions might require adjustments of the program.
+
+== Program Architecture
+=== Open for Easy Modification
+Personal Linux/Java/AEM development environment is subject to continuous change, e.g. due to  obsolescence of some programs, software updates and need for new scripts. For that reason Linux Mantra is designed to be open for easy modification. Thanks to that, changes to the environment can be smoothly and handily implemented into Linux Mantra so that they will be reproducible during next setup.
+
+=== `linux_mantra.sh` and `resources`
+[upperalpha]
+. Linux Mantra consists of two interdependent parts: a bash script `linux_mantra.sh` and a directory `resources`. The first one is the script that drives the whole program from the very start till the very end. The directory `resources`, in turn, contains files that are used (copied, modified and triggered) by `linux_mantra.sh`.
+. `linux_mantra.sh` and `resources` must be sibling files, i.e. they must be located in the same directory.
+. `linux_mantra.sh` has hardcoded paths to files inside `resources`. It means that changes of files hierarchy inside `resources` must be appropriately reflected in `linux_mantra.sh`.
+
+=== Code Blocks in `linux_mantra.sh`
+[upperalpha]
+. `linux_mantra.sh` consists of set of code blocks, each of which is visually marked by a big comment-header.
+. The first code block is a set of common functions used throughout the script and the rest of blocks are procedural ones.
+. Every procedural code block starts with informing about the name of a procedure that now will be performed. In the end of every procedure the user is informed about completion, the script stops the execution to give the user time for facultative checks and prompts for continuation.
+. Procedural code blocks have numbers in headings. Those numbers represent sequence-priorities in which blocks should be run. Lower numbers (1, 2, 3...) mean higher priority, higher numbers (14, 15, 16...) mean lower priority and equal numbers (7, 7, 7...) mean the same priority. In some cases those priorities are very strict so that if the procedure with higher priority is not executed before the procedure with lower priority, the latter one will fail. In other cases those priorities are loosely coupled and arbitrary.
+
+== How to Run
+[upperalpha]
+. By design, Linux Mantra performs _personalized_ setup. Moreover, that setup is _highly_ personalized. Technically, anyone can run Linux Mantra and achieve the result intended by the program, but due to the mentioned particular individualization, that result might not be satisfiable (e.g. someone might prefer different key bindings or wallpaper). Therefore, Linux Mantra isn't supposed to be a universal tool, but rather inspiration for creating other similar tools.
+. Before running Linux Mantra, perform installation of Linux Ubuntu 20.x or 22.x. The installation should be done in a _minimal_ mode (i.e. without preinstalled set of additional packages like LibreOffice) and in an _erasing the disk_ mode, so that the operating system is clean.
+. Right after the first boot do not install any additional programs. Right after the first boot just download this repository as a `.zip` archive and unzip it.
+. Run `linux_mantra.sh` script located in the root of this repository. Run it as a usual user, without `sudo` (otherwise, incorrect `$HOME` variable might be set up).
+. Running `linux_mantra.sh` script will start and drive the whole execution of Linux Mantra. Running that script is the only thing required to perform the setup; accompanying files from the `resources` directory will be accessed by the script itself.
+. Follow the instructions and prompts that will appear in the terminal where `linux_mantra.sh` script is running.
+. `linux_mantra.sh` can be run from any path other than `$HOME/TEMP`. It resolves its actual path (and therefore - also the actual path of relative `resources`) itself.
+. Note that Linux Mantra isn't run in a fully automatic mode and requires certain interaction with the user (e.g. provision of an e-mail address). The reasons for that are security considerations and open for easy modification principle mentioned above. Another reason is also ineffectiveness of full aromatization: certain aspects of certain programs (e.g. the location of setting for the download target in Google Chrome) are practically nondeterministic due to constant change of those programs.
+
+== License
+The program is subject to MIT No Attribution License
+
+Copyright © 2022 Herman Ciechanowiec
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the 'Software'), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so.
+
+The Software is provided 'as is', without warranty of any kind, express or implied,
+including but not limited to the warranties of merchantability, fitness for a
+particular purpose and noninfringement. In no event shall the authors or copyright
+holders be liable for any claim, damages or other liability, whether in an action
+of contract, tort or otherwise, arising from, out of or in connection with the
+Software or the use or other dealings in the Software.

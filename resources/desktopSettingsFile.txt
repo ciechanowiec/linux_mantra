@@ -1,0 +1,203 @@
+[com/github/amezin/ddterm]
+background-color='#2E3436'
+bold-color='#000000'
+bold-color-same-as-fg=true
+bold-is-bright=true
+cursor-background-color='#000000'
+cursor-colors-set=false
+cursor-foreground-color='#ffffff'
+cursor-shape='ibeam'
+custom-font='JetBrainsMonoNL Nerd Font Mono 12'
+foreground-color='#D3D7CF'
+hide-animation-duration=0.080000000000000002
+hide-when-focus-lost=true
+hide-window-on-esc=true
+highlight-background-color='#000000'
+highlight-colors-set=false
+highlight-foreground-color='#ffffff'
+new-tab-button=false
+notebook-border=false
+palette=['rgb(46,52,54)', 'rgb(204,0,0)', 'rgb(78,154,6)', 'rgb(196,160,0)', 'rgb(52,101,164)', 'rgb(117,80,123)', 'rgb(6,152,154)', 'rgb(211,215,207)', 'rgb(85,87,83)', 'rgb(239,41,41)', 'rgb(138,226,52)', 'rgb(252,233,79)', 'rgb(114,159,207)', 'rgb(173,127,168)', 'rgb(52,226,226)', 'rgb(238,238,236)']
+panel-icon-type='none'
+shortcut-next-tab=['<Alt>Right']
+shortcut-page-close=['<Primary>w']
+shortcut-prev-tab=['<Alt>Left']
+shortcut-win-new-tab=['<Primary>t']
+shortcuts-enabled=true
+show-animation-duration=0.080000000000000002
+tab-close-buttons=false
+tab-expand=false
+tab-label-ellipsize-mode='middle'
+tab-position='top'
+tab-title-template='{{window-title}}'
+theme-variant='dark'
+transparent-background=false
+use-system-font=false
+use-theme-colors=false
+window-maximize=false
+window-position='left'
+window-size=0.5
+
+[org/gnome/desktop/input-sources]
+mru-sources=[('xkb', 'pl'), ('xkb', 'ru')]
+sources=[('xkb', 'pl'), ('xkb', 'ru')]
+xkb-options=@as []
+
+[org/gnome/desktop/interface]
+color-scheme='prefer-light'
+cursor-theme='breeze_cursors'
+enable-hot-corners=false
+font-hinting='slight'
+gtk-theme='Yaru-sage'
+icon-theme='Yaru-sage'
+show-battery-percentage=false
+
+[org/gnome/desktop/notifications]
+show-in-lock-screen=false
+
+[org/gnome/desktop/peripherals/mouse]
+speed=0.235
+
+[org/gnome/desktop/peripherals/touchpad]
+speed=0.235
+two-finger-scrolling-enabled=true
+
+[org/gnome/desktop/privacy]
+disable-microphone=false
+old-files-age=30
+recent-files-max-age=30
+remove-old-temp-files=true
+remove-old-trash-files=true
+report-technical-problems=false
+
+[org/gnome/desktop/screensaver]
+lock-delay=uint32 0
+lock-enabled=false
+picture-options='zoom'
+ubuntu-lock-on-suspend=false
+
+[org/gnome/desktop/session]
+idle-delay=uint32 0
+
+[org/gnome/desktop/sound]
+allow-volume-above-100-percent=false
+
+[org/gnome/desktop/wm/keybindings]
+minimize=['<Super>Down']
+move-to-monitor-left=@as []
+move-to-monitor-right=@as []
+show-desktop=['<Super>d']
+unmaximize=@as []
+
+[org/gnome/desktop/wm/preferences]
+num-workspaces=1
+
+[org/gnome/gedit/preferences/editor]
+editor-font='JetBrainsMonoNL Nerd Font Mono 11'
+scheme='kate'
+use-default-font=false
+wrap-last-split-mode='word'
+
+[org/gnome/mutter]
+dynamic-workspaces=false
+
+[org/gnome/nautilus/icon-view]
+default-zoom-level='larger'
+
+[org/gnome/nautilus/list-view]
+default-column-order=['name', 'size', 'type', 'owner', 'group', 'permissions', 'where', 'date_modified', 'date_modified_with_time', 'date_accessed', 'recency', 'starred', 'detailed_type']
+default-visible-columns=['name', 'size', 'date_modified']
+default-zoom-level='small'
+use-tree-view=true
+
+[org/gnome/nautilus/preferences]
+default-folder-viewer='list-view'
+search-filter-time-type='last_modified'
+search-view='list-view'
+show-create-link=true
+
+[org/gnome/settings-daemon/plugins/media-keys]
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/']
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0]
+binding='<Super>s'
+command='shutdown now'
+name='Shutdown'
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1]
+binding='<Super>c'
+command='google-chrome'
+name='Google Chrome'
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2]
+binding='<Super>e'
+command='gedit --new-window'
+name='Text Editor'
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3]
+binding='<Super>f'
+command='gnome-terminal --geometry 94x45+0+0 -- /home/linuxbrew/.linuxbrew/bin/xplr'
+name='XPLR'
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4]
+binding='<Super>t'
+command='gnome-terminal --geometry 94x45+0+0'
+name='Terminal'
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5]
+binding='<Super>KP_Subtract'
+command='sh -c "gnome-screenshot -acf /tmp/test && cat /tmp/test | xclip -i -selection clipboard -target image/png"'
+name='Screenshot'
+
+[org/gnome/settings-daemon/plugins/power]
+idle-dim=false
+sleep-inactive-ac-timeout=0
+sleep-inactive-ac-type='nothing'
+sleep-inactive-battery-type='nothing'
+
+[org/gnome/shell]
+disabled-extensions=['ubuntu-dock@ubuntu.com']
+enabled-extensions=['panel-date-format@keiii.github.com', 'hide-keyboard-layout@sitnik.ru', 'ddterm@amezin.github.com']
+favorite-apps=@as []
+
+[org/gnome/shell/extensions/desktop-icons]
+show-home=false
+show-trash=false
+
+[org/gnome/shell/extensions/ding]
+show-home=false
+start-corner='bottom-right'
+
+[org/gnome/shell/extensions/panel-date-format]
+format='%R  |  %d.%m.%y  |  %A'
+
+[org/gnome/shell/keybindings]
+toggle-overview=@as []
+
+[org/gnome/system/location]
+enabled=false
+
+[org/gnome/terminal/legacy/keybindings]
+close-tab='<Primary>w'
+find='<Primary>f'
+new-tab='<Primary>t'
+next-tab='<Alt>Right'
+prev-tab='<Alt>Left'
+
+[org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9]
+audible-bell=true
+background-color='rgb(46,52,54)'
+bold-is-bright=true
+cursor-blink-mode='on'
+cursor-shape='ibeam'
+default-size-columns=94
+default-size-rows=45
+exit-action='close'
+font='JetBrainsMonoNL Nerd Font Mono 12'
+foreground-color='rgb(211,215,207)'
+palette=['rgb(46,52,54)', 'rgb(204,0,0)', 'rgb(78,154,6)', 'rgb(196,160,0)', 'rgb(52,101,164)', 'rgb(117,80,123)', 'rgb(6,152,154)', 'rgb(211,215,207)', 'rgb(85,87,83)', 'rgb(239,41,41)', 'rgb(138,226,52)', 'rgb(252,233,79)', 'rgb(114,159,207)', 'rgb(173,127,168)', 'rgb(52,226,226)', 'rgb(238,238,236)']
+use-system-font=false
+use-theme-colors=false
+
+[system/locale]
+region='en_GB.UTF-8'
