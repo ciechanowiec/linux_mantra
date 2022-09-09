@@ -14,6 +14,5 @@ fi
 
 echo "Starting instance..."
 cd "$authorDir" || exit 1
-java -jar "$authorJAR"
 # This will run AEM in debug mode on 8888 port and also on usual 4502:
 java -Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8888 -jar "$authorJAR"
