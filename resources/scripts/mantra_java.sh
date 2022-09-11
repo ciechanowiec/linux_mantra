@@ -120,20 +120,21 @@ insertContentToMain () {
 cat > "$mainFile" << EOF
 package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class Main {
 
     public static void main(String[] args) {
-        Logger.info("Application started");
+        log.info("Application started");
         System.out.println("Hello, Universe!");
 
-        Logger.info("Testing resource printing...");
+        log.info("Testing resource printing...");
         SamplePrinter samplePrinter = new SamplePrinter();
         samplePrinter.performSamplePrint("sampleLines.txt");
-        Logger.info("Finished resource printing");
+        log.info("Finished resource printing");
 
-        Logger.info("Application ended");
+        log.info("Application ended");
     }
 }
 EOF
@@ -149,7 +150,7 @@ insertContentToSamplePrinter () {
 cat > "$samplePrinterFile" << EOF
 package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -157,6 +158,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
+@Slf4j
 class SamplePrinter {
 
     void performSamplePrint(String fileName) {
@@ -184,7 +186,7 @@ class SamplePrinter {
                 line = reader.readLine();
             }
         } catch (IOException exception) {
-            Logger.error(exception);
+            log.error("Failed to print input stream", exception);
         }
     }
 }
@@ -207,7 +209,7 @@ cat > "$loggerPropertiesFile" << EOF
 writer        = console
 # to write to a file:
 # writer        = file
-writer.format = {date: yyyy-MM-dd HH:mm:ss.SSS O} {level}: {message}
+writer.format = [{date: yyyy-MM-dd HH:mm:ss.SSS O}] [{thread}] [{class}] [{level}]: {message}
 writer.file   = logs.txt
 EOF
 printf "${STATUS_TAG} Default logger properties have been added to ${ITALIC}tinylog.properties${RESET_FORMAT}.\n"
@@ -261,16 +263,19 @@ cat > "$pomFile" << EOF
   <url>$projectURL</url>
 
   <properties>
-    <!--  building properties  -->
+    <!--  Building properties  -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
-    <!--  dependencies  -->
+    <!--  Dependencies  -->
+    <commons-lang3.version>3.12.0</commons-lang3.version>
     <lombok.version>1.18.24</lombok.version>
     <junit-jupiter-api.version>5.9.0</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.9.0</junit-jupiter-params.version>
+    <slf4j-api.version>2.0.0</slf4j-api.version>
+    <slf4j-tinylog.version>2.5.0</slf4j-tinylog.version>
     <tinylog-api.version>2.5.0</tinylog-api.version>
     <tinylog-impl.version>2.5.0</tinylog-impl.version>
-    <!-- plugins -->
+    <!-- Plugins -->
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
@@ -282,12 +287,19 @@ cat > "$pomFile" << EOF
   </properties>
 
   <dependencies>
+    <!-- Utils -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>\${commons-lang3.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>\${lombok.version}</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Testing -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -300,12 +312,27 @@ cat > "$pomFile" << EOF
       <version>\${junit-jupiter-params.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- Logging -->
     <dependency>
+      <!-- Logging facade -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>\${slf4j-api.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Tinylog to SLF4J binding -->
+      <groupId>org.tinylog</groupId>
+      <artifactId>slf4j-tinylog</artifactId>
+      <version>\${slf4j-tinylog.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Tinylog API -->
       <groupId>org.tinylog</groupId>
       <artifactId>tinylog-api</artifactId>
       <version>\${tinylog-api.version}</version>
     </dependency>
     <dependency>
+      <!-- Tinylog implementation -->
       <groupId>org.tinylog</groupId>
       <artifactId>tinylog-impl</artifactId>
       <version>\${tinylog-impl.version}</version>
@@ -345,6 +372,15 @@ cat > "$pomFile" << EOF
                   <mainClass>$firstLevelPackageName.$secondLevelPackageName.$projectName.Main</mainClass>
                 </transformer>
               </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.MF</exclude>
+                    <exclude>META-INF/versions/9/module-info.class</exclude> <!-- Overlapping resource from logging dependencies -->
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
@@ -550,7 +586,7 @@ openProjectInIDE () {
 #                                                #
 # ============================================== #
 
-# Revise and change values of the variables below to meet your needs 
+# Revise and change values of the variables below to meet your needs
 
 gitCommitterName="Herman"
 gitCommitterSurname="Ciechanowiec"
