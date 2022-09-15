@@ -209,6 +209,7 @@ cat > "$loggerPropertiesFile" << EOF
 writer        = console
 # to write to a file:
 # writer        = file
+level         = debug
 writer.format = [{date: yyyy-MM-dd HH:mm:ss.SSS O}] [{thread}] [{class}] [{level}]: {message}
 writer.file   = logs.txt
 EOF
