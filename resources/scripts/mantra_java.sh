@@ -253,7 +253,7 @@ cat > "$pomFile" << EOF
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>$firstLevelPackageName.$secondLevelPackageName.$projectName</groupId>
+  <groupId>$firstLevelPackageName.$secondLevelPackageName</groupId>
   <artifactId>$projectName</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
