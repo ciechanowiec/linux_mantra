@@ -229,6 +229,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class MainTest {
 
     @Test
@@ -272,6 +273,9 @@ cat > "$pomFile" << EOF
     <lombok.version>1.18.24</lombok.version>
     <junit-jupiter-api.version>5.9.0</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.9.0</junit-jupiter-params.version>
+    <mockito-core.version>4.8.0</mockito-core.version>
+    <mockito-junit-jupiter.version>4.8.0</mockito-junit-jupiter.version>
+    <mockito-inline.version>4.8.0</mockito-inline.version>
     <slf4j-api.version>2.0.0</slf4j-api.version>
     <slf4j-tinylog.version>2.5.0</slf4j-tinylog.version>
     <tinylog-api.version>2.5.0</tinylog-api.version>
@@ -302,15 +306,40 @@ cat > "$pomFile" << EOF
     </dependency>
     <!-- Testing -->
     <dependency>
+      <!--  Basic JUnit library -->
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>\${junit-jupiter-api.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
+      <!-- Parameterized JUnit tests -->
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
       <version>\${junit-jupiter-params.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Basic Mockito library -->
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>\${mockito-core.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- JUnit extension for Mockito: @ExtendWith(MockitoExtension.class) -->
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>\${mockito-junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Experimental and intermediate library for mocking
+           final types, enums, final and static methods.
+           Will be superseded by automatic usage in a future version -->
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>\${mockito-inline.version}</version>
       <scope>test</scope>
     </dependency>
     <!-- Logging -->
