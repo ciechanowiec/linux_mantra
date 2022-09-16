@@ -94,7 +94,7 @@ createProjectDirectory () {
 	printf "${STATUS_TAG} The project directory ${ITALIC}$projectDirectory${RESET_FORMAT} has been created.\n"
 }
 
-createFilesStructure () {
+createSrcStructure () {
   projectDirectory=$1
   firstLevelPackageName=$2
   secondLevelPackageName=$3
@@ -105,10 +105,7 @@ createFilesStructure () {
 	touch "$projectDirectory/src/main/resources/tinylog.properties"
 	touch "$projectDirectory/src/main/resources/sampleLines.txt"
 	touch "$projectDirectory/src/test/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/MainTest.java"
-	touch "$projectDirectory/pom.xml"
-	touch "$projectDirectory/README.adoc"
-	printf "${STATUS_TAG} The following file structure for the project has been created:\n"
-	tree "$projectDirectory"
+	printf "${STATUS_TAG} File structure for ${ITALIC}src${RESET_FORMAT} has been created.\n"
 }
 
 insertContentToMain () {
@@ -226,6 +223,8 @@ cat > "$mainTestFile" << EOF
 package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -241,13 +240,67 @@ EOF
 printf "${STATUS_TAG} Default test content has been added to ${ITALIC}MainTest.java${RESET_FORMAT}.\n"
 }
 
-insertContentToPom () {
+addGitAttributes () {
+  projectDirectory=$1
+  gitattributesFile="$projectDirectory/.gitattributes"
+  touch "$gitattributesFile"
+cat > "$gitattributesFile" << EOF
+###############################
+#        Line Endings         #
+###############################
+
+# Set default behaviour to automatically normalize line endings:
+* text=auto
+
+# Force batch scripts to always use CRLF line endings so that if a repo is accessed
+# in Windows via a file share from Linux, the scripts will work:
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
+
+# Force bash scripts to always use LF line endings so that if a repo is accessed
+# in Unix via a file share from Windows, the scripts will work:
+*.sh text eol=lf
+EOF
+printf "${STATUS_TAG} ${ITALIC}.gitattributes${RESET_FORMAT} with default content has been created.\n"
+}
+
+addGitignore () {
+  projectDirectory=$1
+  gitignoreFile="$projectDirectory/.gitignore"
+  touch "$gitignoreFile"
+cat > "$gitignoreFile" << EOF
+*.class
+*.iml
+*.log
+.idea
+.vscode
+target
+# Compiled documentation:
+README.html
+README.pdf
+EOF
+printf "${STATUS_TAG} ${ITALIC}.gitignore${RESET_FORMAT} with default content has been created.\n"
+}
+
+addLombokConfig () {
+  projectDirectory=$1
+  lombokConfigFile="$projectDirectory/lombok.config"
+  touch "$lombokConfigFile"
+cat > "$lombokConfigFile" << EOF
+config.stopBubbling = true
+lombok.accessors.fluent = true
+EOF
+printf "${STATUS_TAG} ${ITALIC}lombok.config${RESET_FORMAT} file with default content has been created.\n"
+}
+
+addPom () {
   projectDirectory=$1
   firstLevelPackageName=$2
   secondLevelPackageName=$3
   projectName=$4
   projectURL=$5
   pomFile="$projectDirectory/pom.xml"
+  touch "$pomFile"
 cat > "$pomFile" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -491,16 +544,17 @@ cat > "$pomFile" << EOF
   </build>
 </project>
 EOF
-printf "${STATUS_TAG} Default Maven-content has been added to ${ITALIC}pom.xml${RESET_FORMAT}.\n"
+printf "${STATUS_TAG} ${ITALIC}pom.xml${RESET_FORMAT} file with default content has been created.\n"
 }
 
-insertContentToReadme () {
+addReadme () {
   readmeFile="$1/README.adoc"
   projectName=$2
   gitCommitterName=$3
   gitCommitterSurname=$4
   gitCommitterEmail=$5
   date=$(date +%F)
+  touch "$readmeFile"
 cat > "$readmeFile" << EOF
 [.text-justify]
 = $projectName
@@ -518,49 +572,7 @@ cat > "$readmeFile" << EOF
 
 This project was created on _${date}_ from a template.
 EOF
-printf "${STATUS_TAG} Default readme-content has been added to ${ITALIC}README.adoc${RESET_FORMAT}.\n"
-}
-
-addGitignore () {
-  projectDirectory=$1
-  gitignoreFile="$projectDirectory/.gitignore"
-  touch "$gitignoreFile"
-cat > "$gitignoreFile" << EOF
-*.class
-*.iml
-*.log
-.idea
-.vscode
-target
-# Compiled documentation:
-README.html
-README.pdf
-EOF
-printf "${STATUS_TAG} ${ITALIC}.gitignore${RESET_FORMAT} with standard content has been created.\n"
-}
-
-addGitAttributes () {
-  projectDirectory=$1
-  gitattributesFile="$projectDirectory/.gitattributes"
-  touch "$gitattributesFile"
-cat > "$gitattributesFile" << EOF
-###############################
-#        Line Endings         #
-###############################
-
-# Set default behaviour to automatically normalize line endings:
-* text=auto
-
-# Force batch scripts to always use CRLF line endings so that if a repo is accessed
-# in Windows via a file share from Linux, the scripts will work:
-*.{cmd,[cC][mM][dD]} text eol=crlf
-*.{bat,[bB][aA][tT]} text eol=crlf
-
-# Force bash scripts to always use LF line endings so that if a repo is accessed
-# in Unix via a file share from Windows, the scripts will work:
-*.sh text eol=lf
-EOF
-printf "${STATUS_TAG} ${ITALIC}.gitattributes${RESET_FORMAT} has been created. It sets git to normalize line endings.\n"
+printf "${STATUS_TAG} ${ITALIC}README.adoc${RESET_FORMAT} file with default content has been created.\n"
 }
 
 initGit () {
@@ -584,17 +596,8 @@ setupGitCommitter() {
 
 showFinishMessage () {
 	projectName=$1
-	printf "${BOLD_LIGHT_GREEN}[SUCCESS]:${RESET_FORMAT} The project ${ITALIC}$projectName${RESET_FORMAT} has been created.\n"
-}
-
-tryOpenWithIntelliJCommunity () {
-	projectName=$1
-	projectDirectory=$2
-	if [ -f /snap/intellij-idea-community/current/bin/idea.sh ] # Checks whether a native IntelliJ IDEA launcher exists
-	then
-		printf "${BOLD_LIGHT_YELLOW}[IntelliJ IDEA]:${RESET_FORMAT} Opening the project...\n"
-		nohup /snap/intellij-idea-community/current/bin/idea.sh nosplash $projectDirectory > /dev/null 2>&1 &
-	fi
+	printf "${BOLD_LIGHT_GREEN}[SUCCESS]:${RESET_FORMAT} The project ${ITALIC}$projectName${RESET_FORMAT} with the following file structure has been created:\n"
+  tree -a "$projectDirectory"
 }
 
 openProjectInIDE () {
@@ -649,18 +652,26 @@ verifyIfCorrectProjectName "$projectName"
 verifyIfProjectPathIsFree "$projectDirectory"
 
 createProjectDirectory "$projectDirectory"
-createFilesStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
+
+# Pollute 'src' folder:
+createSrcStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToMain "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToSamplePrinter "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToSampleLines "$projectDirectory"
 insertContentToLoggerProperties "$projectDirectory"
 insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
-insertContentToPom "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName" "$projectURL"
-insertContentToReadme "$projectDirectory" "$projectName" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
-addGitignore "$projectDirectory"
+
+# Pollute root directory with additional files:
 addGitAttributes "$projectDirectory"
+addGitignore "$projectDirectory"
+addLombokConfig "$projectDirectory"
+addPom "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName" "$projectURL"
+addReadme "$projectDirectory" "$projectName" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
+
+# Setup git:
 initGit "$projectDirectory"
 setupGitCommitter "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
-showFinishMessage "$projectName"
 
+# Finish:
+showFinishMessage "$projectName"
 openProjectInIDE "$launcherPath" "$projectDirectory"
