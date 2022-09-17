@@ -452,6 +452,26 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                              6. FIREWALL                                    #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="firewall"
+# DOCUMENTATION:
+#   n/a
+
+informAboutProcedureStart
+
+echo "Enabling firewall..."
+sudo ufw enable
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                                 7. FONTS                                    #
 #                                                                             #
 #                                                                             #
