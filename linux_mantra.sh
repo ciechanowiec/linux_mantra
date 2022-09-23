@@ -1405,8 +1405,8 @@ sudo input-remapper-control --command start --device "Keychron K4 Keychron K4" -
 sudo input-remapper-control --command start --device "MX Anywhere 2S Mouse" --preset "new preset.json"
 sudo input-remapper-control --command autoload
 
- The program behaves unpredictably and often it is impossible to initiate the injection
- automatically. For that reason manual intervention below is required:
+# The program behaves unpredictably and often it is impossible to initiate the injection
+# automatically. For that reason manual intervention below is required:
 echo "Open 'Input Remapper' program and click 'Apply' for the following devices:"
 echo "   -> Keychron K4 Keychron K4"
 echo "   -> MX Anywhere 2S Mouse"
