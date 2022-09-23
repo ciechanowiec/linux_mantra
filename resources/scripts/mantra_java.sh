@@ -336,6 +336,7 @@ cat > "$pomFile" << EOF
     <!-- Plugins -->
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
+    <maven-dependency-plugin.version>3.3.0</maven-dependency-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
     <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
@@ -469,6 +470,23 @@ cat > "$pomFile" << EOF
         </executions>
         <configuration>
           <createDependencyReducedPom>false</createDependencyReducedPom>
+        </configuration>
+      </plugin>
+      <!-- Reports on unused dependencies: -->
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>\${maven-dependency-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>analyze</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <ignoreNonCompile>true</ignoreNonCompile>
         </configuration>
       </plugin>
       <!-- Prevents from building if unit tests don't pass -->
