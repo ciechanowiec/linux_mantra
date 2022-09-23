@@ -1,43 +1,109 @@
 -- 3_custom_commands
-local unarchive = commandMode.cmd("unarchive", "Unzip/untar/unjar a focused file to a current location") (
+local deployToAEMAuthor = commandMode.cmd("aem deploy author", "Upload and install a content package to AEM Author instance running at http://localhost:4502") (
         commandMode.BashExecSilently [===[
-    dirNameForFile=$(dirname "$XPLR_FOCUS_PATH")
+  baseName=$(basename -- "$XPLR_FOCUS_PATH")
+  unzip -t "$XPLR_FOCUS_PATH" &> /dev/null
+  exitCode=$?
+  if [ "$exitCode" == 0 ]
+    then
+      # On success should produce result that has lines like these:
+      # Package installed in 283ms.
+      #     </log>
+      #   </data>
+      #   <status code="200">ok</status>
+      # </response>
+      # </crx>
+      output=$(curl -s -u admin:admin -F file=@"$XPLR_FOCUS_PATH" -F name="$baseName" -F force=true -F recursive=true -F install=true http://localhost:4502/crx/packmgr/service.jsp)
+      result=$(echo "$output" | grep -c 'Package imported\|Package installed\|<status code="200">ok</status>')
+      if [ "$result" == "3" ]
+        then
+          echo LogSuccess: "Deployed $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+        else
+          echo LogError: "Failed to deploy $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+      fi
+    else
+      echo LogError: "Failed to deploy $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+  fi
+  ]===]
+)
 
-    generateTargetFolder() {
-      baseName=$(basename -- "$XPLR_FOCUS_PATH")
-      baseNameWithoutExtension="${baseName%.*}"
-      echo "${dirNameForFile}/${baseNameWithoutExtension}[${RANDOM}]"
-    }
+local deployToAEMPublish = commandMode.cmd("aem deploy publish", "Upload and install a content package to AEM Publish instance running at http://localhost:4503") (
+        commandMode.BashExecSilently [===[
+  baseName=$(basename -- "$XPLR_FOCUS_PATH")
+  unzip -t "$XPLR_FOCUS_PATH" &> /dev/null
+  exitCode=$?
+  if [ "$exitCode" == 0 ]
+    then
+      # On success should produce result that has lines like these:
+      # Package installed in 283ms.
+      #     </log>
+      #   </data>
+      #   <status code="200">ok</status>
+      # </response>
+      # </crx>
+      output=$(curl -s -u admin:admin -F file=@"$XPLR_FOCUS_PATH" -F name="$baseName" -F force=true -F recursive=true -F install=true http://localhost:4503/crx/packmgr/service.jsp)
+      result=$(echo "$output" | grep -c 'Package imported\|Package installed\|<status code="200">ok</status>')
+      if [ "$result" == "3" ]
+        then
+          echo LogSuccess: "Deployed $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+        else
+          echo LogError: "Failed to deploy $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+      fi
+    else
+      echo LogError: "Failed to deploy $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+  fi
+  ]===]
+)
 
-    unzip -t "$XPLR_FOCUS_PATH" &> /dev/null
-    exitCode=$?
-    if [ "$exitCode" == 0 ]
-      then
-        targetPath="$(generateTargetFolder)"
-        while [ -d "$targetPath" ]; do
-            targetPath="$(generateTargetFolder)"
-        done
-        mkdir -p "$targetPath"
-        unzip "$XPLR_FOCUS_PATH" -d "$targetPath" &> /dev/null
-        echo LogSuccess: "Unarchived $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
-        echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
-      else
-        gzip -t "$XPLR_FOCUS_PATH" &> /dev/null
-        exitCode=$?
-        if [ "$exitCode" == 0 ]
-          then
-            targetPath="$(generateTargetFolder)"
-            while [ -d "$targetPath" ]; do
-                targetPath="$(generateTargetFolder)"
-            done
-            mkdir -p "$targetPath"
-            tar -xf "$XPLR_FOCUS_PATH" --directory "$targetPath" &> /dev/null
-            echo LogSuccess: "Unarchived $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
-            echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
-          else
-            echo LogError: "Invalid source archive. Aborted" >> "${XPLR_PIPE_MSG_IN:?}"
-        fi
-    fi
+local installPackToAEMAuthor = commandMode.cmd("aem install author", "Install a content package to AEM Author instance running at http://localhost:4502") (
+        commandMode.BashExecSilently [===[
+  baseName=$(basename -- "$XPLR_FOCUS_PATH")
+  allPackages=$(curl -s -u admin:admin http://localhost:4502/crx/packmgr/service.jsp?cmd=ls)
+  searchedPackLN=$(echo "$allPackages" | grep -Fn "$baseName" | cut -d : -f 1)
+  lnWithPackGroup=$((searchedPackLN - 3))
+  if [ $lnWithPackGroup -gt 1 ]
+    then
+      packGroup=$(echo "$allPackages" | sed -n "${lnWithPackGroup}p" | grep -o -P "(?<=<group>).*(?=</group>)")
+      # Will produce result like:
+      #  {"success":true,"msg":"Package installed"}
+      #  {"success":false,"msg":"no package"}
+      output=$(curl -s -u admin:admin -F cmd=install "http://localhost:4502/crx/packmgr/service/.json/etc/packages/$packGroup/$baseName")
+      result=$(echo "$output" | cut -d : -f 2 | cut -d , -f 1)
+      if [ "$result" == "true" ]
+        then
+          echo LogSuccess: "Installed $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+        else
+          echo LogError: "Failed to install $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+      fi
+    else
+      echo LogError: "Failed to install $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+  fi
+  ]===]
+)
+
+local installPackToAEMPublish = commandMode.cmd("aem install publish", "Install a content package to AEM Publish instance running at http://localhost:4503") (
+        commandMode.BashExecSilently [===[
+  baseName=$(basename -- "$XPLR_FOCUS_PATH")
+  allPackages=$(curl -s -u admin:admin http://localhost:4502/crx/packmgr/service.jsp?cmd=ls)
+  searchedPackLN=$(echo "$allPackages" | grep -Fn "$baseName" | cut -d : -f 1)
+  lnWithPackGroup=$((searchedPackLN - 3))
+  if [ $lnWithPackGroup -gt 1 ]
+    then
+      packGroup=$(echo "$allPackages" | sed -n "${lnWithPackGroup}p" | grep -o -P "(?<=<group>).*(?=</group>)")
+      # Will produce result like:
+      #  {"success":true,"msg":"Package installed"}
+      #  {"success":false,"msg":"no package"}
+      output=$(curl -s -u admin:admin -F cmd=install "http://localhost:4503/crx/packmgr/service/.json/etc/packages/$packGroup/$baseName")
+      result=$(echo "$output" | cut -d : -f 2 | cut -d , -f 1)
+      if [ "$result" == "true" ]
+        then
+          echo LogSuccess: "Installed $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+        else
+          echo LogError: "Failed to install $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+      fi
+    else
+      echo LogError: "Failed to install $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+  fi
   ]===]
 )
 
@@ -91,70 +157,21 @@ local uploadPackToAEMPublish = commandMode.cmd("aem upload publish", "Upload a c
   ]===]
 )
 
-local installPackToAEMAuthor = commandMode.cmd("aem install author", "Install a content package to AEM Author instance running at http://localhost:4502") (
+local archive = commandMode.cmd("archive", "Package and compress a focused directory into a .zip archive") (
         commandMode.BashExecSilently [===[
-  packName=$(basename -- "$XPLR_FOCUS_PATH")
-  allPackages=$(curl -s -u admin:admin http://localhost:4502/crx/packmgr/service.jsp?cmd=ls)
-  searchedPackLN=$(echo "$allPackages" | grep -Fn "$packName" | cut -d : -f 1)
-  lnWithPackGroup=$((searchedPackLN - 3))
-  if [ $lnWithPackGroup -gt 1 ]
+  baseName=$(basename -- "$XPLR_FOCUS_PATH")
+  archiveName="$baseName.zip"
+
+  if [ ! -d "$baseName" ]
     then
-      packGroup=$(echo "$allPackages" | sed -n "${lnWithPackGroup}p" | grep -o -P "(?<=<group>).*(?=</group>)")
-      # Will produce result like:
-      #  {"success":true,"msg":"Package installed"}
-      #  {"success":false,"msg":"no package"}
-      output=$(curl -s -u admin:admin -F cmd=install "http://localhost:4502/crx/packmgr/service/.json/etc/packages/$packGroup/$packName")
-      result=$(echo "$output" | cut -d : -f 2 | cut -d , -f 1)
-      if [ "$result" == "true" ]
-        then
-          echo LogSuccess: "Installed $packName" >> "${XPLR_PIPE_MSG_IN:?}"
-        else
-          echo LogError: "Failed to install $packName" >> "${XPLR_PIPE_MSG_IN:?}"
-      fi
-    else
-      echo LogError: "Failed to install $packName" >> "${XPLR_PIPE_MSG_IN:?}"
-  fi
-  ]===]
-)
-
-local installPackToAEMPublish = commandMode.cmd("aem install publish", "Install a content package to AEM Publish instance running at http://localhost:4503") (
-        commandMode.BashExecSilently [===[
-  packName=$(basename -- "$XPLR_FOCUS_PATH")
-  allPackages=$(curl -s -u admin:admin http://localhost:4502/crx/packmgr/service.jsp?cmd=ls)
-  searchedPackLN=$(echo "$allPackages" | grep -Fn "$packName" | cut -d : -f 1)
-  lnWithPackGroup=$((searchedPackLN - 3))
-  if [ $lnWithPackGroup -gt 1 ]
+      echo LogError: "Only existing directories can be archived" >> "${XPLR_PIPE_MSG_IN:?}"
+  elif [ -d "$archiveName" ] || [ -f "$archiveName" ]
     then
-      packGroup=$(echo "$allPackages" | sed -n "${lnWithPackGroup}p" | grep -o -P "(?<=<group>).*(?=</group>)")
-      # Will produce result like:
-      #  {"success":true,"msg":"Package installed"}
-      #  {"success":false,"msg":"no package"}
-      output=$(curl -s -u admin:admin -F cmd=install "http://localhost:4503/crx/packmgr/service/.json/etc/packages/$packGroup/$packName")
-      result=$(echo "$output" | cut -d : -f 2 | cut -d , -f 1)
-      if [ "$result" == "true" ]
-        then
-          echo LogSuccess: "Installed $packName" >> "${XPLR_PIPE_MSG_IN:?}"
-        else
-          echo LogError: "Failed to install $packName" >> "${XPLR_PIPE_MSG_IN:?}"
-      fi
+      echo LogError: "Directory/file '$archiveName' already exists" >> "${XPLR_PIPE_MSG_IN:?}"
     else
-      echo LogError: "Failed to install $packName" >> "${XPLR_PIPE_MSG_IN:?}"
+      zip -r "$archiveName" "$baseName"
+      echo LogSuccess: "Archived to '$archiveName'" >> "${XPLR_PIPE_MSG_IN:?}"
   fi
-  ]===]
-)
-
-local copyFilePath = commandMode.cmd("copy path", "Copy the path to a focused file into clipboard") (
-        commandMode.BashExecSilently [===[
-  echo "$XPLR_FOCUS_PATH" | perl -pe 'chomp if eof' | xclip -selection clipboard
-  echo LogSuccess: "Copied a file path to the clipboard ($XPLR_FOCUS_PATH)" >> "${XPLR_PIPE_MSG_IN:?}"
-  ]===]
-)
-
-local copyFileName = commandMode.cmd("copy name", "Copy the name of a focused file into clipboard") (
-        commandMode.BashExecSilently [===[
-  fileName=$(basename "$XPLR_FOCUS_PATH")
-  echo "$fileName" | perl -pe 'chomp if eof' | xclip -selection clipboard
-  echo LogSuccess: "Copied a file name to the clipboard ($fileName)" >> "${XPLR_PIPE_MSG_IN:?}"
   ]===]
 )
 
@@ -168,6 +185,21 @@ local copyFileContent = commandMode.cmd("copy content", "Copy (cat) the content 
       cat "$fileName" | perl -pe 'chomp if eof' | xclip -selection clipboard
       echo LogSuccess: "Copied content of $fileName into clipboard" >> "${XPLR_PIPE_MSG_IN:?}"
   fi
+  ]===]
+)
+
+local copyFileName = commandMode.cmd("copy name", "Copy the name of a focused file into clipboard") (
+        commandMode.BashExecSilently [===[
+  fileName=$(basename "$XPLR_FOCUS_PATH")
+  echo "$fileName" | perl -pe 'chomp if eof' | xclip -selection clipboard
+  echo LogSuccess: "Copied a file name to the clipboard ($fileName)" >> "${XPLR_PIPE_MSG_IN:?}"
+  ]===]
+)
+
+local copyFilePath = commandMode.cmd("copy path", "Copy the path to a focused file into clipboard") (
+        commandMode.BashExecSilently [===[
+  echo "$XPLR_FOCUS_PATH" | perl -pe 'chomp if eof' | xclip -selection clipboard
+  echo LogSuccess: "Copied a file path to the clipboard ($XPLR_FOCUS_PATH)" >> "${XPLR_PIPE_MSG_IN:?}"
   ]===]
 )
 
@@ -192,5 +224,47 @@ local idea = commandMode.cmd("idea", "Open a focused directory in IntelliJ IDEA"
 
   nohup "$launcherPath" nosplash "$XPLR_FOCUS_PATH" > /dev/null 2>&1 &
   echo LogSuccess: "Opened the directory in IntelliJ IDEA - ${XPLR_FOCUS_PATH}" >> "${XPLR_PIPE_MSG_IN:?}"
+  ]===]
+)
+
+local unarchive = commandMode.cmd("unarchive", "Unzip/untar/unjar a focused file to a current location") (
+        commandMode.BashExecSilently [===[
+    dirNameForFile=$(dirname "$XPLR_FOCUS_PATH")
+
+    generateTargetFolder() {
+      baseName=$(basename -- "$XPLR_FOCUS_PATH")
+      baseNameWithoutExtension="${baseName%.*}"
+      echo "${dirNameForFile}/${baseNameWithoutExtension}_${RANDOM}"
+    }
+
+    unzip -t "$XPLR_FOCUS_PATH" &> /dev/null
+    exitCode=$?
+    if [ "$exitCode" == 0 ]
+      then
+        targetPath="$(generateTargetFolder)"
+        while [ -d "$targetPath" ]; do
+            targetPath="$(generateTargetFolder)"
+        done
+        mkdir -p "$targetPath"
+        unzip "$XPLR_FOCUS_PATH" -d "$targetPath" &> /dev/null
+        echo LogSuccess: "Unarchived $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
+        echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
+      else
+        gzip -t "$XPLR_FOCUS_PATH" &> /dev/null
+        exitCode=$?
+        if [ "$exitCode" == 0 ]
+          then
+            targetPath="$(generateTargetFolder)"
+            while [ -d "$targetPath" ]; do
+                targetPath="$(generateTargetFolder)"
+            done
+            mkdir -p "$targetPath"
+            tar -xf "$XPLR_FOCUS_PATH" --directory "$targetPath" &> /dev/null
+            echo LogSuccess: "Unarchived $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
+            echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
+          else
+            echo LogError: "Invalid source archive. Aborted" >> "${XPLR_PIPE_MSG_IN:?}"
+        fi
+    fi
   ]===]
 )
