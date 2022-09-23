@@ -1694,7 +1694,7 @@ if [ "$exitCode" != 0 ]
     sudo add-apt-repository ppa:graphics-drivers/ppa -y
     sudo apt update
     sudo apt install nvidia-driver-510 -y
-    echo "3. NVIDIA drivers installed. They will start after rebooting."
+    echo "3. NVIDIA drivers installed. They will start after rebooting"
 fi
 
 informAboutProcedureEnd
