@@ -47,7 +47,7 @@ Personal Linux/Java/AEM development environment is subject to continuous change,
 . Running `linux_mantra.sh` script will start and drive the whole execution of Linux Mantra. Running that script is the only thing required to perform the setup; accompanying files from the `resources` directory will be accessed by the script itself.
 . Follow the instructions and prompts that will appear in the terminal where `linux_mantra.sh` script is running.
 . `linux_mantra.sh` can be run from any path other than `$HOME/TEMP`. It resolves its actual path (and therefore - also the actual path of relative `resources`) itself.
-. Note that Linux Mantra isn't run in a fully automatic mode and requires certain interaction with the user (e.g. provision of an e-mail address). The reasons for that are security considerations and open for easy modification principle mentioned above. Another reason is also ineffectiveness of full aromatization: certain aspects of certain programs (e.g. the location of setting for the download target in Google Chrome) are practically nondeterministic due to constant change of those programs.
+. Note that Linux Mantra isn't run in a fully automatic mode and requires certain interaction with the user (e.g. provision of an e-mail address). The reasons for that are security considerations and open for easy modification principle mentioned above. Another reason is also ineffectiveness of full automation: certain aspects of certain programs (e.g. the location of setting for the download target in Google Chrome) are practically nondeterministic due to constant change of those programs.
 
 == License
 The program is subject to MIT No Attribution License
