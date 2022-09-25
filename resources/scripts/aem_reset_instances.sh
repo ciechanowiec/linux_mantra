@@ -69,8 +69,8 @@ echo "Setting up AEM Forms bootstrap properties..."
 # 1. Two following lines should be added to $slingPropsOfAuthor for AEM Forms to work:
 #      sling.bootdelegation.class.org.bouncycastle.jce.provider.BouncyCastleProvider=org.bouncycastle.*
 #      sling.bootdelegation.class.com.rsa.jsafe.provider.JsafeJCE=com.rsa.*
-# 2. Be aware that in order for 'AEMFD Signatures Bundle (adobe-aemfd-signatures)' from AEM Forms to start,
-#    AEM should be restarted after the first start.
+# 2. Be aware that in order for 'AEMFD Signatures Bundle (adobe-aemfd-signatures)'
+#    from AEM Forms to work, AEM should be restarted after the first start.
 cat >> "$slingPropsOfAuthor" << EOF
 sling.bootdelegation.class.org.bouncycastle.jce.provider.BouncyCastleProvider=org.bouncycastle.*
 sling.bootdelegation.class.com.rsa.jsafe.provider.JsafeJCE=com.rsa.*
