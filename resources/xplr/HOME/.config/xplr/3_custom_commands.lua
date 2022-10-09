@@ -15,7 +15,7 @@ local deployToAEMAuthor = commandMode.cmd("aem deploy author", "Upload and insta
       # </crx>
       output=$(curl -s -u admin:admin -F file=@"$XPLR_FOCUS_PATH" -F name="$baseName" -F force=true -F recursive=true -F install=true http://localhost:4502/crx/packmgr/service.jsp)
       result=$(echo "$output" | grep -c 'Package imported\|Package installed\|<status code="200">ok</status>')
-      if [ "$result" == "3" ]
+      if [ "$result" -gt 2 ] # -gt because multiple packages from the deployed package can be installed
         then
           echo LogSuccess: "Deployed $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
         else
@@ -43,7 +43,7 @@ local deployToAEMPublish = commandMode.cmd("aem deploy publish", "Upload and ins
       # </crx>
       output=$(curl -s -u admin:admin -F file=@"$XPLR_FOCUS_PATH" -F name="$baseName" -F force=true -F recursive=true -F install=true http://localhost:4503/crx/packmgr/service.jsp)
       result=$(echo "$output" | grep -c 'Package imported\|Package installed\|<status code="200">ok</status>')
-      if [ "$result" == "3" ]
+      if [ "$result" -gt 2 ] # -gt because multiple packages from the deployed package can be installed
         then
           echo LogSuccess: "Deployed $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
         else
@@ -192,14 +192,14 @@ local copyFileName = commandMode.cmd("copy name", "Copy the name of a focused fi
         commandMode.BashExecSilently [===[
   fileName=$(basename "$XPLR_FOCUS_PATH")
   echo "$fileName" | perl -pe 'chomp if eof' | xclip -selection clipboard
-  echo LogSuccess: "Copied a file name to the clipboard ($fileName)" >> "${XPLR_PIPE_MSG_IN:?}"
+  echo LogSuccess: "Copied a file name to the clipboard∶ $fileName" >> "${XPLR_PIPE_MSG_IN:?}"
   ]===]
 )
 
 local copyFilePath = commandMode.cmd("copy path", "Copy the path to a focused file into clipboard") (
         commandMode.BashExecSilently [===[
   echo "$XPLR_FOCUS_PATH" | perl -pe 'chomp if eof' | xclip -selection clipboard
-  echo LogSuccess: "Copied a file path to the clipboard ($XPLR_FOCUS_PATH)" >> "${XPLR_PIPE_MSG_IN:?}"
+  echo LogSuccess: "Copied a file path to the clipboard∶ $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
   ]===]
 )
 
@@ -223,7 +223,24 @@ local idea = commandMode.cmd("idea", "Open a focused directory in IntelliJ IDEA"
   fi
 
   nohup "$launcherPath" nosplash "$XPLR_FOCUS_PATH" > /dev/null 2>&1 &
-  echo LogSuccess: "Opened the directory in IntelliJ IDEA - ${XPLR_FOCUS_PATH}" >> "${XPLR_PIPE_MSG_IN:?}"
+  echo LogSuccess: "Opened the directory in IntelliJ IDEA∶ ${XPLR_FOCUS_PATH}" >> "${XPLR_PIPE_MSG_IN:?}"
+  ]===]
+)
+
+local props = commandMode.cmd("props", "Show size and recursive number of items for a focused directory") (
+        commandMode.BashExecSilently [===[
+  baseName=$(basename -- "$XPLR_FOCUS_PATH")
+
+  if [ ! -d "$XPLR_FOCUS_PATH" ]
+    then
+      echo LogError: "The target '$baseName' isn't a valid directory" >> "${XPLR_PIPE_MSG_IN:?}"
+      exit 0 # This code must be 0. Otherwise, the above error will not be logged by xplr
+  fi       
+  
+  dirSize=$(du -sh "$XPLR_FOCUS_PATH" | cut -d $'\t' -f 1)
+  numOfRecursiveItemsInDirectory=$(find "$XPLR_FOCUS_PATH" -mindepth 1 | wc -l)
+  
+  echo LogSuccess: "${baseName}∶ $dirSize | $numOfRecursiveItemsInDirectory item(s) recursively" >> "${XPLR_PIPE_MSG_IN:?}"
   ]===]
 )
 
