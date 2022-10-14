@@ -282,6 +282,25 @@ EOF
 printf "${STATUS_TAG} ${ITALIC}.gitignore${RESET_FORMAT} with default content has been created.\n"
 }
 
+addLicense () {
+  licenseFile="$projectDirectory/LICENSE.txt"
+  projectDirectory=$1
+  gitCommitterName=$2
+  gitCommitterSurname=$3
+  year=$(date +%Y)
+  touch "$licenseFile"
+cat > "$licenseFile" << EOF
+The program is subject to MIT No Attribution License
+
+Copyright © $year $gitCommitterName $gitCommitterSurname
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
+
+The Software is provided 'as is', without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
+EOF
+printf "${STATUS_TAG} ${ITALIC}.gitignore${RESET_FORMAT} with default content has been created.\n"
+}
+
 addLombokConfig () {
   projectDirectory=$1
   lombokConfigFile="$projectDirectory/lombok.config"
@@ -313,6 +332,8 @@ cat > "$pomFile" << EOF
   <version>1.0.0</version>
   <packaging>jar</packaging>
 
+  <inceptionYear>$(date +%Y)</inceptionYear>
+
   <name>$projectName</name>
   <description>Java Program</description>
   <url>$projectURL</url>
@@ -324,25 +345,33 @@ cat > "$pomFile" << EOF
     <!--  Dependencies  -->
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <lombok.version>1.18.24</lombok.version>
-    <junit-jupiter-api.version>5.9.0</junit-jupiter-api.version>
-    <junit-jupiter-params.version>5.9.0</junit-jupiter-params.version>
+    <junit-jupiter-api.version>5.9.1</junit-jupiter-api.version>
+    <junit-jupiter-params.version>5.9.1</junit-jupiter-params.version>
     <mockito-core.version>4.8.0</mockito-core.version>
     <mockito-junit-jupiter.version>4.8.0</mockito-junit-jupiter.version>
     <mockito-inline.version>4.8.0</mockito-inline.version>
-    <slf4j-api.version>2.0.0</slf4j-api.version>
+    <slf4j-api.version>2.0.3</slf4j-api.version>
     <slf4j-tinylog.version>2.5.0</slf4j-tinylog.version>
     <tinylog-api.version>2.5.0</tinylog-api.version>
     <tinylog-impl.version>2.5.0</tinylog-impl.version>
+    <!-- Locking down Maven default plugins -->
+    <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
+    <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
+    <maven-install-plugin.version>3.0.1</maven-install-plugin.version>
+    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+    <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
+    <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
     <!-- Plugins -->
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-    <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
+    <maven-shade-plugin.version>3.4.0</maven-shade-plugin.version>
     <maven-dependency-plugin.version>3.3.0</maven-dependency-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
     <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
     <min.maven.version>3.8.6</min.maven.version>
-    <versions-maven-plugin.version>2.11.0</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.12.0</versions-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
   </properties>
 
   <dependencies>
@@ -431,6 +460,37 @@ cat > "$pomFile" << EOF
         <directory>src/main/resources</directory>
       </resource>
     </resources>
+
+    <pluginManagement>
+      <!-- Lock down plugins versions to avoid using Maven defaults from super-pom -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>\${maven-clean-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>\${maven-deploy-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>\${maven-install-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>\${maven-jar-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>\${maven-resources-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>\${maven-site-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <!-- Allows to compile and build the program -->
       <plugin>
@@ -438,7 +498,33 @@ cat > "$pomFile" << EOF
         <artifactId>maven-compiler-plugin</artifactId>
         <version>\${maven-compiler-plugin.version}</version>
       </plugin>
-      <!-- Creates an uber-jar file with all
+      <!-- Processes resources -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-license-and-readme-to-jar</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>\${project.build.outputDirectory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>\${project.basedir}</directory>
+                  <includes>
+                    <include>LICENSE.txt</include>
+                    <include>README.adoc</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Creates an uber-jar binary file with all
            dependencies and resources inside -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -461,7 +547,9 @@ cat > "$pomFile" << EOF
                   <artifact>*:*</artifact>
                   <excludes>
                     <exclude>META-INF/*.MF</exclude>
-                    <exclude>META-INF/versions/9/module-info.class</exclude> <!-- Overlapping resource from logging dependencies -->
+                    <exclude>META-INF/NOTICE.txt</exclude>
+                    <exclude>META-INF/LICENSE.txt</exclude>
+                    <exclude>META-INF/versions/9/module-info.class</exclude>
                   </excludes>
                 </filter>
               </filters>
@@ -489,17 +577,29 @@ cat > "$pomFile" << EOF
           <ignoreNonCompile>true</ignoreNonCompile>
         </configuration>
       </plugin>
-      <!-- Prevents from building if unit tests don't pass -->
+      <!-- Prevents from building if unit tests don't pass
+           and fails the build if there are no tests -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>\${maven-surefire-plugin.version}</version>
+        <configuration>
+          <failIfNoTests>true</failIfNoTests>
+        </configuration>
       </plugin>
       <!-- Prevents from building if integration tests don't pass -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>\${maven-failsafe-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <!-- Requires new Maven version -->
       <plugin>
@@ -537,7 +637,8 @@ cat > "$pomFile" << EOF
           </execution>
         </executions>
       </plugin>
-      <!-- Creates reports on tests coverage (target->site->jacoco->index.html) -->
+      <!-- Creates reports on tests coverage (target->site->jacoco->index.html)
+           and fails the build if the coverage is insufficient -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -556,6 +657,32 @@ cat > "$pomFile" << EOF
               <goal>report</goal>
             </goals>
           </execution>
+          <execution>
+            <id>check</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>\${jacoco-maven-plugin.coverage.minimum}</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>\${jacoco-maven-plugin.coverage.minimum}</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -572,6 +699,7 @@ addReadme () {
   gitCommitterSurname=$4
   gitCommitterEmail=$5
   date=$(date +%F)
+  year=$(date +%Y)
   touch "$readmeFile"
 cat > "$readmeFile" << EOF
 [.text-justify]
@@ -588,7 +716,16 @@ cat > "$readmeFile" << EOF
 :toclevels: 5
 :icons: font
 
-This project was created on _${date}_ from a template.
+This program was created on _${date}_ from a template.
+
+== License
+The program is subject to MIT No Attribution License
+
+Copyright © $year $gitCommitterName $gitCommitterSurname
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
+
+The Software is provided 'as is', without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
 EOF
 printf "${STATUS_TAG} ${ITALIC}README.adoc${RESET_FORMAT} file with default content has been created.\n"
 }
@@ -682,6 +819,7 @@ insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLev
 # Pollute root directory with additional files:
 addGitAttributes "$projectDirectory"
 addGitignore "$projectDirectory"
+addLicense "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname"
 addLombokConfig "$projectDirectory"
 addPom "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName" "$projectURL"
 addReadme "$projectDirectory" "$projectName" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
