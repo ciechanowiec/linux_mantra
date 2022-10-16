@@ -1203,9 +1203,11 @@ echo "   - AEM IDE"
 echo "   - AsciiDoc"
 echo "   - CND Language / Jahia Framework"
 echo "   - CodeMetrics"
+echo "   - MoveTab"
 echo "   - Luanalysis"
 echo "   - OSGi"
 echo "   - SonarLint"
+echo "   - Statistic"
 echo "Press Enter to continue..."
 read voidInput
 
