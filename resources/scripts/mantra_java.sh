@@ -301,17 +301,6 @@ EOF
 printf "${STATUS_TAG} ${ITALIC}.gitignore${RESET_FORMAT} with default content has been created.\n"
 }
 
-addLombokConfig () {
-  projectDirectory=$1
-  lombokConfigFile="$projectDirectory/lombok.config"
-  touch "$lombokConfigFile"
-cat > "$lombokConfigFile" << EOF
-config.stopBubbling = true
-lombok.accessors.fluent = true
-EOF
-printf "${STATUS_TAG} ${ITALIC}lombok.config${RESET_FORMAT} file with default content has been created.\n"
-}
-
 addPom () {
   projectDirectory=$1
   firstLevelPackageName=$2
@@ -827,7 +816,6 @@ insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLev
 addGitAttributes "$projectDirectory"
 addGitignore "$projectDirectory"
 addLicense "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname"
-addLombokConfig "$projectDirectory"
 addPom "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName" "$projectURL"
 addReadme "$projectDirectory" "$projectName" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
 
