@@ -337,9 +337,9 @@ cat > "$pomFile" << EOF
     <lombok.version>1.18.24</lombok.version>
     <junit-jupiter-api.version>5.9.1</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.9.1</junit-jupiter-params.version>
-    <mockito-core.version>4.8.0</mockito-core.version>
-    <mockito-junit-jupiter.version>4.8.0</mockito-junit-jupiter.version>
-    <mockito-inline.version>4.8.0</mockito-inline.version>
+    <mockito-core.version>4.8.1</mockito-core.version>
+    <mockito-junit-jupiter.version>4.8.1</mockito-junit-jupiter.version>
+    <mockito-inline.version>4.8.1</mockito-inline.version>
     <slf4j-api.version>2.0.3</slf4j-api.version>
     <slf4j-tinylog.version>2.5.0</slf4j-tinylog.version>
     <tinylog-api.version>2.5.0</tinylog-api.version>
