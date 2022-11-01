@@ -332,7 +332,7 @@ cat > "$pomFile" << EOF
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
     <!--  Dependencies  -->
-    <conditional.version>1.0.2</conditional.version>
+    <conditional.version>1.0.3</conditional.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <lombok.version>1.18.24</lombok.version>
     <junit-jupiter-api.version>5.9.1</junit-jupiter-api.version>
