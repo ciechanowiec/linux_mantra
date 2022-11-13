@@ -1172,14 +1172,14 @@ nohup "$launcherPath" nosplash "$tempIntelliJDir" > /dev/null 2>&1 &
 sleep 7 # Give time for opening
 
 printf "\n6. Perform synchronizable settings:\n"
-echo "   Toolbar -> Manage IDE Settings -> Settings repository"
+echo "   Toolbar -> File -> Manage IDE Settings -> Settings repository"
 echo "   -> Upstream URL [like: https://github.com/ciechanowiec/intellij_settings]"
 echo "   -> Overwrite local"
 echo "Press Enter to continue..."
 read voidInput
 
 echo "7. Perform non-synchronizable Git settings:"
-echo "   Toolbar -> New Projects Setup -> Settings for New Projects"
+echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Version Control"
 echo "   -> Confirmation"
 echo "      -> When files are created: Do not add"
@@ -1188,7 +1188,7 @@ echo "Press Enter to continue..."
 read voidInput
 
 echo "8. Perform non-synchronizable Maven settings:"
-echo "   Toolbar -> New Projects Setup -> Settings for New Projects"
+echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Build, Execution, Deployment"
 echo "   -> Build Tools"
 echo "   -> Maven"
@@ -1201,7 +1201,6 @@ echo "9. Perform non-synchronizable plugin settings."
 echo "   Install manually the following IntelliJ IDEA plugins:"
 echo "   - AEM IDE"
 echo "   - AsciiDoc"
-echo "   - CND Language / Jahia Framework"
 echo "   - CodeMetrics"
 echo "   - MoveTab"
 echo "   - Luanalysis"
