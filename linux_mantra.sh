@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## TODO AND CHECK WITH NEXT ITERATION (TO FIX BLUETOOTH AUDIO ISSUES):
+## https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones
+
 procedureId="null"
 
 ###############################################################################
