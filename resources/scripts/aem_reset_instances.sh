@@ -14,7 +14,6 @@
 #  ├───adobe-aemfd-linux-pkg-6.0.334.zip
 #  ├───aem-service-pkg-6.5.14.0.zip
 #  ├───basicContent.zip
-#  ├───formsContent.zip
 #  └───testContent.zip
 
 # ============================================== #
@@ -29,7 +28,6 @@ rootDir="$HOME/0_prog/0_aem_instances/aem-sdk"
 formsPackage="$rootDir/adobe-aemfd-linux-pkg-6.0.334.zip"
 servicePackage="$rootDir/aem-service-pkg-6.5.14.0.zip"
 basicContent="$rootDir/basicContent.zip"
-formsContent="$rootDir/formsContent.zip"
 testContent="$rootDir/testContent.zip"
 # Instance directories
 authorDir="$rootDir/author"
@@ -60,7 +58,7 @@ publishInstallDir="$publishJCR/install"
 # ============================================== #
 echo "Checking whether required directories and files exist..."
 if [ ! -d "$rootDir" ] \
-   || [ ! -f "$formsPackage" ] || [ ! -f "$servicePackage" ] || [ ! -f "$basicContent" ] || [ ! -f "$formsContent" ] || [ ! -f "$testContent" ] \
+   || [ ! -f "$formsPackage" ] || [ ! -f "$servicePackage" ] || [ ! -f "$basicContent" ] || [ ! -f "$testContent" ] \
    || [ ! -d "$authorDir" ] || [ ! -d "$formsDir" ] || [ ! -d "$publishDir" ] \
    || [ ! -f "$authorJAR" ] || [ ! -f "$formsJAR" ] || [ ! -f "$publishJAR" ] \
    || [ ! -f "$authorLicense" ] || [ ! -f "$formsLicense" ]  || [ ! -f "$publishLicense" ]
@@ -83,7 +81,6 @@ mkdir "$authorInstallDir"
 cp "$servicePackage" "$authorInstallDir"
 cp "$formsPackage" "$authorInstallDir"
 cp "$basicContent" "$authorInstallDir"
-cp "$formsContent" "$authorInstallDir"
 cp "$testContent" "$authorInstallDir"
 cd "$currentDir" || exit 1
 
@@ -110,7 +107,6 @@ mkdir "$formsInstallDir"
 cp "$servicePackage" "$formsInstallDir"
 cp "$formsPackage" "$formsInstallDir"
 cp "$basicContent" "$formsInstallDir"
-cp "$formsContent" "$formsInstallDir"
 cp "$testContent" "$formsInstallDir"
 cd "$currentDir" || exit 1
 
@@ -127,7 +123,7 @@ EOF
 #                  AEM PUBLISH                   #
 # ============================================== #
 echo "Resetting AEM Publish instance..."
-# In this particular case $formsPackage and $formsContent aren't supposed to be installed on AEM Publish
+# In this particular case $formsPackage isn't supposed to be installed on AEM Publish
 cd "$publishDir" || exit 1
 if [ -d "$publishJCR" ]
   then
