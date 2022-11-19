@@ -191,7 +191,10 @@ sudo apt install icdiff -y
 # This tool was delivered with Ubuntu 20, but isn't delivered with Ubuntu 22.
 # It is used further in keyboard shortcuts:
 echo "Installing gnome-screenshot (tool for taking screenshots)..."
-sudo apt install gnome-screenshot
+sudo apt install gnome-screenshot -y
+
+echo "Installing jq (CLI JSON processor)..."
+sudo apt install jq -y
 
 informAboutProcedureEnd
 
