@@ -203,6 +203,49 @@ local copyFilePath = commandMode.cmd("copy path", "Copy the path to a focused fi
   ]===]
 )
 
+local decompile = commandMode.cmd("decompile", "Decompile a focused item (normally .jar, .zip or .class file) to a current location") (
+        commandMode.BashExec [===[
+    fernflowerJar="/usr/share/java/fernflower/fernflower.jar"
+    baseName=$(basename -- "$XPLR_FOCUS_PATH")
+
+    generateTargetFolder() {
+      echo "${dirNameForFile}/${baseName}_${RANDOM}"
+    }
+
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    sdk use java 17.0.4-tem # fernflower requires at least Java 17
+    echo ""
+    echo "Using the following Java:"
+    java -version
+    dirNameForFile=$(dirname "$XPLR_FOCUS_PATH")
+    echo ""
+
+    targetPath="$(generateTargetFolder)"
+    while [ -d "$targetPath" ]; do
+      targetPath="$(generateTargetFolder)"
+    done
+    mkdir -p "$targetPath"
+
+    java -jar "$fernflowerJar" "$XPLR_FOCUS_PATH" "$targetPath"
+    echo ""
+
+    if [ -z "$(ls -A $targetPath)" ]; then
+      trash-put "$targetPath"
+      echo "The target path is empty, which might mean that the decompilation failed"
+      echo "  -> target path: $targetPath"
+      echo "[press Entry to continue]"
+      read answer
+      echo LogError: "Decompilation might have failed" >> "${XPLR_PIPE_MSG_IN:?}"
+    else
+      decompiledItem="$targetPath/$baseName"
+      unzip "$decompiledItem" -d "$targetPath"
+      trash-put "$decompiledItem"
+      echo LogSuccess: "Decompiled $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
+      echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
+    fi
+  ]===]
+)
+
 local idea = commandMode.cmd("idea", "Open a focused directory in IntelliJ IDEA") (
         commandMode.BashExecSilently [===[
   # Version for IntelliJ IDEA Community:
