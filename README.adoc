@@ -17,7 +17,7 @@ _Linux Mantra_ is a set of interconnected Bash/Lua scripts and configuration fil
 
 == Features
 [upperalpha]
-. Linux Mantra performs automized setup of personal Linux/Java/AEM development environment right after installation of an operating system. It installs basic packages (e.g. `curl`, `ffmpeg`, `xclip`, `traceroute`, `fzf`, `xdotool`, `tree`, `unzip`, `wget`, `htop`, `trash-cli`, `vim`), adjusts `.bashrc`, customizes fonts, fixes some bugs, sets up locale formats, personalizes directories in `$HOME`, remaps appropriate input keys, loads dumped `dconf`, configures terminal file manager (`xplr`), initiates often used Bash scripts, establishes GNOME extensions, modifies run modes (`.desktop`) of certain default applications, associates mime types etc.
+. Linux Mantra performs automized setup of personal Linux/Java/AEM development environment right after installation of an operating system. It installs basic packages (e.g. `curl`, `ffmpeg`, `xclip`, `traceroute`, `fzf`, `xdotool`, `tree`, `unzip`, `wget`, `htop`, `trash-cli`, `vim`), adjusts `.bashrc`, customizes fonts, fixes some bugs, sets up locale formats, mounts a decompiler, personalizes directories in `$HOME`, remaps appropriate input keys, loads dumped `dconf`, configures terminal file manager (`xplr`), initiates often used Bash scripts, establishes GNOME extensions, modifies run modes (`.desktop`) of certain default applications, associates mime types etc.
 . With Linux Mantra, time required to perform the whole setup of personal Linux/Java/AEM development environment is usually less than 30 minutes (depends on the quality of internet connection).
 . Linux Mantra was tested and can be run on Linux Ubuntu 20.x or 22.x. Other Linux distributions might require adjustments of the program.
 
