@@ -335,12 +335,13 @@ cat > "$pomFile" << EOF
     <conditional.version>1.0.3</conditional.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <lombok.version>1.18.24</lombok.version>
+    <jsr305.version>3.0.2</jsr305.version>
     <junit-jupiter-api.version>5.9.1</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.9.1</junit-jupiter-params.version>
-    <mockito-core.version>4.8.1</mockito-core.version>
-    <mockito-junit-jupiter.version>4.8.1</mockito-junit-jupiter.version>
-    <mockito-inline.version>4.8.1</mockito-inline.version>
-    <slf4j-api.version>2.0.3</slf4j-api.version>
+    <mockito-core.version>4.9.0</mockito-core.version>
+    <mockito-junit-jupiter.version>4.9.0</mockito-junit-jupiter.version>
+    <mockito-inline.version>4.9.0</mockito-inline.version>
+    <slf4j-api.version>2.0.4</slf4j-api.version>
     <slf4j-tinylog.version>2.5.0</slf4j-tinylog.version>
     <tinylog-api.version>2.5.0</tinylog-api.version>
     <tinylog-impl.version>2.5.0</tinylog-impl.version>
@@ -381,6 +382,14 @@ cat > "$pomFile" << EOF
       <artifactId>lombok</artifactId>
       <version>\${lombok.version}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <!--  Mainly for @CheckForNull and @Nonnull annotations.
+            Google groupId is used, because the native groupId isn't
+            available at repo.maven.apache.org/maven2 -->
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>\${jsr305.version}</version>
     </dependency>
     <!-- Testing -->
     <dependency>
