@@ -595,6 +595,53 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                          7. FERNFLOWER (DECOMPILER)                         #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="fernflower (decompiler)"
+# DOCUMENTATION:
+#   https://github.com/fesh0r/fernflower
+# NOTES:
+#   1. CFR (https://github.com/leibnitz27/cfr) decompiler was also tested, but it
+#      extracted only Java files, discarding META-INF, resources etc.
+#   2. The installation is performed via mounting a `fernflower.jar` file stored in
+#      the Linux Mantra repository. That file is a custom build from the source code
+#      (https://github.com/fesh0r/fernflower) based on the
+#      2080f165fa49bcc744a7b6185a8ec64c4cf52c4c commit from 2022-09-23 (14:05, +0200).
+#      However, due to specific issues, before the build one change in the source code
+#      was made. Within that change three following lines from the `StructContext.java`
+#      file were commented out:
+#      142   if (!testPath.normalize().startsWith(file.toPath().normalize())) { // check for zip slip exploit
+#      143     throw new RuntimeException("Zip entry '" + entry.getName() + "' tries to escape target directory");
+#      144   }
+
+informAboutProcedureStart
+
+fernflowerInstallDir="/usr/share/java/fernflower"
+fernflowerJarSourceAbs="$resourcesDir/fernflower/fernflower.jar"
+
+if [ -d "$fernflowerInstallDir" ] || [ -f "$fernflowerInstallDir" ]
+  then
+    echo "Installation path is occupied. Removing in order to recreate: $fernflowerInstallDir..."
+    sudo trash-put "$fernflowerInstallDir"
+fi
+
+echo "Creating an installation directory: $fernflowerInstallDir..."
+sudo mkdir -p "$fernflowerInstallDir"
+
+echo "Mounting a fernflower jar..."
+# Note that the path to the target file
+# (/usr/share/java/fernflower/fernflower.jar) is hardcoded in xplr:
+sudo cp "$fernflowerJarSourceAbs" "$fernflowerInstallDir"
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                   7. HOME DEFAULT DIRECTORIES CLEANING                      #
 #                                                                             #
 #                                                                             #
@@ -1720,7 +1767,7 @@ procedureId="cleanup"
 # DOCUMENTATION:
 #   n/a
 informAboutProcedureStart
-echo "1. Going back to the initial working directory ($initialWorkingDirectory)..."
+echo "1. Going back to the initial working directory: $initialWorkingDirectory..."
 cd "$initialWorkingDirectory" || exit 1
 echo "2. Removing the temporary directory..."
 trash-put "$tempDir"
