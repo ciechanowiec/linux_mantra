@@ -342,10 +342,12 @@ cat > "$pomFile" << EOF
     <mockito-core.version>4.9.0</mockito-core.version>
     <mockito-junit-jupiter.version>4.9.0</mockito-junit-jupiter.version>
     <mockito-inline.version>4.9.0</mockito-inline.version>
-    <slf4j-api.version>2.0.4</slf4j-api.version>
+    <slf4j-api.version>2.0.5</slf4j-api.version>
     <slf4j-tinylog.version>2.5.0</slf4j-tinylog.version>
     <tinylog-api.version>2.5.0</tinylog-api.version>
     <tinylog-impl.version>2.5.0</tinylog-impl.version>
+    <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
+    <maven-project-info-reports-plugin.version>3.4.1</maven-project-info-reports-plugin.version>
     <!-- Locking down Maven default plugins -->
     <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
     <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
@@ -364,6 +366,7 @@ cat > "$pomFile" << EOF
     <versions-maven-plugin.version>2.12.0</versions-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
+    <spotbugs-maven-plugin.version>4.7.3.0</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -455,6 +458,17 @@ cat > "$pomFile" << EOF
       <artifactId>tinylog-impl</artifactId>
       <version>\${tinylog-impl.version}</version>
     </dependency>
+    <dependency>
+      <!-- @SuppressFBWarnings annotation for SpotBugs: -->
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>\${spotbugs-annotations.version}</version>
+      <optional>true</optional>
+      <!-- Although @SuppressFBWarnings annotation, for which this dependency is added,
+           has a CLASS retention policy, in fact it isn't required during runtime or
+           on the final classpath -->
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -492,6 +506,10 @@ cat > "$pomFile" << EOF
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
           <version>\${maven-site-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>\${maven-project-info-reports-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -687,6 +705,27 @@ cat > "$pomFile" << EOF
                 </rule>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Searches for bugs during the build -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>\${spotbugs-maven-plugin.version}</version>
+        <configuration>
+          <failOnError>true</failOnError>
+          <includeTests>true</includeTests>
+          <effort>Max</effort>
+          <!-- Low / Medium / High: -->
+          <threshold>Low</threshold>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
