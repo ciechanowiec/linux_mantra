@@ -1,7 +1,8 @@
 #!/bin/bash
 
 ## TODO AND CHECK WITH NEXT ITERATION (TO FIX BLUETOOTH AUDIO ISSUES):
-## https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones
+## 1. https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones
+## 2. IntelliJ Settings changed a lot (mainly settings synchronization)
 
 procedureId="null"
 
@@ -1254,6 +1255,7 @@ echo "9. Perform non-synchronizable plugin settings."
 echo "   Install manually the following IntelliJ IDEA plugins:"
 echo "   - AEM IDE"
 echo "   - AsciiDoc"
+echo "   - CND Language / Jahia Framework"
 echo "   - CodeMetrics"
 echo "   - MoveTab"
 echo "   - Luanalysis"
