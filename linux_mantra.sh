@@ -1,7 +1,7 @@
 #!/bin/bash
 
-## TODO AND CHECK WITH NEXT ITERATION (TO FIX BLUETOOTH AUDIO ISSUES):
-## 1. https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones
+## TODO AND CHECK WITH NEXT ITERATION:
+## 1. https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones (fix bluetooth audio issues)
 ## 2. IntelliJ Settings changed a lot (mainly settings synchronization)
 
 procedureId="null"
