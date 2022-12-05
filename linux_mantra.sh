@@ -1,8 +1,9 @@
 #!/bin/bash
 
-## TODO AND CHECK WITH NEXT ITERATION:
-## 1. https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones (fix bluetooth audio issues)
-## 2. IntelliJ Settings changed a lot (mainly settings synchronization)
+# TODO AND CHECK WITH NEXT ITERATION:
+# 1. https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones (fix bluetooth audio issues)
+# 2. After IntelliJ 2022.3 there were important settings update. Recheck with 
+#    attention on clean Linux installation whether the script works correctly.
 
 procedureId="null"
 
@@ -501,7 +502,7 @@ globalTargetFontsDir="/usr/share/fonts/custom"
 echo "1. Creating a temporary directory for new fonts..."
 mkdir tempFontsDir
 
-echo "2. Deleting all user fonts if installed..."
+echo "2. Removing all user fonts if installed..."
 if [ -d "$localTargetFontsDir" ]
   then
     trash-put "$localTargetFontsDir"
@@ -1195,44 +1196,104 @@ procedureId="intellij idea"
 #   3. The script below requires a number of manual actions. This is because IntelliJ IDEA
 #      setup cannot be effectively automated in that scope (e.g. its behavior on first
 #      run is often unpredictable and it doesn't have clear configuration files system).
-#
+#   4. Since IntelliJ IDEA 2022.3 there is an inbuilt option 'Setting Sync'. However, it
+#      is very unstable, unpredictable and also doesn't perform sync of all settings.
+#      Besides that, it is impossible to backup or see all settings synced by that
+#      functionality, so there is a risk of loosing settings.
+
 informAboutProcedureStart
 
 echo "1. Setting up variables..."
-tempIntelliJDir="$tempDir/intellij_temp_project"
+projectName="demoproject"
+tempProjectDir="$tempDir/$projectName"
+jetbrainsCacheDir="$HOME/.cache/JetBrains"
 jetbrainsConfigDir="$HOME/.config/JetBrains"
 jetbrainsLocalDir="$HOME/.local/share/JetBrains"
 launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
 
-echo "2. Installing IntelliJ IDEA..."
+printf "\n2. Purging IntelliJ IDEA if present...\n"
+
+if [ -d "$jetbrainsCacheDir" ]
+  then
+    echo "Old cache directory found. Removing..."
+    trash-put "$jetbrainsCacheDir"
+fi
+
+if [ -d "$jetbrainsConfigDir" ]
+  then
+    echo "Old config directory found. Removing..."
+    trash-put "$jetbrainsConfigDir"
+fi
+
+if [ -d "$jetbrainsLocalDir" ]
+  then
+    echo "Old local share directory found. Removing..."
+    trash-put "$jetbrainsLocalDir"
+fi
+
+sudo snap remove intellij-idea-ultimate
+
+printf "\n3. Installing IntelliJ IDEA...\n"
 sudo snap install intellij-idea-ultimate --classic
 
-echo "3. Setting up a temporary project directory..."
-if [ -d "$tempIntelliJDir" ]
+printf "\n4. A temporary project will be set up and IntelliJ IDEA will be opened...\n"
+if [ -d "$tempProjectDir" ]
   then
-    echo "Old directory found. Deleting..."
-    trash-put "$tempIntelliJDir"
+    echo "Old temporary project directory found. Removing..."
+    trash-put "$tempProjectDir"
 fi
-mkdir -p "$tempIntelliJDir"
 
-printf "\n4. Now IntelliJ IDEA will be opened...\n"
-echo "4.1. Accept user agreement if requested."
-echo "4.2. Choose to trust projects in a temporary directory if asked."
-echo "4.3. Login to your JetBrains account if asked."
-sleep 4
+yes | mvn archetype:generate                          \
+  -DarchetypeGroupId=org.apache.maven.archetypes      \
+  -DarchetypeArtifactId=maven-archetype-quickstart    \
+  -DarchetypeVersion=1.4                              \
+  -DgroupId=demo.groupId                              \
+  -DartifactId="$projectName"                         \
+  -Dversion=1.0-SNAPSHOT
 
-printf "\n5. Opening IntelliJ IDEA...\n"
-nohup "$launcherPath" nosplash "$tempIntelliJDir" > /dev/null 2>&1 &
-sleep 7 # Give time for opening
+nohup "$launcherPath" nosplash "$tempProjectDir" > /dev/null 2>&1 &
 
-printf "\n6. Perform synchronizable settings:\n"
+printf "\n5. Perform initial settings...\n"
+echo "   5.1. Choose 'Don't Send' for data sharing request."
+echo "   5.2. Choose 'Do not import settings' if asked."
+echo "   5.3. Choose to trust projects in a temporary directory if asked."
+#echo "   5.4. Accept user agreement if requested." (TODO: check if required when installing on a clean Linux)
+#echo "   5.5. Login to your JetBrains account if asked." (TODO: check if required when installing on a clean Linux)
+echo "Press Enter to continue..."
+read voidInput
+
+echo "6. Install manually the following IntelliJ IDEA plugins:"
+echo "   - AEM IDE"
+echo "   - AsciiDoc"
+echo "   - CND Language / Jahia Framework"
+echo "   - CodeMetrics"
+echo "   - MoveTab"
+echo "   - Luanalysis"
+echo "   - OSGi"
+echo "   - Settings Repository"
+echo "   - SonarLint"
+echo "   - Statistic"
+echo "Press Enter to continue..."
+read voidInput
+
+echo "7. Perform synchronizable settings:"
 echo "   Toolbar -> File -> Manage IDE Settings -> Settings repository"
 echo "   -> Upstream URL [like: https://github.com/ciechanowiec/intellij_settings]"
 echo "   -> Overwrite local"
 echo "Press Enter to continue..."
 read voidInput
 
-echo "7. Perform non-synchronizable Git settings:"
+echo "8. Restart IntelliJ IDEA"
+echo "Press Enter to continue..."
+read voidInput
+
+echo "9. Perform non-synchronizable workspace settings:"
+echo "   -> In the right toolbar perform 'hide' action on all icons"
+echo "   -> Toolbar -> Window -> Store current layout as default"
+echo "Press Enter to continue..."
+read voidInput
+
+echo "10. Perform non-synchronizable Git settings:"
 echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Version Control"
 echo "   -> Confirmation"
@@ -1241,7 +1302,7 @@ echo "      -> When files are deleted: Do not remove"
 echo "Press Enter to continue..."
 read voidInput
 
-echo "8. Perform non-synchronizable Maven settings:"
+echo "11. Perform non-synchronizable Maven settings:"
 echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Build, Execution, Deployment"
 echo "   -> Build Tools"
@@ -1251,27 +1312,13 @@ echo "      -> Check Automatically download 'Sources', 'Documentation', 'Annotat
 echo "Press Enter to continue..."
 read voidInput
 
-echo "9. Perform non-synchronizable plugin settings."
-echo "   Install manually the following IntelliJ IDEA plugins:"
-echo "   - AEM IDE"
-echo "   - AsciiDoc"
-echo "   - CND Language / Jahia Framework"
-echo "   - CodeMetrics"
-echo "   - MoveTab"
-echo "   - Luanalysis"
-echo "   - OSGi"
-echo "   - SonarLint"
-echo "   - Statistic"
-echo "Press Enter to continue..."
-read voidInput
-
-echo "10. Perform non-synchronizable shell check settings."
+echo "12. Perform non-synchronizable shell check settings."
 echo "   -> Open in IntelliJ any Bash script with .sh extension."
 echo "   -> Click 'Install' in the pop-up window above about shell check plugin."
 echo "Press Enter to continue..."
 read voidInput
 
-echo "11. Setting up files templates (removing 'public' modifiers for java files)..."
+echo "13. Setting up files templates (removing 'public' modifiers for java files)..."
 for IDESubDir in "$jetbrainsConfigDir"/*; do
   if [ -d "$IDESubDir" ]
     then
@@ -1409,7 +1456,7 @@ keyboardPresetDir="$HOME/.config/input-remapper/presets/Keychron K4 Keychron K4"
 keyboardPresetConfigFile="$keyboardPresetDir/new preset.json"
 if [ -d "$keyboardPresetDir" ]
   then
-    echo "Old presets directory detected. Deleting..."
+    echo "Old presets directory detected. Removing..."
     trash-put "$keyboardPresetDir"
 fi
 mkdir -p "$keyboardPresetDir"
@@ -1429,7 +1476,7 @@ mousePresetDir="$HOME/.config/input-remapper/presets/MX Anywhere 2S Mouse"
 mousePresetConfigFile="$mousePresetDir/new preset.json"
 if [ -d "$mousePresetDir" ]
   then
-    echo "Old presets directory detected. Deleting..."
+    echo "Old presets directory detected. Removing..."
     trash-put "$mousePresetDir"
 fi
 mkdir -p "$mousePresetDir"
