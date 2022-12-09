@@ -796,7 +796,7 @@ setupGitCommitter() {
 showFinishMessage () {
 	projectName=$1
 	printf "${BOLD_LIGHT_GREEN}[SUCCESS]:${RESET_FORMAT} The project ${ITALIC}$projectName${RESET_FORMAT} with the following file structure has been created:\n"
-  tree -a "$projectDirectory"
+  tree --dirsfirst -a "$projectDirectory"
 }
 
 openProjectInIDE () {
