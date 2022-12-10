@@ -14,8 +14,8 @@ source "$HOME/.sdkman/bin/sdkman-init.sh" # To make sdk command work
 currentDir=$(pwd)
 appId="firsthops"
 targetDir="${currentDir}/${appId}"
-corePom="$targetDir/core/pom.xml"
 allPom="$targetDir/all/pom.xml"
+corePom="$targetDir/core/pom.xml"
 parentPom="$targetDir/pom.xml"
 latestConditionalLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/conditional/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
 
@@ -42,9 +42,7 @@ git init
 git add .
 git commit -m "Init commit"
 
-sed -i 's/<source>1.8<\/source>/<source>11<\/source>/g' "$parentPom"
-sed -i 's/<target>1.8<\/target>/<target>11<\/target>/g' "$parentPom"
-
+# ADJUST ALL POM
 allPomFirstPart=$(head -n 56 "$allPom")
 allPomSecondPart=$(tail -n +57 "$allPom")
 echo "$allPomFirstPart" > "$allPom"
@@ -57,6 +55,7 @@ cat >> "$allPom" << EOF
 EOF
 echo "$allPomSecondPart" >> "$allPom"
 
+# ADJUST CORE POM
 corePomFirstPart=$(head -n 83 "$corePom")
 corePomSecondPart=$(tail -n +84 "$corePom")
 echo "$corePomFirstPart" > "$corePom"
@@ -75,7 +74,19 @@ cat >> "$corePom" << EOF
 EOF
 echo "$corePomSecondPart" >> "$corePom"
 
+# ADJUST PARENT POM
+sed -i 's/<source>1.8<\/source>/<source>11<\/source>/g' "$parentPom"
+sed -i 's/<target>1.8<\/target>/<target>11<\/target>/g' "$parentPom"
+parentPomFirstPart=$(head -n 179 "$parentPom")
+parentPomSecondPart=$(tail -n +182 "$parentPom")
+echo "$parentPomFirstPart" > "$parentPom"
+cat >> "$parentPom" << EOF
+# Plugins are inlined due to the plugins merge bug: https://github.com/adobe/aem-project-archetype/issues/971
+-plugin org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin,org.apache.sling.bnd.models.ModelsScannerPlugin
+EOF
+echo "$parentPomSecondPart" >> "$parentPom"
+
 git add .
-git commit -m "Add libraries, migrate to Java 11"
+git commit -m "Add libraries, migrate to Java 11, fix bnd bug"
 
 cd "$currentDir" || exit 1
