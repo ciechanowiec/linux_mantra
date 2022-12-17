@@ -339,10 +339,10 @@ cat > "$pomFile" << EOF
     <jsr305.version>3.0.2</jsr305.version>
     <junit-jupiter-api.version>5.9.1</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.9.1</junit-jupiter-params.version>
-    <mockito-core.version>4.9.0</mockito-core.version>
-    <mockito-junit-jupiter.version>4.9.0</mockito-junit-jupiter.version>
-    <mockito-inline.version>4.9.0</mockito-inline.version>
-    <slf4j-api.version>2.0.5</slf4j-api.version>
+    <mockito-core.version>4.10.0</mockito-core.version>
+    <mockito-junit-jupiter.version>4.10.0</mockito-junit-jupiter.version>
+    <mockito-inline.version>4.10.0</mockito-inline.version>
+    <slf4j-api.version>2.0.6</slf4j-api.version>
     <slf4j-tinylog.version>2.5.0</slf4j-tinylog.version>
     <tinylog-api.version>2.5.0</tinylog-api.version>
     <tinylog-impl.version>2.5.0</tinylog-impl.version>
