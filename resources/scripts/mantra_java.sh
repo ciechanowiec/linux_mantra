@@ -481,7 +481,8 @@ cat > "$pomFile" << EOF
     </resources>
 
     <pluginManagement>
-      <!-- Lock down plugins versions to avoid using Maven defaults from super-pom -->
+      <!-- Lock down plugins versions to avoid using Maven
+           defaults from the default Maven super-pom -->
       <plugins>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
