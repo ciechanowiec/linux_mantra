@@ -768,6 +768,13 @@ p {
     text-align: justify;
     text-justify: inter-word;
 }
+img {
+    display: block;
+    margin: 0 auto;
+}
+.imageblock .title {
+    text-align: center;
+}
 ::-webkit-scrollbar {
     width: 12px;
     height: 10px;
