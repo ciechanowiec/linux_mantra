@@ -761,6 +761,34 @@ cat > "$readmeFile" << EOF
 :toclevels: 5
 :icons: font
 
+ifndef::backend-pdf[]
+++++
+<style>
+p {
+    text-align: justify;
+    text-justify: inter-word;
+}
+::-webkit-scrollbar {
+    width: 12px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    box-shadow: 0 0 1px 1px #111;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 0.7px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb:active {
+    background: #eae9e9;
+}
+</style>
+++++
+endif::[]
+
 This program was created on _${date}_ from a template.
 
 == License
