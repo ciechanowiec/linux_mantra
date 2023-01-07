@@ -792,6 +792,9 @@ img {
 ::-webkit-scrollbar-thumb:active {
     background: #eae9e9;
 }
+#footer {
+    background: #fff;
+}
 </style>
 ++++
 endif::[]
