@@ -718,6 +718,33 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                     7. AUTOMATIC UPDATES DISABLING                          #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="automatic updates disabling"
+# DOCUMENTATION:
+#   https://linuxconfig.org/disable-automatic-updates-on-ubuntu-22-04-jammy-jellyfish-linux
+
+informAboutProcedureStart
+
+aptUpdateConfigFile="/etc/apt/apt.conf.d/20auto-upgrades"
+
+sudo bash -c "cat > ${aptUpdateConfigFile} << EOF
+APT::Periodic::Update-Package-Lists "0";
+APT::Periodic::Download-Upgradeable-Packages "0";
+APT::Periodic::AutocleanInterval "0";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+"
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                               7. LID CLOSING                                #
 #                                                                             #
 #                                                                             #
