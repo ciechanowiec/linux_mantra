@@ -795,6 +795,9 @@ img {
 #footer {
     background: #fff;
 }
+.admonitionblock>table td.content {
+    color: rgba(0,0,0,.8) !important;
+}
 </style>
 ++++
 endif::[]
