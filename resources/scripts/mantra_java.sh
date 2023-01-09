@@ -761,7 +761,7 @@ cat > "$readmeFile" << EOF
 :toclevels: 5
 :icons: font
 
-ifndef::backend-pdf[]
+ifndef::backend-pdf,env-github[]
 ++++
 <style>
 p {
