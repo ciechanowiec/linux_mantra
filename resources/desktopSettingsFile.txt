@@ -157,7 +157,6 @@ sleep-inactive-battery-type='nothing'
 
 [org/gnome/shell]
 disabled-extensions=['ubuntu-dock@ubuntu.com']
-enabled-extensions=['panel-date-format@keiii.github.com', 'hide-keyboard-layout@sitnik.ru', 'ddterm@amezin.github.com']
 favorite-apps=@as []
 
 [org/gnome/shell/extensions/desktop-icons]
@@ -167,6 +166,12 @@ show-trash=false
 [org/gnome/shell/extensions/ding]
 show-home=false
 start-corner='bottom-right'
+
+[org/gnome/shell/extensions/just-perfection]
+app-menu=false
+clock-menu-position=1
+dash=false
+keyboard-layout=false
 
 [org/gnome/shell/extensions/panel-date-format]
 format='%R  |  %d.%m.%y  |  %A'
