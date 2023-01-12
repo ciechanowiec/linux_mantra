@@ -1596,19 +1596,19 @@ panelDateFormatUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$panelDateForma
 mv "$panelDateFormatDirUnzipped" "$panelDateFormatUUID"
 cp -rf "$panelDateFormatUUID" "$extensionsDir"
 
-echo "4. Installing 'Hide Keyboard Layout' extension..."
-# 1. Extension page: https://extensions.gnome.org/extension/2848/hide-keyboard-layout/
-# 2. For GNOME Shell 3.36 the extension for GNOME Shell 40 can be installed
-# 3. Configuration for this extension is made in a separate `dconf` procedure
-hideKeyBoardLayoutArchive="hideKeyBoardLayoutArchive.zip"
-wget -O "$hideKeyBoardLayoutArchive" https://extensions.gnome.org/extension-data/hide-keyboard-layoutsitnik.ru.v4.shell-extension.zip
-hideKeyBoardLayoutDirUnzipped="hideKeyBoardLayoutDirUnzipped"
-unzip "$hideKeyBoardLayoutArchive" -d "$hideKeyBoardLayoutDirUnzipped"
+echo "4. Installing 'Just Perfection' extension..."
+# 1. Extension page: https://extensions.gnome.org/extension/3843/just-perfection/
+# 2. Configuration for this extension is made in a separate `dconf` procedure
+justPerfectionArchive="justPerfectionArchive.zip"
+wget -O "$justPerfectionArchive" https://extensions.gnome.org/extension-data/just-perfection-desktopjust-perfection.v22.shell-extension.zip
+justPerfectionDirUnzipped="justPerfectionDirUnzipped"
+unzip "$justPerfectionArchive" -d "$justPerfectionDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
-#   "uuid": "panel-date-format@keiii.github.com",
-hideKeyBoardLayoutUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$hideKeyBoardLayoutDirUnzipped/metadata.json")
-mv "$hideKeyBoardLayoutDirUnzipped" "$hideKeyBoardLayoutUUID"
-cp -rf "$hideKeyBoardLayoutUUID" "$extensionsDir"
+#   "uuid": "just-perfection-desktop@just-perfection",
+justPerfectionUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$justPerfectionDirUnzipped/metadata.json")
+echo "$justPerfectionUUID"
+mv "$justPerfectionDirUnzipped" "$justPerfectionUUID"
+cp -rf "$justPerfectionUUID" "$extensionsDir"
 
 echo "5. Installing 'ddterm' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/3780/ddterm/
@@ -1624,7 +1624,7 @@ mv "$ddtermDirUnzipped" "$ddtermUUID"
 cp -rf "$ddtermUUID" "$extensionsDir"
 
 echo "6. Enabling extensions. They will start working after GNOME session is restarted..."
-dconf write /org/gnome/shell/enabled-extensions "['$panelDateFormatUUID', '$hideKeyBoardLayoutUUID', '$ddtermUUID']"
+dconf write /org/gnome/shell/enabled-extensions "['$panelDateFormatUUID', '$justPerfectionUUID', '$ddtermUUID']"
 
 informAboutProcedureEnd
 
