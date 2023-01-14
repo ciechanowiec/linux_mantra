@@ -116,6 +116,9 @@ sudo apt install tree -y
 echo "Installing unzip (file decompressor)..."
 sudo apt install unzip -y
 
+echo "Installing p7zip (file decompressor)..."
+sudo apt install p7zip-full -y
+
 echo "Installing wget (non-interactive network downloader)..."
 sudo apt install wget -y
 

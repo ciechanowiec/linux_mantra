@@ -293,39 +293,66 @@ local unarchive = commandMode.cmd("unarchive", "Unzip/untar/unjar a focused file
         commandMode.BashExecSilently [===[
     dirNameForFile=$(dirname "$XPLR_FOCUS_PATH")
 
-    generateTargetFolder() {
+    targetPath=""
+
+    generateTargetFolderName() {
       baseName=$(basename -- "$XPLR_FOCUS_PATH")
-      baseNameWithoutExtension="${baseName%.*}"
-      echo "${dirNameForFile}/${baseNameWithoutExtension}_${RANDOM}"
+      echo "${dirNameForFile}/${baseName}_${RANDOM}"
     }
 
+    mkdirForTargetPath() {
+      targetPath="$(generateTargetFolderName)"
+      while [ -d "$targetPath" ]; do
+          targetPath="$(generateTargetFolderName)"
+      done
+      mkdir -p "$targetPath"
+    }
+
+    finishWithSuccess() {
+      echo LogSuccess: "Unarchived $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
+      echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
+    }
+
+    # Not all archives can be tested/unarchived in the same way.
+    # For that reason the script below tries different options.
+
+    # 1. Test with unzip
     unzip -t "$XPLR_FOCUS_PATH" &> /dev/null
     exitCode=$?
     if [ "$exitCode" == 0 ]
       then
-        targetPath="$(generateTargetFolder)"
-        while [ -d "$targetPath" ]; do
-            targetPath="$(generateTargetFolder)"
-        done
-        mkdir -p "$targetPath"
+        mkdirForTargetPath
         unzip "$XPLR_FOCUS_PATH" -d "$targetPath" &> /dev/null
-        echo LogSuccess: "Unarchived $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
-        echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
+        finishWithSuccess
       else
+        # 2. Test with gzip
         gzip -t "$XPLR_FOCUS_PATH" &> /dev/null
         exitCode=$?
+
+        # 3. Test with tar (possible only by listing a tar archive content)
+        if [ "$exitCode" != 0 ]
+          then
+            tar -tf "$XPLR_FOCUS_PATH" &> /dev/null
+            exitCode=$?
+        fi
+
         if [ "$exitCode" == 0 ]
           then
-            targetPath="$(generateTargetFolder)"
-            while [ -d "$targetPath" ]; do
-                targetPath="$(generateTargetFolder)"
-            done
-            mkdir -p "$targetPath"
+            mkdirForTargetPath
             tar -xf "$XPLR_FOCUS_PATH" --directory "$targetPath" &> /dev/null
-            echo LogSuccess: "Unarchived $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
-            echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
+            finishWithSuccess
           else
-            echo LogError: "Invalid source archive. Aborted" >> "${XPLR_PIPE_MSG_IN:?}"
+            # 4. Test with 7z
+            7z t "$XPLR_FOCUS_PATH" &> /dev/null
+            exitCode=$?
+            if [ "$exitCode" == 0 ]
+              then
+                mkdirForTargetPath
+                7z x -o"$targetPath" "$XPLR_FOCUS_PATH" &> /dev/null
+                finishWithSuccess
+              else
+                echo LogError: "Invalid source archive. Aborted" >> "${XPLR_PIPE_MSG_IN:?}"
+            fi
         fi
     fi
   ]===]
