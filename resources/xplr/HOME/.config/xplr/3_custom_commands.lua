@@ -168,9 +168,11 @@ local archive = commandMode.cmd("archive", "Package and compress a focused direc
   elif [ -d "$archiveName" ] || [ -f "$archiveName" ]
     then
       echo LogError: "Directory/file '$archiveName' already exists" >> "${XPLR_PIPE_MSG_IN:?}"
-    else
+  else
       zip -r "$archiveName" "$baseName"
+      targetPath=$(realpath "$archiveName")
       echo LogSuccess: "Archived to '$archiveName'" >> "${XPLR_PIPE_MSG_IN:?}"
+      echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
   fi
   ]===]
 )
