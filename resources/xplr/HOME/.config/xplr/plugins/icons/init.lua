@@ -219,6 +219,7 @@ function setup()
   xplr.config.node_types.extension.desktop = { meta = { icon = "" } }
   xplr.config.node_types.extension.diff = { meta = { icon = "" } }
   xplr.config.node_types.extension.doc = { meta = { icon = "" } }
+  xplr.config.node_types.extension.docx = { meta = { icon = "" } }
   xplr.config.node_types.extension.dockerfile = { meta = { icon = "" } }
   xplr.config.node_types.extension.dropbox = { meta = { icon = "" } }
   xplr.config.node_types.extension.dump = { meta = { icon = "" } }
