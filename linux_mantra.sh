@@ -201,6 +201,9 @@ sudo apt install gnome-screenshot -y
 echo "Installing jq (CLI JSON processor)..."
 sudo apt install jq -y
 
+echo "Installing pandoc (general markup converter, i.a. for .doc -> .adoc conversions)..."
+sudo apt install pandoc -y
+
 informAboutProcedureEnd
 
 promptOnContinuation
