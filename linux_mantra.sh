@@ -201,9 +201,6 @@ sudo apt install gnome-screenshot -y
 echo "Installing jq (CLI JSON processor)..."
 sudo apt install jq -y
 
-echo "Installing pandoc (general markup converter, i.a. for .doc -> .adoc conversions)..."
-sudo apt install pandoc -y
-
 informAboutProcedureEnd
 
 promptOnContinuation
@@ -893,6 +890,35 @@ desktopSettingsFile="$resourcesDir/desktopSettingsFile.txt"
 dconf load / < "$desktopSettingsFile"
 
 echo "There might be incorrect font in the terminal now. This should be fixed by reboot."
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
+#                               7. PANDOC                                     #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="pandoc"
+# DOCUMENTATION:
+#   n/a
+# NOTES:
+#   1. General markup converter, i.a. for .doc -> .adoc conversions
+#   2. Don't install from apt, because pandoc version in apt might be heavily outdated
+
+informAboutProcedureStart
+
+curl -s https://api.github.com/repos/jgm/pandoc/releases/latest \
+| grep "browser_download_url.*pandoc.*amd64.deb" \
+| cut -d : -f 2,3 \
+| tr -d \" \
+| wget -i -
+
+pandocIntstallationFile=$(ls -1 pandoc*amd64.deb | head -n 1)
+sudo dpkg -i "$pandocIntstallationFile"
 
 informAboutProcedureEnd
 
