@@ -1137,6 +1137,7 @@ video/mp4=mpv.desktop
 text/plain=geditnewwindow.desktop
 text/x-java=geditnewwindow.desktop
 text/javascript=geditnewwindow.desktop
+application/json=geditnewwindow.desktop
 application/pdf=evinceindependent.desktop
 EOF
 
