@@ -337,6 +337,7 @@ cat > "$pomFile" << EOF
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <lombok.version>1.18.24</lombok.version>
     <jsr305.version>3.0.2</jsr305.version>
+    <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
     <junit-jupiter-api.version>5.9.2</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.9.2</junit-jupiter-params.version>
     <mockito-core.version>5.0.0</mockito-core.version>
@@ -346,8 +347,6 @@ cat > "$pomFile" << EOF
     <slf4j-tinylog.version>2.5.0</slf4j-tinylog.version>
     <tinylog-api.version>2.5.0</tinylog-api.version>
     <tinylog-impl.version>2.5.0</tinylog-impl.version>
-    <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
-    <maven-project-info-reports-plugin.version>3.4.1</maven-project-info-reports-plugin.version>
     <!-- Locking down Maven default plugins -->
     <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
     <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
@@ -355,6 +354,7 @@ cat > "$pomFile" << EOF
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
     <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
+    <maven-project-info-reports-plugin.version>3.4.1</maven-project-info-reports-plugin.version>
     <!-- Plugins -->
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven-shade-plugin.version>3.4.0</maven-shade-plugin.version>
@@ -394,6 +394,17 @@ cat > "$pomFile" << EOF
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>\${jsr305.version}</version>
+    </dependency>
+    <dependency>
+      <!-- @SuppressFBWarnings annotation for SpotBugs: -->
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>\${spotbugs-annotations.version}</version>
+      <optional>true</optional>
+      <!-- Although @SuppressFBWarnings annotation, for which this dependency is added,
+           has a CLASS retention policy, in fact it isn't required during runtime or
+           on the final classpath -->
+      <scope>provided</scope>
     </dependency>
     <!-- Testing -->
     <dependency>
@@ -457,17 +468,6 @@ cat > "$pomFile" << EOF
       <groupId>org.tinylog</groupId>
       <artifactId>tinylog-impl</artifactId>
       <version>\${tinylog-impl.version}</version>
-    </dependency>
-    <dependency>
-      <!-- @SuppressFBWarnings annotation for SpotBugs: -->
-      <groupId>com.github.spotbugs</groupId>
-      <artifactId>spotbugs-annotations</artifactId>
-      <version>\${spotbugs-annotations.version}</version>
-      <optional>true</optional>
-      <!-- Although @SuppressFBWarnings annotation, for which this dependency is added,
-           has a CLASS retention policy, in fact it isn't required during runtime or
-           on the final classpath -->
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 
