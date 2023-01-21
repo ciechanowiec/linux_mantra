@@ -18,6 +18,7 @@ allPom="$targetDir/all/pom.xml"
 corePom="$targetDir/core/pom.xml"
 parentPom="$targetDir/pom.xml"
 latestConditionalLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/conditional/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
+latestSneakyFunLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/sneakyfun/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
 
 sdk use java 8.0.345-tem
 
@@ -52,6 +53,11 @@ cat >> "$allPom" << EOF
                             <artifactId>conditional</artifactId>
                             <target>/apps/firsthops-vendor-packages/application/install</target>
                         </embedded>
+                        <embedded>
+                            <groupId>eu.ciechanowiec</groupId>
+                            <artifactId>sneakyfun</artifactId>
+                            <target>/apps/firsthops-vendor-packages/application/install</target>
+                        </embedded>
 EOF
 echo "$allPomSecondPart" >> "$allPom"
 
@@ -70,6 +76,11 @@ cat >> "$corePom" << EOF
             <groupId>eu.ciechanowiec</groupId>
             <artifactId>conditional</artifactId>
             <version>$latestConditionalLibVersion</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.ciechanowiec</groupId>
+            <artifactId>sneakyfun</artifactId>
+            <version>$latestSneakyFunLibVersion</version>
         </dependency>
 EOF
 echo "$corePomSecondPart" >> "$corePom"
