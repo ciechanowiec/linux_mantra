@@ -310,6 +310,7 @@ addPom () {
   pomFile="$projectDirectory/pom.xml"
   touch "$pomFile"
   latestConditionalLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/conditional/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
+  latestSneakyFunLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/sneakyfun/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
 cat > "$pomFile" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -334,6 +335,7 @@ cat > "$pomFile" << EOF
     <maven.compiler.release>17</maven.compiler.release>
     <!--  Dependencies  -->
     <conditional.version>$latestConditionalLibVersion</conditional.version>
+    <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <lombok.version>1.18.24</lombok.version>
     <jsr305.version>3.0.2</jsr305.version>
@@ -375,6 +377,11 @@ cat > "$pomFile" << EOF
       <groupId>eu.ciechanowiec</groupId>
       <artifactId>conditional</artifactId>
       <version>\${conditional.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.ciechanowiec</groupId>
+      <artifactId>sneakyfun</artifactId>
+      <version>\${sneakyfun.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
