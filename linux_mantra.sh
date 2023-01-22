@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # TODO AND CHECK WITH NEXT ITERATION:
-# 1. https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones (fix bluetooth audio issues)
-# 2. After IntelliJ 2022.3 there were important settings update. Recheck with 
-#    attention on clean Linux installation whether the script works correctly.
+# After IntelliJ 2022.3 there were important settings update. Recheck with
+# attention on clean Linux installation whether the script works correctly.
 
 procedureId="null"
 
