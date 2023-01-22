@@ -149,8 +149,8 @@ sudo apt install mpv -y
 echo "Installing audacious (audio player)..."
 sudo apt install audacious -y
 
-echo "Installing vokoscreen-ng (screencast program)..."
-sudo apt install vokoscreen-ng -y
+echo "Installing simplescreenrecorder (screencast program)..."
+sudo apt install simplescreenrecorder -y
 
 echo "Installing rtorrent (terminal-based BitTorrent client)..."
 sudo apt install rtorrent -y
@@ -578,6 +578,57 @@ if [ -d "$codeRepoDir" ]
   else
     mkdir -p "$codeRepoDir"
 fi
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
+#                            7. PULSEAUDIO BUG                                #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="pulseaudio bug"
+# DOCUMENTATION:
+#   https://askubuntu.com/questions/1232159/ubuntu-20-04-no-sound-out-of-bluetooth-headphones
+# NOTES:
+#   Fix bluetooth audio issues related to pulseaudio
+
+informAboutProcedureStart
+
+echo "Reinstalling pulseaudio..."
+sudo apt install --reinstall pulseaudio pulseaudio-module-bluetooth
+
+echo "Stopping pulseaudio in order to freeze configuration directories..."
+systemctl --user stop pulseaudio.socket
+systemctl --user stop pulseaudio.service
+
+echo "Removing old pulseaudio configuration directories..."
+trash-put "$HOME/.config/pulse"
+if [ -d "$HOME/.config/pulse.old" ]
+  then
+    trash-put "$HOME/.config/pulse.old"
+fi
+
+echo "Starting pulseaudio in order to initiate a fresh configuration directory..."
+systemctl --user start pulseaudio.socket
+systemctl --user start pulseaudio.service
+
+echo "Stopping pulseaudio in order to freeze the fresh configuration directory..."
+systemctl --user stop pulseaudio.socket
+systemctl --user stop pulseaudio.service
+
+echo "Moving the fresh pulseaudio configuration directory..."
+mv "$HOME/.config/pulse" "$HOME/.config/pulse.old"
+
+echo "Restarting bluetooth..."
+sudo systemctl restart bluetooth.service
+
+echo "Starting pulseaudio after changing settings..."
+systemctl --user start pulseaudio.socket
+systemctl --user start pulseaudio.service
 
 informAboutProcedureEnd
 
