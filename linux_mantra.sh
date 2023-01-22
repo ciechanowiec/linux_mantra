@@ -727,23 +727,60 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
-#                     7. AUTOMATIC UPDATES DISABLING                          #
+#                                7. APT REFRESH                               #
 #                                                                             #
 #                                                                             #
 ###############################################################################
-procedureId="automatic updates disabling"
+procedureId="apt refresh"
 # DOCUMENTATION:
 #   https://linuxconfig.org/disable-automatic-updates-on-ubuntu-22-04-jammy-jellyfish-linux
+#   https://www.linuxfordevices.com/tutorials/linux/automatic-updates-cronjob
 
 informAboutProcedureStart
 
+echo "1. Disabling Ubuntu Software GUI automatic apt refresh..."
 aptUpdateConfigFile="/etc/apt/apt.conf.d/20auto-upgrades"
-
 sudo bash -c "cat > ${aptUpdateConfigFile} << EOF
 APT::Periodic::Update-Package-Lists \"0\";
 APT::Periodic::Download-Upgradeable-Packages \"0\";
 APT::Periodic::AutocleanInterval \"0\";
 APT::Periodic::Unattended-Upgrade \"0\";
+EOF
+"
+
+echo "2. Enabling cron-based automatic apt refresh..."
+
+scriptsDir="$HOME/scripts"
+
+if [ ! -d "$scriptsDir" ]
+  then
+    echo "Scripts directory not found. Creating: $scriptsDir"
+    mkdir -p "$scriptsDir"
+fi
+
+aptRefreshScript="$scriptsDir/apt_refresh.sh"
+
+echo "Creating an apt refresh script: $aptRefreshScript"
+cat > "$aptRefreshScript" << EOF
+echo "APT REFRESH STARTED: \$(date)"
+echo "1. Downloading packages information from all configured sources..."
+/usr/bin/apt update -y
+
+echo ""
+echo "2. Installing available upgrades of all packages currently installed on the system..."
+/usr/bin/apt --with-new-pkgs upgrade -y
+
+echo ""
+echo "3. Removing unnecessary dependencies..."
+/usr/bin/apt autoremove -y
+EOF
+
+echo "Setting up regular apt refresh in /etc/crontab..."
+# 1. `bash` after `root` is required: https://stackoverflow.com/questions/18809614/execute-a-shell-script-in-current-shell-with-sudo-permission
+# 2. `cron` job will be run every Monday at 14:00
+# 3. Logs are saved on Desktop to notify about the apt refresh. They can be removed right away after verifying them
+sudo bash -c "cat >> /etc/crontab << EOF
+0 14 * * 1 root bash $aptRefreshScript >> \"$HOME/Desktop/aptCronUpdate.log\"
 EOF
 "
 
