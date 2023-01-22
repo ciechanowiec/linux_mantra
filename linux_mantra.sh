@@ -204,7 +204,10 @@ echo "Installing ruby (interpreted object-oriented scripting language)..."
 sudo apt install ruby -y
 
 echo "Installing asciidoctor-pdf (Asciidoctor converter to backend files)..."
-sudo gem install asciidoctor-pdf # `gem` comes from ruby
+sudo gem install asciidoctor-pdf # `gem` comes from ruby, so ruby must be preinstalled
+
+echo "Installing wavemon (Wi-Fi connection monitor)..."
+sudo apt install wavemon -y
 
 informAboutProcedureEnd
 
