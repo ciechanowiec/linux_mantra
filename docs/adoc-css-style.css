@@ -1,0 +1,37 @@
+@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";
+@import "https://cdn.jsdelivr.net/gh/asciidoctor/asciidoctor@2.0/data/stylesheets/asciidoctor-default.css";
+
+p {
+    text-align: justify;
+    text-justify: inter-word;
+}
+img {
+    display: block;
+    margin: 0 auto;
+}
+.imageblock .title {
+    text-align: center;
+}
+::-webkit-scrollbar {
+    width: 12px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    box-shadow: 0 0 1px 1px #111;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 0.7px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb:active {
+    background: #eae9e9;
+}
+#footer {
+    background: #fff;
+}
+.admonitionblock>table td.content {
+    color: rgba(0,0,0,.8) !important;
+}
