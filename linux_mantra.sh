@@ -588,6 +588,73 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                                  7. DOCKER                                  #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="docker"
+# DOCUMENTATION:
+#   https://docs.docker.com/desktop/
+
+informAboutProcedureStart
+
+echo "Stopping Docker..."
+sudo systemctl stop docker.socket
+sudo systemctl stop docker.service
+
+echo "Uninstalling Docker related to Docker Engine..." # Uninstallation as described at https://docs.docker.com/engine/install/ubuntu/
+#Older versions of Docker went by the names of docker, docker.io, or docker-engine. Uninstall any such older versions before attempting to install a new version:
+sudo apt remove docker docker-engine docker.io containerd runc -y
+# Uninstall the Docker Engine, CLI, containerd, and Docker Compose packages:
+sudo apt remove docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-ce-rootless-extras -y
+# Images, containers, volumes, or custom configuration files on your host aren’t automatically removed. To delete all images, containers, and volumes:
+sudo rm -rf /var/lib/docker
+sudo rm -rf /var/lib/containerd
+
+echo "Uninstalling Docker related to Docker Desktop..." # Uninstallation as described at https://docs.docker.com/desktop/install/ubuntu/
+# Uninstall the tech preview or beta version of Docker Desktop for Linux. Run:
+sudo apt remove docker-desktop
+# For a complete cleanup, remove configuration and data files at $HOME/.docker/desktop, the symlink at /usr/local/bin/com.docker.cli, and purge the remaining systemd service files:
+rm -r $HOME/.docker/desktop
+sudo rm /usr/local/bin/com.docker.cli
+sudo apt remove docker-desktop -y
+
+echo "Uninstalling Docker related to Docker Compose..." # Uninstallation as described at https://docs.docker.com/compose/install/uninstall/
+sudo apt remove docker-compose-plugin -y
+rm $DOCKER_CONFIG/cli-plugins/docker-compose
+rm /usr/local/lib/docker/cli-plugins/docker-compose
+
+echo "Uninstalling Docker from snap..."
+sudo snap remove docker
+
+echo "Setting up the repository..." # As described at https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+sudo apt update -y
+sudo apt install \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release -y
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+echo "Installing Docker Engine and Docker Compose..." # As described at https://docs.docker.com/engine/install/ubuntu/ and https://docs.docker.com/compose/install/linux/
+sudo apt update -y
+sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
+
+echo "Testing Docker installation..."
+sudo docker run hello-world
+sudo docker image rm -f hello-world
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                         7. PULSEAUDIO BUG FIX                               #
 #                                                                             #
 #                                                                             #
