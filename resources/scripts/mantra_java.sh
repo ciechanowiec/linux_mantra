@@ -767,47 +767,9 @@ cat > "$readmeFile" << EOF
 :toc: left
 :toclevels: 5
 :icons: font
-
-ifndef::backend-pdf,env-github[]
-++++
-<style>
-p {
-    text-align: justify;
-    text-justify: inter-word;
-}
-img {
-    display: block;
-    margin: 0 auto;
-}
-.imageblock .title {
-    text-align: center;
-}
-::-webkit-scrollbar {
-    width: 12px;
-    height: 10px;
-}
-::-webkit-scrollbar-track {
-    box-shadow: 0 0 1px 1px #111;
-}
-::-webkit-scrollbar-thumb {
-    border-radius: 3px;
-    box-shadow: inset 0 0 0 0.7px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #f1f1f1;
-}
-::-webkit-scrollbar-thumb:active {
-    background: #eae9e9;
-}
-#footer {
-    background: #fff;
-}
-.admonitionblock>table td.content {
-    color: rgba(0,0,0,.8) !important;
-}
-</style>
-++++
-endif::[]
+:linkcss:
+:stylesdir: https://www.ciechanowiec.eu/linux_mantra/
+:stylesheet: adoc-css-style.css
 
 This program was created on _${date}_ from a template.
 
