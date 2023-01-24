@@ -341,9 +341,9 @@ alias aem_start_publish='~/scripts/aem_start_publish.sh'
 alias git_clip_cur_branch="git branch | grep '*' | cut -d ' ' -f 2 | xxclip"
 alias git_switch_to_com='~/scripts/git_switch_to_com.sh'
 alias idea='~/scripts/idea.sh'
+alias logout="pkill -KILL -u $(whoami)"
 alias mantra_java='~/scripts/mantra_java.sh'
 alias xxclip="perl -pe 'chomp if eof' | xclip -selection clipboard" # perl is required to drop the last NL character
-alias logout="pkill -KILL -u $(whoami)"
 gedit() {
   fileName="\$1"
   nohup gedit --new-window "\$fileName" &> /dev/null & disown
