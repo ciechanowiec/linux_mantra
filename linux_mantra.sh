@@ -905,12 +905,12 @@ promptOnContinuation
 ###############################################################################
 procedureId="apt refresh"
 # DOCUMENTATION:
-#   https://linuxconfig.org/disable-automatic-updates-on-ubuntu-22-04-jammy-jellyfish-linux
-#   https://www.linuxfordevices.com/tutorials/linux/automatic-updates-cronjob
+#   n/a
 
 informAboutProcedureStart
 
 echo "1. Disabling Ubuntu Software GUI automatic apt refresh..."
+# Docs for the following: https://linuxconfig.org/disable-automatic-updates-on-ubuntu-22-04-jammy-jellyfish-linux
 aptUpdateConfigFile="/etc/apt/apt.conf.d/20auto-upgrades"
 sudo bash -c "cat > ${aptUpdateConfigFile} << EOF
 APT::Periodic::Update-Package-Lists \"0\";
@@ -919,7 +919,10 @@ APT::Periodic::AutocleanInterval \"0\";
 APT::Periodic::Unattended-Upgrade \"0\";
 EOF
 "
+# Docs for the following: https://unix.stackexchange.com/a/675685
+sudo bash -c 'echo "Hidden=true" >> /etc/xdg/autostart/update-notifier.desktop'
 
+# Docs for the following: https://www.linuxfordevices.com/tutorials/linux/automatic-updates-cronjob
 echo "2. Enabling cron-based automatic apt refresh..."
 
 scriptsDir="$HOME/scripts"
