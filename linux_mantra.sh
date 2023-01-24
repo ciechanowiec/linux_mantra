@@ -1179,6 +1179,26 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                          7. STARTUP UBUNTU LOGO                             #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="startup ubuntu logo"
+# DOCUMENTATION:
+#   n/a
+
+informAboutProcedureStart
+
+echo "Removing Ubuntu logo from the startup screen..."
+sudo trash-put /usr/share/plymouth/ubuntu-logo.png
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                    7. IMWHEEL (MOUSE SPEED CONFIGURATOR)                    #
 #                                                                             #
 #                                                                             #
