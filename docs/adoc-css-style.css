@@ -35,3 +35,7 @@ img {
 .admonitionblock>table td.content {
     color: rgba(0,0,0,.8) !important;
 }
+#toc {
+    text-align: left;
+    font-size: 15px;
+}
