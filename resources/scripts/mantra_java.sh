@@ -767,6 +767,9 @@ cat > "$readmeFile" << EOF
 :toc: left
 :toclevels: 5
 :icons: font
+// Docinfo is used for foldable TOC.
+// -> For full usage example see https://github.com/remkop/picocli
+:docinfo: shared,private
 :linkcss:
 :stylesdir: https://www.ciechanowiec.eu/linux_mantra/
 :stylesheet: adoc-css-style.css
@@ -783,6 +786,66 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The Software is provided 'as is', without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
 EOF
 printf "${STATUS_TAG} ${ITALIC}README.adoc${RESET_FORMAT} file with default content has been created.\n"
+
+readmeFileDocinfo="$1/README-docinfo.html"
+cat > "$readmeFileDocinfo" << EOF
+<!-- Foldable TOC -->
+<style>
+    #tocbot a.toc-link.node-name--H1{ font-style: italic }
+    @media screen{
+      #tocbot > ul.toc-list{ margin-bottom: 0.5em; margin-left: 0.125em }
+      #tocbot ul.sectlevel0, #tocbot a.toc-link.node-name--H1 + ul{
+        padding-left: 0 }
+      #tocbot a.toc-link{ height:100% }
+      .is-collapsible{ max-height:3000px; overflow:hidden; }
+      .is-collapsed{ max-height:0 }
+      .is-active-link{ font-weight:700 }
+    }
+    @media print{
+      #tocbot a.toc-link.node-name--H4{ display:none }
+    }
+</style>
+EOF
+printf "${STATUS_TAG} ${ITALIC}README-docinfo.html${RESET_FORMAT} file with default content has been created.\n"
+
+readmeFileDocinfoFooter="$1/README-docinfo-footer.html"
+cat > "$readmeFileDocinfoFooter" << EOF
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/3.0.7/tocbot.min.js"></script>
+<script>
+    /* Tocbot dynamic TOC, works with tocbot 3.0.7 */
+    var oldtoc = document.getElementById('toctitle').nextElementSibling;
+    var newtoc = document.createElement('div');
+    newtoc.setAttribute('id', 'tocbot');
+    newtoc.setAttribute('class', 'js-toc');
+    oldtoc.parentNode.replaceChild(newtoc, oldtoc);
+    tocbot.init({ contentSelector: '#content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        smoothScroll: false,
+        collapseDepth: 3 });
+    var handleTocOnResize = function() {
+        var width = window.innerWidth
+                    || document.documentElement.clientWidth
+                    || document.body.clientWidth;
+        if (width < 768) {
+            tocbot.refresh({ contentSelector: '#content',
+                headingSelector: 'h1, h2, h3, h4',
+                collapseDepth: 6,
+                activeLinkClass: 'ignoreactive',
+                throttleTimeout: 1000,
+                smoothScroll: false });
+        }
+        else {
+            tocbot.refresh({ contentSelector: '#content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                smoothScroll: false,
+                collapseDepth: 3 });
+        }
+    };
+    window.addEventListener('resize', handleTocOnResize);
+    handleTocOnResize();
+</script>
+EOF
+printf "${STATUS_TAG} ${ITALIC}README-docinfo-footer.html${RESET_FORMAT} file with default content has been created.\n"
 }
 
 initGit () {
@@ -800,7 +863,7 @@ setupGitCommitter() {
 	cd "$projectDirectory" || exit 1
 	git config user.name "$gitCommitterName $gitCommitterSurname"
 	git config user.email $gitCommitterEmail
-	printf "${STATUS_TAG} Git committer fot this project has been set up: $gitCommitterName $gitCommitterSurname <$gitCommitterEmail>.\n"
+	printf "${STATUS_TAG} Git committer for this project has been set up: $gitCommitterName $gitCommitterSurname <$gitCommitterEmail>.\n"
 	cd "$currentDirectory" || exit 1
 }
 
