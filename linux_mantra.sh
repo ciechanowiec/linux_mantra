@@ -1826,9 +1826,11 @@ sudo input-remapper-control --command autoload
 
 # The program behaves unpredictably and often it is impossible to initiate the injection
 # automatically. For that reason manual intervention below is required:
-echo "Open 'Input Remapper' program and click 'Apply' for the following devices:"
+echo "Open 'Input Remapper' program and click 'Apply' for the following devices having them connected:"
 echo "   -> Keychron K4 Keychron K4"
 echo "   -> MX Anywhere 2S Mouse"
+echo "Press Entry when done."
+read voidInput
 
 informAboutProcedureEnd
 
@@ -2039,36 +2041,11 @@ sed -i 's/"num_personal_suggestions":[[:digit:]]\+,"shortcust_visible":true},/"n
 echo "Turning on caret browsing..."
 sed -i 's/},"sharing":{/},"settings":{"a11y":{"caretbrowsing":{"enabled":true,"show_dialog":false}}},"sharing":{/g' "$chromeSettingsFile"
 
-echo "Giving permissions for News Feed Eradicator..."
+echo "Give manually permissions for News Feed Eradicator..."
 sleep 2
-nohup google-chrome chrome-extension://fjcldmjmjhkklehbacihaiopjklihlgg/options.html > /dev/null 2>&1 &
-sleep 4
-echo "Going to sites section..."
-xdotool key Tab
-xdotool key Tab
-xdotool key Tab
-echo "Giving permissions for eradicating..."
-givePermissionsToEradicate() {
-  sleep 4
-  xdotool key Tab
-  xdotool key space
-  sleep 3;
-  xdotool key Tab
-  xdotool key space
-}
-# Facebook:
-givePermissionsToEradicate
-# Instagram:
-givePermissionsToEradicate
-# Twitter:
-givePermissionsToEradicate
-# YouTube:
-givePermissionsToEradicate
-# LinkedIn:
-givePermissionsToEradicate
-# Reddit:
-givePermissionsToEradicate
-sleep 2
+nohup google-chrome > /dev/null 2>&1 &
+echo "   Press Entry when done."
+read voidInput
 
 # The Chrome settings are practically unpredictable when it comes to a default
 # download directory, so it should be set manually:
