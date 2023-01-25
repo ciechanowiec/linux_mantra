@@ -218,8 +218,9 @@ sudo snap install node --classic
 
 echo "Installing typescript..."
 # Installation docs:
-#   https://www.typescriptlang.org/download
-npm install typescript --save-dev # `npm` comes from node, so node must be preinstalled
+#   bad: https://www.typescriptlang.org/download
+#   good: https://lindevs.com/install-typescript-on-ubuntu
+sudo npm install -g typescript # `npm` comes from node, so node must be preinstalled
 
 informAboutProcedureEnd
 
