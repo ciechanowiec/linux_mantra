@@ -209,6 +209,18 @@ sudo gem install asciidoctor-pdf # `gem` comes from ruby, so ruby must be preins
 echo "Installing wavemon (Wi-Fi connection monitor)..."
 sudo apt install wavemon -y
 
+echo "Installing node (server environment)..."
+# Installation docs:
+#   https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
+#   https://github.com/nodejs/snap
+#   https://snapcraft.io/node
+sudo snap install node --classic
+
+echo "Installing typescript..."
+# Installation docs:
+#   https://www.typescriptlang.org/download
+npm install typescript --save-dev # `npm` comes from node, so node must be preinstalled
+
 informAboutProcedureEnd
 
 promptOnContinuation
