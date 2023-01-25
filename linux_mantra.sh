@@ -1299,7 +1299,8 @@ procedureId="xplr (file explorer)"
 
 informAboutProcedureStart
 
-echo "1. Removing previous settings if present..."
+echo "1. Removing previous settings and application if present..."
+brew uninstall xplr
 xplrSettingsDir="$HOME/.config/xplr"
 if [ -d "$xplrSettingsDir" ]
   then
@@ -1321,7 +1322,7 @@ xplrVersion=$(echo $xplrApp | grep -o -P "(?<=xplr/).*(?=/bin)") # result like: 
 xplrVersionAsConfigEntry="version = \"${xplrVersion:?}\"" # result like: version = "0.19.0"
 echo "-- 1_version" > "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
 echo "$xplrVersionAsConfigEntry" >> "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
-cat $resourcesDir/"xplr/HOME/.config/xplr/1_version.lua" > "$mainConfigurationFile"
+cat "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua" > "$mainConfigurationFile"
 
 echo "3.2. Setting up plugins..." # docs: https://xplr.dev/en/installing-plugins + docs for every plugin
 
