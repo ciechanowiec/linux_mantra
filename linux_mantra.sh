@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# TODO AND CHECK WITH NEXT ITERATION:
-# After IntelliJ 2022.3 there were important settings update. Recheck with
-# attention on clean Linux installation whether the script works correctly.
-
 procedureId="null"
 
 ###############################################################################
@@ -707,7 +703,12 @@ echo "Moving the fresh pulseaudio configuration directory..."
 mv "$HOME/.config/pulse" "$HOME/.config/pulse.old"
 
 echo "Restarting bluetooth..."
-sudo systemctl restart bluetooth.service
+# systemctl might not have effect on bluetooth after the
+# first start of OS, so rfkill is also used:
+rfkill block bluetooth
+sudo systemctl start bluetooth.service
+rfkill unblock bluetooth
+sudo systemctl stop bluetooth.service
 
 echo "Starting pulseaudio after changing settings..."
 systemctl --user start pulseaudio.socket
@@ -1569,11 +1570,10 @@ yes | mvn archetype:generate                          \
 nohup "$launcherPath" nosplash "$tempProjectDir" > /dev/null 2>&1 &
 
 printf "\n5. Perform initial settings...\n"
-echo "   5.1. Choose 'Don't Send' for data sharing request."
-echo "   5.2. Choose 'Do not import settings' if asked."
+echo "   5.1. Accept user agreement if requested."
+echo "   5.2. Choose 'Don't Send' for data sharing request."
 echo "   5.3. Choose to trust projects in a temporary directory if asked."
-#echo "   5.4. Accept user agreement if requested." (TODO: check if required when installing on a clean Linux)
-#echo "   5.5. Login to your JetBrains account if asked." (TODO: check if required when installing on a clean Linux)
+echo "   5.4. Login to your JetBrains account if asked."
 echo "Press Enter to continue..."
 read voidInput
 
