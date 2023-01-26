@@ -452,6 +452,28 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                             6. SPRING BOOT                                  #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="spring boot"
+# DOCUMENTATION:
+#   n/a
+# NOTES:
+#   installed mainly for Spring Boot CLI
+
+informAboutProcedureStart
+
+echo "Installing Spring Boot..."
+sdk install springboot
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                                6. MAVEN                                     #
 #                                                                             #
 #                                                                             #
@@ -470,7 +492,7 @@ export SDKMAN_DIR="$HOME/.sdkman"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 echo "Installing Maven..."
-yes | sdk install maven 3.8.6
+yes | sdk install maven 3.8.7
 
 echo "Enabling the installed program in the current console..."
 export SDKMAN_DIR="$HOME/.sdkman"
