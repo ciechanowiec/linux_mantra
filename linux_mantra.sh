@@ -937,6 +937,10 @@ EOF
 # Docs for the following: https://unix.stackexchange.com/a/675685
 sudo bash -c 'echo "Hidden=true" >> /etc/xdg/autostart/update-notifier.desktop'
 
+# Docs for the following: https://askubuntu.com/questions/1059971/disable-updates-from-command-line-in-ubuntu-16-04?noredirect=1&lq=1
+aptUpdateTriggerFile="/etc/cron.daily/apt-compat"
+sudo sed -i 's=exec /usr/lib/apt/apt.systemd.daily=# exec /usr/lib/apt/apt.systemd.daily=g' "$aptUpdateTriggerFile"
+
 # Docs for the following: https://www.linuxfordevices.com/tutorials/linux/automatic-updates-cronjob
 echo "2. Enabling cron-based automatic apt refresh..."
 
