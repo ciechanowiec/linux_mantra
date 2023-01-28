@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# A. Script for generating Java projects from a template.
+# A. Script for generating Spring Boot projects from a template.
+#    The template is based on the output of the following command:
+#    spring init --dependencies=web,actuator,devtools,lombok --type=maven-project --group-id=eu.ciechanowiec --artifact-id=demo --version=1.0.0 --description="Spring Boot Application" --name="demo"
 # B. Author: herman@ciechanowiec.eu.
 # C. heredoc used in the script below should adhere to the left border of a file.
 # D. Table of Contents:
@@ -101,9 +103,9 @@ createSrcStructure () {
   projectName=$4
 	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName",resources},test/java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"}
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/Main.java"
-	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/SamplePrinter.java"
-	touch "$projectDirectory/src/main/resources/tinylog.properties"
-	touch "$projectDirectory/src/main/resources/sampleLines.txt"
+	mkdir -p "$projectDirectory/src/main/resources/static"
+	mkdir -p "$projectDirectory/src/main/resources/templates"
+	touch "$projectDirectory/src/main/resources/application.properties"
 	touch "$projectDirectory/src/test/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/MainTest.java"
 	printf "${STATUS_TAG} File structure for ${ITALIC}src${RESET_FORMAT} has been created.\n"
 }
@@ -117,100 +119,26 @@ insertContentToMain () {
 cat > "$mainFile" << EOF
 package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@Slf4j
-class Main {
+@SpringBootApplication
+public class Main {
 
     public static void main(String[] args) {
-        log.info("Application started");
-        System.out.println("Hello, Universe!");
-
-        log.info("Testing resource printing...");
-        SamplePrinter samplePrinter = new SamplePrinter();
-        samplePrinter.performSamplePrint("sampleLines.txt");
-        log.info("Finished resource printing");
-
-        log.info("Application ended");
+        SpringApplication.run(Main.class, args);
     }
 }
 EOF
 printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}Main.java${RESET_FORMAT}.\n"
 }
 
-insertContentToSamplePrinter () {
-  projectDirectory=$1
-  firstLevelPackageName=$2
-  secondLevelPackageName=$3
-  projectName=$4
-  samplePrinterFile="$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/SamplePrinter.java"
-cat > "$samplePrinterFile" << EOF
-package $firstLevelPackageName.$secondLevelPackageName.$projectName;
-
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-
-@Slf4j
-class SamplePrinter {
-
-    void performSamplePrint(String fileName) {
-        InputStream fileFromResourcesAsStream = getFileFromResourcesAsStream(fileName);
-        printInputStream(fileFromResourcesAsStream);
-    }
-
-    private InputStream getFileFromResourcesAsStream(String fileName) {
-        Class<? extends SamplePrinter> samplePrinterClass = this.getClass();
-        ClassLoader classLoader = samplePrinterClass.getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream(fileName);
-        if (inputStream == null) {
-            throw new IllegalArgumentException(String.format("File '%s' wasn't found!", fileName));
-        } else {
-            return inputStream;
-        }
-    }
-
-    private static void printInputStream(InputStream inputStream) {
-        try (InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-             BufferedReader reader = new BufferedReader(streamReader)) {
-            String line = reader.readLine();
-            while (line != null) {
-                System.out.println(line);
-                line = reader.readLine();
-            }
-        } catch (IOException exception) {
-            log.error("Failed to print input stream", exception);
-        }
-    }
-}
+insertContentToApplicationProperties () {
+  applicationPropertiesFile="$1/src/main/resources/application.properties"
+cat > "$applicationPropertiesFile" << EOF
+server.port=8080
 EOF
-printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}SamplePrinter.java${RESET_FORMAT}.\n"
-}
-
-insertContentToSampleLines () {
-  sampleLinesFile="$1/src/main/resources/sampleLines.txt"
-cat > "$sampleLinesFile" << EOF
-This is the first line from a sample file.
-This is the second line from a sample file.
-EOF
-printf "${STATUS_TAG} Default text content has been added to ${ITALIC}sampleLines.txt${RESET_FORMAT}.\n"
-}
-
-insertContentToLoggerProperties () {
-  loggerPropertiesFile="$1/src/main/resources/tinylog.properties"
-cat > "$loggerPropertiesFile" << EOF
-writer        = console
-# to write to a file:
-# writer        = file
-level         = debug
-writer.format = [{date: yyyy-MM-dd HH:mm:ss.SSS O}] [{thread}] [{class}] [{level}]: {message}
-writer.file   = logs.txt
-EOF
-printf "${STATUS_TAG} Default logger properties have been added to ${ITALIC}tinylog.properties${RESET_FORMAT}.\n"
+printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application.properties${RESET_FORMAT}.\n"
 }
 
 insertContentToMainTest () {
@@ -223,16 +151,15 @@ cat > "$mainTestFile" << EOF
 package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class MainTest {
 
     @Test
-    void sampleTrueTest() {
+    void contextLoads() {
         assertTrue(true);
     }
 }
@@ -329,6 +256,7 @@ addPom () {
   projectURL=$5
   pomFile="$projectDirectory/pom.xml"
   touch "$pomFile"
+  latestSpringBootParentVersion=$(curl --silent https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-parent/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
   latestConditionalLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/conditional/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
   latestSneakyFunLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/sneakyfun/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
 cat > "$pomFile" << EOF
@@ -338,10 +266,16 @@ cat > "$pomFile" << EOF
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>$latestSpringBootParentVersion</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
   <groupId>$firstLevelPackageName.$secondLevelPackageName</groupId>
   <artifactId>$projectName</artifactId>
   <version>1.0.0</version>
-  <packaging>jar</packaging>
 
   <inceptionYear>$(date +%Y)</inceptionYear>
 
@@ -351,39 +285,16 @@ cat > "$pomFile" << EOF
 
   <properties>
     <!--  Building properties  -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>17</maven.compiler.release>
+    <java.version>17</java.version>
     <!--  Dependencies  -->
     <conditional.version>$latestConditionalLibVersion</conditional.version>
     <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
-    <lombok.version>1.18.24</lombok.version>
     <jsr305.version>3.0.2</jsr305.version>
     <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
-    <junit-jupiter-api.version>5.9.2</junit-jupiter-api.version>
-    <junit-jupiter-params.version>5.9.2</junit-jupiter-params.version>
-    <mockito-core.version>5.0.0</mockito-core.version>
-    <mockito-junit-jupiter.version>5.0.0</mockito-junit-jupiter.version>
-    <mockito-inline.version>5.0.0</mockito-inline.version>
-    <slf4j-api.version>2.0.6</slf4j-api.version>
-    <slf4j-tinylog.version>2.6.0</slf4j-tinylog.version>
-    <tinylog-api.version>2.6.0</tinylog-api.version>
-    <tinylog-impl.version>2.6.0</tinylog-impl.version>
     <!-- Locking down Maven default plugins -->
-    <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
-    <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
-    <maven-install-plugin.version>3.1.0</maven-install-plugin.version>
-    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-    <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
     <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
-    <maven-project-info-reports-plugin.version>3.4.2</maven-project-info-reports-plugin.version>
     <!-- Plugins -->
-    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-    <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-    <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
-    <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
-    <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
-    <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
     <min.maven.version>3.8.6</min.maven.version>
     <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
@@ -392,6 +303,26 @@ cat > "$pomFile" << EOF
   </properties>
 
   <dependencies>
+    <!-- Spring Boot -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
     <!-- Utils -->
     <dependency>
       <groupId>eu.ciechanowiec</groupId>
@@ -411,7 +342,7 @@ cat > "$pomFile" << EOF
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>\${lombok.version}</version>
+      <optional>true</optional>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -433,121 +364,33 @@ cat > "$pomFile" << EOF
            on the final classpath -->
       <scope>provided</scope>
     </dependency>
-    <!-- Testing -->
-    <dependency>
-      <!--  Basic JUnit library -->
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>\${junit-jupiter-api.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- Parameterized JUnit tests -->
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <version>\${junit-jupiter-params.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- Basic Mockito library -->
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>\${mockito-core.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- JUnit extension for Mockito: @ExtendWith(MockitoExtension.class) -->
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <version>\${mockito-junit-jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- Experimental and intermediate library for mocking
-           final types, enums, final and static methods.
-           Will be superseded by automatic usage in a future version -->
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>\${mockito-inline.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- Logging -->
-    <dependency>
-      <!-- Logging facade -->
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>\${slf4j-api.version}</version>
-    </dependency>
-    <dependency>
-      <!-- Tinylog to SLF4J binding -->
-      <groupId>org.tinylog</groupId>
-      <artifactId>slf4j-tinylog</artifactId>
-      <version>\${slf4j-tinylog.version}</version>
-    </dependency>
-    <dependency>
-      <!-- Tinylog API -->
-      <groupId>org.tinylog</groupId>
-      <artifactId>tinylog-api</artifactId>
-      <version>\${tinylog-api.version}</version>
-    </dependency>
-    <dependency>
-      <!-- Tinylog implementation -->
-      <groupId>org.tinylog</groupId>
-      <artifactId>tinylog-impl</artifactId>
-      <version>\${tinylog-impl.version}</version>
-    </dependency>
   </dependencies>
 
   <build>
-    <resources>
-      <resource>
-        <!-- Describes the directory where the resources are stored.
-             The path is relative to the POM -->
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
-
     <pluginManagement>
       <!-- Lock down plugins versions to avoid using Maven
            defaults from the default Maven super-pom -->
       <plugins>
         <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>\${maven-clean-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>\${maven-deploy-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>\${maven-install-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>\${maven-jar-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>\${maven-resources-plugin.version}</version>
-        </plugin>
-        <plugin>
           <artifactId>maven-site-plugin</artifactId>
           <version>\${maven-site-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>\${maven-project-info-reports-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
 
     <plugins>
-      <!-- Allows to compile and build the program -->
+      <!-- Spring Boot support in Apache Maven -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>\${maven-compiler-plugin.version}</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
       </plugin>
       <!-- Processes resources -->
       <plugin>
@@ -575,47 +418,10 @@ cat > "$pomFile" << EOF
           </execution>
         </executions>
       </plugin>
-      <!-- Creates an uber-jar binary file with all
-           dependencies and resources inside -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>\${maven-shade-plugin.version}</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>$firstLevelPackageName.$secondLevelPackageName.$projectName.Main</mainClass>
-                </transformer>
-              </transformers>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.MF</exclude>
-                    <exclude>META-INF/NOTICE.txt</exclude>
-                    <exclude>META-INF/LICENSE.txt</exclude>
-                    <exclude>META-INF/versions/9/module-info.class</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-            </configuration>
-          </execution>
-        </executions>
-        <configuration>
-          <createDependencyReducedPom>false</createDependencyReducedPom>
-        </configuration>
-      </plugin>
       <!-- Reports on unused dependencies: -->
       <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>\${maven-dependency-plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -633,7 +439,6 @@ cat > "$pomFile" << EOF
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>\${maven-surefire-plugin.version}</version>
         <configuration>
           <failIfNoTests>true</failIfNoTests>
         </configuration>
@@ -642,7 +447,6 @@ cat > "$pomFile" << EOF
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>\${maven-failsafe-plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -656,7 +460,6 @@ cat > "$pomFile" << EOF
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>\${maven-enforcer-plugin.version}</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
@@ -677,7 +480,6 @@ cat > "$pomFile" << EOF
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>\${versions-maven-plugin.version}</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -980,9 +782,7 @@ createProjectDirectory "$projectDirectory"
 # Pollute 'src' folder:
 createSrcStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToMain "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
-insertContentToSamplePrinter "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
-insertContentToSampleLines "$projectDirectory"
-insertContentToLoggerProperties "$projectDirectory"
+insertContentToApplicationProperties "$projectDirectory"
 insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 
 # Pollute root directory with additional files:
