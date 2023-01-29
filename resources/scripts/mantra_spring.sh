@@ -233,6 +233,8 @@ cat > "$gitignoreFile" << EOF
 *.class
 *.iml
 *.log
+logs
+log
 .idea
 .vscode
 target
