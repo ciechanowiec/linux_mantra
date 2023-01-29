@@ -1240,6 +1240,39 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                                  7. MYSQL                                   #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="mysql"
+# DOCUMENTATION:
+#   1. https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-22-04
+#   2. https://linuxhint.com/installing_mysql_workbench_ubuntu/
+
+informAboutProcedureStart
+
+echo "Installing MySQL Server..."
+sudo apt install mysql-server -y
+echo "Installing MySQL Workbench..."
+sudo snap install mysql-workbench-community
+
+echo "Connecting MySQL Workbench with password manager service..."
+# Docs: https://stackoverflow.com/questions/42671914/mysql-workbench-not-saving-passwords-in-keychain
+sudo snap connect mysql-workbench-community:password-manager-service :password-manager-service
+
+echo "Altering the root user so that it can be used within MySQL Workbench..."
+# Docs:
+# 1. https://stackoverflow.com/questions/7864276/cannot-connect-to-database-server-mysql-workbench
+# 2. https://trendoceans.com/how-to-resolve-cannot-connect-to-database-server-mysql-workbench/
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';"
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                    7. IMWHEEL (MOUSE SPEED CONFIGURATOR)                    #
 #                                                                             #
 #                                                                             #
