@@ -139,6 +139,18 @@ insertContentToApplicationProperties () {
   applicationPropertiesFile="$1/src/main/resources/application.properties"
 cat > "$applicationPropertiesFile" << EOF
 server.port=8080
+spring.main.banner-mode=off
+
+logging.level.root=info
+logging.pattern.dateformat=yyyy-MM-dd HH:mm:ss.SSS O
+logging.file.name=./logs/application-logs
+logging.logback.rollingpolicy.file-name-pattern=${LOG_FILE}-%d{yyyy-MM-dd}.%i.log
+logging.logback.rollingpolicy.max-history=30
+logging.logback.rollingpolicy.max-file-size=10MB
+# No total size cap:
+logging.logback.rollingpolicy.total-size-cap=0
+# Restore from the comment the line below to disable logging into the console:
+# logging.pattern.console=
 EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application.properties${RESET_FORMAT}.\n"
 }
