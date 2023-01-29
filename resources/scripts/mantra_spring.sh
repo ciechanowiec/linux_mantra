@@ -2,7 +2,7 @@
 
 # A. Script for generating Spring Boot projects from a template.
 #    The template is based on the output of the following command:
-#    spring init --dependencies=web,actuator,devtools,lombok --type=maven-project --group-id=eu.ciechanowiec --artifact-id=demo --version=1.0.0 --description="Spring Boot Application" --name="demo"
+#    spring init --dependencies=web,actuator,validation,devtools,lombok --type=maven-project --group-id=eu.ciechanowiec --artifact-id=demo --version=1.0.0 --description="Spring Boot Application" --name="demo"
 # B. Author: herman@ciechanowiec.eu.
 # C. heredoc used in the script below should adhere to the left border of a file.
 # D. Table of Contents:
