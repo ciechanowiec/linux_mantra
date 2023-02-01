@@ -583,7 +583,10 @@ echo "6. Installing downloaded fonts..."
 cp -rf tempFontsDir/* "$localTargetFontsDir"
 sudo cp -rf tempFontsDir/* "$globalTargetFontsDir"
 
-echo "7. Clearing and regenerating fonts cache..."
+echo "7. Installing Open Sans fonts from apt repository..."
+sudo apt install -y fonts-open-sans
+
+echo "8. Clearing and regenerating fonts cache..."
 fc-cache -f -v
 
 informAboutProcedureEnd
