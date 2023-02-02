@@ -205,6 +205,9 @@ sudo gem install asciidoctor-pdf # `gem` comes from ruby, so ruby must be preins
 echo "Installing wavemon (Wi-Fi connection monitor)..."
 sudo apt install wavemon -y
 
+echo "Installing inkskape (svg editor)..."
+sudo apt install inkscape -y
+
 echo "Installing node (server environment)..."
 # Installation docs:
 #   https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
