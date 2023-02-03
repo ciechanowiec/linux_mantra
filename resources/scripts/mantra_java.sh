@@ -291,7 +291,8 @@ addGitignore () {
 cat > "$gitignoreFile" << EOF
 *.class
 *.iml
-*.log
+*.log*
+*.logs*
 logs
 log
 .idea
