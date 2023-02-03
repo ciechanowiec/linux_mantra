@@ -355,13 +355,19 @@ alias git_switch_to_com='~/scripts/git_switch_to_com.sh'
 alias idea='~/scripts/idea.sh'
 alias logout="pkill -KILL -u $(whoami)"
 alias mantra_java='~/scripts/mantra_java.sh'
-alias mantra_java='~/scripts/mantra_spring.sh'
+alias mantra_spring='~/scripts/mantra_spring.sh'
 alias xxclip="perl -pe 'chomp if eof' | xclip -selection clipboard" # perl is required to drop the last NL character
 gedit() {
   fileName="\$1"
   nohup gedit --new-window "\$fileName" &> /dev/null & disown
 }
 EOF
+
+echo "6. Adding GitHub CLI autocompletion..."
+# Docs: https://cli.github.com/manual/gh_completion
+echo "" >> "$bashrcFile" # Empty line
+echo "# GH CLI AUTOCOMPLETION:" >> "$bashrcFile"
+echo "eval \"\$(gh completion -s bash)\"" >> "$bashrcFile"
 
 ######################################################################
 #                   HOMEBREW (PACKAGE MANAGER)                       #
