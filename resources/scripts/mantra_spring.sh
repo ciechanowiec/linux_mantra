@@ -109,12 +109,14 @@ createSrcStructure () {
   projectName=$4
 	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName",resources},test/java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"}
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/Main.java"
-	mkdir -p "$projectDirectory/src/main/resources/static"
-	mkdir -p "$projectDirectory/src/main/resources/templates"
+	mkdir -p "$projectDirectory"/src/main/resources/{sql/{data,schema},static,templates}
+	touch "$projectDirectory"/src/main/resources/sql/data/uat-data.sql
+	touch "$projectDirectory"/src/main/resources/sql/schema/prod-schema.sql
+	touch "$projectDirectory"/src/main/resources/sql/schema/uat-schema.sql
 	touch "$projectDirectory/src/main/resources/application.properties"
-	touch "$projectDirectory/src/main/resources/application-local.properties"
+	touch "$projectDirectory/src/main/resources/application-h2.properties"
 	touch "$projectDirectory/src/main/resources/application-prod.properties"
-	touch "$projectDirectory/src/main/resources/schema.sql"
+	touch "$projectDirectory/src/main/resources/application-uat.properties"
 	touch "$projectDirectory/src/test/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/MainTest.java"
 	printf "${STATUS_TAG} File structure for ${ITALIC}src${RESET_FORMAT} has been created.\n"
 }
@@ -144,12 +146,52 @@ EOF
 printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}Main.java${RESET_FORMAT}.\n"
 }
 
+insertContentToSQLInitFiles () {
+  uatDataFile="$1/src/main/resources/sql/data/uat-data.sql"
+cat > "$uatDataFile" << EOF
+INSERT INTO courses(id, name, category, rating, description)
+VALUES (1, 'SQL Course', 'Databases', 4, 'Course to learn SQL'),
+       (2, 'Java Course', 'Programming', 5, 'Course to learn Java');
+EOF
+printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}uat-data.sql${RESET_FORMAT}.\n"
+
+  prodSchemaFile="$1/src/main/resources/sql/schema/prod-schema.sql"
+cat > "$prodSchemaFile" << EOF
+CREATE TABLE IF NOT EXISTS courses
+(
+    id          INT(15)       NOT NULL,
+    name        VARCHAR(100)  NOT NULL,
+    category    VARCHAR(20)   NOT NULL,
+    rating      INT(1)        NOT NULL,
+    description VARCHAR(1000) NOT NULL,
+    PRIMARY KEY (id)
+);
+EOF
+printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}prod-schema.sql${RESET_FORMAT}.\n"
+
+  uatSchemaFile="$1/src/main/resources/sql/schema/uat-schema.sql"
+cat > "$uatSchemaFile" << EOF
+DROP TABLE IF EXISTS courses;
+
+CREATE TABLE IF NOT EXISTS courses
+(
+    id          INT(15)       NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100)  NOT NULL,
+    category    VARCHAR(20)   NOT NULL,
+    rating      INT(1)        NOT NULL,
+    description VARCHAR(1000) NOT NULL,
+    PRIMARY KEY (id)
+);
+EOF
+printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}uat-schema.sql${RESET_FORMAT}.\n"
+}
+
 insertContentToApplicationProperties () {
   applicationPropertiesFile="$1/src/main/resources/application.properties"
 cat > "$applicationPropertiesFile" << EOF
 server.port=8080
 spring.main.banner-mode=off
-spring.profiles.active=local
+spring.profiles.active=h2
 
 # LOGGING
 logging.level.root=INFO
@@ -158,7 +200,7 @@ logging.pattern.dateformat=yyyy-MM-dd HH:mm:ss.SSS O
 logging.file.name=./logs/application.log
 # Will roll the log file every day and add it name like 'application.log-2023-02-03_21-49.0'
 # (docs: https://logback.qos.ch/manual/appenders.html):
-logging.logback.rollingpolicy.file-name-pattern=${LOG_FILE}-%d{yyyy-MM-dd}.%i
+logging.logback.rollingpolicy.file-name-pattern=\${LOG_FILE}-%d{yyyy-MM-dd}.%i
 logging.logback.rollingpolicy.max-history=30
 logging.logback.rollingpolicy.max-file-size=10MB
 # No total size cap:
@@ -173,8 +215,8 @@ EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application.properties${RESET_FORMAT}.\n"
 }
 
-insertContentToApplicationLocalProperties () {
-  applicationPropertiesFile="$1/src/main/resources/application-local.properties"
+insertContentToApplicationH2Properties () {
+  applicationPropertiesFile="$1/src/main/resources/application-h2.properties"
 cat > "$applicationPropertiesFile" << EOF
 # DATA
 spring.datasource.url=jdbc:h2:mem:localdb
@@ -187,7 +229,7 @@ spring.datasource.driver-class-name=org.h2.Driver
 spring.datasource.username=admin
 spring.datasource.password=admin
 EOF
-printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-local.properties${RESET_FORMAT}.\n"
+printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-h2.properties${RESET_FORMAT}.\n"
 }
 
 insertContentToApplicationProdProperties () {
@@ -195,6 +237,7 @@ insertContentToApplicationProdProperties () {
 cat > "$applicationPropertiesFile" << EOF
 # DATA
 spring.datasource.url=jdbc:mysql://localhost:3306/university?createDatabaseIfNotExist=true
+spring.sql.init.schema-locations=classpath:sql/schema/prod-schema.sql
 spring.jpa.hibernate.ddl-auto=none
 spring.sql.init.mode=always
 spring.datasource.username=root
@@ -203,16 +246,19 @@ EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-prod.properties${RESET_FORMAT}.\n"
 }
 
-insertContentToSchemaSQL () {
-  applicationPropertiesFile="$1/src/main/resources/schema.sql"
+insertContentToApplicationUATProperties () {
+  applicationPropertiesFile="$1/src/main/resources/application-uat.properties"
 cat > "$applicationPropertiesFile" << EOF
-CREATE TABLE IF NOT EXISTS students (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    firstName VARCHAR(200),
-    lastName VARCHAR(200)
-);
+# DATA
+spring.datasource.url=jdbc:mysql://localhost:3306/university-uat?createDatabaseIfNotExist=true
+spring.sql.init.schema-locations=classpath:sql/schema/uat-schema.sql
+spring.sql.init.data-locations=classpath:sql/data/uat-data.sql
+spring.jpa.hibernate.ddl-auto=none
+spring.sql.init.mode=always
+spring.datasource.username=root
+spring.datasource.password=password
 EOF
-printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}schema.sql${RESET_FORMAT}.\n"
+printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-uat.properties${RESET_FORMAT}.\n"
 }
 
 insertContentToMainTest () {
@@ -878,9 +924,10 @@ createSrcStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPac
 insertContentToMain "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToApplicationProperties "$projectDirectory"
-insertContentToApplicationLocalProperties "$projectDirectory"
+insertContentToApplicationH2Properties "$projectDirectory"
 insertContentToApplicationProdProperties "$projectDirectory"
-insertContentToSchemaSQL "$projectDirectory"
+insertContentToApplicationUATProperties  "$projectDirectory"
+insertContentToSQLInitFiles "$projectDirectory"
 
 # Pollute root directory with additional files:
 addEditorConfig "$projectDirectory"
