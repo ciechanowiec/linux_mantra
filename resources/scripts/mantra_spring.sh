@@ -2,7 +2,13 @@
 
 # A. Script for generating Spring Boot projects from a template.
 #    The template is based on the output of the following command:
-#    spring init --dependencies=web,actuator,validation,devtools,lombok --type=maven-project --group-id=eu.ciechanowiec --artifact-id=demo --version=1.0.0 --description="Spring Boot Application" --name="demo"
+#    spring init --dependencies=web,actuator,devtools,validation,data-jpa,mysql,h2,lombok \
+#                --type=maven-project \
+#                --group-id=eu.ciechanowiec \
+#                --artifact-id=demo \
+#                --version=1.0.0 \
+#                --description="Spring Boot Application" \
+#                --name="demo"
 # B. Author: herman@ciechanowiec.eu.
 # C. heredoc used in the script below should adhere to the left border of a file.
 # D. Table of Contents:
@@ -106,6 +112,9 @@ createSrcStructure () {
 	mkdir -p "$projectDirectory/src/main/resources/static"
 	mkdir -p "$projectDirectory/src/main/resources/templates"
 	touch "$projectDirectory/src/main/resources/application.properties"
+	touch "$projectDirectory/src/main/resources/application-local.properties"
+	touch "$projectDirectory/src/main/resources/application-prod.properties"
+	touch "$projectDirectory/src/main/resources/schema.sql"
 	touch "$projectDirectory/src/test/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/MainTest.java"
 	printf "${STATUS_TAG} File structure for ${ITALIC}src${RESET_FORMAT} has been created.\n"
 }
@@ -140,19 +149,70 @@ insertContentToApplicationProperties () {
 cat > "$applicationPropertiesFile" << EOF
 server.port=8080
 spring.main.banner-mode=off
+spring.profiles.active=local
 
-logging.level.root=info
+# LOGGING
+logging.level.root=INFO
+# Format like '2023-02-03 21:37:11.056 GMT+1':
 logging.pattern.dateformat=yyyy-MM-dd HH:mm:ss.SSS O
-logging.file.name=./logs/application-logs
-logging.logback.rollingpolicy.file-name-pattern=${LOG_FILE}-%d{yyyy-MM-dd}.%i.log
+logging.file.name=./logs/application.log
+# Will roll the log file every day and add it name like 'application.log-2023-02-03_21-49.0'
+# (docs: https://logback.qos.ch/manual/appenders.html):
+logging.logback.rollingpolicy.file-name-pattern=${LOG_FILE}-%d{yyyy-MM-dd}.%i
 logging.logback.rollingpolicy.max-history=30
 logging.logback.rollingpolicy.max-file-size=10MB
 # No total size cap:
 logging.logback.rollingpolicy.total-size-cap=0
 # Restore from the comment the line below with an empty value to disable logging into the console:
 # logging.pattern.console=
+
+# DATA
+spring.jpa.open-in-view=true
+spring.jpa.hibernate.ddl-auto=none
 EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application.properties${RESET_FORMAT}.\n"
+}
+
+insertContentToApplicationLocalProperties () {
+  applicationPropertiesFile="$1/src/main/resources/application-local.properties"
+cat > "$applicationPropertiesFile" << EOF
+# DATA
+spring.datasource.url=jdbc:h2:mem:localdb
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.sql.init.mode=never
+logging.level.org.hibernate=TRACE
+# H2 console will be available at '/h2-console':
+spring.h2.console.enabled=true
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=admin
+spring.datasource.password=admin
+EOF
+printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-local.properties${RESET_FORMAT}.\n"
+}
+
+insertContentToApplicationProdProperties () {
+  applicationPropertiesFile="$1/src/main/resources/application-prod.properties"
+cat > "$applicationPropertiesFile" << EOF
+# DATA
+spring.datasource.url=jdbc:mysql://localhost:3306/university?createDatabaseIfNotExist=true
+spring.jpa.hibernate.ddl-auto=none
+spring.sql.init.mode=always
+spring.datasource.username=root
+spring.datasource.password=password
+EOF
+printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-prod.properties${RESET_FORMAT}.\n"
+}
+
+insertContentToSchemaSQL () {
+  applicationPropertiesFile="$1/src/main/resources/schema.sql"
+cat > "$applicationPropertiesFile" << EOF
+CREATE TABLE IF NOT EXISTS students (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    firstName VARCHAR(200),
+    lastName VARCHAR(200)
+);
+EOF
+printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}schema.sql${RESET_FORMAT}.\n"
 }
 
 insertContentToMainTest () {
@@ -331,13 +391,26 @@ cat > "$pomFile" << EOF
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
       <scope>runtime</scope>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -803,8 +876,11 @@ createProjectDirectory "$projectDirectory"
 # Pollute 'src' folder:
 createSrcStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToMain "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
-insertContentToApplicationProperties "$projectDirectory"
 insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
+insertContentToApplicationProperties "$projectDirectory"
+insertContentToApplicationLocalProperties "$projectDirectory"
+insertContentToApplicationProdProperties "$projectDirectory"
+insertContentToSchemaSQL "$projectDirectory"
 
 # Pollute root directory with additional files:
 addEditorConfig "$projectDirectory"
