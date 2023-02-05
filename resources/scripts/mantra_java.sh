@@ -983,10 +983,10 @@ createProjectDirectory "$projectDirectory"
 # Pollute 'src' folder:
 createSrcStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToMain "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
+insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToSamplePrinter "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToSampleLines "$projectDirectory"
 insertContentToLoggerProperties "$projectDirectory"
-insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 
 # Pollute root directory with additional files:
 addEditorConfig "$projectDirectory"
