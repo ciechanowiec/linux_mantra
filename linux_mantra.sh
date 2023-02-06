@@ -989,21 +989,6 @@ fi
 
 aptRefreshScript="$scriptsDir/apt_refresh.sh"
 
-echo "Creating an apt refresh script: $aptRefreshScript"
-cat > "$aptRefreshScript" << EOF
-echo "APT REFRESH STARTED: \$(date)"
-echo "1. Downloading packages information from all configured sources..."
-/usr/bin/apt update -y
-
-echo ""
-echo "2. Installing available upgrades of all packages currently installed on the system..."
-/usr/bin/apt --with-new-pkgs upgrade -y
-
-echo ""
-echo "3. Removing unnecessary dependencies..."
-/usr/bin/apt autoremove -y
-EOF
-
 echo "Setting up regular apt refresh in /etc/crontab..."
 # 1. `bash` after `root` is required: https://stackoverflow.com/questions/18809614/execute-a-shell-script-in-current-shell-with-sudo-permission
 # 2. `cron` job will be run every Monday at 14:00
