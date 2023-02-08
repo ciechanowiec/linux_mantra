@@ -1270,6 +1270,35 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                 7. DISABLE ROUNDED GNOME WINDOWS CORNERS                    #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="disable rounded gnome windows corners"
+# DOCUMENTATION:
+#   https://www.reddit.com/r/pop_os/comments/hnxgzv/i_have_been_trying_for_hours_to_get_rid_of_the/
+
+informAboutProcedureStart
+
+gtkDir="$HOME/.config/gtk-3.0"
+gtkStylesheet="$gtkDir/gtk.css"
+
+echo "Disabling rounded windows corners in GNOME..."
+mkdir -p "$gtkDir"
+touch "$gtkStylesheet"
+cat > "$gtkStylesheet" << EOF
+decoration, window, window.background, window.titlebar, * {
+   border-radius: 0px;
+}
+EOF
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                    7. IMWHEEL (MOUSE SPEED CONFIGURATOR)                    #
 #                                                                             #
 #                                                                             #
