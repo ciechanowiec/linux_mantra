@@ -211,6 +211,14 @@ logging.logback.rollingpolicy.total-size-cap=0
 # DATA
 spring.jpa.open-in-view=true
 spring.jpa.hibernate.ddl-auto=none
+
+# ACTUATOR
+# Enable all actuator endpoints over HTTP:
+#management.endpoints.web.exposure.include=*
+# Disable all actuator endpoints over HTTP:
+management.endpoints.web.exposure.exclude=*
+# Repeat default base path for clarity:
+management.endpoints.web.base-path=/actuator
 EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application.properties${RESET_FORMAT}.\n"
 }
