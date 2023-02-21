@@ -19,7 +19,7 @@
 :stylesheet: adoc-css-style.css
 
 == Overview
-_Linux Mantra_ is a set of interconnected Bash/Lua scripts and configuration files, which perform automated fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra is composed of 4500+ lines and constitutes one of the most sophisticated programs of its kind.
+_Linux Mantra_ is a set of interconnected Bash/Lua scripts and configuration files, which perform automated fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra is composed of 4.500+ lines and constitutes one of the most sophisticated programs of its kind.
 
 == Features
 [upperalpha]
