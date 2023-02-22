@@ -360,14 +360,14 @@ cat > "$pomFile" << EOF
     <conditional.version>$latestConditionalLibVersion</conditional.version>
     <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
-    <lombok.version>1.18.24</lombok.version>
+    <lombok.version>1.18.26</lombok.version>
     <jsr305.version>3.0.2</jsr305.version>
     <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
     <junit-jupiter-api.version>5.9.2</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.9.2</junit-jupiter-params.version>
-    <mockito-core.version>5.0.0</mockito-core.version>
-    <mockito-junit-jupiter.version>5.0.0</mockito-junit-jupiter.version>
-    <mockito-inline.version>5.0.0</mockito-inline.version>
+    <mockito-core.version>5.1.1</mockito-core.version>
+    <mockito-junit-jupiter.version>5.1.1</mockito-junit-jupiter.version>
+    <mockito-inline.version>5.1.1</mockito-inline.version>
     <slf4j-api.version>2.0.6</slf4j-api.version>
     <slf4j-tinylog.version>2.6.0</slf4j-tinylog.version>
     <tinylog-api.version>2.6.0</tinylog-api.version>
