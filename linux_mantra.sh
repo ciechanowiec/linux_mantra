@@ -1666,7 +1666,6 @@ read voidInput
 echo "6. Install manually the following IntelliJ IDEA plugins:"
 echo "   - AEM IDE"
 echo "   - AsciiDoc"
-echo "   - CND Language / Jahia Framework"
 echo "   - CodeMetrics"
 echo "   - MoveTab"
 echo "   - Luanalysis"
