@@ -689,9 +689,26 @@ echo "Installing Docker Engine and Docker Compose..." # As described at https://
 sudo apt update -y
 sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
 
-echo "Testing Docker installation..."
+echo "Testing Docker installation with sudo..."
 sudo docker run hello-world
 sudo docker image rm -f hello-world
+
+echo "Setting Docker to be run without 'sudo' prefix..." # As described at https://docs.docker.com/engine/install/linux-postinstall/
+sudo groupadd docker
+sudo usermod -aG docker "$USER"
+# To run Docker without 'sudo' prefix, a reboot after the above commands is required.
+# However, it is possible to test without the reboot whether Docker without 'sudo' prefix
+# can be run. In order to do that, the 'newgrp docker' command should be executed.
+# By default, the 'newgrp docker' command will terminate the script. To prevent it,
+# it is needed to use a heredoc code block as shown below, where it is tested
+# whether Docker without 'sudo' prefix can be run. However, that 'newgrp docker'
+# command has only local effect for one session of the terminal. To run Docker
+# without 'sudo' prefix globally, reboot is required, as mentioned above
+newgrp docker << EOF
+echo "Testing Docker installation without sudo..."
+docker run hello-world
+docker image rm -f hello-world
+EOF
 
 informAboutProcedureEnd
 
