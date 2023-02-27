@@ -298,6 +298,7 @@ log
 .idea
 .vscode
 target
+node_modules
 # Compiled documentation:
 README.html
 README.pdf
