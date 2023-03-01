@@ -713,6 +713,19 @@ docker run hello-world
 docker image rm -f hello-world
 EOF
 
+echo "Logging out from Docker Hub..."
+docker logout
+echo "Logging into Docker Hub..."
+echo "Provide your Docker Hub login:"
+read -r dockerHubLogin
+docker login --username "$dockerHubLogin"
+exitCode=$(echo $?)
+while [ "$exitCode" -ne 0 ];
+  do
+    docker login --username "$dockerHubLogin"
+    exitCode=$(echo $?)
+done
+
 informAboutProcedureEnd
 
 promptOnContinuation
