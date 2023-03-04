@@ -353,6 +353,7 @@ alias aem_start_publish='~/scripts/aem_start_publish.sh'
 alias docker_clean='~/scripts/docker_clean.sh'
 alias docker_clean_containers='~/scripts/docker_clean_containers.sh'
 alias docker_clean_images='~/scripts/docker_clean_images.sh'
+alias docker_clean_volumes='~/scripts/docker_clean_volumes.sh'
 alias git_clip_cur_branch="git branch | grep '*' | cut -d ' ' -f 2 | xxclip"
 alias git_switch_to_com='~/scripts/git_switch_to_com.sh'
 alias idea='~/scripts/idea.sh'
