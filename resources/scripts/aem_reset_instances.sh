@@ -11,7 +11,7 @@
 #  ├───publish
 #  │   ├───aem-quickstart-p4503.jar
 #  │   └───license.properties
-#  ├───adobe-aemfd-linux-pkg-6.0.334.zip
+#  ├───adobe-aemfd-linux-pkg-6.0.772.zip
 #  ├───aem-service-pkg-6.5.14.0.zip
 #  ├───basicContent.zip
 #  └───testContent.zip
@@ -25,7 +25,7 @@ currentDir=$(pwd)
 # Root directory
 rootDir="$HOME/0_prog/0_aem_instances/aem-sdk"
 # Initial packages
-formsPackage="$rootDir/adobe-aemfd-linux-pkg-6.0.334.zip"
+formsPackage="$rootDir/adobe-aemfd-linux-pkg-6.0.772.zip"
 servicePackage="$rootDir/aem-service-pkg-6.5.14.0.zip"
 basicContent="$rootDir/basicContent.zip"
 testContent="$rootDir/testContent.zip"
