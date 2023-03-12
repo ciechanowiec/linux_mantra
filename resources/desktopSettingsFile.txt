@@ -131,8 +131,8 @@ name='Google Chrome'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2]
 binding='<Super>e'
-command='gedit --new-window'
-name='Text Editor'
+command='gnome-terminal -- nvim'
+name='NeoVim'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3]
 binding='<Super>f'
