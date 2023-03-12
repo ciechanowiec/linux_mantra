@@ -1307,6 +1307,32 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                                  7. NEOVIM                                  #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="neovim"
+# DOCUMENTATION:
+#   https://nvchad.com/#/docs/quickstart/install
+
+informAboutProcedureStart
+
+echo "Installing NeoVim..."
+sudo snap install nvim --classic
+
+echo "Installing NvChad..."
+git clone https://github.com/NvChad/NvChad ~/.config/nvim --depth 1 && nvim
+echo "Setting light theme..."
+nvimDefaultConfigFile="$HOME/.config/nvim/lua/core/default_config.lua"
+sed --in-place 's/theme = "onedark"/theme = "one_light"/g' "$nvimDefaultConfigFile"
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                 7. DISABLE ROUNDED GNOME WINDOWS CORNERS                    #
 #                                                                             #
 #                                                                             #
@@ -1501,51 +1527,48 @@ echo "Appending to the mime config file..."
 # doubled, the file will still have the intended effect.
 cat >> "$mimeConfigFile" << EOF
 [Default Applications]
-application/xml=geditnewwindow.desktop
-application/x-shellscript=geditnewwindow.desktop
 video/x-matroska=mpv.desktop
 video/mp4=mpv.desktop
-text/plain=geditnewwindow.desktop
-text/x-java=geditnewwindow.desktop
-text/javascript=geditnewwindow.desktop
-application/json=geditnewwindow.desktop
 application/pdf=evinceindependent.desktop
+application/json=nvim.desktop
+application/x-shellscript=nvim.desktop
+application/xml=nvim.desktop
+text/english=nvim.desktop
+text/javascript=nvim.desktop
+text/plain=nvim.desktop
+text/x-c++=nvim.desktop
+text/x-c++hdr=nvim.desktop
+text/x-c++src=nvim.desktop
+text/x-c=nvim.desktop
+text/x-chdr=nvim.desktop
+text/x-csrc=nvim.desktop
+text/x-java=nvim.desktop
+text/x-makefile=nvim.desktop
+text/x-moc=nvim.desktop
+text/x-pascal=nvim.desktop
+text/x-tcl=nvim.desktop
+text/x-tex=nvim.desktop
 EOF
 
-echo "2. Overwriting default gedit launcher..."
-# Modifies the default launcher from /usr/share/applications/org.gnome.gedit.desktop
-# to open files in a new window, not it a new tab
+echo "2. Overriding default neovim launcher..."
+# Overrides the default launcher from /usr/share/applications/nvim.desktop
 mkdir -p "$HOME/.local/share/applications"
-geditLauncher="$HOME/.local/share/applications/geditnewwindow.desktop"
-touch "$geditLauncher"
-cat > "$geditLauncher" << EOF
+nvimLauncher="$HOME/.local/share/applications/nvim.desktop"
+touch "$nvimLauncher"
+cat > "$nvimLauncher" << EOF
 [Desktop Entry]
-Name=Text Editor - New Window
-Comment=Edit text files in a new window
-Exec=nohup gedit --new-window %U
-Terminal=false
+Name=Neovim
+GenericName=Text Editor
+Comment=Edit text files
+TryExec=nvim
+Exec=nvim %F
+Terminal=true
 Type=Application
-StartupNotify=true
-MimeType=text/plain;
-# TRANSLATORS: Do NOT translate or transliterate this text!
-#              This is an icon file name.
-Icon=org.gnome.gedit
-Categories=GNOME;GTK;Utility;TextEditor;
-Actions=new-window;
-# TRANSLATORS: Do NOT translate or localize the semicolons!
-#              The list MUST also end with a semicolon!
-#              Search terms to find this application.
-Keywords=Text;Editor;Plaintext;Write;gedit;
-DBusActivatable=true
-X-Ubuntu-Gettext-Domain=gedit
-
-[Desktop Action new-window]
-Name=New Window
-Exec=nohup gedit --new-window
-
-[Desktop Action new-document]
-Name=New Document
-Exec=nohup gedit --new-window
+Keywords=Text;editor;
+Icon=nvim
+Categories=Utility;TextEditor;
+StartupNotify=false
+MimeType=text/english;text/plain;text/x-makefile;text/x-c++hdr;text/x-c++src;text/x-chdr;text/x-csrc;text/x-java;text/x-moc;text/x-pascal;text/x-tcl;text/x-tex;application/x-shellscript;text/x-c;text/x-c++;
 EOF
 
 echo "3. Overwriting default evince launcher..."
@@ -1704,12 +1727,15 @@ echo "6. Install manually the following IntelliJ IDEA plugins:"
 echo "   - AEM IDE"
 echo "   - AsciiDoc"
 echo "   - CodeMetrics"
+echo "   - IdeaVim"
 echo "   - MoveTab"
 echo "   - Luanalysis"
 echo "   - OSGi"
+echo "   - Python"
 echo "   - Settings Repository"
 echo "   - SonarLint"
 echo "   - Statistic"
+echo "   - VCL/Varnish Language"
 echo "Press Enter to continue..."
 read voidInput
 
@@ -1817,6 +1843,27 @@ EOF
 
   fi
 done
+
+echo "14. Setting up .ideavimrc file..."
+ideavimrcFile="$HOME/.ideavimrc"
+touch "$ideavimrcFile"
+cat > "$ideavimrcFile" << EOF
+source ~/.vimrc
+
+" Make by default search case insensitive (https://stackoverflow.com/questions/2287440/how-to-do-case-insensitive-search-in-vim):
+set ignorecase
+
+" Yank to system clipboard (https://stackoverflow.com/questions/27898407/intellij-idea-with-ideavim-cannot-copy-text-from-another-source):
+set clipboard+=unnamed
+
+" Disable error bells (https://superuser.com/questions/622898/how-to-turn-off-the-bell-sound-in-intellij):
+set visualbell
+set noerrorbells
+
+" Highlight search results and clear highlighting on escape in normal mode:
+set hls
+nnoremap <ESC> :noh<CR>
+EOF
 
 informAboutProcedureEnd
 
