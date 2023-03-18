@@ -1,4 +1,5 @@
 [com/github/amezin/ddterm]
+audible-bell=false
 background-color='#2E3436'
 bold-color='#000000'
 bold-color-same-as-fg=true
@@ -8,6 +9,7 @@ cursor-colors-set=false
 cursor-foreground-color='#ffffff'
 cursor-shape='ibeam'
 custom-font='JetBrainsMonoNL Nerd Font Mono 12'
+detect-urls-as-is=true
 foreground-color='#D3D7CF'
 hide-animation-duration=0.080000000000000002
 hide-when-focus-lost=true
@@ -34,9 +36,9 @@ theme-variant='dark'
 transparent-background=false
 use-system-font=false
 use-theme-colors=false
-window-maximize=false
+window-maximize=true
 window-position='left'
-window-size=0.5
+window-size=0.49999999999999961
 
 [org/gnome/desktop/input-sources]
 mru-sources=[('xkb', 'pl'), ('xkb', 'ru')]
@@ -191,19 +193,23 @@ next-tab='<Alt>Right'
 prev-tab='<Alt>Left'
 
 [org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9]
-audible-bell=true
+audible-bell=false
 background-color='rgb(46,52,54)'
+bold-color-same-as-fg=true
 bold-is-bright=true
 cursor-blink-mode='on'
+cursor-colors-set=false
 cursor-shape='ibeam'
 default-size-columns=94
-default-size-rows=45
+default-size-rows=44
 exit-action='close'
 font='JetBrainsMonoNL Nerd Font Mono 12'
 foreground-color='rgb(211,215,207)'
+highlight-colors-set=false
 palette=['rgb(46,52,54)', 'rgb(204,0,0)', 'rgb(78,154,6)', 'rgb(196,160,0)', 'rgb(52,101,164)', 'rgb(117,80,123)', 'rgb(6,152,154)', 'rgb(211,215,207)', 'rgb(85,87,83)', 'rgb(239,41,41)', 'rgb(138,226,52)', 'rgb(252,233,79)', 'rgb(114,159,207)', 'rgb(173,127,168)', 'rgb(52,226,226)', 'rgb(238,238,236)']
 use-system-font=false
 use-theme-colors=false
+use-theme-transparency=true
 
 [system/locale]
 region='en_GB.UTF-8'
