@@ -1863,6 +1863,9 @@ set noerrorbells
 " Highlight search results and clear highlighting on escape in normal mode:
 set hls
 nnoremap <ESC> :noh<CR>
+
+" Enable repeatable pasting in visual mode (https://stackoverflow.com/questions/7163947/paste-multiple-times):
+xnoremap p pgvy
 EOF
 
 informAboutProcedureEnd
