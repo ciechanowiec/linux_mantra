@@ -366,16 +366,16 @@ cat > "$pomFile" << EOF
     <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
     <junit-jupiter-api.version>5.9.2</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.9.2</junit-jupiter-params.version>
-    <mockito-core.version>5.1.1</mockito-core.version>
-    <mockito-junit-jupiter.version>5.1.1</mockito-junit-jupiter.version>
-    <mockito-inline.version>5.1.1</mockito-inline.version>
-    <slf4j-api.version>2.0.6</slf4j-api.version>
-    <slf4j-tinylog.version>2.6.0</slf4j-tinylog.version>
-    <tinylog-api.version>2.6.0</tinylog-api.version>
-    <tinylog-impl.version>2.6.0</tinylog-impl.version>
+    <mockito-core.version>5.2.0</mockito-core.version>
+    <mockito-junit-jupiter.version>5.2.0</mockito-junit-jupiter.version>
+    <mockito-inline.version>5.2.0</mockito-inline.version>
+    <slf4j-api.version>2.0.7</slf4j-api.version>
+    <slf4j-tinylog.version>2.6.1</slf4j-tinylog.version>
+    <tinylog-api.version>2.6.1</tinylog-api.version>
+    <tinylog-impl.version>2.6.1</tinylog-impl.version>
     <!-- Locking down Maven default plugins -->
     <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
-    <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
+    <maven-deploy-plugin.version>3.1.0</maven-deploy-plugin.version>
     <maven-install-plugin.version>3.1.0</maven-install-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
@@ -387,12 +387,12 @@ cat > "$pomFile" << EOF
     <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
-    <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
+    <maven-enforcer-plugin.version>3.2.1</maven-enforcer-plugin.version>
     <min.maven.version>3.8.6</min.maven.version>
-    <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <spotbugs-maven-plugin.version>4.7.3.0</spotbugs-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.7.3.1</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -718,6 +718,11 @@ cat > "$pomFile" << EOF
                 <!-- Ignoring candidate release versions, like 6.2.0.CR2 -->
                 <type>regex</type>
                 <version>(?i)[0-9].+\\.CR[0-9]+</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <!-- Ignoring release candidate versions, like 2.15.0-rc1 and 1.8.20-RC -->
+                <type>regex</type>
+                <version>(?i)[0-9].+-rc[0-9]*</version>
               </ignoreVersion>
             </ignoreVersions>
           </ruleSet>

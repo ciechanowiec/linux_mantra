@@ -107,16 +107,20 @@ createSrcStructure () {
   firstLevelPackageName=$2
   secondLevelPackageName=$3
   projectName=$4
-	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName",resources},test/java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"}
+	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"/{controller,model,repository,service},resources},test/java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"}
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/Main.java"
-	mkdir -p "$projectDirectory"/src/main/resources/{sql/{data,schema},static,templates}
-	touch "$projectDirectory"/src/main/resources/sql/data/uat-data.sql
+	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/controller/MainController.java"
+	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/model/Book.java"
+	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/repository/BooksRepository.java"
+	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/service/BooksService.java"
+	mkdir -p "$projectDirectory"/src/main/resources/sql/{data,schema}
+	touch "$projectDirectory"/src/main/resources/sql/data/test-data.sql
 	touch "$projectDirectory"/src/main/resources/sql/schema/prod-schema.sql
-	touch "$projectDirectory"/src/main/resources/sql/schema/uat-schema.sql
+	touch "$projectDirectory"/src/main/resources/sql/schema/test-schema.sql
 	touch "$projectDirectory/src/main/resources/application.properties"
 	touch "$projectDirectory/src/main/resources/application-h2.properties"
 	touch "$projectDirectory/src/main/resources/application-prod.properties"
-	touch "$projectDirectory/src/main/resources/application-uat.properties"
+	touch "$projectDirectory/src/main/resources/application-test.properties"
 	touch "$projectDirectory/src/test/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/MainTest.java"
 	printf "${STATUS_TAG} File structure for ${ITALIC}src${RESET_FORMAT} has been created.\n"
 }
@@ -127,14 +131,17 @@ insertContentToMain () {
   secondLevelPackageName=$3
   projectName=$4
   mainFile="$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/Main.java"
+  mainControllerFile="$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/controller/MainController.java"
+	bookFile="$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/model/Book.java"
+	booksRepositoryFile="$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/repository/BooksRepository.java"
+	booksServiceFile="$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/service/BooksService.java"
+
 cat > "$mainFile" << EOF
 package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@Slf4j
 @SpringBootApplication
 public class Main {
 
@@ -144,46 +151,180 @@ public class Main {
 }
 EOF
 printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}Main.java${RESET_FORMAT}.\n"
+
+cat > "$mainControllerFile" << EOF
+package $firstLevelPackageName.$secondLevelPackageName.$projectName.controller;
+
+import $firstLevelPackageName.$secondLevelPackageName.$projectName.model.Book;
+import $firstLevelPackageName.$secondLevelPackageName.$projectName.service.BooksService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@Slf4j
+@RestController
+public class MainController {
+
+    private final BooksService booksService;
+
+    @Autowired
+    public MainController(BooksService booksService) {
+        this.booksService = booksService;
+    }
+
+    @GetMapping("/")
+    ResponseEntity<List<Book>> index() {
+        log.info("Received root request");
+        List<Book> allBooks = booksService.findAll();
+        return new ResponseEntity<>(allBooks, HttpStatus.OK);
+    }
+}
+EOF
+printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}MainController.java${RESET_FORMAT}.\n"
+
+cat > "$bookFile" << EOF
+package $firstLevelPackageName.$secondLevelPackageName.$projectName.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Getter
+@ToString
+@NoArgsConstructor
+@EqualsAndHashCode
+@Table(name = "books")
+@SuppressWarnings("JpaDataSourceORMInspection")
+public class Book {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SuppressWarnings({"unused", "InstanceVariableMayNotBeInitialized"})
+    private Long id;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "author")
+    private String author;
+
+    @Column(name = "rating")
+    @Setter
+    private Integer rating;
+
+    @Column(name = "description")
+    private String description;
+
+    public Book(String title, String author, Integer rating, String description) {
+        this.title = title;
+        this.author = author;
+        this.rating = rating;
+        this.description = description;
+    }
+}
+EOF
+printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}Book.java${RESET_FORMAT}.\n"
+
+cat > "$booksRepositoryFile" << EOF
+package $firstLevelPackageName.$secondLevelPackageName.$projectName.repository;
+
+import $firstLevelPackageName.$secondLevelPackageName.$projectName.model.Book;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface BooksRepository extends CrudRepository<Book, Long> {
+}
+EOF
+printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}BooksRepository.java${RESET_FORMAT}.\n"
+
+cat > "$booksServiceFile" << EOF
+package $firstLevelPackageName.$secondLevelPackageName.$projectName.service;
+
+import $firstLevelPackageName.$secondLevelPackageName.$projectName.model.Book;
+import $firstLevelPackageName.$secondLevelPackageName.$projectName.repository.BooksRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Spliterator;
+import java.util.stream.StreamSupport;
+
+@Service
+public class BooksService {
+
+    private final BooksRepository booksRepository;
+
+    @Autowired
+    public BooksService(BooksRepository booksRepository) {
+        this.booksRepository = booksRepository;
+    }
+
+    @SuppressWarnings("ChainedMethodCall")
+    public List<Book> findAll() {
+        Iterable<Book> allItems = booksRepository.findAll();
+        Spliterator<Book> allItemsSpliterator = allItems.spliterator();
+        return StreamSupport.stream(allItemsSpliterator, false)
+                            .toList();
+    }
+}
+EOF
+printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}BooksService.java${RESET_FORMAT}.\n"
 }
 
 insertContentToSQLInitFiles () {
-  uatDataFile="$1/src/main/resources/sql/data/uat-data.sql"
-cat > "$uatDataFile" << EOF
-INSERT INTO courses(id, name, category, rating, description)
-VALUES (1, 'SQL Course', 'Databases', 4, 'Course to learn SQL'),
-       (2, 'Java Course', 'Programming', 5, 'Course to learn Java');
+  testDataFile="$1/src/main/resources/sql/data/test-data.sql"
+cat > "$testDataFile" << EOF
+INSERT INTO books(title, author, rating, description)
+VALUES ('The World as Will and Representation', 'Arthur Schopenhauer', 5, 'Abactor de camerarius sectam, amor accola!'),
+       ('Mathematical Principles of Natural Philosophy', 'Isaac Newton', 5, 'Pol, dexter buxum!'),
+       ('The Cosmic Connection', 'Carl Sagan', 4, 'Classiss sunt bubos de regius cannabis.'),
+       ('The Count of Monte Cristo', 'Alexandre Dumas', 4, 'Barbatus clinias tandem apertos valebat est.'),
+       ('Dialogue Concerning the Two Chief World Systems', 'Galileo Galilei', 4, 'Pol, a bene heuretes, talis domus!'),
+       ('On the Revolutions of Heavenly Spheres', 'Nicolaus Copernicus', 2, 'Nocere hic ducunt ad regius zeta.'),
+       ('Moral Letters to Lucilius', 'Lucius Seneca', 5, 'Advena dexter mineralis est.'),
+       ('The Double Helix: A Personal Account of the Discovery of the Structure of DNA', 'James Watson', 4,
+        'Danista manducares, tanquam velox usus.'),
+       ('Relativity: The Special and General Theory', 'Albert Einstein', 3, 'A falsis, ausus peritus humani generis.'),
+       ('Faust', 'Wolfgang Goethe', 4, 'Hibrida de velox rector, locus luna!');
 EOF
-printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}uat-data.sql${RESET_FORMAT}.\n"
+printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}test-data.sql${RESET_FORMAT}.\n"
 
   prodSchemaFile="$1/src/main/resources/sql/schema/prod-schema.sql"
 cat > "$prodSchemaFile" << EOF
-CREATE TABLE IF NOT EXISTS courses
+CREATE TABLE IF NOT EXISTS books
 (
-    id          INT(15)       NOT NULL,
-    name        VARCHAR(100)  NOT NULL,
-    category    VARCHAR(20)   NOT NULL,
-    rating      INT(1)        NOT NULL,
-    description VARCHAR(1000) NOT NULL,
+    id          INT            NOT NULL AUTO_INCREMENT,
+    title       VARCHAR(100)   NOT NULL,
+    author      VARCHAR(100)   NOT NULL,
+    rating      INT            NOT NULL,
+    description VARCHAR(1000)  NOT NULL,
     PRIMARY KEY (id)
 );
 EOF
 printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}prod-schema.sql${RESET_FORMAT}.\n"
 
-  uatSchemaFile="$1/src/main/resources/sql/schema/uat-schema.sql"
-cat > "$uatSchemaFile" << EOF
-DROP TABLE IF EXISTS courses;
+  testSchemaFile="$1/src/main/resources/sql/schema/test-schema.sql"
+cat > "$testSchemaFile" << EOF
+DROP TABLE IF EXISTS books;
 
-CREATE TABLE IF NOT EXISTS courses
+CREATE TABLE IF NOT EXISTS books
 (
-    id          INT(15)       NOT NULL AUTO_INCREMENT,
-    name        VARCHAR(100)  NOT NULL,
-    category    VARCHAR(20)   NOT NULL,
-    rating      INT(1)        NOT NULL,
-    description VARCHAR(1000) NOT NULL,
+    id          INT            NOT NULL AUTO_INCREMENT,
+    title       VARCHAR(100)   NOT NULL,
+    author      VARCHAR(100)   NOT NULL,
+    rating      INT            NOT NULL,
+    description VARCHAR(1000)  NOT NULL,
     PRIMARY KEY (id)
 );
 EOF
-printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}uat-schema.sql${RESET_FORMAT}.\n"
+printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}test-schema.sql${RESET_FORMAT}.\n"
 }
 
 insertContentToApplicationProperties () {
@@ -192,6 +333,8 @@ cat > "$applicationPropertiesFile" << EOF
 server.port=8080
 spring.main.banner-mode=off
 spring.profiles.active=h2
+# To make 'th:method=...' work:
+spring.mvc.hiddenmethod.filter.enabled=true
 
 # LOGGING
 logging.level.root=INFO
@@ -217,7 +360,7 @@ spring.jpa.hibernate.ddl-auto=none
 #management.endpoints.web.exposure.include=*
 # Disable all actuator endpoints over HTTP:
 management.endpoints.web.exposure.exclude=*
-# Repeat default base path for clarity:
+# Repeat the default base path for clarity:
 management.endpoints.web.base-path=/actuator
 EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application.properties${RESET_FORMAT}.\n"
@@ -226,10 +369,18 @@ printf "${STATUS_TAG} Default application properties have been added to ${ITALIC
 insertContentToApplicationH2Properties () {
   applicationPropertiesFile="$1/src/main/resources/application-h2.properties"
 cat > "$applicationPropertiesFile" << EOF
+spring.devtools.livereload.enabled=true
+
 # DATA
 spring.datasource.url=jdbc:h2:mem:localdb
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.sql.init.mode=never
+spring.jpa.hibernate.ddl-auto=none
+spring.sql.init.mode=always
+spring.sql.init.schema-locations=classpath:sql/schema/test-schema.sql
+spring.sql.init.data-locations=classpath:sql/data/test-data.sql
+# To not initialize the database on start, replace
+# the 4 lines above with the 2 following lines:
+#spring.jpa.hibernate.ddl-auto=create-drop
+#spring.sql.init.mode=never
 logging.level.org.hibernate=TRACE
 # H2 console will be available at '/h2-console':
 spring.h2.console.enabled=true
@@ -244,10 +395,14 @@ insertContentToApplicationProdProperties () {
   applicationPropertiesFile="$1/src/main/resources/application-prod.properties"
 cat > "$applicationPropertiesFile" << EOF
 # DATA
-spring.datasource.url=jdbc:mysql://localhost:3306/university?createDatabaseIfNotExist=true
-spring.sql.init.schema-locations=classpath:sql/schema/prod-schema.sql
+spring.datasource.url=jdbc:mysql://localhost:3306/bookshop?createDatabaseIfNotExist=true
 spring.jpa.hibernate.ddl-auto=none
 spring.sql.init.mode=always
+spring.sql.init.schema-locations=classpath:sql/schema/prod-schema.sql
+# To not initialize the database on start, replace
+# the 3 lines above with the 2 following lines:
+#spring.jpa.hibernate.ddl-auto=create-drop
+#spring.sql.init.mode=never
 spring.datasource.username=root
 spring.datasource.password=password
 EOF
@@ -259,10 +414,10 @@ insertContentToApplicationUATProperties () {
 cat > "$applicationPropertiesFile" << EOF
 # DATA
 spring.datasource.url=jdbc:mysql://localhost:3306/university-uat?createDatabaseIfNotExist=true
-spring.sql.init.schema-locations=classpath:sql/schema/uat-schema.sql
-spring.sql.init.data-locations=classpath:sql/data/uat-data.sql
 spring.jpa.hibernate.ddl-auto=none
 spring.sql.init.mode=always
+spring.sql.init.schema-locations=classpath:sql/schema/test-schema.sql
+spring.sql.init.data-locations=classpath:sql/data/test-data.sql
 spring.datasource.username=root
 spring.datasource.password=password
 EOF
@@ -428,10 +583,10 @@ cat > "$pomFile" << EOF
     <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
     <!-- Plugins -->
     <min.maven.version>3.8.6</min.maven.version>
-    <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <spotbugs-maven-plugin.version>4.7.3.0</spotbugs-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.7.3.1</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -665,6 +820,11 @@ cat > "$pomFile" << EOF
                 <!-- Ignoring candidate release versions, like 6.2.0.CR2 -->
                 <type>regex</type>
                 <version>(?i)[0-9].+\\.CR[0-9]+</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <!-- Ignoring release candidate versions, like 2.15.0-rc1 and 1.8.20-RC -->
+                <type>regex</type>
+                <version>(?i)[0-9].+-rc[0-9]*</version>
               </ignoreVersion>
             </ignoreVersions>
           </ruleSet>
