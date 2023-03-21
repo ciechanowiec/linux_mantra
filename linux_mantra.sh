@@ -269,6 +269,16 @@ informAboutProcedureStart
 echo "Setting up vim as default editor..."
 sudo update-alternatives --set editor /usr/bin/vim.basic
 
+vimrcFile="$HOME/.vimrc"
+
+cat > "$vimrcFile" << EOF
+" Use system clipboard (https://stackoverflow.com/questions/27898407/intellij-idea-with-ideavim-cannot-copy-text-from-another-source):
+set clipboard=unnamedplus
+
+" Enable repeatable pasting in visual mode (https://stackoverflow.com/questions/7163947/paste-multiple-times):
+xnoremap p pgvy
+EOF
+
 informAboutProcedureEnd
 
 promptOnContinuation
@@ -1853,19 +1863,13 @@ source ~/.vimrc
 " Make by default search case insensitive (https://stackoverflow.com/questions/2287440/how-to-do-case-insensitive-search-in-vim):
 set ignorecase
 
-" Yank to system clipboard (https://stackoverflow.com/questions/27898407/intellij-idea-with-ideavim-cannot-copy-text-from-another-source):
-set clipboard+=unnamed
-
-" Disable error bells (https://superuser.com/questions/622898/how-to-turn-off-the-bell-sound-in-intellij):
+" Disable error bells (https://stackoverflow.com/questions/11489428/how-to-make-vim-paste-from-and-copy-to-systems-clipboard):
 set visualbell
 set noerrorbells
 
 " Highlight search results and clear highlighting on escape in normal mode:
 set hls
 nnoremap <ESC> :noh<CR>
-
-" Enable repeatable pasting in visual mode (https://stackoverflow.com/questions/7163947/paste-multiple-times):
-xnoremap p pgvy
 EOF
 
 informAboutProcedureEnd
