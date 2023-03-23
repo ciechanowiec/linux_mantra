@@ -354,6 +354,8 @@ logging.logback.rollingpolicy.total-size-cap=0
 # DATA
 spring.jpa.open-in-view=true
 spring.jpa.hibernate.ddl-auto=none
+# Treat case literally and don't transform it:
+spring.jpa.properties.hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 # ACTUATOR
 # Enable all actuator endpoints over HTTP:
