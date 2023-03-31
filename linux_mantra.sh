@@ -1323,18 +1323,32 @@ promptOnContinuation
 ###############################################################################
 procedureId="neovim"
 # DOCUMENTATION:
-#   https://nvchad.com/#/docs/quickstart/install
+#   https://www.lazyvim.org/
+#   https://github.com/folke/tokyonight.nvim
 
 informAboutProcedureStart
 
 echo "Installing NeoVim..."
 sudo snap install nvim --classic
 
-echo "Installing NvChad..."
-git clone https://github.com/NvChad/NvChad ~/.config/nvim --depth 1 && nvim
+echo "Installing LazyVim..."
+mkdir -p "$HOME/.config/nvim"
+mv ~/.config/nvim ~/.config/nvim.bak
+git clone https://github.com/LazyVim/starter ~/.config/nvim
+rm -rf ~/.config/nvim/.git
+
 echo "Setting light theme..."
-nvimDefaultConfigFile="$HOME/.config/nvim/lua/core/default_config.lua"
-sed --in-place 's/theme = "onedark"/theme = "one_light"/g' "$nvimDefaultConfigFile"
+nvimColorConfigFile="$HOME/.config/nvim/lua/plugins/colorscheme.lua"
+touch "$nvimColorConfigFile"
+cat > "$nvimColorConfigFile" << EOF
+return {
+	{
+	  "folke/tokyonight.nvim",
+	  lazy = true,
+	  opts = { style = "day" },
+	}
+}
+EOF
 
 informAboutProcedureEnd
 
