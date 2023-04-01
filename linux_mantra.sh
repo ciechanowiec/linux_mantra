@@ -758,7 +758,7 @@ procedureId="pulseaudio bug fix"
 informAboutProcedureStart
 
 echo "Reinstalling pulseaudio..."
-sudo apt install --reinstall pulseaudio pulseaudio-module-bluetooth
+sudo apt install --reinstall pulseaudio pulseaudio-module-bluetooth -y
 
 echo "Stopping pulseaudio in order to freeze configuration directories..."
 systemctl --user stop pulseaudio.socket
