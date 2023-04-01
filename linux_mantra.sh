@@ -517,7 +517,7 @@ export SDKMAN_DIR="$HOME/.sdkman"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 echo "Installing Maven..."
-yes | sdk install maven 3.8.7
+yes | sdk install maven 3.9.1
 
 echo "Enabling the installed program in the current console..."
 export SDKMAN_DIR="$HOME/.sdkman"
@@ -584,9 +584,9 @@ echo "3. Clearing and regenerating fonts cache..."
 fc-cache -f -v
 
 echo "4. Downloading new fonts..."
-fontOne="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Regular/complete/JetBrains%20Mono%20NL%20Regular%20Nerd%20Font%20Complete%20Mono.ttf"
-fontTwo="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Bold/complete/JetBrains%20Mono%20NL%20Bold%20Nerd%20Font%20Complete%20Mono.ttf"
-fontThree="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Italic/complete/JetBrains%20Mono%20NL%20Italic%20Nerd%20Font%20Complete%20Mono.ttf"
+fontOne="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Regular/complete/JetBrains%20Mono%20NL%20Nerd%20Font%20Complete%20Mono%20Regular.ttf"
+fontTwo="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Bold/complete/JetBrains%20Mono%20NL%20Nerd%20Font%20Complete%20Mono%20Bold.ttf"
+fontThree="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Italic/complete/JetBrains%20Mono%20NL%20Nerd%20Font%20Complete%20Mono%20Italic.ttf"
 fontFour="https://fonts.google.com/download?family=Noto%20Serif"
 wget "$fontOne" -P tempFontsDir
 wget "$fontTwo" -P tempFontsDir
@@ -730,11 +730,11 @@ docker logout
 echo "Logging into Docker Hub..."
 echo "Provide your Docker Hub login:"
 read -r dockerHubLogin
-docker login --username "$dockerHubLogin"
+sudo docker login --username "$dockerHubLogin"
 exitCode=$(echo $?)
 while [ "$exitCode" -ne 0 ];
   do
-    docker login --username "$dockerHubLogin"
+    sudo docker login --username "$dockerHubLogin"
     exitCode=$(echo $?)
 done
 
@@ -1357,35 +1357,6 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
-#                 7. DISABLE ROUNDED GNOME WINDOWS CORNERS                    #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="disable rounded gnome windows corners"
-# DOCUMENTATION:
-#   https://www.reddit.com/r/pop_os/comments/hnxgzv/i_have_been_trying_for_hours_to_get_rid_of_the/
-
-informAboutProcedureStart
-
-gtkDir="$HOME/.config/gtk-3.0"
-gtkStylesheet="$gtkDir/gtk.css"
-
-echo "Disabling rounded windows corners in GNOME..."
-mkdir -p "$gtkDir"
-touch "$gtkStylesheet"
-cat > "$gtkStylesheet" << EOF
-decoration, window, window.background, window.titlebar, * {
-   border-radius: 0px;
-}
-EOF
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
 #                    7. IMWHEEL (MOUSE SPEED CONFIGURATOR)                    #
 #                                                                             #
 #                                                                             #
@@ -1752,8 +1723,8 @@ echo "   - AEM IDE"
 echo "   - AsciiDoc"
 echo "   - CodeMetrics"
 echo "   - IdeaVim"
-echo "   - MoveTab"
 echo "   - Luanalysis"
+echo "   - MoveTab"
 echo "   - OSGi"
 echo "   - Python"
 echo "   - Settings Repository"
@@ -1928,9 +1899,7 @@ fi
 echo "Installing application..."
 # The files downloaded below can be removed after installation
 sudo apt install git python3-setuptools gettext -y
-git clone https://github.com/sezanzeb/input-remapper.git
-cd input-remapper && ./scripts/build.sh
-sudo apt install ./dist/input-remapper-1.5.0.deb -y
+sudo apt install input-remapper -y
 
 echo "Starting the application for a while to initialize the configuration directory..."
 # Running in a new terminal, because doing it in the current might block it:
@@ -2208,7 +2177,7 @@ echo "Allowing the organization to manage the profile..."
 sleep 7
 xdotool key space
 
-echo "Turning on syncing..."
+echo "Turning on syncing (it might take up to 1 minute)..."
 sleep 4
 xdotool key space
 sleep 40 # Give time to download and sync settings
