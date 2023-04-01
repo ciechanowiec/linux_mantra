@@ -2039,7 +2039,7 @@ echo "3. Installing 'Panel Date Format' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/1462/panel-date-format/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 panelDateFormatArchive="panelDateFormatArchive.zip"
-wget -O "$panelDateFormatArchive" https://extensions.gnome.org/extension-data/panel-date-formatkeiii.github.com.v8.shell-extension.zip
+wget -O "$panelDateFormatArchive" https://extensions.gnome.org/extension-data/panel-date-formatkeiii.github.com.v9.shell-extension.zip
 panelDateFormatDirUnzipped="panelDateFormatDirUnzipped"
 unzip "$panelDateFormatArchive" -d "$panelDateFormatDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
@@ -2052,7 +2052,7 @@ echo "4. Installing 'Just Perfection' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/3843/just-perfection/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 justPerfectionArchive="justPerfectionArchive.zip"
-wget -O "$justPerfectionArchive" https://extensions.gnome.org/extension-data/just-perfection-desktopjust-perfection.v22.shell-extension.zip
+wget -O "$justPerfectionArchive" https://extensions.gnome.org/extension-data/just-perfection-desktopjust-perfection.v24.shell-extension.zip
 justPerfectionDirUnzipped="justPerfectionDirUnzipped"
 unzip "$justPerfectionArchive" -d "$justPerfectionDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
@@ -2066,7 +2066,7 @@ echo "5. Installing 'ddterm' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/3780/ddterm/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 ddtermArchive="ddtermArchive.zip"
-wget -O "$ddtermArchive" https://extensions.gnome.org/extension-data/ddtermamezin.github.com.v36.shell-extension.zip
+wget -O "$ddtermArchive" https://extensions.gnome.org/extension-data/ddtermamezin.github.com.v43.shell-extension.zip
 ddtermDirUnzipped="ddtermDirUnzipped"
 unzip "$ddtermArchive" -d "$ddtermDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
