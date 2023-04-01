@@ -138,7 +138,7 @@ name='NeoVim'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3]
 binding='<Super>f'
-command='gnome-terminal --geometry 94x45+0+0 -- /home/linuxbrew/.linuxbrew/bin/xplr'
+command='gnome-terminal --geometry 94x45+0+0 -- xplr'
 name='XPLR'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4]

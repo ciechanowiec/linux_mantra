@@ -1446,6 +1446,7 @@ informAboutProcedureStart
 
 echo "1. Removing previous settings and application if present..."
 brew uninstall xplr
+sudo rm --force /usr/bin/xplr
 xplrSettingsDir="$HOME/.config/xplr"
 if [ -d "$xplrSettingsDir" ]
   then
@@ -1454,16 +1455,20 @@ if [ -d "$xplrSettingsDir" ]
 fi
 
 echo "2. Installing xplr..." # docs: https://xplr.dev/en/install
-brew install xplr
+# Hardcoded version is installed, because new versions of xplr
+# are very dynamic, UI constantly changes, and old settings stop
+# working correctly:
+wget https://github.com/sayanarijit/xplr/releases/download/v0.20.2/xplr-linux.tar.gz
+tar --verbose --extract --file xplr-linux.tar.gz
+# On binary installation: https://askubuntu.com/a/993635
+sudo install ./xplr /usr/bin
 mkdir -p "$xplrSettingsDir"
 
 echo "3. Composing a main configuration file..."
 mainConfigurationFile=$resourcesDir/"xplr/HOME/.config/xplr/init.lua"
 
 echo "3.1. Extracting an xplr version..." # docs: https://xplr.dev/en/post-install
-xplrSymLink=$(whereis xplr | cut -d ' ' -f 2) # result like: /home/linuxbrew/.linuxbrew/bin/xplr
-xplrApp=$(readlink -f "$xplrSymLink") # result like: /home/linuxbrew/.linuxbrew/Cellar/xplr/0.19.0/bin/xplr
-xplrVersion=$(echo $xplrApp | grep -o -P "(?<=xplr/).*(?=/bin)") # result like: 0.19.0
+xplrVersion=$(xplr --version | cut --delimiter ' ' --field 2) # result like: 0.19.0
 xplrVersionAsConfigEntry="version = \"${xplrVersion:?}\"" # result like: version = "0.19.0"
 echo "-- 1_version" > "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
 echo "$xplrVersionAsConfigEntry" >> "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
