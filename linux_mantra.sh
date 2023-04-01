@@ -2253,9 +2253,36 @@ if [ "$exitCode" != 0 ]
     echo "2. NVIDIA devices detected. Drivers will be installed now..."
     sudo add-apt-repository ppa:graphics-drivers/ppa -y
     sudo apt update
-    sudo apt install nvidia-driver-510 -y
+    sudo apt install nvidia-driver-525 -y
     echo "3. NVIDIA drivers installed. They will start after rebooting"
 fi
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
+#                                  16. INSYNC                                 #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="insync"
+# DOCUMENTATION:
+#   https://www.insynchq.com/downloads/linux
+
+informAboutProcedureStart
+
+echo "Downloading insync..."
+wget https://cdn.insynchq.com/builds/linux/insync_3.8.4.50481-jammy_amd64.deb
+
+echo "Installing insync..."
+sudo dpkg -i insync_3.8.4.50481-jammy_amd64.deb
+
+echo "Adjust manually InSync settings according to personal needs."
+echo "Press Enter to continue..."
+read voidInput
 
 informAboutProcedureEnd
 
