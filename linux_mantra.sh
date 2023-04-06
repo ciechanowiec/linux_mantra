@@ -786,9 +786,9 @@ echo "Restarting bluetooth..."
 # systemctl might not have effect on bluetooth after the
 # first start of OS, so rfkill is also used:
 rfkill block bluetooth
-sudo systemctl start bluetooth.service
-rfkill unblock bluetooth
 sudo systemctl stop bluetooth.service
+rfkill unblock bluetooth
+sudo systemctl start bluetooth.service
 
 echo "Starting pulseaudio after changing settings..."
 systemctl --user start pulseaudio.socket
