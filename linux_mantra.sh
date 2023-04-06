@@ -523,6 +523,59 @@ echo "Enabling the installed program in the current console..."
 export SDKMAN_DIR="$HOME/.sdkman"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
+echo "Adding an Adobe Maven repository..."
+# Details: https://repo.adobe.com/index.html
+mavenSettingsFile="$HOME/.m2/settings.xml"
+touch "$mavenSettingsFile"
+cat > "$mavenSettingsFile" << EOF
+<!-- ====================================================== -->
+<!-- A D O B E   P U B L I C   P R O F I L E                -->
+<!-- ====================================================== -->
+<profile>
+    <id>adobe-public</id>
+
+    <activation>
+        <activeByDefault>false</activeByDefault>
+    </activation>
+
+    <properties>
+        <releaseRepository-Id>adobe-public-releases</releaseRepository-Id>
+        <releaseRepository-Name>Adobe Public Releases</releaseRepository-Name>
+        <releaseRepository-URL>https://repo.adobe.com/nexus/content/groups/public</releaseRepository-URL>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>adobe-public-releases</id>
+            <name>Adobe Public Repository</name>
+            <url>https://repo.adobe.com/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>adobe-public-releases</id>
+            <name>Adobe Public Repository</name>
+            <url>https://repo.adobe.com/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+</profile>
+EOF
+
 informAboutProcedureEnd
 
 promptOnContinuation
