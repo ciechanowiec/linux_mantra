@@ -1410,6 +1410,28 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                                 7. RUST                                     #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="rust"
+# DOCUMENTATION:
+#   https://www.rust-lang.org/tools/install
+#   https://stackoverflow.com/a/57251636 (non-interactive installation)
+
+informAboutProcedureStart
+
+echo "Installing rust..."
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env" # Post-installation command suggested by the script above
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                    7. IMWHEEL (MOUSE SPEED CONFIGURATOR)                    #
 #                                                                             #
 #                                                                             #
