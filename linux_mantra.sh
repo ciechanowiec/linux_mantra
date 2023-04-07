@@ -603,6 +603,28 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                                 6. RUST                                     #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="rust"
+# DOCUMENTATION:
+#   https://www.rust-lang.org/tools/install
+#   https://stackoverflow.com/a/57251636 (non-interactive installation)
+
+informAboutProcedureStart
+
+echo "Installing rust..."
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env" # Post-installation command suggested by the script above
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                                 7. FONTS                                    #
 #                                                                             #
 #                                                                             #
@@ -1378,19 +1400,34 @@ procedureId="neovim"
 # DOCUMENTATION:
 #   https://www.lazyvim.org/
 #   https://github.com/folke/tokyonight.nvim
+# NOTES:
+#   1. Do not install via snap, because it might cause problems like this:
+#      https://github.com/LunarVim/LunarVim/issues/3612#issuecomment-1441131186
+#   2. Do not install via apt, because it has an old version
 
 informAboutProcedureStart
 
-echo "Installing NeoVim..."
-sudo snap install nvim --classic
+echo "1. Installing NeoVim..."
+echo "1.1. Creating a destination directory if doesn't exist..."
+destinationDir="$HOME/.local"
+if [ ! -d "$destinationDir" ]
+  then
+    mkdir -p "$destinationDir"
+fi
+echo "1.2. Downloading neovim binaries..."
+wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+echo "1.3. Extracting binaries..."
+tar --extract --verbose --file nvim-linux64.tar.gz --directory "$destinationDir"
+echo "1.4. Adding nvim to path..."
+ln --symbolic "$destinationDir/nvim-linux64/bin/nvim" "$destinationDir/bin/nvim"
 
-echo "Installing LazyVim..."
+echo "2. Installing LazyVim..."
 mkdir -p "$HOME/.config/nvim"
 mv ~/.config/nvim ~/.config/nvim.bak
 git clone https://github.com/LazyVim/starter ~/.config/nvim
 rm -rf ~/.config/nvim/.git
 
-echo "Setting light theme..."
+echo "3. Setting light theme..."
 nvimColorConfigFile="$HOME/.config/nvim/lua/plugins/colorscheme.lua"
 touch "$nvimColorConfigFile"
 cat > "$nvimColorConfigFile" << EOF
@@ -1402,28 +1439,6 @@ return {
 	}
 }
 EOF
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
-#                                 7. RUST                                     #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="rust"
-# DOCUMENTATION:
-#   https://www.rust-lang.org/tools/install
-#   https://stackoverflow.com/a/57251636 (non-interactive installation)
-
-informAboutProcedureStart
-
-echo "Installing rust..."
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-source "$HOME/.cargo/env" # Post-installation command suggested by the script above
 
 informAboutProcedureEnd
 
