@@ -25,7 +25,7 @@ sdk use java 8.0.345-tem
 mvn -B org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate \
     -D archetypeGroupId=com.adobe.aem \
     -D archetypeArtifactId=aem-project-archetype \
-    -D archetypeVersion=40 \
+    -D archetypeVersion=41 \
     -D appTitle="First Hops" \
     -D appId="$appId" \
     -D groupId="eu.ciechanowiec" \
