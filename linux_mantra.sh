@@ -356,10 +356,6 @@ echo "" >> "$bashrcFile" # Empty line
 cat >> "$bashrcFile" << EOF
 # ALIASES:
 alias aem_init_archetype='~/scripts/aem_init_archetype.sh'
-alias aem_reset_instances='~/scripts/aem_reset_instances.sh'
-alias aem_start_author='~/scripts/aem_start_author.sh'
-alias aem_start_forms='~/scripts/aem_start_forms.sh'
-alias aem_start_publish='~/scripts/aem_start_publish.sh'
 alias docker_clean='~/scripts/docker_clean.sh'
 alias docker_clean_containers='~/scripts/docker_clean_containers.sh'
 alias docker_clean_images='~/scripts/docker_clean_images.sh'
