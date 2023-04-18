@@ -269,8 +269,8 @@ informAboutProcedureStart
 echo "Setting up vim as default editor..."
 sudo update-alternatives --set editor /usr/bin/vim.basic
 
+echo "Updating vim settings..."
 vimrcFile="$HOME/.vimrc"
-
 cat > "$vimrcFile" << EOF
 " Use system clipboard (https://stackoverflow.com/questions/27898407/intellij-idea-with-ideavim-cannot-copy-text-from-another-source):
 set clipboard=unnamedplus
@@ -1204,6 +1204,8 @@ promptOnContinuation
 procedureId="wallpaper"
 # DOCUMENTATION:
 #   n/a
+# NOTES:
+#   Wallpaper RGB: 82,94,84
 
 informAboutProcedureStart
 
