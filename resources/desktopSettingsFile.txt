@@ -158,7 +158,7 @@ sleep-inactive-ac-type='nothing'
 sleep-inactive-battery-type='nothing'
 
 [org/gnome/shell]
-disabled-extensions=['ubuntu-dock@ubuntu.com']
+disabled-extensions=['ubuntu-dock@ubuntu.com', 'ding@rastersoft.com']
 favorite-apps=@as []
 
 [org/gnome/shell/extensions/desktop-icons]
