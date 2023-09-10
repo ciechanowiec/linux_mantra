@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# 1. The archetype below works on AEM 6.5.14.
-#    However, as of creating this script (2022-08-27), no `uber-jar` of the
-#    version 6.5.14 was available. For that reason aemVersion was set to 6.5.13.
+# 1. For AEM 6.5 the archetype below works on for AEM 6.5.16.
+#    However, AEM 6.5.16 is supposed to work with 6.5.15 uber-jar.
+#    For that reason aemVersionToUse is set for AEM 6.5 to 6.5.15.
 # 2. As of creating this script, if for project generation Java 11+ is used, it will result
 #    in unformatted `{basedir}/pom.xml` (see bug description: https://issues.apache.org/jira/browse/ARCHETYPE-587).
 #    In order to avoid it, Java 8 is used.
@@ -10,6 +10,17 @@
 #    (details: https://sling.apache.org/documentation/bundles/osgi-installer.html#:~:text=The%20OSGi%20installer%20is%20a,for%20the%20OSGi%20configuration%20admin)
 
 source "$HOME/.sdkman/bin/sdkman-init.sh" # To make sdk command work
+
+userInput=$1
+aemVersionToUse=""
+if [ "$userInput" == "cloud" ]; then
+    aemVersionToUse="cloud"
+    elif [ "$userInput" == "65" ]; then
+      aemVersionToUse="6.5.15"
+    else
+      echo "Unknown AEM version. Aborting..."
+      exit 1
+fi
 
 currentDir=$(pwd)
 appId="firsthops"
@@ -20,12 +31,12 @@ parentPom="$targetDir/pom.xml"
 latestConditionalLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/conditional/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
 latestSneakyFunLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/sneakyfun/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
 
-sdk use java 8.0.345-tem
+sdk use java 8.0.372-zulu
 
 mvn -B org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate \
     -D archetypeGroupId=com.adobe.aem \
     -D archetypeArtifactId=aem-project-archetype \
-    -D archetypeVersion=41 \
+    -D archetypeVersion=43 \
     -D appTitle="First Hops" \
     -D appId="$appId" \
     -D groupId="eu.ciechanowiec" \
@@ -34,9 +45,9 @@ mvn -B org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate \
     -D singleCountry=n \
     -D includeExamples=y \
     -D version="1.0-SNAPSHOT" \
-    -D aemVersion="6.5.13"
+    -D aemVersion="$aemVersionToUse"
 
-sdk use java 11.0.16-tem
+sdk use java 11.0.19-tem
 
 cd "$targetDir" || exit 1
 git init
@@ -62,6 +73,8 @@ EOF
 echo "$allPomSecondPart" >> "$allPom"
 
 # ADJUST CORE POM
+sed -i.backup 's/Import-Package: javax.annotation/Import-Package: !lombok,javax.annotation/g' "$corePom"
+trash-put "${corePom}.backup"
 corePomFirstPart=$(head -n 83 "$corePom")
 corePomSecondPart=$(tail -n +84 "$corePom")
 echo "$corePomFirstPart" > "$corePom"
@@ -69,7 +82,7 @@ cat >> "$corePom" << EOF
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
+            <version>1.18.26</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -86,12 +99,14 @@ EOF
 echo "$corePomSecondPart" >> "$corePom"
 
 # ADJUST PARENT POM
-sed -i 's/<source>1.8<\/source>/<source>11<\/source>/g' "$parentPom"
-sed -i 's/<target>1.8<\/target>/<target>11<\/target>/g' "$parentPom"
-parentPomFirstPart=$(head -n 179 "$parentPom")
-parentPomSecondPart=$(tail -n +182 "$parentPom")
+sed -i.backup 's/<source>1.8<\/source>/<source>11<\/source>/g' "$parentPom"
+sed -i.backup 's/<target>1.8<\/target>/<target>11<\/target>/g' "$parentPom"
+trash-put "${parentPom}.backup"
+parentPomFirstPart=$(head -n 183 "$parentPom")
+parentPomSecondPart=$(tail -n +187 "$parentPom")
 echo "$parentPomFirstPart" > "$parentPom"
 cat >> "$parentPom" << EOF
+
 # Plugins are inlined due to the plugins merge bug: https://github.com/adobe/aem-project-archetype/issues/971
 -plugin org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin,org.apache.sling.bnd.models.ModelsScannerPlugin
 EOF

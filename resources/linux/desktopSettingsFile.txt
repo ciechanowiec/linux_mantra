@@ -13,7 +13,7 @@ detect-urls-as-is=true
 foreground-color='#D3D7CF'
 hide-animation-duration=0.080000000000000002
 hide-when-focus-lost=true
-hide-window-on-esc=true
+hide-window-on-esc=false
 highlight-background-color='#000000'
 highlight-colors-set=false
 highlight-foreground-color='#ffffff'
@@ -57,6 +57,10 @@ show-battery-percentage=false
 [org/gnome/desktop/notifications]
 show-in-lock-screen=false
 
+[org/gnome/desktop/peripherals/keyboard]
+delay=uint32 180
+repeat-interval=uint32 20
+
 [org/gnome/desktop/peripherals/mouse]
 speed=0.235
 
@@ -76,6 +80,7 @@ report-technical-problems=false
 lock-delay=uint32 0
 lock-enabled=false
 picture-options='zoom'
+picture-uri='/home/herman/Pictures/background.png'
 ubuntu-lock-on-suspend=false
 
 [org/gnome/desktop/session]
@@ -102,6 +107,8 @@ wrap-last-split-mode='word'
 
 [org/gnome/mutter]
 dynamic-workspaces=false
+experimental-features=['scale-monitor-framebuffer']
+text-scaling-factor=1.3999999999999999
 
 [org/gnome/nautilus/icon-view]
 default-zoom-level='larger'
@@ -127,17 +134,17 @@ command='shutdown now'
 name='Shutdown'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1]
-binding='<Super>c'
-command='google-chrome'
-name='Google Chrome'
+binding='<Super>e'
+command='microsoft-edge'
+name='Microsoft Edge'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2]
-binding='<Super>e'
-command='gnome-terminal -- nvim'
+binding='<Super>n'
+command="gnome-terminal -- nvim -c 'startinsert'"
 name='NeoVim'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3]
-binding='<Super>f'
+binding='<Super>x'
 command='gnome-terminal --geometry 94x45+0+0 -- xplr'
 name='XPLR'
 

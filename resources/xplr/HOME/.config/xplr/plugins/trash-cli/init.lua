@@ -32,7 +32,7 @@ local function setup(args)
         {
           BashExecSilently = [===[
           while IFS= read -r line; do
-            if trash-put -- "${line:?}"; then
+            if trash-put "${line:?}"; then
               echo LogSuccess: "Trashed $line" >> "${XPLR_PIPE_MSG_IN:?}"
             else
               echo LogError: "Failed to trash $line" >> "${XPLR_PIPE_MSG_IN:?}"

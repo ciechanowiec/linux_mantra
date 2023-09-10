@@ -19,12 +19,13 @@
 :stylesheet: adoc-css-style.css
 
 == Overview
-_Linux Mantra_ is a set of interconnected Bash/Lua scripts and configuration files, which perform automated fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra is composed of 4.500+ lines and constitutes one of the most sophisticated programs of its kind.
+_Linux Mantra_ is a set of interconnected Bash/Lua scripts and configuration files, which perform automated fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra has been used on a daily basis for over a year. It has undergone rigorous testing and stands as one of the most sophisticated programs of its kind.
 
 == Features
 [upperalpha]
 . Linux Mantra performs automized setup of personal Linux/Java/AEM development environment right after installation of an operating system. It installs basic packages (e.g. `curl`, `ffmpeg`, `xclip`, `traceroute`, `fzf`, `xdotool`, `tree`, `unzip`, `wget`, `htop`, `trash-cli`, `vim`), adjusts `.bashrc`, customizes fonts, fixes some bugs, sets up locale formats, mounts a decompiler, personalizes directories in `$HOME`, remaps appropriate input keys, loads dumped `dconf`, configures terminal file manager (`xplr`), initiates often used Bash scripts, establishes GNOME extensions, modifies run modes (`.desktop`) of certain default applications, associates mime types etc.
 . With Linux Mantra, time required to perform the whole setup of personal Linux/Java/AEM development environment is usually less than 45 minutes (depends on the quality of internet connection).
+. Besides the initial setup after installation of an operating system, Linux Mantra can be used to keep record of the ongoing configuration changes in order to assure their reproducibility.
 . Linux Mantra was tested and can be run on Linux Ubuntu 22.x. Other Linux distributions might require adjustments of the program.
 
 == Program Architecture
@@ -43,6 +44,7 @@ Personal Linux/Java/AEM development environment is subject to continuous change,
 . The first code block is a set of common functions used throughout the script and the rest of blocks are procedural ones.
 . Every procedural code block starts with informing about the name of a procedure that now will be performed. In the end of every procedure the user is informed about completion, the script stops the execution to give the user time for facultative checks and prompts for continuation.
 . Procedural code blocks have numbers in headings. Those numbers represent sequence-priorities in which blocks should be run. Lower numbers (1, 2, 3...) mean higher priority, higher numbers (14, 15, 16...) mean lower priority and equal numbers (7, 7, 7...) mean the same priority. In some cases those priorities are very strict so that if the procedure with higher priority is not executed before the procedure with lower priority, the latter one will fail. In other cases those priorities are loosely coupled and arbitrary.
+. Linux Mantra files incorporate some code related to macOS as the basis for future cross-platform solution. However, at this moment during the execution of Linux Mantra on a Linux machine, the macOS related code isn't executed and has no relevant impact on the flow of the program.
 
 == How to Run
 [upperalpha]
@@ -53,7 +55,7 @@ Personal Linux/Java/AEM development environment is subject to continuous change,
 . Running `linux_mantra.sh` script will start and drive the whole execution of Linux Mantra. Running that script is the only thing required to perform the setup; accompanying files from the `resources` directory will be accessed by the script itself.
 . Follow the instructions and prompts that will appear in the terminal where `linux_mantra.sh` script is running.
 . `linux_mantra.sh` can be run from any path other than `$HOME/TEMP`. It resolves its actual path (and therefore - also the actual path of relative `resources`) itself.
-. Note that Linux Mantra isn't run in a fully automatic mode and requires certain interaction with the user (e.g. provision of an e-mail address). The reasons for that are security considerations and open for easy modification principle mentioned above. Another reason is also ineffectiveness of full automation: certain aspects of certain programs (e.g. the location of setting for the download target in Google Chrome) are practically nondeterministic due to constant change of those programs.
+. Note that Linux Mantra isn't run in a fully automatic mode and requires certain interaction with the user (e.g. provision of an e-mail address). The reasons for that are security considerations and open for easy modification principle mentioned above. Another reason is also ineffectiveness of full automation: certain aspects of certain programs (e.g. the location of setting for the download target in the browser) are practically nondeterministic due to constant change of those programs.
 
 == License
 The program is subject to MIT No Attribution License
