@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # A. Script for generating Spring Boot projects from a template.
 #    The template is based on the output of the following command:
 #    spring init --dependencies=web,actuator,devtools,validation,data-jpa,mysql,h2,lombok \
@@ -48,7 +47,7 @@ showWelcomeMessage () {
 verifyIfTreeExists () {
 	if ! command tree -v &> /dev/null
 	then
-		printf "${ERROR_TAG} 'tree' package which is required to run the script hasn't been detected. The script execution has been aborted. Try to install 'tree' package using this command: 'sudo apt install tree'.\n"
+		printf "${ERROR_TAG} 'tree' package which is required to run the script hasn't been detected. The script execution has been aborted.\n"
     exit
 	fi
 }
@@ -56,7 +55,7 @@ verifyIfTreeExists () {
 verifyIfGitExists () {
 	if ! command git --version &> /dev/null
 	then
-		printf "${ERROR_TAG} 'git' package which is required to run the script hasn't been detected. The script execution has been aborted. Try to install 'git' package using this command: 'sudo apt install git'.\n"
+		printf "${ERROR_TAG} 'git' package which is required to run the script hasn't been detected. The script execution has been aborted.\n"
 		exit
 	fi
 }
@@ -578,17 +577,17 @@ cat > "$pomFile" << EOF
     <!--  Dependencies  -->
     <conditional.version>$latestConditionalLibVersion</conditional.version>
     <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
-    <commons-lang3.version>3.12.0</commons-lang3.version>
+    <commons-lang3.version>3.13.0</commons-lang3.version>
     <jsr305.version>3.0.2</jsr305.version>
     <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
     <!-- Locking down Maven default plugins -->
     <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
     <!-- Plugins -->
     <min.maven.version>3.8.6</min.maven.version>
-    <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
+    <versions-maven-plugin.version>2.16.0</versions-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <spotbugs-maven-plugin.version>4.7.3.1</spotbugs-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.7.3.5</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -717,6 +716,8 @@ cat > "$pomFile" << EOF
                   <includes>
                     <include>LICENSE.txt</include>
                     <include>README.adoc</include>
+                    <include>README-docinfo.html</include>
+                    <include>README-docinfo-footer.html</include>
                   </includes>
                 </resource>
               </resources>
@@ -827,6 +828,11 @@ cat > "$pomFile" << EOF
                 <!-- Ignoring release candidate versions, like 2.15.0-rc1 and 1.8.20-RC -->
                 <type>regex</type>
                 <version>(?i)[0-9].+-rc[0-9]*</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <!-- Ignoring develop versions, like 15.0.0.Dev01 -->
+                <type>regex</type>
+                <version>(?i)[0-9].+\\.dev[0-9]*</version>
               </ignoreVersion>
             </ignoreVersions>
           </ruleSet>
@@ -1038,16 +1044,62 @@ showFinishMessage () {
 }
 
 openProjectInIDE () {
-  launcherPath=$1
-  projectDirectory=$2
-  if [ ! -f "$launcherPath" ]
+  launcherPathLinux=$1
+  launcherPathMac=$2
+  projectDirectory=$3
+  launcherPath=""
+
+  isMacOS=false
+  isLinux=false
+  linesWithLinuxReleaseName=0
+  linesWithMacReleaseName=0
+  if compgen -G "/etc/*-release" > /dev/null; # Checking a file existence with a glob pattern: https://stackoverflow.com/a/34195247
       then
-        printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT}hasn't been detected. Opening will be aborted.\n"
-        exit 1
-      else
-        printf "${BOLD_LIGHT_YELLOW}[IntelliJ IDEA]:${RESET_FORMAT} Opening the project...\n"
-        nohup "$launcherPath" nosplash "$projectDirectory" > /dev/null 2>&1 &
-    fi
+        linesWithLinuxReleaseName=$(cat /etc/*-release | grep --ignore-case --count "$expectedLinuxReleaseName")
+    elif [ "$(command system_profiler -v &> /dev/null ; echo $?)" -eq 1 ]
+      then
+        linesWithMacReleaseName=$(system_profiler SPSoftwareDataType | grep --ignore-case --count "$expectedMacReleaseName") # https://www.cyberciti.biz/faq/mac-osx-find-tell-operating-system-version-from-bash-prompt/
+  fi
+  if [ "$linesWithLinuxReleaseName" -gt 0 ] && [ "$linesWithMacReleaseName" -gt 0 ];
+    then
+      echo "Unexpected state: both supported operating systems detected, i.e. Mac and Linux. Exiting..."
+      exit 1
+    elif [ "$linesWithLinuxReleaseName" -gt 0 ];
+      then
+        isLinux=true
+        launcherPath="$launcherPathLinux"
+    elif [ "$linesWithMacReleaseName" -gt 0 ];
+      then
+        isMacOS=true
+        launcherPath="$launcherPathMac"
+    else
+      echo "Unsupported operating system. Exiting..."
+      exit 1;
+  fi
+
+  printf "${BOLD_LIGHT_YELLOW}[IntelliJ IDEA]:${RESET_FORMAT} Opening the project...\n"
+  if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+    then
+        if [ ! -f "$launcherPath" ]
+          then
+            printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT} hasn't been detected. Opening will be aborted.\n"
+            exit 1
+          else
+            nohup "$launcherPathLinux" nosplash "$projectDirectory" > /dev/null 2>&1 &
+        fi
+    elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+      then
+        if [ ! -d "$launcherPath" ]
+          then
+            printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT} hasn't been detected. Opening will be aborted.\n"
+            exit 1
+          else
+            open -na "IntelliJ IDEA.app" --args "$projectDirectory" nosplash
+        fi
+    else
+      echo "Unexpected error occurred. Launching failed"
+      exit 1
+  fi
 }
 
 # ============================================== #
@@ -1057,19 +1109,21 @@ openProjectInIDE () {
 # ============================================== #
 
 # Revise and change values of the variables below to meet your needs
-
+expectedLinuxReleaseName="jammy"
+expectedMacReleaseName="macOS 13"
 gitCommitterName="Herman"
 gitCommitterSurname="Ciechanowiec"
 gitCommitterEmail="herman@ciechanowiec.eu"
 firstLevelPackageName="eu"
 secondLevelPackageName="ciechanowiec"
 projectURL="https://ciechanowiec.eu/"
-pathUntilProjectDirectory="${HOME}/0_prog"  # This directory must exist when script executes
+pathUntilProjectDirectory="${HOME}/0_prog" # This directory must exist when script is executed
 # It is assumed that the project will be opened in IntelliJ IDEA Ultimate.
 # In case you want to use IntelliJ IDEA Community, comment out the code line below
-#    and restore from the comment the next line:
-launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
-#launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
+# and restore from the comment the next line:
+launcherPathLinux="/snap/intellij-idea-ultimate/current/bin/idea.sh"
+#launcherPathLinux="/snap/intellij-idea-community/current/bin/idea.sh"
+launcherPathMac="$HOME/Applications/IntelliJ IDEA.app"
 
 # ============================================== #
 #                                                #
@@ -1114,4 +1168,4 @@ setupGitCommitter "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname"
 
 # Finish:
 showFinishMessage "$projectName"
-openProjectInIDE "$launcherPath" "$projectDirectory"
+openProjectInIDE "$launcherPathLinux" "$launcherPathMac" "$projectDirectory"
