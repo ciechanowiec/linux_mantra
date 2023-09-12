@@ -102,8 +102,8 @@ echo "$corePomSecondPart" >> "$corePom"
 sed -i.backup 's/<source>1.8<\/source>/<source>11<\/source>/g' "$parentPom"
 sed -i.backup 's/<target>1.8<\/target>/<target>11<\/target>/g' "$parentPom"
 trash-put "${parentPom}.backup"
-parentPomFirstPart=$(head -n 183 "$parentPom")
-parentPomSecondPart=$(tail -n +187 "$parentPom")
+parentPomFirstPart=$(head -n 181 "$parentPom")
+parentPomSecondPart=$(tail -n +185 "$parentPom")
 echo "$parentPomFirstPart" > "$parentPom"
 cat >> "$parentPom" << EOF
 
