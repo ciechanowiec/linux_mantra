@@ -510,6 +510,7 @@ log
 .vscode
 target
 node_modules
+.DS_Store
 # Compiled documentation:
 README.html
 README.pdf
