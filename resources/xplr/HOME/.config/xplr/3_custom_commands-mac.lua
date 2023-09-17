@@ -195,18 +195,18 @@ local copyFileContent = commandMode.cmd("copy content", "Copy (cat) the content 
   ]===]
 )
 
-local copyFileName = commandMode.cmd("copy name", "Copy the name of a focused file into clipboard") (
+local copyItemName = commandMode.cmd("copy name", "Copy the name of a focused item into clipboard") (
         commandMode.BashExecSilently [===[
   fileName=$(basename "$XPLR_FOCUS_PATH")
   echo "$fileName" | perl -pe 'chomp if eof' | pbcopy
-  echo LogSuccess: "Copied a file name to the clipboard∶ $fileName" >> "${XPLR_PIPE_MSG_IN:?}"
+  echo LogSuccess: "Copied an item name to the clipboard∶ $fileName" >> "${XPLR_PIPE_MSG_IN:?}"
   ]===]
 )
 
-local copyFilePath = commandMode.cmd("copy path", "Copy the path to a focused file into clipboard") (
+local copyItemPath = commandMode.cmd("copy path", "Copy the path to a focused item into clipboard") (
         commandMode.BashExecSilently [===[
   echo "$XPLR_FOCUS_PATH" | perl -pe 'chomp if eof' | pbcopy
-  echo LogSuccess: "Copied a file path to the clipboard∶ $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
+  echo LogSuccess: "Copied an item path to the clipboard∶ $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
   ]===]
 )
 
