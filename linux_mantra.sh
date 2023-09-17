@@ -1761,7 +1761,7 @@ echo "2. Installing imwheel..."
 sudo apt install imwheel -y
 
 echo "3. Creating a configuration file..."
-# [Button4, 5] and [Button5, 5] stand for speed, where the second number is speed rate:
+# [Button4, 3] and [Button5, 3] stand for speed, where the second number is speed rate:
 touch "$imwheelConfigFile"
 cat > "$imwheelConfigFile" << EOF
 ".*"
