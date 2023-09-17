@@ -508,7 +508,7 @@ else
       create window with default profile
       activate
       tell current session of current window
-        write text "nvim test.lua" 
+        write text "nvim test.lua"
       end tell
     end tell
 end if'
@@ -519,7 +519,6 @@ fi
 echo "Once an nvim application is initialized, close it and press Enter to continue..."
 read voidInput
 
-#TODO: after OS clean installation three files below probably don't exist without initialization, so 8-10 might not work
 echo "8. Fixing JSON LSP bug..."
 # At the moment there is a bug related to JSON LSP installation within NeoVim
 # It is reproducible at least on macOS. Therefore, JSON LSP is being disabled below:
