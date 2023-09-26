@@ -1704,7 +1704,7 @@ procedureId="mysql"
 #   1. https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-22-04
 #   2. https://linuxhint.com/installing_mysql_workbench_ubuntu/
 # NOTES:
-#   To login: 'mysql -u root -p'
+#   To login: 'mysql -u root -ppassword'
 
 informAboutProcedureStart
 
