@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # 1. For AEM 6.5 the archetype below works on for AEM 6.5.16.
 #    However, AEM 6.5.16 is supposed to work with 6.5.15 uber-jar.
 #    For that reason aemVersionToUse is set for AEM 6.5 to 6.5.15.
@@ -82,7 +81,7 @@ cat >> "$corePom" << EOF
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
