@@ -244,6 +244,17 @@ sudo apt install inkscape -y
 echo "Installing libreoffice (word processor)..."
 sudo apt install libreoffice -y
 
+echo "Installing exiftool (read and write meta information in files)"
+sudo apt install exiftool -y
+
+echo "Installing tesseract (command-line OCR engine)"
+# Docs: https://tesseract-ocr.github.io/tessdoc/Installation.html
+sudo apt install tesseract-ocr
+sudo apt install libtesseract-dev
+
+echo "Installing imagemagick (images converter)"
+sudo apt install imagemagick -y
+
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then

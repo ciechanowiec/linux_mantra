@@ -45,7 +45,7 @@ showWelcomeMessage () {
 }
 
 verifyIfTreeExists () {
-	if ! command tree -v &> /dev/null
+	if ! type tree &> /dev/null
 	then
 		printf "${ERROR_TAG} 'tree' package which is required to run the script hasn't been detected. The script execution has been aborted.\n"
     exit
@@ -53,7 +53,7 @@ verifyIfTreeExists () {
 }
 
 verifyIfGitExists () {
-	if ! command git --version &> /dev/null
+	if ! type git &> /dev/null
 	then
 		printf "${ERROR_TAG} 'git' package which is required to run the script hasn't been detected. The script execution has been aborted.\n"
 		exit
@@ -585,10 +585,10 @@ cat > "$pomFile" << EOF
     <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
     <!-- Plugins -->
     <min.maven.version>3.8.6</min.maven.version>
-    <versions-maven-plugin.version>2.16.0</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <spotbugs-maven-plugin.version>4.7.3.5</spotbugs-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -728,8 +728,11 @@ cat > "$pomFile" << EOF
       </plugin>
       <!-- Reports on unused dependencies: -->
       <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <ignoreNonCompile>true</ignoreNonCompile>
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -738,9 +741,6 @@ cat > "$pomFile" << EOF
             <phase>package</phase>
           </execution>
         </executions>
-        <configuration>
-          <ignoreNonCompile>true</ignoreNonCompile>
-        </configuration>
       </plugin>
       <!-- Prevents from building if unit tests don't pass
            and fails the build if there are no tests -->
@@ -826,7 +826,7 @@ cat > "$pomFile" << EOF
                 <version>(?i)[0-9].+\\.CR[0-9]+</version>
               </ignoreVersion>
               <ignoreVersion>
-                <!-- Ignoring release candidate versions, like 2.15.0-rc1 and 1.8.20-RC -->
+                <!-- Ignoring release candidate versions, like 2.16.1-rc1 and 1.8.20-RC -->
                 <type>regex</type>
                 <version>(?i)[0-9].+-rc[0-9]*</version>
               </ignoreVersion>
