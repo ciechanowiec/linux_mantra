@@ -37,7 +37,7 @@ showWelcomeMessage () {
 }
 
 verifyIfTreeExists () {
-	if ! command tree -v &> /dev/null
+	if ! type tree &> /dev/null
 	then
 		printf "${ERROR_TAG} 'tree' package which is required to run the script hasn't been detected. The script execution has been aborted.\n"
     exit
@@ -45,7 +45,7 @@ verifyIfTreeExists () {
 }
 
 verifyIfGitExists () {
-	if ! command git --version &> /dev/null
+	if ! type git &> /dev/null
 	then
 		printf "${ERROR_TAG} 'git' package which is required to run the script hasn't been detected. The script execution has been aborted.\n"
 		exit
@@ -118,6 +118,8 @@ package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 
 import lombok.extern.slf4j.Slf4j;
 
+import static eu.ciechanowiec.conditional.Conditional.onTrueExecute;
+
 @Slf4j
 class Main {
 
@@ -129,6 +131,9 @@ class Main {
         SamplePrinter samplePrinter = new SamplePrinter();
         samplePrinter.performSamplePrint("sampleLines.txt");
         log.info("Finished resource printing");
+
+        log.info("Testing external library...");
+        onTrueExecute(true, () -> System.out.println("I'm a line from the external library"));
 
         log.info("Application ended");
     }
@@ -356,20 +361,20 @@ cat > "$pomFile" << EOF
   <properties>
     <!--  Building properties  -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.release>17</maven.compiler.release>
     <!--  Dependencies  -->
     <conditional.version>$latestConditionalLibVersion</conditional.version>
     <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
     <commons-lang3.version>3.13.0</commons-lang3.version>
-    <lombok.version>1.18.28</lombok.version>
+    <lombok.version>1.18.30</lombok.version>
     <jsr305.version>3.0.2</jsr305.version>
     <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
     <junit-jupiter-api.version>5.10.0</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.10.0</junit-jupiter-params.version>
-    <mockito-core.version>5.4.0</mockito-core.version>
-    <mockito-junit-jupiter.version>5.4.0</mockito-junit-jupiter.version>
+    <mockito-core.version>5.5.0</mockito-core.version>
+    <mockito-junit-jupiter.version>5.5.0</mockito-junit-jupiter.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
-    <slf4j-api.version>2.0.7</slf4j-api.version>
+    <slf4j-api.version>2.0.9</slf4j-api.version>
     <slf4j-tinylog.version>2.6.2</slf4j-tinylog.version>
     <tinylog-api.version>2.6.2</tinylog-api.version>
     <tinylog-impl.version>2.6.2</tinylog-impl.version>
@@ -383,16 +388,16 @@ cat > "$pomFile" << EOF
     <maven-project-info-reports-plugin.version>3.4.5</maven-project-info-reports-plugin.version>
     <!-- Plugins -->
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    <maven-shade-plugin.version>3.5.0</maven-shade-plugin.version>
+    <spring-boot-maven-plugin.version>3.1.4</spring-boot-maven-plugin.version>
     <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
     <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
-    <maven-enforcer-plugin.version>3.3.0</maven-enforcer-plugin.version>
+    <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     <min.maven.version>3.8.6</min.maven.version>
-    <versions-maven-plugin.version>2.16.0</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <spotbugs-maven-plugin.version>4.7.3.5</spotbugs-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -584,44 +589,33 @@ cat > "$pomFile" << EOF
       <!-- Creates an uber-jar binary file with all
            dependencies and resources inside -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>\${maven-shade-plugin.version}</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>\${spring-boot-maven-plugin.version}</version>
+        <configuration>
+          <excludes>
+            <exclude>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
-            <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>repackage</goal>
             </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>$firstLevelPackageName.$secondLevelPackageName.$projectName.Main</mainClass>
-                </transformer>
-              </transformers>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.MF</exclude>
-                    <exclude>META-INF/NOTICE.txt</exclude>
-                    <exclude>META-INF/LICENSE.txt</exclude>
-                    <exclude>META-INF/versions/9/module-info.class</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <createDependencyReducedPom>false</createDependencyReducedPom>
-        </configuration>
       </plugin>
       <!-- Reports on unused dependencies: -->
       <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>\${maven-dependency-plugin.version}</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>\${maven-dependency-plugin.version}</version>
+        <configuration>
+          <ignoreNonCompile>true</ignoreNonCompile>
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -630,9 +624,6 @@ cat > "$pomFile" << EOF
             <phase>package</phase>
           </execution>
         </executions>
-        <configuration>
-          <ignoreNonCompile>true</ignoreNonCompile>
-        </configuration>
       </plugin>
       <!-- Prevents from building if unit tests don't pass
            and fails the build if there are no tests -->
@@ -722,7 +713,7 @@ cat > "$pomFile" << EOF
                 <version>(?i)[0-9].+\\.CR[0-9]+</version>
               </ignoreVersion>
               <ignoreVersion>
-                <!-- Ignoring release candidate versions, like 2.15.0-rc1 and 1.8.20-RC -->
+                <!-- Ignoring release candidate versions, like 2.16.1-rc1 and 1.8.20-RC -->
                 <type>regex</type>
                 <version>(?i)[0-9].+-rc[0-9]*</version>
               </ignoreVersion>
