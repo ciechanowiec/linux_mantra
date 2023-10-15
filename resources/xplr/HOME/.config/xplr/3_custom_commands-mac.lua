@@ -220,7 +220,7 @@ local decompile = commandMode.cmd("decompile", "Decompile a focused item (normal
     }
 
     source "$HOME/.sdkman/bin/sdkman-init.sh"
-    sdk use java 17.0.8-tem # fernflower requires at least Java 17
+    sdk use java 21-tem
     echo ""
     echo "Using the following Java:"
     java -version

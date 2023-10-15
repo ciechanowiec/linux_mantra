@@ -473,6 +473,9 @@ set clipboard=unnamedplus
 
 " Enable repeatable pasting in visual mode (https://stackoverflow.com/questions/7163947/paste-multiple-times):
 xnoremap p pgvy
+
+" Wrap lines:
+set wrap
 EOF
 
 echo "4. Installing NeoVim..."
@@ -546,6 +549,13 @@ echo "10. Disabling autoformat on save..."
 lazyVimInitFile="$HOME/.local/share/nvim/lazy/LazyVim/lua/lazyvim/plugins/lsp/init.lua"
 sed -i.backup 's/autoformat = true,/autoformat = false,/g' "$lazyVimInitFile"
 trash-put "${lazyVimInitFile}.backup"
+
+echo "11. Sourcing .vimrc file..."
+nvimInitFile="$HOME/.config/nvim/init.lua"
+cat >> "$nvimInitFile" << EOF
+
+vim.cmd('source ~/.vimrc')
+EOF
 
 informAboutProcedureEnd
 
@@ -800,6 +810,9 @@ yes | sdk install java 11.0.20-tem
 
 echo "Installing Java 17..."
 yes | sdk install java 17.0.8-tem
+
+echo "Installing Java 21..."
+yes | sdk install java 21-tem
 
 echo "Setting up Java 11 as the default one..."
 sdk default java 11.0.20-tem
@@ -1305,13 +1318,7 @@ procedureId="fernflower (decompiler)"
 #   2. The installation is performed via mounting a `fernflower.jar` file stored in
 #      the Linux Mantra repository. That file is a custom build from the source code
 #      (https://github.com/fesh0r/fernflower) based on the
-#      2080f165fa49bcc744a7b6185a8ec64c4cf52c4c commit from 2022-09-23 (14:05, +0200).
-#      However, due to specific issues, before the build one change in the source code
-#      was made. Within that change three following lines from the `StructContext.java`
-#      file were commented out:
-#      142   if (!testPath.normalize().startsWith(file.toPath().normalize())) { // check for zip slip exploit
-#      143     throw new RuntimeException("Zip entry '" + entry.getName() + "' tries to escape target directory");
-#      144   }
+#      e52e88a7488d02fae7dd94291e62877954efcd10 commit from 2023-10-03 (14:39, +0200).
 
 informAboutProcedureStart
 

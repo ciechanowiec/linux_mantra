@@ -574,7 +574,7 @@ cat > "$pomFile" << EOF
 
   <properties>
     <!--  Building properties  -->
-    <java.version>17</java.version>
+    <java.version>21</java.version>
     <!--  Dependencies  -->
     <conditional.version>$latestConditionalLibVersion</conditional.version>
     <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
@@ -730,6 +730,10 @@ cat > "$pomFile" << EOF
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <!-- As of writing these words, the latest Spring Boot parent POM version specifies this
+             plugin old version that doesn't support Java 21. Therefore, the newest version of
+             this plugin is specified below manually: -->
+        <version>3.6.0</version>
         <configuration>
           <ignoreNonCompile>true</ignoreNonCompile>
         </configuration>
