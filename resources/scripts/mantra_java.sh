@@ -613,15 +613,33 @@ cat > "$pomFile" << EOF
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>\${maven-dependency-plugin.version}</version>
-        <configuration>
-          <ignoreNonCompile>true</ignoreNonCompile>
-        </configuration>
         <executions>
           <execution>
+            <id>download-sources</id>
+            <goals>
+              <goal>sources</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+          <execution>
+            <id>download-javadoc</id>
+            <goals>
+              <goal>resolve</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <classifier>javadoc</classifier>
+            </configuration>
+          </execution>
+          <execution>
+            <id>analyze-dependencies</id>
             <goals>
               <goal>analyze</goal>
             </goals>
             <phase>package</phase>
+            <configuration>
+              <ignoreNonCompile>true</ignoreNonCompile>
+            </configuration>
           </execution>
         </executions>
       </plugin>

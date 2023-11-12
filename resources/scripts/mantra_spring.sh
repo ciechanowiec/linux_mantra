@@ -734,15 +734,33 @@ cat > "$pomFile" << EOF
              plugin old version that doesn't support Java 21. Therefore, the newest version of
              this plugin is specified below manually: -->
         <version>3.6.0</version>
-        <configuration>
-          <ignoreNonCompile>true</ignoreNonCompile>
-        </configuration>
         <executions>
           <execution>
+            <id>download-sources</id>
+            <goals>
+              <goal>sources</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+          <execution>
+            <id>download-javadoc</id>
+            <goals>
+              <goal>resolve</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <classifier>javadoc</classifier>
+            </configuration>
+          </execution>
+          <execution>
+            <id>analyze-dependencies</id>
             <goals>
               <goal>analyze</goal>
             </goals>
             <phase>package</phase>
+            <configuration>
+              <ignoreNonCompile>true</ignoreNonCompile>
+            </configuration>
           </execution>
         </executions>
       </plugin>

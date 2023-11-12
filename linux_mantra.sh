@@ -629,6 +629,7 @@ alias i='idea'
 alias idea='~/scripts/idea.sh'
 alias mantra_java='~/scripts/mantra_java.sh'
 alias mantra_spring='~/scripts/mantra_spring.sh'
+alias mvn_download_sources_and_javadocs='mvn dependency:sources && mvn dependency:sources dependency:resolve -Dclassifier=javadoc'
 alias n='nvim'
 alias nvim="~/scripts/nvim.sh"
 alias x='xplr'

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-reset_cursor() {
+resetCursor() {
   case "$(uname)" in
     # For Linux-based systems
     Linux)
@@ -25,7 +25,7 @@ reset_cursor() {
 }
 
 if [ "$#" -eq 0 ]; then
-    nvim -c 'startinsert'; reset_cursor
+    nvim -c 'startinsert'; resetCursor
 else
-    nvim "$@"; reset_cursor
+    nvim "$@"; resetCursor
 fi
