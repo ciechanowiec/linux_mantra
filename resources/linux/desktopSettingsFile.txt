@@ -31,6 +31,7 @@ tab-close-buttons=false
 tab-expand=false
 tab-label-ellipsize-mode='middle'
 tab-position='top'
+tab-show-shortcuts=false
 tab-title-template='{{window-title}}'
 theme-variant='dark'
 transparent-background=false
@@ -39,6 +40,7 @@ use-theme-colors=false
 window-maximize=true
 window-position='left'
 window-size=0.49999999999999961
+window-type-hint='tooltip'
 
 [org/gnome/desktop/input-sources]
 mru-sources=[('xkb', 'pl'), ('xkb', 'ru')]
