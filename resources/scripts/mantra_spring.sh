@@ -329,7 +329,7 @@ printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC
 insertContentToApplicationProperties () {
   applicationPropertiesFile="$1/src/main/resources/application.properties"
 cat > "$applicationPropertiesFile" << EOF
-server.port=8080
+server.port=\${PROGRAM_PORT:8080}
 spring.main.banner-mode=off
 spring.profiles.active=h2
 # To make 'th:method=...' work:
@@ -339,7 +339,7 @@ spring.mvc.hiddenmethod.filter.enabled=true
 logging.level.root=INFO
 # Format like '2023-02-03 21:37:11.056 GMT+1':
 logging.pattern.dateformat=yyyy-MM-dd HH:mm:ss.SSS O
-logging.file.name=./logs/application.log
+logging.file.name=\${LOGGING_FILE_ABS_PATH:./logs/application.log}
 # Will roll the log file every day and add it name like 'application.log-2023-02-03_21-49.0'
 # (docs: https://logback.qos.ch/manual/appenders.html):
 logging.logback.rollingpolicy.file-name-pattern=\${LOG_FILE}-%d{yyyy-MM-dd}.%i
@@ -410,11 +410,11 @@ EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-prod.properties${RESET_FORMAT}.\n"
 }
 
-insertContentToApplicationUATProperties () {
-  applicationPropertiesFile="$1/src/main/resources/application-uat.properties"
+insertContentToApplicationTestProperties () {
+  applicationPropertiesFile="$1/src/main/resources/application-test.properties"
 cat > "$applicationPropertiesFile" << EOF
 # DATA
-spring.datasource.url=jdbc:mysql://localhost:3306/university-uat?createDatabaseIfNotExist=true
+spring.datasource.url=jdbc:mysql://localhost:3306/bookshop-test?createDatabaseIfNotExist=true
 spring.jpa.hibernate.ddl-auto=none
 spring.sql.init.mode=always
 spring.sql.init.schema-locations=classpath:sql/schema/test-schema.sql
@@ -422,7 +422,7 @@ spring.sql.init.data-locations=classpath:sql/data/test-data.sql
 spring.datasource.username=root
 spring.datasource.password=password
 EOF
-printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-uat.properties${RESET_FORMAT}.\n"
+printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-test.properties${RESET_FORMAT}.\n"
 }
 
 insertContentToMainTest () {
@@ -476,21 +476,8 @@ addGitAttributes () {
   gitattributesFile="$projectDirectory/.gitattributes"
   touch "$gitattributesFile"
 cat > "$gitattributesFile" << EOF
-###############################
-#        Line Endings         #
-###############################
-
 # Set default behaviour to automatically normalize line endings:
 * text=auto eol=lf
-
-# Force batch scripts to always use CRLF line endings so that if a repo is accessed
-# in Windows via a file share from Linux, the scripts will work:
-*.{cmd,[cC][mM][dD]} text eol=crlf
-*.{bat,[bB][aA][tT]} text eol=crlf
-
-# Force bash scripts to always use LF line endings so that if a repo is accessed
-# in Unix via a file share from Windows, the scripts will work:
-*.sh text eol=lf
 EOF
 printf "${STATUS_TAG} ${ITALIC}.gitattributes${RESET_FORMAT} with default content has been created.\n"
 }
@@ -578,17 +565,18 @@ cat > "$pomFile" << EOF
     <!--  Dependencies  -->
     <conditional.version>$latestConditionalLibVersion</conditional.version>
     <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
-    <commons-lang3.version>3.13.0</commons-lang3.version>
+    <commons-lang3.version>3.14.0</commons-lang3.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
+    <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
     <!-- Locking down Maven default plugins -->
     <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
     <!-- Plugins -->
+    <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
     <min.maven.version>3.8.6</min.maven.version>
     <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.8.2.0</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -685,6 +673,25 @@ cat > "$pomFile" << EOF
     </pluginManagement>
 
     <plugins>
+      <!-- Read project properties from the env file -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>\${properties-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>.env</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Spring Boot support in Apache Maven -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -733,7 +740,7 @@ cat > "$pomFile" << EOF
         <!-- As of writing these words, the latest Spring Boot parent POM version specifies this
              plugin old version that doesn't support Java 21. Therefore, the newest version of
              this plugin is specified below manually: -->
-        <version>3.6.0</version>
+        <version>3.6.1</version>
         <executions>
           <execution>
             <id>download-sources</id>
@@ -1041,6 +1048,93 @@ EOF
 printf "${STATUS_TAG} ${ITALIC}README-docinfo-footer.html${RESET_FORMAT} file with default content has been created.\n"
 }
 
+addDocker () {
+  projectDirectory=$1
+  projectName=$2
+
+cat > "$projectDirectory/.env" << EOF
+PROGRAM_NAME=$projectName
+PROGRAM_VERSION=1.0.0
+PROGRAM_PORT=8080
+LOGGING_DIR=/var/logs/$projectName
+LOGGING_FILE_ABS_PATH=/var/logs/$projectName/application.log
+EOF
+printf "${STATUS_TAG} ${ITALIC}.env${RESET_FORMAT} file with default content has been created.\n"
+
+cat > "$projectDirectory/docker-compose.yml" << EOF
+version: "3.9"
+
+services:
+  $projectName:
+    build:
+      dockerfile: Dockerfile
+      args:
+        PROGRAM_NAME: \${PROGRAM_NAME}
+        PROGRAM_VERSION: \${PROGRAM_VERSION}
+        LOGGING_DIR: \${LOGGING_DIR}
+    environment:
+      PROGRAM_NAME: \${PROGRAM_NAME}
+      PROGRAM_VERSION: \${PROGRAM_VERSION}
+      PROGRAM_PORT: \${PROGRAM_PORT}
+      LOGGING_DIR: \${LOGGING_DIR}
+      LOGGING_FILE_ABS_PATH: \${LOGGING_FILE_ABS_PATH}
+    image: \${PROGRAM_NAME}:latest
+    container_name: \${PROGRAM_NAME}
+    volumes:
+      - type: volume
+        source: \${PROGRAM_NAME}-data
+        target: \${LOGGING_DIR}
+    entrypoint: ["sh", "-c", "./starter.sh" ]
+    hostname: \${PROGRAM_NAME}
+    networks:
+      - \${PROGRAM_NAME}-network
+    ports:
+      - \${PROGRAM_PORT}:\${PROGRAM_PORT}
+
+volumes:
+  $projectName-data:
+    name: \${PROGRAM_NAME}-data
+
+networks:
+  $projectName-network:
+    name: \${PROGRAM_NAME}-network
+    driver: bridge
+EOF
+printf "${STATUS_TAG} ${ITALIC}docker-compose.yml${RESET_FORMAT} file with default content has been created.\n"
+
+cat > "$projectDirectory/Dockerfile" << EOF
+# First stage: Maven build
+FROM maven:latest AS build
+
+ARG PROGRAM_NAME
+ARG PROGRAM_VERSION
+
+WORKDIR /app
+# Copy the project files
+COPY pom.xml .
+COPY .env .
+COPY src ./src
+# Build the application
+RUN mvn clean package
+
+# Second stage: Setup the Java runtime
+FROM eclipse-temurin:21-jdk
+
+ARG PROGRAM_NAME
+ARG PROGRAM_VERSION
+ARG LOGGING_DIR
+
+WORKDIR /app
+# Copy only the built jar from the first stage
+COPY --from=build /app/target/\$PROGRAM_NAME-\$PROGRAM_VERSION.jar /app
+RUN printf '#!/bin/bash\n\njava -jar \$PROGRAM_NAME-\$PROGRAM_VERSION.jar\n\ntail -f /dev/null\n' > starter.sh
+RUN chmod 755 starter.sh
+
+VOLUME \$LOGGING_DIR
+EOF
+printf "${STATUS_TAG} ${ITALIC}Dockerfile${RESET_FORMAT} file with default content has been created.\n"
+}
+
 initGit () {
 	projectDirectory=$1
 	git init "$projectDirectory" &> /dev/null   # Redirect to void hints on git initialization
@@ -1058,6 +1152,14 @@ setupGitCommitter() {
 	git config user.email $gitCommitterEmail
 	printf "${STATUS_TAG} Git committer for this project has been set up: $gitCommitterName $gitCommitterSurname <$gitCommitterEmail>.\n"
 	cd "$currentDirectory" || exit 1
+}
+
+initCommit() {
+	projectDirectory=$1
+  cd "$projectDirectory" || exit 1
+  git add . > /dev/null 2>&1
+  git commit -m "Init commit" > /dev/null 2>&1
+	printf "${STATUS_TAG} Git init commit was made.\n"
 }
 
 showFinishMessage () {
@@ -1174,7 +1276,7 @@ insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLev
 insertContentToApplicationProperties "$projectDirectory"
 insertContentToApplicationH2Properties "$projectDirectory"
 insertContentToApplicationProdProperties "$projectDirectory"
-insertContentToApplicationUATProperties  "$projectDirectory"
+insertContentToApplicationTestProperties  "$projectDirectory"
 insertContentToSQLInitFiles "$projectDirectory"
 
 # Pollute root directory with additional files:
@@ -1184,10 +1286,12 @@ addGitignore "$projectDirectory"
 addLicense "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname"
 addPom "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName" "$projectURL"
 addReadme "$projectDirectory" "$projectName" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
+addDocker "$projectDirectory" "$projectName"
 
 # Setup git:
 initGit "$projectDirectory"
 setupGitCommitter "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
+initCommit "$projectDirectory"
 
 # Finish:
 showFinishMessage "$projectName"

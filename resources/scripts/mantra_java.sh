@@ -269,21 +269,8 @@ addGitAttributes () {
   gitattributesFile="$projectDirectory/.gitattributes"
   touch "$gitattributesFile"
 cat > "$gitattributesFile" << EOF
-###############################
-#        Line Endings         #
-###############################
-
 # Set default behaviour to automatically normalize line endings:
 * text=auto eol=lf
-
-# Force batch scripts to always use CRLF line endings so that if a repo is accessed
-# in Windows via a file share from Linux, the scripts will work:
-*.{cmd,[cC][mM][dD]} text eol=crlf
-*.{bat,[bB][aA][tT]} text eol=crlf
-
-# Force bash scripts to always use LF line endings so that if a repo is accessed
-# in Unix via a file share from Windows, the scripts will work:
-*.sh text eol=lf
 EOF
 printf "${STATUS_TAG} ${ITALIC}.gitattributes${RESET_FORMAT} with default content has been created.\n"
 }
@@ -365,14 +352,14 @@ cat > "$pomFile" << EOF
     <!--  Dependencies  -->
     <conditional.version>$latestConditionalLibVersion</conditional.version>
     <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
-    <commons-lang3.version>3.13.0</commons-lang3.version>
+    <commons-lang3.version>3.14.0</commons-lang3.version>
     <lombok.version>1.18.30</lombok.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
-    <junit-jupiter-api.version>5.10.0</junit-jupiter-api.version>
-    <junit-jupiter-params.version>5.10.0</junit-jupiter-params.version>
-    <mockito-core.version>5.5.0</mockito-core.version>
-    <mockito-junit-jupiter.version>5.5.0</mockito-junit-jupiter.version>
+    <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
+    <junit-jupiter-api.version>5.10.1</junit-jupiter-api.version>
+    <junit-jupiter-params.version>5.10.1</junit-jupiter-params.version>
+    <mockito-core.version>5.8.0</mockito-core.version>
+    <mockito-junit-jupiter.version>5.8.0</mockito-junit-jupiter.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
     <slf4j-api.version>2.0.9</slf4j-api.version>
     <slf4j-tinylog.version>2.6.2</slf4j-tinylog.version>
@@ -395,9 +382,9 @@ cat > "$pomFile" << EOF
     <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     <min.maven.version>3.8.6</min.maven.version>
     <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.8.2.0</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -943,6 +930,14 @@ setupGitCommitter() {
 	cd "$currentDirectory" || exit 1
 }
 
+initCommit() {
+	projectDirectory=$1
+  cd "$projectDirectory" || exit 1
+  git add . > /dev/null 2>&1
+  git commit -m "Init commit" > /dev/null 2>&1
+	printf "${STATUS_TAG} Git init commit was made.\n"
+}
+
 showFinishMessage () {
 	projectName=$1
 	printf "${BOLD_LIGHT_GREEN}[SUCCESS]:${RESET_FORMAT} The project ${ITALIC}$projectName${RESET_FORMAT} with the following file structure has been created:\n"
@@ -1069,6 +1064,7 @@ addReadme "$projectDirectory" "$projectName" "$gitCommitterName" "$gitCommitterS
 # Setup git:
 initGit "$projectDirectory"
 setupGitCommitter "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
+initCommit "$projectDirectory"
 
 # Finish:
 showFinishMessage "$projectName"
