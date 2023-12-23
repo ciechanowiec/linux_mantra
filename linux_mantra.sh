@@ -255,6 +255,12 @@ sudo apt install libtesseract-dev
 echo "Installing imagemagick (images converter)"
 sudo apt install imagemagick -y
 
+echo "Installing fuse (enables filesystems in userspace)"
+sudo apt install fuse -y
+
+echo "Installing libfuse2 (library for fuse functionalities)"
+sudo apt install libfuse2 -y
+
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then
