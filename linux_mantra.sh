@@ -261,6 +261,9 @@ sudo apt install fuse -y
 echo "Installing libfuse2 (library for fuse functionalities)"
 sudo apt install libfuse2 -y
 
+echo "Installing nvtop (top for nvidia GPU)"
+sudo apt install nvtop -y
+
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then
@@ -652,6 +655,9 @@ alias logout="pkill -KILL -u $(whoami)"
 alias scaling="dconf write /org/gnome/desktop/interface/text-scaling-factor" # Usage: 'scaling 1.0', 'scaling 1.4' (range from 0 to 2)
 alias shutdown="shutdown now"
 alias xxclip="perl -pe 'chomp if eof' | xclip -selection clipboard" # perl is required to drop the last NL character
+fuse() {
+    fuser --kill --namespace tcp "$1"
+}
 EOF
 
 echo "6. Adding GitHub CLI autocompletion..."
