@@ -106,7 +106,7 @@ createSrcStructure () {
   firstLevelPackageName=$2
   secondLevelPackageName=$3
   projectName=$4
-	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"/{controller,model,repository,service},resources},test/java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"}
+	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"/{controller,model,repository,service},resources},test/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName",resources}}
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/Main.java"
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/controller/MainController.java"
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/model/Book.java"
@@ -121,6 +121,8 @@ createSrcStructure () {
 	touch "$projectDirectory/src/main/resources/application-prod.properties"
 	touch "$projectDirectory/src/main/resources/application-test.properties"
 	touch "$projectDirectory/src/test/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/MainTest.java"
+	touch "$projectDirectory/src/test/resources/application.properties"
+	touch "$projectDirectory/src/test/resources/logback-test.xml"
 	printf "${STATUS_TAG} File structure for ${ITALIC}src${RESET_FORMAT} has been created.\n"
 }
 
@@ -425,7 +427,7 @@ EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-test.properties${RESET_FORMAT}.\n"
 }
 
-insertContentToMainTest () {
+insertContentToTest () {
   projectDirectory=$1
   firstLevelPackageName=$2
   secondLevelPackageName=$3
@@ -449,6 +451,22 @@ class MainTest {
 }
 EOF
 printf "${STATUS_TAG} Default test content has been added to ${ITALIC}MainTest.java${RESET_FORMAT}.\n"
+
+cat > "$projectDirectory/src/test/resources/application.properties" << EOF
+logging.level.root=OFF
+spring.main.banner-mode=off
+EOF
+printf "${STATUS_TAG} Default test application properties have been added to ${ITALIC}application.properties${RESET_FORMAT}.\n"
+
+cat > "$projectDirectory/src/test/resources/logback-test.xml" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+    <logger name="org.springframework" level="OFF"/>
+</configuration>
+EOF
+printf "${STATUS_TAG} Default test logging configuration has been added to ${ITALIC}logback-test.xml${RESET_FORMAT}.\n"
+
 }
 
 addEditorConfig () {
@@ -1272,12 +1290,12 @@ createProjectDirectory "$projectDirectory"
 # Pollute 'src' folder:
 createSrcStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToMain "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
-insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToApplicationProperties "$projectDirectory"
 insertContentToApplicationH2Properties "$projectDirectory"
 insertContentToApplicationProdProperties "$projectDirectory"
 insertContentToApplicationTestProperties  "$projectDirectory"
 insertContentToSQLInitFiles "$projectDirectory"
+insertContentToTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 
 # Pollute root directory with additional files:
 addEditorConfig "$projectDirectory"
