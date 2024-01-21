@@ -106,7 +106,7 @@ createSrcStructure () {
   firstLevelPackageName=$2
   secondLevelPackageName=$3
   projectName=$4
-	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"/{controller,model,repository,service},resources},test/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName",resources}}
+	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"/{controller,model,repository,service},resources/pmd},test/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName",resources}}
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/Main.java"
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/controller/MainController.java"
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/model/Book.java"
@@ -144,6 +144,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@SuppressWarnings("PMD.UseUtilityClass")
 public class Main {
 
     public static void main(String[] args) {
@@ -200,7 +201,7 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 @Table(name = "books")
-@SuppressWarnings("JpaDataSourceORMInspection")
+@SuppressWarnings({"JpaDataSourceORMInspection", "PMD.ImmutableField"})
 public class Book {
 
     @Id
@@ -328,6 +329,23 @@ EOF
 printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}test-schema.sql${RESET_FORMAT}.\n"
 }
 
+insertContentToPMD () {
+  projectDirectory="$1"
+  pmdRulesetFile="$projectDirectory/src/main/resources/pmd/java-basic-ruleset.xml"
+  pmdRuleSetHTTPResponse=$(curl --write-out "\n%{http_code}" --silent https://raw.githubusercontent.com/ciechanowiec/linux_mantra/master/resources/pmd/java-basic-ruleset.xml)
+  pmdRuleSetHTTPBody=$(echo "$pmdRuleSetHTTPResponse" | sed '$d')
+  pmdRuleSetHTTPStatus=$(echo "$pmdRuleSetHTTPResponse" | tail -n1)
+
+  if [ "$pmdRuleSetHTTPStatus" -eq 200 ]; then
+      echo "$pmdRuleSetHTTPBody" > "$pmdRulesetFile"
+      printf "${STATUS_TAG} Default PMD rules have been added to ${ITALIC}java-basic-ruleset.xml${RESET_FORMAT}.\n"
+  else
+      printf "${ERROR_TAG} Unable to retrieve PMD rules. Execution aborted.\n"
+      trash-put "$projectDirectory"
+      exit 1
+  fi
+}
+
 insertContentToApplicationProperties () {
   applicationPropertiesFile="$1/src/main/resources/application.properties"
 cat > "$applicationPropertiesFile" << EOF
@@ -439,14 +457,15 @@ package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class MainTest {
 
     @Test
     void contextLoads() {
-        assertTrue(true);
+        int actualResult = 2 + 2;
+        assertEquals(4, actualResult);
     }
 }
 EOF
@@ -594,7 +613,9 @@ cat > "$pomFile" << EOF
     <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <spotbugs-maven-plugin.version>4.8.2.0</spotbugs-maven-plugin.version>
+    <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
+    <pmdVersion>7.0.0-rc4</pmdVersion>
+    <spotbugs-maven-plugin.version>4.8.3.0</spotbugs-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -679,6 +700,17 @@ cat > "$pomFile" << EOF
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <!-- Describes the directory where the resources are stored.
+             The path is relative to the POM -->
+        <directory>src/main/resources</directory>
+        <excludes>
+          <exclude>pmd/java-basic-ruleset.xml</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
     <pluginManagement>
       <!-- Lock down plugins versions to avoid using Maven
            defaults from the default Maven super-pom -->
@@ -766,6 +798,9 @@ cat > "$pomFile" << EOF
               <goal>sources</goal>
             </goals>
             <phase>validate</phase>
+            <configuration>
+              <silent>true</silent>
+            </configuration>
           </execution>
           <execution>
             <id>download-javadoc</id>
@@ -775,6 +810,7 @@ cat > "$pomFile" << EOF
             <phase>validate</phase>
             <configuration>
               <classifier>javadoc</classifier>
+              <silent>true</silent>
             </configuration>
           </execution>
           <execution>
@@ -934,7 +970,62 @@ cat > "$pomFile" << EOF
           </execution>
         </executions>
       </plugin>
-      <!-- Searches for bugs during the build -->
+      <plugin>
+        <!-- Configuration for PMD 7-RC as described here:
+             - https://github.com/pmd/pmd/discussions/4478#discussioncomment-7607566
+             - https://maven.apache.org/plugins/maven-pmd-plugin/examples/upgrading-PMD-at-runtime.html -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>\${maven-pmd-plugin.version}</version>
+        <configuration>
+          <rulesets>
+            <!-- For default rule sets see:
+                 - https://github.com/pmd/pmd/tree/master/pmd-java/src/main/resources
+                 - https://github.com/pmd/pmd/blob/master/pmd-core/src/main/resources/rulesets/internal/all-java.xml -->
+            <ruleset>\${project.build.resources[0].directory}/pmd/java-basic-ruleset.xml</ruleset>
+          </rulesets>
+          <failOnViolation>true</failOnViolation>
+          <printFailingErrors>true</printFailingErrors>
+          <verbose>true</verbose>
+          <includeTests>true</includeTests>
+          <linkXRef>false</linkXRef>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd-compat6</artifactId>
+            <version>\${pmdVersion}</version>
+          </dependency>
+          <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd-core</artifactId>
+            <version>\${pmdVersion}</version>
+          </dependency>
+          <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd-java</artifactId>
+            <version>\${pmdVersion}</version>
+          </dependency>
+          <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd-javascript</artifactId>
+            <version>\${pmdVersion}</version>
+          </dependency>
+          <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd-jsp</artifactId>
+            <version>\${pmdVersion}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
@@ -1290,6 +1381,7 @@ createProjectDirectory "$projectDirectory"
 # Pollute 'src' folder:
 createSrcStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToMain "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
+insertContentToPMD "$projectDirectory"
 insertContentToApplicationProperties "$projectDirectory"
 insertContentToApplicationH2Properties "$projectDirectory"
 insertContentToApplicationProdProperties "$projectDirectory"
