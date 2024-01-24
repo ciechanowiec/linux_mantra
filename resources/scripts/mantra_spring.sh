@@ -949,6 +949,7 @@ cat > "$pomFile" << EOF
               <goal>check</goal>
             </goals>
             <configuration>
+              <haltOnFailure>true</haltOnFailure>
               <rules>
                 <rule>
                   <element>BUNDLE</element>
