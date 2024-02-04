@@ -22,6 +22,7 @@
         <property name="max" value="500"/>
     </module>
     <module name="LineLength">
+        <property name="fileExtensions" value="java"/>
         <property name="max" value="120"/>
     </module>
 
@@ -74,7 +75,9 @@
         <module name="EqualsHashCode"/>
         <module name="ExplicitInitialization"/>
         <module name="FallThrough"/>
-        <module name="HiddenField"/>
+        <module name="HiddenField">
+            <property name="tokens" value="VARIABLE_DEF"/>
+        </module>
         <module name="IllegalCatch"/>
         <module name="IllegalThrows"/>
         <module name="InnerAssignment"/>
@@ -118,7 +121,6 @@
         <!--
         Imports
         -->
-        <module name="AvoidStarImport"/>
         <module name="IllegalImport"/>
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
@@ -130,7 +132,11 @@
         <module name="ClassDataAbstractionCoupling"/>
         <module name="ClassFanOutComplexity"/>
         <module name="CyclomaticComplexity"/>
-        <module name="JavaNCSS"/>
+        <module name="JavaNCSS">
+            <property name="methodMaximum" value="30"/>
+            <property name="classMaximum" value="600"/>
+            <property name="recordMaximum" value="200"/>
+        </module>
         <module name="NPathComplexity"/>
 
         <!--
@@ -182,6 +188,7 @@
         <module name="LambdaBodyLength"/>
         <module name="MethodCount">
             <property name="maxTotal" value="30"/>
+            <property name="maxPublic" value="20"/>
         </module>
         <module name="MethodLength">
             <property name="max" value="50"/>
@@ -209,7 +216,9 @@
         <module name="NoWhitespaceBeforeCaseDefaultColon"/>
         <module name="OperatorWrap"/>
         <module name="ParenPad"/>
-        <module name="SeparatorWrap"/>
+        <module name="SeparatorWrap">
+            <property name="tokens" value="COMMA, SEMI"/>
+        </module>
         <module name="SingleSpaceSeparator"/>
         <module name="TypecastParenPad"/>
         <module name="WhitespaceAfter"/>
