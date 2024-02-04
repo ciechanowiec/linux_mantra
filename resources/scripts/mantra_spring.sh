@@ -616,6 +616,7 @@ cat > "$pomFile" << EOF
     <properties>
         <!--  Building properties  -->
         <java.version>21</java.version>
+        <fail-build-on-static-code-analysis-errors>true</fail-build-on-static-code-analysis-errors>
         <!--  Dependencies  -->
         <conditional.version>$latestConditionalLibVersion</conditional.version>
         <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
@@ -928,7 +929,7 @@ cat > "$pomFile" << EOF
                     <configLocation>\${project.basedir}/src/main/resources/static_code_analysis/checkstyle.xml
                     </configLocation>
                     <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
+                    <failsOnError>\${fail-build-on-static-code-analysis-errors}</failsOnError>
                     <linkXRef>false</linkXRef>
                 </configuration>
                 <executions>
@@ -955,7 +956,7 @@ cat > "$pomFile" << EOF
                         <ruleset>\${project.basedir}/src/main/resources/static_code_analysis/pmd.xml
                         </ruleset>
                     </rulesets>
-                    <failOnViolation>true</failOnViolation>
+                    <failOnViolation>\${fail-build-on-static-code-analysis-errors}</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
                     <verbose>true</verbose>
                     <includeTests>true</includeTests>
@@ -1002,7 +1003,7 @@ cat > "$pomFile" << EOF
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>\${spotbugs-maven-plugin.version}</version>
                 <configuration>
-                    <failOnError>true</failOnError>
+                    <failOnError>\${fail-build-on-static-code-analysis-errors}</failOnError>
                     <includeTests>true</includeTests>
                     <effort>Max</effort>
                     <!-- Low / Medium / High: -->
@@ -1068,6 +1069,21 @@ cat > "$pomFile" << EOF
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>fail-build-on-static-code-analysis-errors-when-no-tests</id>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <fail-build-on-static-code-analysis-errors>false</fail-build-on-static-code-analysis-errors>
+            </properties>
+        </profile>
+    </profiles>
 </project>
 EOF
 printf "${STATUS_TAG} ${ITALIC}pom.xml${RESET_FORMAT} file with default content has been created.\n"
