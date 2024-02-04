@@ -98,7 +98,7 @@ createSrcStructure () {
   firstLevelPackageName=$2
   secondLevelPackageName=$3
   projectName=$4
-	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName",resources/pmd},test/java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"}
+	mkdir -p "$projectDirectory"/src/{main/{java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName",resources/static_code_analysis},test/java/"$firstLevelPackageName"/"$secondLevelPackageName"/"$projectName"}
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/Main.java"
 	touch "$projectDirectory/src/main/java/$firstLevelPackageName/$secondLevelPackageName/$projectName/SamplePrinter.java"
 	touch "$projectDirectory/src/main/resources/tinylog.properties"
@@ -116,14 +116,13 @@ insertContentToMain () {
 cat > "$mainFile" << EOF
 package $firstLevelPackageName.$secondLevelPackageName.$projectName;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import static eu.ciechanowiec.conditional.Conditional.onTrueExecute;
 
 @Slf4j
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 @SuppressWarnings("PMD.SystemPrintln")
 final class Main {
 
@@ -201,18 +200,35 @@ EOF
 printf "${STATUS_TAG} Default Java-content has been added to ${ITALIC}SamplePrinter.java${RESET_FORMAT}.\n"
 }
 
-insertContentToPMD () {
+addStatisCodeAnalysisRules () {
   projectDirectory="$1"
-  pmdRulesetFile="$projectDirectory/src/main/resources/pmd/java-basic-ruleset.xml"
-  pmdRuleSetHTTPResponse=$(curl --write-out "\n%{http_code}" --silent https://raw.githubusercontent.com/ciechanowiec/linux_mantra/master/resources/pmd/java-basic-ruleset.xml)
-  pmdRuleSetHTTPBody=$(echo "$pmdRuleSetHTTPResponse" | sed '$d')
-  pmdRuleSetHTTPStatus=$(echo "$pmdRuleSetHTTPResponse" | tail -n1)
 
-  if [ "$pmdRuleSetHTTPStatus" -eq 200 ]; then
-      echo "$pmdRuleSetHTTPBody" > "$pmdRulesetFile"
-      printf "${STATUS_TAG} Default PMD rules have been added to ${ITALIC}java-basic-ruleset.xml${RESET_FORMAT}.\n"
+  # PMD
+  pmdRulesetFile="$projectDirectory/src/main/resources/static_code_analysis/pmd.xml"
+  pmdRulesetHTTPResponse=$(curl --write-out "\n%{http_code}" --silent https://raw.githubusercontent.com/ciechanowiec/linux_mantra/master/resources/static_code_analysis/pmd.xml)
+  pmdRulesetHTTPBody=$(echo "$pmdRulesetHTTPResponse" | sed '$d')
+  pmdRulesetHTTPStatus=$(echo "$pmdRulesetHTTPResponse" | tail -n1)
+
+  if [ "$pmdRulesetHTTPStatus" -eq 200 ]; then
+      echo "$pmdRulesetHTTPBody" > "$pmdRulesetFile"
+      printf "${STATUS_TAG} Default PMD rules have been added to ${ITALIC}pmd.xml${RESET_FORMAT}.\n"
   else
       printf "${ERROR_TAG} Unable to retrieve PMD rules. Execution aborted.\n"
+      trash-put "$projectDirectory"
+      exit 1
+  fi
+
+  # Checkstyle
+  checkstyleRulesetFile="$projectDirectory/src/main/resources/static_code_analysis/checkstyle.xml"
+  checkstyleRulesetHTTPResponse=$(curl --write-out "\n%{http_code}" --silent https://raw.githubusercontent.com/ciechanowiec/linux_mantra/master/resources/static_code_analysis/checkstyle.xml)
+  checkstyleRulesetHTTPBody=$(echo "$checkstyleRulesetHTTPResponse" | sed '$d')
+  checkstyleRulesetHTTPStatus=$(echo "$checkstyleRulesetHTTPResponse" | tail -n1)
+
+  if [ "$checkstyleRulesetHTTPStatus" -eq 200 ]; then
+      echo "$checkstyleRulesetHTTPBody" > "$checkstyleRulesetFile"
+      printf "${STATUS_TAG} Default Checkstyle rules have been added to ${ITALIC}checkstyle.xml${RESET_FORMAT}.\n"
+  else
+      printf "${ERROR_TAG} Unable to retrieve Checkstyle rules. Execution aborted.\n"
       trash-put "$projectDirectory"
       exit 1
   fi
@@ -356,541 +372,563 @@ cat > "$pomFile" << EOF
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>$firstLevelPackageName.$secondLevelPackageName</groupId>
-  <artifactId>$projectName</artifactId>
-  <version>1.0.0</version>
-  <packaging>jar</packaging>
+    <groupId>$firstLevelPackageName.$secondLevelPackageName</groupId>
+    <artifactId>$projectName</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
 
-  <inceptionYear>$(date +%Y)</inceptionYear>
+    <inceptionYear>$(date +%Y)</inceptionYear>
 
-  <name>$projectName</name>
-  <description>Java Program</description>
-  <url>$projectURL</url>
+    <name>$projectName</name>
+    <description>Java Program</description>
+    <url>$projectURL</url>
 
-  <properties>
-    <!--  Building properties  -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>21</maven.compiler.release>
-    <!--  Dependencies  -->
-    <conditional.version>$latestConditionalLibVersion</conditional.version>
-    <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
-    <commons-lang3.version>3.14.0</commons-lang3.version>
-    <lombok.version>1.18.30</lombok.version>
-    <jsr305.version>3.0.2</jsr305.version>
-    <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
-    <junit-jupiter-api.version>5.10.1</junit-jupiter-api.version>
-    <junit-jupiter-params.version>5.10.1</junit-jupiter-params.version>
-    <mockito-core.version>5.8.0</mockito-core.version>
-    <mockito-junit-jupiter.version>5.8.0</mockito-junit-jupiter.version>
-    <mockito-inline.version>5.2.0</mockito-inline.version>
-    <slf4j-api.version>2.0.9</slf4j-api.version>
-    <slf4j-tinylog.version>2.6.2</slf4j-tinylog.version>
-    <tinylog-api.version>2.6.2</tinylog-api.version>
-    <tinylog-impl.version>2.6.2</tinylog-impl.version>
-    <!-- Locking down Maven default plugins -->
-    <maven-clean-plugin.version>3.3.1</maven-clean-plugin.version>
-    <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
-    <maven-install-plugin.version>3.1.1</maven-install-plugin.version>
-    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
-    <maven-project-info-reports-plugin.version>3.4.5</maven-project-info-reports-plugin.version>
-    <!-- Plugins -->
-    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    <spring-boot-maven-plugin.version>3.2.2</spring-boot-maven-plugin.version>
-    <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
-    <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
-    <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
-    <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
-    <min.maven.version>3.8.6</min.maven.version>
-    <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-    <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
-    <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
-    <pmdVersion>7.0.0-rc4</pmdVersion>
-    <spotbugs-maven-plugin.version>4.8.3.0</spotbugs-maven-plugin.version>
-  </properties>
+    <properties>
+        <!--  Building properties  -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+        <!--  Dependencies  -->
+        <conditional.version>$latestConditionalLibVersion</conditional.version>
+        <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <lombok.version>1.18.30</lombok.version>
+        <jsr305.version>3.0.2</jsr305.version>
+        <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
+        <junit-jupiter-api.version>5.10.1</junit-jupiter-api.version>
+        <junit-jupiter-params.version>5.10.1</junit-jupiter-params.version>
+        <mockito-core.version>5.8.0</mockito-core.version>
+        <mockito-junit-jupiter.version>5.8.0</mockito-junit-jupiter.version>
+        <mockito-inline.version>5.2.0</mockito-inline.version>
+        <slf4j-api.version>2.0.9</slf4j-api.version>
+        <slf4j-tinylog.version>2.6.2</slf4j-tinylog.version>
+        <tinylog-api.version>2.6.2</tinylog-api.version>
+        <tinylog-impl.version>2.6.2</tinylog-impl.version>
+        <!-- Locking down Maven default plugins -->
+        <maven-clean-plugin.version>3.3.1</maven-clean-plugin.version>
+        <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
+        <maven-install-plugin.version>3.1.1</maven-install-plugin.version>
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
+        <maven-project-info-reports-plugin.version>3.4.5</maven-project-info-reports-plugin.version>
+        <!-- Plugins -->
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <spring-boot-maven-plugin.version>3.2.2</spring-boot-maven-plugin.version>
+        <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
+        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
+        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
+        <min.maven.version>3.8.6</min.maven.version>
+        <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
+        <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
+        <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
+        <pmdVersion>7.0.0-rc4</pmdVersion>
+        <spotbugs-maven-plugin.version>4.8.3.0</spotbugs-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
+    </properties>
 
-  <dependencies>
-    <!-- Utils -->
-    <dependency>
-      <groupId>eu.ciechanowiec</groupId>
-      <artifactId>conditional</artifactId>
-      <version>\${conditional.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>eu.ciechanowiec</groupId>
-      <artifactId>sneakyfun</artifactId>
-      <version>\${sneakyfun.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>\${commons-lang3.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>\${lombok.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <!--  Mainly for @CheckForNull and @Nonnull annotations.
-            Google groupId is used, because the native groupId isn't
-            available at repo.maven.apache.org/maven2 -->
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>\${jsr305.version}</version>
-    </dependency>
-    <dependency>
-      <!-- @SuppressFBWarnings annotation for SpotBugs: -->
-      <groupId>com.github.spotbugs</groupId>
-      <artifactId>spotbugs-annotations</artifactId>
-      <version>\${spotbugs-annotations.version}</version>
-      <optional>true</optional>
-      <!-- Although @SuppressFBWarnings annotation, for which this dependency is added,
-           has a CLASS retention policy, in fact it isn't required during runtime or
-           on the final classpath -->
-      <scope>provided</scope>
-    </dependency>
-    <!-- Testing -->
-    <dependency>
-      <!--  Basic JUnit library -->
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>\${junit-jupiter-api.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- Parameterized JUnit tests -->
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <version>\${junit-jupiter-params.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- Basic Mockito library -->
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>\${mockito-core.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- JUnit extension for Mockito: @ExtendWith(MockitoExtension.class) -->
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <version>\${mockito-junit-jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- Experimental and intermediate library for mocking
-           final types, enums, final and static methods.
-           Will be superseded by automatic usage in a future version -->
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>\${mockito-inline.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- Logging -->
-    <dependency>
-      <!-- Logging facade -->
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>\${slf4j-api.version}</version>
-    </dependency>
-    <dependency>
-      <!-- Tinylog to SLF4J binding -->
-      <groupId>org.tinylog</groupId>
-      <artifactId>slf4j-tinylog</artifactId>
-      <version>\${slf4j-tinylog.version}</version>
-    </dependency>
-    <dependency>
-      <!-- Tinylog API -->
-      <groupId>org.tinylog</groupId>
-      <artifactId>tinylog-api</artifactId>
-      <version>\${tinylog-api.version}</version>
-    </dependency>
-    <dependency>
-      <!-- Tinylog implementation -->
-      <groupId>org.tinylog</groupId>
-      <artifactId>tinylog-impl</artifactId>
-      <version>\${tinylog-impl.version}</version>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <!-- Utils -->
+        <dependency>
+            <groupId>eu.ciechanowiec</groupId>
+            <artifactId>conditional</artifactId>
+            <version>\${conditional.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.ciechanowiec</groupId>
+            <artifactId>sneakyfun</artifactId>
+            <version>\${sneakyfun.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>\${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>\${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!--  Mainly for @CheckForNull and @Nonnull annotations.
+                  Google groupId is used, because the native groupId isn't
+                  available at repo.maven.apache.org/maven2 -->
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>\${jsr305.version}</version>
+        </dependency>
+        <dependency>
+            <!-- @SuppressFBWarnings annotation for SpotBugs: -->
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>\${spotbugs-annotations.version}</version>
+            <optional>true</optional>
+            <!-- Although @SuppressFBWarnings annotation, for which this dependency is added,
+                 has a CLASS retention policy, in fact it isn't required during runtime or
+                 on the final classpath -->
+            <scope>provided</scope>
+        </dependency>
+        <!-- Testing -->
+        <dependency>
+            <!--  Basic JUnit library -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>\${junit-jupiter-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Parameterized JUnit tests -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>\${junit-jupiter-params.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Basic Mockito library -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>\${mockito-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- JUnit extension for Mockito: @ExtendWith(MockitoExtension.class) -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>\${mockito-junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Experimental and intermediate library for mocking
+                 final types, enums, final and static methods.
+                 Will be superseded by automatic usage in a future version -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>\${mockito-inline.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Logging -->
+        <dependency>
+            <!-- Logging facade -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>\${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Tinylog to SLF4J binding -->
+            <groupId>org.tinylog</groupId>
+            <artifactId>slf4j-tinylog</artifactId>
+            <version>\${slf4j-tinylog.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Tinylog API -->
+            <groupId>org.tinylog</groupId>
+            <artifactId>tinylog-api</artifactId>
+            <version>\${tinylog-api.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Tinylog implementation -->
+            <groupId>org.tinylog</groupId>
+            <artifactId>tinylog-impl</artifactId>
+            <version>\${tinylog-impl.version}</version>
+        </dependency>
+    </dependencies>
 
-  <build>
-    <resources>
-      <resource>
-        <!-- Describes the directory where the resources are stored.
-             The path is relative to the POM -->
-        <directory>src/main/resources</directory>
-        <excludes>
-          <exclude>pmd/java-basic-ruleset.xml</exclude>
-        </excludes>
-      </resource>
-    </resources>
+    <build>
+        <resources>
+            <resource>
+                <!-- Describes the directory where the resources are stored.
+                     The path is relative to the POM -->
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>static_code_analysis/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
 
-    <pluginManagement>
-      <!-- Lock down plugins versions to avoid using Maven
-           defaults from the default Maven super-pom -->
-      <plugins>
-        <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>\${maven-clean-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>\${maven-deploy-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>\${maven-install-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>\${maven-jar-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>\${maven-resources-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>\${maven-site-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>\${maven-project-info-reports-plugin.version}</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+        <pluginManagement>
+            <!-- Lock down plugins versions to avoid using Maven
+                 defaults from the default Maven super-pom -->
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>\${maven-clean-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>\${maven-deploy-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>\${maven-install-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>\${maven-jar-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>\${maven-resources-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>\${maven-site-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>\${maven-project-info-reports-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 
-    <plugins>
-      <!-- Allows to compile and build the program -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>\${maven-compiler-plugin.version}</version>
-      </plugin>
-      <!-- Processes resources -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-license-and-readme-to-jar</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>\${project.build.outputDirectory}</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>\${project.basedir}</directory>
-                  <includes>
-                    <include>LICENSE.txt</include>
-                    <include>README.adoc</include>
-                    <include>README-docinfo.html</include>
-                    <include>README-docinfo-footer.html</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Creates an uber-jar binary file with all
-           dependencies and resources inside -->
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>\${spring-boot-maven-plugin.version}</version>
-        <configuration>
-          <excludes>
-            <exclude>
-              <groupId>org.projectlombok</groupId>
-              <artifactId>lombok</artifactId>
-            </exclude>
-          </excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>repackage</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Reports on unused dependencies: -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>\${maven-dependency-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>download-sources</id>
-            <goals>
-              <goal>sources</goal>
-            </goals>
-            <phase>validate</phase>
-            <configuration>
-              <silent>true</silent>
-            </configuration>
-          </execution>
-          <execution>
-            <id>download-javadoc</id>
-            <goals>
-              <goal>resolve</goal>
-            </goals>
-            <phase>validate</phase>
-            <configuration>
-              <classifier>javadoc</classifier>
-              <silent>true</silent>
-            </configuration>
-          </execution>
-          <execution>
-            <id>analyze-dependencies</id>
-            <goals>
-              <goal>analyze</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <ignoreNonCompile>true</ignoreNonCompile>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Prevents from building if unit tests don't pass
-           and fails the build if there are no tests -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>\${maven-surefire-plugin.version}</version>
-        <configuration>
-          <failIfNoTests>true</failIfNoTests>
-        </configuration>
-      </plugin>
-      <!-- Prevents from building if integration tests don't pass -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>\${maven-failsafe-plugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Requires new Maven version -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>\${maven-enforcer-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>enforce-maven</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>[\${min.maven.version},)</version>
-                </requireMavenVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Reports on possible updates of dependencies and plugins -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>versions-maven-plugin</artifactId>
-        <version>\${versions-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>display-dependency-updates</goal>
-              <goal>display-plugin-updates</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <ruleSet>
-            <ignoreVersions>
-              <ignoreVersion>
-                <!-- Ignoring milestone versions, like 3.0.4-M5 and 1.0.0-m23 -->
-                <type>regex</type>
-                <version>(?i)[0-9].+-m[0-9]+</version>
-              </ignoreVersion>
-              <ignoreVersion>
-                <!-- Ignoring alpha versions, like 5.0.0.Alpha2 and 12.0.0.alpha3 -->
-                <type>regex</type>
-                <version>(?i).*ALPHA.*</version>
-              </ignoreVersion>
-              <ignoreVersion>
-                <!-- Ignoring alpha versions, like 5.0.0.Beta2 and 12.0.0.beta3 -->
-                <type>regex</type>
-                <version>(?i).*BETA.*</version>
-              </ignoreVersion>
-              <ignoreVersion>
-                <!-- Ignoring preview versions, like 12.1.0.jre11-preview -->
-                <type>regex</type>
-                <version>(?i).*PREVIEW.*</version>
-              </ignoreVersion>
-              <ignoreVersion>
-                <!-- Ignoring candidate release versions, like 6.2.0.CR2 -->
-                <type>regex</type>
-                <version>(?i)[0-9].+\\.CR[0-9]+</version>
-              </ignoreVersion>
-              <ignoreVersion>
-                <!-- Ignoring release candidate versions, like 2.16.1-rc1 and 1.8.20-RC -->
-                <type>regex</type>
-                <version>(?i)[0-9].+-rc[0-9]*</version>
-              </ignoreVersion>
-              <ignoreVersion>
-                <!-- Ignoring develop versions, like 15.0.0.Dev01 -->
-                <type>regex</type>
-                <version>(?i)[0-9].+\\.dev[0-9]*</version>
-              </ignoreVersion>
-            </ignoreVersions>
-          </ruleSet>
-        </configuration>
-      </plugin>
-      <!-- Creates reports on tests coverage (target->site->jacoco->index.html)
-           and fails the build if the coverage is insufficient -->
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>\${jacoco-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>prepare-agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>report</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>check</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <configuration>
-              <haltOnFailure>true</haltOnFailure>
-              <rules>
-                <rule>
-                  <element>BUNDLE</element>
-                  <limits>
-                    <limit>
-                      <counter>INSTRUCTION</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>\${jacoco-maven-plugin.coverage.minimum}</minimum>
-                    </limit>
-                    <limit>
-                      <counter>BRANCH</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>\${jacoco-maven-plugin.coverage.minimum}</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <!-- Configuration for PMD 7-RC as described here:
-             - https://github.com/pmd/pmd/discussions/4478#discussioncomment-7607566
-             - https://maven.apache.org/plugins/maven-pmd-plugin/examples/upgrading-PMD-at-runtime.html -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>\${maven-pmd-plugin.version}</version>
-        <configuration>
-          <rulesets>
-            <!-- For default rule sets see:
-                 - https://github.com/pmd/pmd/tree/master/pmd-java/src/main/resources
-                 - https://github.com/pmd/pmd/blob/master/pmd-core/src/main/resources/rulesets/internal/all-java.xml -->
-            <ruleset>\${project.build.resources[0].directory}/pmd/java-basic-ruleset.xml</ruleset>
-          </rulesets>
-          <failOnViolation>true</failOnViolation>
-          <printFailingErrors>true</printFailingErrors>
-          <verbose>true</verbose>
-          <includeTests>true</includeTests>
-          <linkXRef>false</linkXRef>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>net.sourceforge.pmd</groupId>
-            <artifactId>pmd-compat6</artifactId>
-            <version>\${pmdVersion}</version>
-          </dependency>
-          <dependency>
-            <groupId>net.sourceforge.pmd</groupId>
-            <artifactId>pmd-core</artifactId>
-            <version>\${pmdVersion}</version>
-          </dependency>
-          <dependency>
-            <groupId>net.sourceforge.pmd</groupId>
-            <artifactId>pmd-java</artifactId>
-            <version>\${pmdVersion}</version>
-          </dependency>
-          <dependency>
-            <groupId>net.sourceforge.pmd</groupId>
-            <artifactId>pmd-javascript</artifactId>
-            <version>\${pmdVersion}</version>
-          </dependency>
-          <dependency>
-            <groupId>net.sourceforge.pmd</groupId>
-            <artifactId>pmd-jsp</artifactId>
-            <version>\${pmdVersion}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-      <plugin>
-        <groupId>com.github.spotbugs</groupId>
-        <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>\${spotbugs-maven-plugin.version}</version>
-        <configuration>
-          <failOnError>true</failOnError>
-          <includeTests>true</includeTests>
-          <effort>Max</effort>
-          <!-- Low / Medium / High: -->
-          <threshold>Low</threshold>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+        <plugins>
+            <!-- Allows to compile and build the program -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>\${maven-compiler-plugin.version}</version>
+            </plugin>
+            <!-- Processes resources -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-license-and-readme-to-jar</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>\${project.build.outputDirectory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>\${project.basedir}</directory>
+                                    <includes>
+                                        <include>LICENSE.txt</include>
+                                        <include>README.adoc</include>
+                                        <include>README-docinfo.html</include>
+                                        <include>README-docinfo-footer.html</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Creates an uber-jar binary file with all
+                 dependencies and resources inside -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>\${spring-boot-maven-plugin.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Reports on unused dependencies: -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>\${maven-dependency-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>download-sources</id>
+                        <goals>
+                            <goal>sources</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <silent>true</silent>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-javadoc</id>
+                        <goals>
+                            <goal>resolve</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <classifier>javadoc</classifier>
+                            <silent>true</silent>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>analyze-dependencies</id>
+                        <goals>
+                            <goal>analyze</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <ignoreNonCompile>true</ignoreNonCompile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Prevents from building if unit tests don't pass
+                 and fails the build if there are no tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>\${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <failIfNoTests>true</failIfNoTests>
+                </configuration>
+            </plugin>
+            <!-- Prevents from building if integration tests don't pass -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>\${maven-failsafe-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Requires new Maven version -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>\${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[\${min.maven.version},)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Reports on possible updates of dependencies and plugins -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>\${versions-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>display-dependency-updates</goal>
+                            <goal>display-plugin-updates</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <ruleSet>
+                        <ignoreVersions>
+                            <ignoreVersion>
+                                <!-- Ignoring milestone versions, like 3.0.4-M5 and 1.0.0-m23 -->
+                                <type>regex</type>
+                                <version>(?i)[0-9].+-m[0-9]+</version>
+                            </ignoreVersion>
+                            <ignoreVersion>
+                                <!-- Ignoring alpha versions, like 5.0.0.Alpha2 and 12.0.0.alpha3 -->
+                                <type>regex</type>
+                                <version>(?i).*ALPHA.*</version>
+                            </ignoreVersion>
+                            <ignoreVersion>
+                                <!-- Ignoring alpha versions, like 5.0.0.Beta2 and 12.0.0.beta3 -->
+                                <type>regex</type>
+                                <version>(?i).*BETA.*</version>
+                            </ignoreVersion>
+                            <ignoreVersion>
+                                <!-- Ignoring preview versions, like 12.1.0.jre11-preview -->
+                                <type>regex</type>
+                                <version>(?i).*PREVIEW.*</version>
+                            </ignoreVersion>
+                            <ignoreVersion>
+                                <!-- Ignoring candidate release versions, like 6.2.0.CR2 -->
+                                <type>regex</type>
+                                <version>(?i)[0-9].+\.CR[0-9]+</version>
+                            </ignoreVersion>
+                            <ignoreVersion>
+                                <!-- Ignoring release candidate versions, like 2.16.1-rc1 and 1.8.20-RC -->
+                                <type>regex</type>
+                                <version>(?i)[0-9].+-rc[0-9]*</version>
+                            </ignoreVersion>
+                            <ignoreVersion>
+                                <!-- Ignoring develop versions, like 15.0.0.Dev01 -->
+                                <type>regex</type>
+                                <version>(?i)[0-9].+\.dev[0-9]*</version>
+                            </ignoreVersion>
+                        </ignoreVersions>
+                    </ruleSet>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>\${maven-checkstyle-plugin.version}</version>
+                <configuration>
+                    <configLocation>\${project.basedir}/src/main/resources/static_code_analysis/checkstyle.xml
+                    </configLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>checkstyle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Configuration for PMD 7-RC as described here:
+                     - https://github.com/pmd/pmd/discussions/4478#discussioncomment-7607566
+                     - https://maven.apache.org/plugins/maven-pmd-plugin/examples/upgrading-PMD-at-runtime.html -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>\${maven-pmd-plugin.version}</version>
+                <configuration>
+                    <rulesets>
+                        <!-- For default rule sets see:
+                             - https://github.com/pmd/pmd/tree/master/pmd-java/src/main/resources
+                             - https://github.com/pmd/pmd/blob/master/pmd-core/src/main/resources/rulesets/internal/all-java.xml -->
+                        <ruleset>\${project.basedir}/src/main/resources/static_code_analysis/pmd.xml
+                        </ruleset>
+                    </rulesets>
+                    <failOnViolation>true</failOnViolation>
+                    <printFailingErrors>true</printFailingErrors>
+                    <verbose>true</verbose>
+                    <includeTests>true</includeTests>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-compat6</artifactId>
+                        <version>\${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-core</artifactId>
+                        <version>\${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-java</artifactId>
+                        <version>\${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-javascript</artifactId>
+                        <version>\${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-jsp</artifactId>
+                        <version>\${pmdVersion}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>\${spotbugs-maven-plugin.version}</version>
+                <configuration>
+                    <failOnError>true</failOnError>
+                    <includeTests>true</includeTests>
+                    <effort>Max</effort>
+                    <!-- Low / Medium / High: -->
+                    <threshold>Low</threshold>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Creates reports on tests coverage (target->site->jacoco->index.html)
+                 and fails the build if the coverage is insufficient -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>\${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <haltOnFailure>true</haltOnFailure>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>\${jacoco-maven-plugin.coverage.minimum}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>\${jacoco-maven-plugin.coverage.minimum}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 EOF
 printf "${STATUS_TAG} ${ITALIC}pom.xml${RESET_FORMAT} file with default content has been created.\n"
@@ -1139,7 +1177,7 @@ createSrcStructure "$projectDirectory" "$firstLevelPackageName" "$secondLevelPac
 insertContentToMain "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToMainTest "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
 insertContentToSamplePrinter "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName"
-insertContentToPMD "$projectDirectory"
+addStatisCodeAnalysisRules "$projectDirectory"
 insertContentToSampleLines "$projectDirectory"
 insertContentToLoggerProperties "$projectDirectory"
 
