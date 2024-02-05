@@ -275,6 +275,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MainTest {
 
     @Test
+    @SuppressWarnings("MagicNumber")
     void sampleTrueTest() {
         int actualResult = 2 + 2;
         assertEquals(4, actualResult);
@@ -787,11 +788,11 @@ cat > "$pomFile" << EOF
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>\${maven-checkstyle-plugin.version}</version>
                 <configuration>
-                    <configLocation>\${project.basedir}/src/main/resources/static_code_analysis/checkstyle.xml
-                    </configLocation>
+                    <configLocation>\${project.basedir}/src/main/resources/static_code_analysis/checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>\${fail-build-on-static-code-analysis-errors}</failsOnError>
                     <linkXRef>false</linkXRef>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                 </configuration>
                 <executions>
                     <execution>
