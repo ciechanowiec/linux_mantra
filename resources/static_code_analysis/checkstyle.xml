@@ -16,7 +16,7 @@
     <module name="RegexpMultiline">
         <property name="format" value="^\s*\n\s*\n"/>
         <property name="message" value="Two or more consecutive empty lines aren't allowed."/>
-        <property name="severity" value="warning"/>
+        <property name="severity" value="error"/>
     </module>
     <module name="FileLength">
         <property name="max" value="500"/>
