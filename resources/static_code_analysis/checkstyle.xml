@@ -237,5 +237,21 @@
         <module name="TypecastParenPad"/>
         <module name="WhitespaceAfter"/>
         <module name="WhitespaceAround"/>
+
+        <!--
+        Custom
+        -->
+        <module name="Regexp">
+            <property name="format" value="\s*!=\s*null"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message" value="Avoid using '!= null' for nullability check. Use java.util.Optional instead"/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="\s*==\s*null"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message" value="Avoid using '== null' for nullability check. Use java.util.Optional instead"/>
+            <property name="illegalPattern" value="true"/>
+        </module>
     </module>
 </module>
