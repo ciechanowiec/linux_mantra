@@ -7,16 +7,27 @@
     <property name="charset" value="UTF-8"/>
     <property name="severity" value="error"/>
     <property name="fileExtensions" value="java, properties, xml"/>
+    <property name="localeLanguage" value="en"/>
 
     <!--
     Checker checks
     -->
-    <module name="NewlineAtEndOfFile"/>
+    <module name="NewlineAtEndOfFile">
+        <property name="lineSeparator" value="lf"/>
+    </module>
     <module name="UniqueProperties"/>
     <module name="RegexpMultiline">
         <property name="format" value="^\s*\n\s*\n"/>
         <property name="message" value="Two or more consecutive empty lines aren't allowed."/>
         <property name="severity" value="error"/>
+    </module>
+    <module name="RegexpMultiline">
+        <property name="format" value="\r\n$"/>
+        <property name="message" value="Lines must end with UNIX-like end of line. Windows-like line endings are not allowed."/>
+    </module>
+    <module name="RegexpSingleline">
+        <property name="format" value="\s+$"/>
+        <property name="message" value="Line has trailing spaces. Those are not allowed."/>
     </module>
     <module name="FileLength">
         <property name="max" value="500"/>
@@ -24,6 +35,9 @@
     <module name="LineLength">
         <property name="fileExtensions" value="java"/>
         <property name="max" value="120"/>
+    </module>
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
     </module>
 
     <!--
@@ -76,7 +90,7 @@
         <module name="ExplicitInitialization"/>
         <module name="FallThrough"/>
         <module name="HiddenField">
-            <property name="tokens" value="VARIABLE_DEF"/>
+            <property name="tokens" value="VARIABLE_DEF, PATTERN_VARIABLE_DEF, LAMBDA, RECORD_COMPONENT_DEF"/>
         </module>
         <module name="IllegalCatch"/>
         <module name="IllegalThrows"/>
