@@ -183,6 +183,7 @@ class SamplePrinter {
         return Optional.ofNullable(inputStream).orElseThrow();
     }
 
+    @SuppressWarnings("Regexp")
     private static void printInputStream(InputStream inputStream) {
         try (InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
              BufferedReader reader = new BufferedReader(streamReader)) {
