@@ -277,6 +277,7 @@ class MainTest {
     @Test
     @SuppressWarnings("MagicNumber")
     void sampleTrueTest() {
+        Main.main(new String[]{});
         int actualResult = 2 + 2;
         assertEquals(4, actualResult);
     }
@@ -391,6 +392,7 @@ cat > "$pomFile" << EOF
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
         <fail-build-on-static-code-analysis-errors>true</fail-build-on-static-code-analysis-errors>
+        <enforce-tests-coverage>true</enforce-tests-coverage>
         <!--  Dependencies  -->
         <conditional.version>$latestConditionalLibVersion</conditional.version>
         <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
@@ -429,7 +431,7 @@ cat > "$pomFile" << EOF
         <pmdVersion>7.0.0-rc4</pmdVersion>
         <spotbugs-maven-plugin.version>4.8.3.0</spotbugs-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-        <jacoco-maven-plugin.coverage.minimum>0</jacoco-maven-plugin.coverage.minimum>
+        <jacoco-maven-plugin.coverage.minimum>0.8</jacoco-maven-plugin.coverage.minimum>
     </properties>
 
     <dependencies>
@@ -907,7 +909,7 @@ cat > "$pomFile" << EOF
                             <goal>check</goal>
                         </goals>
                         <configuration>
-                            <haltOnFailure>true</haltOnFailure>
+                            <haltOnFailure>\${enforce-tests-coverage}</haltOnFailure>
                             <rules>
                                 <rule>
                                     <element>BUNDLE</element>
@@ -943,6 +945,18 @@ cat > "$pomFile" << EOF
             </activation>
             <properties>
                 <fail-build-on-static-code-analysis-errors>false</fail-build-on-static-code-analysis-errors>
+            </properties>
+        </profile>
+        <profile>
+            <id>enforce-tests-coverage-when-no-tests</id>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <enforce-tests-coverage>false</enforce-tests-coverage>
             </properties>
         </profile>
     </profiles>
