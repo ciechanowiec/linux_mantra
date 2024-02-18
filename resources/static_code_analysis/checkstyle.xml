@@ -18,7 +18,7 @@
     </module>
     <module name="UniqueProperties"/>
     <module name="RegexpMultiline">
-        <property name="format" value="^\s*\n\s*\n"/>
+        <property name="format" value="(?s)\n\s*\n\s*$"/>
         <property name="message" value="Two or more consecutive empty lines aren't allowed."/>
         <property name="severity" value="error"/>
     </module>
