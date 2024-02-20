@@ -103,7 +103,9 @@
             <property name="allowedDuplicates" value="2"/>
         </module>
         <module name="MultipleVariableDeclarations"/>
-        <module name="NestedForDepth"/>
+        <module name="NestedForDepth">
+            <property name="max" value="0"/>
+        </module>
         <module name="NestedIfDepth">
             <property name="max" value="0"/>
         </module>

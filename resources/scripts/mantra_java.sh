@@ -822,7 +822,6 @@ cat > "$pomFile" << EOF
                         </ruleset>
                     </rulesets>
                     <failOnViolation>\${fail-build-on-static-code-analysis-errors}</failOnViolation>
-                    <printFailingErrors>true</printFailingErrors>
                     <verbose>true</verbose>
                     <includeTests>true</includeTests>
                     <linkXRef>false</linkXRef>
