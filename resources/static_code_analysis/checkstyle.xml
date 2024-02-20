@@ -24,7 +24,8 @@
     </module>
     <module name="RegexpMultiline">
         <property name="format" value="\r\n$"/>
-        <property name="message" value="Lines must end with UNIX-like end of line. Windows-like line endings are not allowed."/>
+        <property name="message"
+                  value="Lines must end with UNIX-like end of line. Windows-like line endings are not allowed."/>
     </module>
     <module name="RegexpSingleline">
         <property name="format" value="\s+$"/>
@@ -95,6 +96,9 @@
         </module>
         <module name="IllegalCatch"/>
         <module name="IllegalThrows"/>
+        <module name="IllegalToken">
+            <property name="tokens" value="EXTENDS_CLAUSE"/>
+        </module>
         <module name="InnerAssignment"/>
         <module name="MagicNumber"/>
         <module name="MissingSwitchDefault"/>
@@ -247,13 +251,15 @@
         <module name="Regexp">
             <property name="format" value="\s*!=\s*null"/>
             <property name="ignoreComments" value="true"/>
-            <property name="message" value="Avoid using '!= null' for nullability check. Use java.util.Optional instead"/>
+            <property name="message"
+                      value="Avoid using '!= null' for nullability check. Use java.util.Optional instead"/>
             <property name="illegalPattern" value="true"/>
         </module>
         <module name="Regexp">
             <property name="format" value="\s*==\s*null"/>
             <property name="ignoreComments" value="true"/>
-            <property name="message" value="Avoid using '== null' for nullability check. Use java.util.Optional instead"/>
+            <property name="message"
+                      value="Avoid using '== null' for nullability check. Use java.util.Optional instead"/>
             <property name="illegalPattern" value="true"/>
         </module>
     </module>
