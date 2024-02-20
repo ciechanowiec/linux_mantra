@@ -55,6 +55,12 @@
             <property name="reportLevel" value="5"/>
         </properties>
     </rule>
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="classReportLevel" value="80"/>
+            <property name="methodReportLevel" value="8"/>
+        </properties>
+    </rule>
     <rule ref="category/java/design.xml/ExcessiveParameterList">
         <properties>
             <property name="minimum" value="4"/>
@@ -106,23 +112,24 @@
     <rule ref="category/java/errorprone.xml">
         <exclude name="CallSuperFirst"/>
         <exclude name="CallSuperLast"/>
-        <exclude name="MissingSerialVersionUID"/> <!-- Disablement justification: https://github.com/projectlombok/lombok/wiki/WHY-NOT:-serialVersionUID -->
+        <exclude
+                name="MissingSerialVersionUID"/> <!-- Disablement justification: https://github.com/projectlombok/lombok/wiki/WHY-NOT:-serialVersionUID -->
         <exclude name="NonStaticInitializer"/>
     </rule>
 
     <!--
     MULTITHREADING
     -->
-    <rule ref="category/java/multithreading.xml" />
+    <rule ref="category/java/multithreading.xml"/>
 
     <!--
     PERFORMANCE
     -->
-    <rule ref="category/java/performance.xml" />
+    <rule ref="category/java/performance.xml"/>
 
     <!--
     SECURITY
     -->
-    <rule ref="category/java/security.xml" />
+    <rule ref="category/java/security.xml"/>
 
 </ruleset>
