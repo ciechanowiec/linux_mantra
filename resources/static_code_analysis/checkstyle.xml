@@ -237,7 +237,10 @@
         <module name="NoWhitespaceAfter"/>
         <module name="NoWhitespaceBefore"/>
         <module name="NoWhitespaceBeforeCaseDefaultColon"/>
-        <module name="OperatorWrap"/>
+        <module name="OperatorWrap">
+            <property name="tokens"
+                      value="COLON, EQUAL, NOT_EQUAL, DIV, PLUS, MINUS, STAR, MOD, SR, BSR, GE, GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, TYPE_EXTENSION_AND, LITERAL_INSTANCEOF"/>
+        </module>
         <module name="ParenPad"/>
         <module name="SeparatorWrap">
             <property name="tokens" value="COMMA, SEMI"/>
