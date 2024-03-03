@@ -167,7 +167,6 @@
         -->
         <module name="ArrayTypeStyle"/>
         <module name="AvoidEscapedUnicodeCharacters"/>
-        <module name="AvoidEscapedUnicodeCharacters"/>
         <module name="CommentsIndentation"/>
         <module name="Indentation"/>
         <module name="NoCodeInFile"/>
