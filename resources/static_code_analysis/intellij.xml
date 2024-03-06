@@ -140,8 +140,9 @@
     </extension>
   </inspection_tool>
   <inspection_tool class="FinalStaticMethod" enabled="false" level="WARNING" enabled_by_default="false" />
-  <inspection_tool class="HardcodedFileSeparators" enabled="true" level="WARNING" enabled_by_default="true">
+  <inspection_tool class="HardcodedFileSeparators" enabled="false" level="WARNING" enabled_by_default="false">
     <option name="m_recognizeExampleMediaType" value="false" />
+    <option name="ignoredCalls" value="java.lang.Class,getResource|getResourceAsStream,java.lang.ClassLoader,findResource|getResource|getResources|resources|getSystemResource|getSystemResources|getSystemResourceAsStream,," />
   </inspection_tool>
   <inspection_tool class="HtmlTagCanBeJavadocTag" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="IOResource" enabled="true" level="WARNING" enabled_by_default="true">
