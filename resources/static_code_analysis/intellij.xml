@@ -223,7 +223,7 @@
   <inspection_tool class="MoveFieldAssignmentToInitializer" enabled="true" level="INFORMATION" enabled_by_default="true" editorAttributes="INFORMATION_ATTRIBUTES" />
   <inspection_tool class="MultipleReturnPointsPerMethod" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="ignoreGuardClauses" value="true" />
-    <option name="ignoreEqualsMethod" value="false" />
+    <option name="ignoreEqualsMethod" value="true" />
     <option name="m_limit" value="2" />
   </inspection_tool>
   <inspection_tool class="MultipleTopLevelClassesInFile" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -238,33 +238,33 @@
   </inspection_tool>
   <inspection_tool class="NewClassNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
     <extension name="AbstractClassNamingConvention" enabled="true">
-      <option name="inheritDefaultSettings" value="true" />
+      <option name="inheritDefaultSettings" value="false" />
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="4" />
-      <option name="m_maxLength" value="64" />
+      <option name="m_minLength" value="3" />
+      <option name="m_maxLength" value="30" />
     </extension>
     <extension name="AnnotationNamingConvention" enabled="true">
-      <option name="inheritDefaultSettings" value="true" />
+      <option name="inheritDefaultSettings" value="false" />
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="8" />
-      <option name="m_maxLength" value="64" />
+      <option name="m_minLength" value="3" />
+      <option name="m_maxLength" value="30" />
     </extension>
     <extension name="ClassNamingConvention" enabled="true">
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
       <option name="m_minLength" value="3" />
-      <option name="m_maxLength" value="64" />
+      <option name="m_maxLength" value="30" />
     </extension>
     <extension name="EnumeratedClassNamingConvention" enabled="true">
-      <option name="inheritDefaultSettings" value="true" />
+      <option name="inheritDefaultSettings" value="false" />
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="8" />
-      <option name="m_maxLength" value="64" />
+      <option name="m_minLength" value="3" />
+      <option name="m_maxLength" value="30" />
     </extension>
     <extension name="InterfaceNamingConvention" enabled="true">
-      <option name="inheritDefaultSettings" value="true" />
+      <option name="inheritDefaultSettings" value="false" />
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="8" />
-      <option name="m_maxLength" value="64" />
+      <option name="m_minLength" value="3" />
+      <option name="m_maxLength" value="30" />
     </extension>
     <extension name="JUnitAbstractTestClassNamingConvention" enabled="true">
       <option name="m_regex" value="[A-Z][A-Za-z\d]*TestCase" />
