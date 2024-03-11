@@ -12,7 +12,7 @@ RESET_FORMAT="\e[0m"
 ERROR_TAG="${BOLD_RED}[ERROR]:${RESET_FORMAT}"
 
 expectedLinuxReleaseName="jammy"
-expectedMacReleaseName="macOS 13"
+expectedMacReleaseName="macOS 14"
 # It is assumed that the project will be opened in IntelliJ IDEA Ultimate.
 # In case you want to use IntelliJ IDEA Community, comment out the code line below
 # and restore from the comment the next line:

@@ -1169,7 +1169,7 @@ openProjectInIDE () {
 
 # Revise and change values of the variables below to meet your needs
 expectedLinuxReleaseName="jammy"
-expectedMacReleaseName="macOS 13"
+expectedMacReleaseName="macOS 14"
 gitCommitterName="Herman"
 gitCommitterSurname="Ciechanowiec"
 gitCommitterEmail="herman@ciechanowiec.eu"

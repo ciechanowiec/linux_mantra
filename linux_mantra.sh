@@ -60,7 +60,7 @@ shellFile="null"
 isMacOS=false
 isLinux=false
 expectedLinuxReleaseName="jammy"
-expectedMacReleaseName="macOS 13"
+expectedMacReleaseName="macOS 14"
 
 echo "2. Checking whether the resources directory exists..."
 if [ ! -d "$resourcesDir" ]
