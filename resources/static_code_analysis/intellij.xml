@@ -4,7 +4,7 @@
     <option name="m_limit" value="3" />
   </inspection_tool>
   <inspection_tool class="AnonymousClassMethodCount" enabled="true" level="WARNING" enabled_by_default="true">
-    <option name="m_limit" value="1" />
+    <option name="m_limit" value="2" />
   </inspection_tool>
   <inspection_tool class="ArrayCanBeReplacedWithEnumValues" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES" />
   <inspection_tool class="ArrayCreationWithoutNewKeyword" enabled="false" level="INFORMATION" enabled_by_default="false" />
@@ -37,6 +37,7 @@
     <option name="m_ignoreThisSuperCalls" value="true" />
   </inspection_tool>
   <inspection_tool class="CheckedExceptionClass" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="ClassCanBeRecord" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES" />
   <inspection_tool class="ClassComplexity" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="m_limit" value="80" />
   </inspection_tool>
@@ -50,7 +51,7 @@
   </inspection_tool>
   <inspection_tool class="ClassMayBeInterface" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES" />
   <inspection_tool class="ClassNameDiffersFromFileName" enabled="true" level="WARNING" enabled_by_default="true" />
-  <inspection_tool class="ClassNamePrefixedWithPackageName" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="ClassNameSameAsAncestorName" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="ClassNestingDepth" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="m_limit" value="1" />
   </inspection_tool>
@@ -140,10 +141,6 @@
     </extension>
   </inspection_tool>
   <inspection_tool class="FinalStaticMethod" enabled="false" level="WARNING" enabled_by_default="false" />
-  <inspection_tool class="HardcodedFileSeparators" enabled="false" level="WARNING" enabled_by_default="false">
-    <option name="m_recognizeExampleMediaType" value="false" />
-    <option name="ignoredCalls" value="java.lang.Class,getResource|getResourceAsStream,java.lang.ClassLoader,findResource|getResource|getResources|resources|getSystemResource|getSystemResources|getSystemResourceAsStream,," />
-  </inspection_tool>
   <inspection_tool class="HtmlTagCanBeJavadocTag" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="IOResource" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="ignoredTypesString" value="java.io.ByteArrayOutputStream,java.io.ByteArrayInputStream,java.io.StringBufferInputStream,java.io.CharArrayWriter,java.io.CharArrayReader,java.io.StringWriter,java.io.StringReader" />
@@ -196,7 +193,7 @@
   <inspection_tool class="MarkerInterface" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="MethodCallInLoopCondition" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="MethodCount" enabled="true" level="WARNING" enabled_by_default="true">
-    <option name="m_limit" value="30" />
+    <option name="m_limit" value="20" />
     <option name="ignoreGettersAndSetters" value="false" />
     <option name="ignoreOverridingMethods" value="false" />
   </inspection_tool>
@@ -241,30 +238,30 @@
     <extension name="AbstractClassNamingConvention" enabled="true">
       <option name="inheritDefaultSettings" value="false" />
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="3" />
+      <option name="m_minLength" value="2" />
       <option name="m_maxLength" value="30" />
     </extension>
     <extension name="AnnotationNamingConvention" enabled="true">
       <option name="inheritDefaultSettings" value="false" />
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="3" />
+      <option name="m_minLength" value="2" />
       <option name="m_maxLength" value="30" />
     </extension>
     <extension name="ClassNamingConvention" enabled="true">
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="3" />
+      <option name="m_minLength" value="2" />
       <option name="m_maxLength" value="30" />
     </extension>
     <extension name="EnumeratedClassNamingConvention" enabled="true">
       <option name="inheritDefaultSettings" value="false" />
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="3" />
+      <option name="m_minLength" value="2" />
       <option name="m_maxLength" value="30" />
     </extension>
     <extension name="InterfaceNamingConvention" enabled="true">
       <option name="inheritDefaultSettings" value="false" />
       <option name="m_regex" value="[A-Z][A-Za-z\d]*" />
-      <option name="m_minLength" value="3" />
+      <option name="m_minLength" value="2" />
       <option name="m_maxLength" value="30" />
     </extension>
     <extension name="JUnitAbstractTestClassNamingConvention" enabled="true">
@@ -277,8 +274,16 @@
   </inspection_tool>
   <inspection_tool class="NewExceptionWithoutArguments" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="NewMethodNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
-    <extension name="InstanceMethodNamingConvention" enabled="true" />
-    <extension name="StaticMethodNamingConvention" enabled="true" />
+    <extension name="InstanceMethodNamingConvention" enabled="true">
+      <option name="m_regex" value="[a-z][A-Za-z\d]*" />
+      <option name="m_minLength" value="2" />
+      <option name="m_maxLength" value="32" />
+    </extension>
+    <extension name="StaticMethodNamingConvention" enabled="true">
+      <option name="m_regex" value="[a-z][A-Za-z\d]*" />
+      <option name="m_minLength" value="2" />
+      <option name="m_maxLength" value="32" />
+    </extension>
   </inspection_tool>
   <inspection_tool class="NonCommentSourceStatements" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="m_limit" value="50" />
