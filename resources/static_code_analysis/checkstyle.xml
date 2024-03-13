@@ -228,6 +228,14 @@
         <module name="ParameterNumber">
             <property name="max" value="4"/>
         </module>
+        <module name="SuppressionXpathSingleFilter">
+            <!-- See: https://github.com/checkstyle/checkstyle/issues/7432#issuecomment-570259104 -->
+            <property name="checks" value="ParameterNumber"/>
+            <property name="query"
+                      value="//CTOR_DEF/IDENT[../MODIFIERS/ANNOTATION/IDENT[@text='Inject'] or ../MODIFIERS/ANNOTATION/IDENT[@text='Autowired']]
+                            |
+                            //METHOD_DEF/IDENT[../MODIFIERS/ANNOTATION/IDENT[@text='Inject'] or ../MODIFIERS/ANNOTATION/IDENT[@text='Autowired']]"/>
+        </module>
 
         <!--
         Whitespace
