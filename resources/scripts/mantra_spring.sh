@@ -361,6 +361,21 @@ addStatisCodeAnalysisRules () {
       trash-put "$projectDirectory"
       exit 1
   fi
+
+  # Spot Bugs
+  sbExclusionsFile="$projectDirectory/src/main/resources/static_code_analysis/spotbugs-exclude.xml"
+  sbExclusionsHTTPResponse=$(curl --write-out "\n%{http_code}" --silent https://raw.githubusercontent.com/ciechanowiec/linux_mantra/master/resources/static_code_analysis/spotbugs-exclude.xml)
+  sbExclusionsHTTPBody=$(echo "$sbExclusionsHTTPResponse" | sed '$d')
+  sbExclusionsHTTPStatus=$(echo "$sbExclusionsHTTPResponse" | tail -n1)
+
+  if [ "$sbExclusionsHTTPStatus" -eq 200 ]; then
+      echo "$sbExclusionsHTTPBody" > "$sbExclusionsFile"
+      printf "${STATUS_TAG} Default Spot Bugs rules have been added to ${ITALIC}spotbugs-exclude.xml${RESET_FORMAT}.\n"
+  else
+      printf "${ERROR_TAG} Unable to retrieve Spot Bugs rules. Execution aborted.\n"
+      trash-put "$projectDirectory"
+      exit 1
+  fi
 }
 
 insertContentToApplicationProperties () {
@@ -480,7 +495,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MainTest {
 
     @Test
-    @SuppressWarnings("MagicNumber")
     void contextLoads() {
         int actualResult = 2 + 2;
         assertEquals(4, actualResult);
@@ -1000,6 +1014,7 @@ cat > "$pomFile" << EOF
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>\${spotbugs-maven-plugin.version}</version>
                 <configuration>
+                    <excludeFilterFile>\${project.basedir}/src/main/resources/static_code_analysis/spotbugs-exclude.xml</excludeFilterFile>
                     <failOnError>\${fail-build-on-static-code-analysis-errors}</failOnError>
                     <includeTests>true</includeTests>
                     <effort>Max</effort>
