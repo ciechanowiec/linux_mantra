@@ -27,6 +27,11 @@
         <property name="message"
                   value="Lines must end with UNIX-like end of line. Windows-like line endings are not allowed."/>
     </module>
+    <module name="RegexpMultiline">
+        <property name="format" value="(?m)(\n\s*\n\s*\})"/>
+        <property name="message" value="Empty lines before a closing brace are not allowed."/>
+        <property name="matchAcrossLines" value="true"/>
+    </module>
     <module name="RegexpSingleline">
         <property name="format" value="\s+$"/>
         <property name="message" value="Line has trailing spaces. Those are not allowed."/>
