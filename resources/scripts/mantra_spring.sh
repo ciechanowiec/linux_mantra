@@ -757,7 +757,6 @@ cat > "$pomFile" << EOF
         </pluginManagement>
 
         <plugins>
-            <!-- Spring Boot support in Apache Maven -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -770,7 +769,6 @@ cat > "$pomFile" << EOF
                     </excludes>
                 </configuration>
             </plugin>
-            <!-- Processes resources -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -798,7 +796,6 @@ cat > "$pomFile" << EOF
                     </execution>
                 </executions>
             </plugin>
-            <!-- Reports on unused dependencies: -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

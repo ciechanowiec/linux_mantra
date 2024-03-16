@@ -610,7 +610,6 @@ cat > "$pomFile" << EOF
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>\${maven-compiler-plugin.version}</version>
             </plugin>
-            <!-- Processes resources -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -660,7 +659,6 @@ cat > "$pomFile" << EOF
                     </execution>
                 </executions>
             </plugin>
-            <!-- Reports on unused dependencies: -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
