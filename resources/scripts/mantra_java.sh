@@ -415,15 +415,15 @@ cat > "$pomFile" << EOF
         <lombok.version>1.18.30</lombok.version>
         <jsr305.version>3.0.2</jsr305.version>
         <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
-        <junit-jupiter-api.version>5.10.1</junit-jupiter-api.version>
-        <junit-jupiter-params.version>5.10.1</junit-jupiter-params.version>
-        <mockito-core.version>5.8.0</mockito-core.version>
-        <mockito-junit-jupiter.version>5.8.0</mockito-junit-jupiter.version>
+        <junit-jupiter-api.version>5.10.2</junit-jupiter-api.version>
+        <junit-jupiter-params.version>5.10.2</junit-jupiter-params.version>
+        <mockito-core.version>5.11.0</mockito-core.version>
+        <mockito-junit-jupiter.version>5.11.0</mockito-junit-jupiter.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
-        <slf4j-api.version>2.0.9</slf4j-api.version>
-        <slf4j-tinylog.version>2.6.2</slf4j-tinylog.version>
-        <tinylog-api.version>2.6.2</tinylog-api.version>
-        <tinylog-impl.version>2.6.2</tinylog-impl.version>
+        <slf4j-api.version>2.0.12</slf4j-api.version>
+        <slf4j-tinylog.version>2.7.0</slf4j-tinylog.version>
+        <tinylog-api.version>2.7.0</tinylog-api.version>
+        <tinylog-impl.version>2.7.0</tinylog-impl.version>
         <!-- Locking down Maven default plugins -->
         <maven-clean-plugin.version>3.3.1</maven-clean-plugin.version>
         <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
@@ -444,7 +444,7 @@ cat > "$pomFile" << EOF
         <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
         <pmdVersion>7.0.0-rc4</pmdVersion>
-        <spotbugs-maven-plugin.version>4.8.3.0</spotbugs-maven-plugin.version>
+        <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <jacoco-maven-plugin.coverage.minimum>0.8</jacoco-maven-plugin.coverage.minimum>
     </properties>
