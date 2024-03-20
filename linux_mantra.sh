@@ -2483,6 +2483,11 @@ cp -rf "$ddtermUUID" "$extensionsDir"
 echo "6. Enabling extensions. They will start working after GNOME session is restarted..."
 dconf write /org/gnome/shell/enabled-extensions "['$panelDateFormatUUID', '$justPerfectionUUID', '$ddtermUUID']"
 
+echo "7. Disabling extensions update notifications..."
+# https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check
+# https://unix.stackexchange.com/a/747690
+git clone https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check.git "$HOME/.local/share/gnome-shell/extensions/disable-gnome-extension-update-check@thjderjktyrjkt.gitlab.com"
+
 informAboutProcedureEnd
 
 promptOnContinuation
