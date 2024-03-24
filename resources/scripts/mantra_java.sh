@@ -665,27 +665,6 @@ cat > "$pomFile" << EOF
                 <version>\${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>download-sources</id>
-                        <goals>
-                            <goal>sources</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <silent>true</silent>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>download-javadoc</id>
-                        <goals>
-                            <goal>resolve</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <classifier>javadoc</classifier>
-                            <silent>true</silent>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>analyze-dependencies</id>
                         <goals>
                             <goal>analyze</goal>
@@ -742,7 +721,6 @@ cat > "$pomFile" << EOF
                     </execution>
                 </executions>
             </plugin>
-            <!-- Reports on possible updates of dependencies and plugins -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
@@ -751,8 +729,8 @@ cat > "$pomFile" << EOF
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>display-dependency-updates</goal>
-                            <goal>display-plugin-updates</goal>
+                            <goal>display-parent-updates</goal>
+                            <goal>display-property-updates</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -971,6 +949,46 @@ cat > "$pomFile" << EOF
             <properties>
                 <enforce-tests-coverage>false</enforce-tests-coverage>
             </properties>
+        </profile>
+        <profile>
+            <id>advanced-dependency-resolution</id>
+            <activation>
+                <!-- By default, this profile is active and is disabled when the property below is present  -->
+                <property>
+                    <name>!skipAdvancedDependencyResolution</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>download-sources</id>
+                                <goals>
+                                    <goal>sources</goal>
+                                </goals>
+                                <phase>validate</phase>
+                                <configuration>
+                                    <silent>true</silent>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>download-javadoc</id>
+                                <goals>
+                                    <goal>resolve</goal>
+                                </goals>
+                                <phase>validate</phase>
+                                <configuration>
+                                    <classifier>javadoc</classifier>
+                                    <silent>true</silent>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

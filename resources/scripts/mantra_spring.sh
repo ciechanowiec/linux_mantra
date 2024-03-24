@@ -786,27 +786,6 @@ cat > "$pomFile" << EOF
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>download-sources</id>
-                        <goals>
-                            <goal>sources</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <silent>true</silent>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>download-javadoc</id>
-                        <goals>
-                            <goal>resolve</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <classifier>javadoc</classifier>
-                            <silent>true</silent>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>analyze-dependencies</id>
                         <goals>
                             <goal>analyze</goal>
@@ -860,7 +839,6 @@ cat > "$pomFile" << EOF
                     </execution>
                 </executions>
             </plugin>
-            <!-- Reports on possible updates of dependencies and plugins -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
@@ -868,8 +846,8 @@ cat > "$pomFile" << EOF
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>display-dependency-updates</goal>
-                            <goal>display-plugin-updates</goal>
+                            <goal>display-parent-updates</goal>
+                            <goal>display-property-updates</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -1088,6 +1066,46 @@ cat > "$pomFile" << EOF
             <properties>
                 <enforce-tests-coverage>false</enforce-tests-coverage>
             </properties>
+        </profile>
+        <profile>
+            <id>advanced-dependency-resolution</id>
+            <activation>
+                <!-- By default, this profile is active and is disabled when the property below is present  -->
+                <property>
+                    <name>!skipAdvancedDependencyResolution</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>download-sources</id>
+                                <goals>
+                                    <goal>sources</goal>
+                                </goals>
+                                <phase>validate</phase>
+                                <configuration>
+                                    <silent>true</silent>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>download-javadoc</id>
+                                <goals>
+                                    <goal>resolve</goal>
+                                </goals>
+                                <phase>validate</phase>
+                                <configuration>
+                                    <classifier>javadoc</classifier>
+                                    <silent>true</silent>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
@@ -1323,12 +1341,22 @@ ARG PROGRAM_NAME
 ARG PROGRAM_VERSION
 
 WORKDIR /app
-# Copy the project files
+
+# Copy the Maven POM file and resolve dependencies
+# This layer will be cached unless pom.xml changes
 COPY pom.xml .
+RUN mvn dependency:go-offline -DskipAdvancedDependencyResolution
+RUN mvn dependency:resolve-plugins -DskipAdvancedDependencyResolution
+RUN mvn dependency:analyze -DskipAdvancedDependencyResolution
+RUN mvn versions:display-parent-updates -DskipAdvancedDependencyResolution
+RUN mvn versions:display-property-updates -DskipAdvancedDependencyResolution
+
+# Copy the rest of the project files
 COPY .env .
 COPY src ./src
+
 # Build the application
-RUN mvn clean package
+RUN mvn clean package -DskipAdvancedDependencyResolution
 
 # Second stage: Setup the Java runtime
 FROM eclipse-temurin:21-jdk
