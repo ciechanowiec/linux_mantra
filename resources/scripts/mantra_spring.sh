@@ -302,12 +302,11 @@ printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC
 cat > "$prodSchemaFile" << EOF
 CREATE TABLE IF NOT EXISTS books
 (
-    id          INT            NOT NULL AUTO_INCREMENT,
+    id          BIGSERIAL PRIMARY KEY,
     title       VARCHAR(100)   NOT NULL,
     author      VARCHAR(100)   NOT NULL,
     rating      INT            NOT NULL,
-    description VARCHAR(1000)  NOT NULL,
-    PRIMARY KEY (id)
+    description VARCHAR(1000)  NOT NULL
 );
 EOF
 printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}prod-schema.sql${RESET_FORMAT}.\n"
@@ -318,12 +317,11 @@ DROP TABLE IF EXISTS books;
 
 CREATE TABLE IF NOT EXISTS books
 (
-    id          INT            NOT NULL AUTO_INCREMENT,
+    id          BIGSERIAL PRIMARY KEY,
     title       VARCHAR(100)   NOT NULL,
     author      VARCHAR(100)   NOT NULL,
     rating      INT            NOT NULL,
-    description VARCHAR(1000)  NOT NULL,
-    PRIMARY KEY (id)
+    description VARCHAR(1000)  NOT NULL
 );
 EOF
 printf "${STATUS_TAG} Default SQL initialization data has been added to ${ITALIC}test-schema.sql${RESET_FORMAT}.\n"
@@ -383,7 +381,7 @@ insertContentToApplicationProperties () {
 cat > "$applicationPropertiesFile" << EOF
 server.port=\${PROGRAM_PORT:8080}
 spring.main.banner-mode=off
-spring.profiles.active=h2
+spring.profiles.active=\${SPRING_ACTIVE_PROFILE:h2}
 # To make 'th:method=...' work:
 spring.mvc.hiddenmethod.filter.enabled=true
 
@@ -405,8 +403,11 @@ logging.logback.rollingpolicy.total-size-cap=0
 # DATA
 spring.jpa.open-in-view=true
 spring.jpa.hibernate.ddl-auto=none
+spring.sql.init.mode=always
 # Treat case literally and don't transform it:
 spring.jpa.properties.hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+spring.datasource.username=\${POSTGRES_USER:admin}
+spring.datasource.password=\${POSTGRES_PASSWORD:admin}
 
 # ACTUATOR
 # Enable all actuator endpoints over HTTP:
@@ -426,20 +427,14 @@ spring.devtools.livereload.enabled=true
 
 # DATA
 spring.datasource.url=jdbc:h2:mem:localdb
-spring.jpa.hibernate.ddl-auto=none
-spring.sql.init.mode=always
 spring.sql.init.schema-locations=classpath:sql/schema/test-schema.sql
 spring.sql.init.data-locations=classpath:sql/data/test-data.sql
-# To not initialize the database on start, replace
-# the 4 lines above with the 2 following lines:
-#spring.jpa.hibernate.ddl-auto=create-drop
-#spring.sql.init.mode=never
-logging.level.org.hibernate=TRACE
+spring.datasource.driver-class-name=org.h2.Driver
 # H2 console will be available at '/h2-console':
 spring.h2.console.enabled=true
-spring.datasource.driver-class-name=org.h2.Driver
-spring.datasource.username=admin
-spring.datasource.password=admin
+# To enable h2 console when run in Docker
+# (https://stackoverflow.com/questions/44867227/h2-console-throwing-a-error-weballowothers-in-h2-database):
+spring.h2.console.settings.web-allow-others=true
 EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-h2.properties${RESET_FORMAT}.\n"
 }
@@ -448,16 +443,9 @@ insertContentToApplicationProdProperties () {
   applicationPropertiesFile="$1/src/main/resources/application-prod.properties"
 cat > "$applicationPropertiesFile" << EOF
 # DATA
-spring.datasource.url=jdbc:mysql://localhost:3306/bookshop?createDatabaseIfNotExist=true
-spring.jpa.hibernate.ddl-auto=none
-spring.sql.init.mode=always
+# 'postgres' is a database that exists by default:
+spring.datasource.url=jdbc:postgresql://\${POSTGRES_HOSTNAME:localhost}:5432/postgres
 spring.sql.init.schema-locations=classpath:sql/schema/prod-schema.sql
-# To not initialize the database on start, replace
-# the 3 lines above with the 2 following lines:
-#spring.jpa.hibernate.ddl-auto=create-drop
-#spring.sql.init.mode=never
-spring.datasource.username=root
-spring.datasource.password=password
 EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-prod.properties${RESET_FORMAT}.\n"
 }
@@ -466,13 +454,10 @@ insertContentToApplicationTestProperties () {
   applicationPropertiesFile="$1/src/main/resources/application-test.properties"
 cat > "$applicationPropertiesFile" << EOF
 # DATA
-spring.datasource.url=jdbc:mysql://localhost:3306/bookshop-test?createDatabaseIfNotExist=true
-spring.jpa.hibernate.ddl-auto=none
-spring.sql.init.mode=always
+# 'postgres' is a database that exists by default:
+spring.datasource.url=jdbc:postgresql://\${POSTGRES_HOSTNAME:localhost}:5432/postgres
 spring.sql.init.schema-locations=classpath:sql/schema/test-schema.sql
 spring.sql.init.data-locations=classpath:sql/data/test-data.sql
-spring.datasource.username=root
-spring.datasource.password=password
 EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-test.properties${RESET_FORMAT}.\n"
 }
@@ -677,8 +662,8 @@ cat > "$pomFile" << EOF
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -1224,6 +1209,12 @@ PROGRAM_VERSION=1.0.0
 PROGRAM_PORT=8080
 LOGGING_DIR=/var/logs/$projectName
 LOGGING_FILE_ABS_PATH=/var/logs/$projectName/application.log
+POSTGRES_HOSTNAME=postgres
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
+SPRING_ACTIVE_PROFILE=h2
+PGADMIN_DEFAULT_EMAIL=admin@admin.com
+PGADMIN_DEFAULT_PASSWORD=admin
 EOF
 printf "${STATUS_TAG} ${ITALIC}.env${RESET_FORMAT} file with default content has been created.\n"
 
@@ -1244,22 +1235,78 @@ services:
       PROGRAM_PORT: \${PROGRAM_PORT}
       LOGGING_DIR: \${LOGGING_DIR}
       LOGGING_FILE_ABS_PATH: \${LOGGING_FILE_ABS_PATH}
+      SPRING_ACTIVE_PROFILE: \${SPRING_ACTIVE_PROFILE}
+      POSTGRES_HOSTNAME: \${POSTGRES_HOSTNAME}
+      POSTGRES_USER: \${POSTGRES_USER}
+      POSTGRES_PASSWORD: \${POSTGRES_PASSWORD}
     image: \${PROGRAM_NAME}:latest
     container_name: \${PROGRAM_NAME}
     volumes:
       - type: volume
         source: \${PROGRAM_NAME}-data
         target: \${LOGGING_DIR}
-    entrypoint: ["sh", "-c", "./starter.sh" ]
+    entrypoint: [ "sh", "-c", "./starter.sh" ]
     hostname: \${PROGRAM_NAME}
     networks:
       - \${PROGRAM_NAME}-network
     ports:
       - \${PROGRAM_PORT}:\${PROGRAM_PORT}
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    hostname: postgres
+    command: ["postgres", "-c", "logging_collector=on", "-c", "log_directory=/var/log/postgresql", "-c", "log_statement=all"]
+    networks:
+      - \${PROGRAM_NAME}-network
+    ports:
+      - target: 5432
+        published: 5432
+        protocol: tcp
+        mode: host
+    environment:
+      POSTGRES_USER: \${POSTGRES_USER}
+      POSTGRES_PASSWORD: \${POSTGRES_PASSWORD}
+    volumes:
+      - type: volume
+        source: postgres-data
+        target: /var/lib/postgresql/data
+      - type: volume
+        source: postgres-logs
+        target: /var/log/postgresql
+
+  pgadmin:
+    build:
+      context: .
+      dockerfile: pgadmin/Dockerfile
+      args:
+        POSTGRES_USER: \${POSTGRES_USER}
+    image: pgadmin
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: \${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: \${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_LISTEN_PORT: 5050
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    ports:
+      - target: 5050
+        published: 5050
+        protocol: tcp
+        mode: host
+    networks:
+      - \${PROGRAM_NAME}-network
+    depends_on:
+      - postgres
 
 volumes:
   $projectName-data:
     name: \${PROGRAM_NAME}-data
+  postgres-data:
+    name: postgres-data
+  postgres-logs:
+    name: postgres-logs
 
 networks:
   $projectName-network:
@@ -1299,6 +1346,42 @@ RUN chmod 755 starter.sh
 VOLUME \$LOGGING_DIR
 EOF
 printf "${STATUS_TAG} ${ITALIC}Dockerfile${RESET_FORMAT} file with default content has been created.\n"
+}
+
+addPgadmin () {
+  projectDirectory=$1
+
+mkdir -p "$projectDirectory/pgadmin"
+
+cat > "$projectDirectory/pgadmin/Dockerfile" << EOF
+FROM dpage/pgadmin4:latest
+
+USER root
+
+ARG POSTGRES_USER
+
+COPY ../pgadmin/servers.json /pgadmin4/servers.json
+
+RUN sed -i "s/POSTGRES_USER/"\${POSTGRES_USER}"/g" /pgadmin4/servers.json
+EOF
+printf "${STATUS_TAG} ${ITALIC}pgadmin/Dockerfile${RESET_FORMAT} file with default content has been created.\n"
+
+cat > "$projectDirectory/pgadmin/servers.json" << EOF
+{
+  "Servers": {
+    "1": {
+      "Name": "Basic",
+      "Group": "Servers",
+      "Port": 5432,
+      "Username": "POSTGRES_USER",
+      "Host": "postgres",
+      "MaintenanceDB": "postgres"
+    }
+  }
+}
+EOF
+printf "${STATUS_TAG} ${ITALIC}pgadmin/servers.json${RESET_FORMAT} file with default content has been created.\n"
+
 }
 
 initGit () {
@@ -1454,6 +1537,7 @@ addLicense "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname"
 addPom "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName" "$projectURL"
 addReadme "$projectDirectory" "$projectName" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
 addDocker "$projectDirectory" "$projectName"
+addPgadmin "$projectDirectory"
 
 # Setup git:
 initGit "$projectDirectory"
