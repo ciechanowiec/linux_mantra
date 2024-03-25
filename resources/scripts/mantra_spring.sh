@@ -207,7 +207,7 @@ public class Book {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @SuppressWarnings({"unused", "InstanceVariableMayNotBeInitialized"})
+    @SuppressWarnings("unused")
     private Long id;
 
     @Column(name = "title")
