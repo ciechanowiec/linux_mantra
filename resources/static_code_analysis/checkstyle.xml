@@ -101,6 +101,7 @@
         </module>
         <module name="IllegalCatch"/>
         <module name="IllegalThrows"/>
+        <module name="IllegalType"/>
         <module name="InnerAssignment"/>
         <module name="MagicNumber">
             <property name="ignoreAnnotation" value="true"/>
@@ -219,6 +220,14 @@
         <module name="RecordTypeParameterName"/>
         <module name="StaticVariableName"/>
         <module name="TypeName"/>
+
+        <!--
+        Regexp
+        -->
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="@PostConstruct"/>
+            <property name="ignoreComments" value="true"/>
+        </module>
 
         <!--
         Size Violations
