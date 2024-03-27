@@ -28,4 +28,14 @@
         <!-- Gives a lot of false positives: -->
         <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
     </Match>
+    <Match>
+        <!--  As of writing these words this check is implemented incorrectly
+              (https://github.com/spotbugs/spotbugs/issues/1797): -->
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <!--  Anon class is better anyway because its counterpart
+              (static named inner class) will require inheritance  -->
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+    </Match>
 </FindBugsFilter>
