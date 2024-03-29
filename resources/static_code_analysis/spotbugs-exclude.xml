@@ -44,4 +44,11 @@
                https://github.com/spotbugs/spotbugs/pull/2709): -->
         <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
     </Match>
+    <Match>
+        <!--  Temporarily disabled until the fix is delivered with the next SpotBugs version
+              (https://github.com/spotbugs/spotbugs/issues/453
+               https://github.com/spotbugs/spotbugs/issues/2870
+               https://github.com/spotbugs/spotbugs/pull/2872): -->
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    </Match>
 </FindBugsFilter>
