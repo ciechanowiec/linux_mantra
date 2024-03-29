@@ -559,8 +559,8 @@ printf "${STATUS_TAG} ${ITALIC}.gitignore${RESET_FORMAT} with default content ha
 }
 
 addLicense () {
-  licenseFile="$projectDirectory/LICENSE.txt"
   projectDirectory=$1
+  licenseFile="$projectDirectory/LICENSE.txt"
   gitCommitterName=$2
   gitCommitterSurname=$3
   year=$(date +%Y)
@@ -575,6 +575,15 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The Software is provided 'as is', without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
 EOF
 printf "${STATUS_TAG} ${ITALIC}LICENSE.txt${RESET_FORMAT} with default content has been created.\n"
+}
+
+addLombokConfig () {
+  projectDirectory=$1
+  lombokConfigFile="$projectDirectory/lombok.config"
+cat > "$lombokConfigFile" << EOF
+lombok.extern.findbugs.addSuppressFBWarnings = true
+EOF
+printf "${STATUS_TAG} ${ITALIC}lombok.config${RESET_FORMAT} with default content has been created.\n"
 }
 
 addPom () {
@@ -1561,6 +1570,7 @@ addEditorConfig "$projectDirectory"
 addGitAttributes "$projectDirectory"
 addGitignore "$projectDirectory"
 addLicense "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname"
+addLombokConfig "$projectDirectory"
 addPom "$projectDirectory" "$firstLevelPackageName" "$secondLevelPackageName" "$projectName" "$projectURL"
 addReadme "$projectDirectory" "$projectName" "$gitCommitterName" "$gitCommitterSurname" "$gitCommitterEmail"
 addDocker "$projectDirectory" "$projectName"
