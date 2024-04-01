@@ -627,6 +627,7 @@ cat > "$pomFile" << EOF
         <fail-build-on-static-code-analysis-errors>true</fail-build-on-static-code-analysis-errors>
         <enforce-tests-coverage>true</enforce-tests-coverage>
         <!--  Dependencies  -->
+        <im-aop-loggers.version>1.1.4</im-aop-loggers.version>
         <conditional.version>$latestConditionalLibVersion</conditional.version>
         <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
@@ -684,6 +685,11 @@ cat > "$pomFile" << EOF
             <scope>test</scope>
         </dependency>
         <!-- Utils -->
+        <dependency>
+            <groupId>eu.ciechanowiec</groupId>
+            <artifactId>im-aop-loggers</artifactId>
+            <version>\${im-aop-loggers.version}</version>
+        </dependency>
         <dependency>
             <groupId>eu.ciechanowiec</groupId>
             <artifactId>conditional</artifactId>
