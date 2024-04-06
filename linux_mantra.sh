@@ -2134,7 +2134,7 @@ echo "   5.5. Login to your JetBrains account if asked."
 echo "Press Enter to continue..."
 read voidInput
 
-echo "6. Install manually the following IntelliJ IDEA plugins:"
+echo "6. Installing the following plugins:"
 echo "   - .ignore"
 echo "   - AEM IDE"
 echo "   - AsciiDoc"
@@ -2149,6 +2149,8 @@ echo "   - Settings Repository (Deprecated)"
 echo "   - SonarLint"
 echo "   - Terraform and HCL"
 echo "   - VCL/Varnish Language"
+/snap/intellij-idea-ultimate/current/bin/idea.sh installPlugins mobi.hsz.idea.gitignore co.nums.intellij.aem org.asciidoctor.intellij.asciidoc CheckStyle-IDEA "Dummy Text Generator" IdeaVIM com.liferay.ide.intellij.plugin com.mikejhill.intellij.movetab Osmorc Pythonid org.jetbrains.settingsRepository org.sonarlint.idea org.intellij.plugins.hcl rocks.blackcat.vcl
+echo ""
 echo "Restart IntelliJ IDEA and press Enter to continue..."
 read voidInput
 
