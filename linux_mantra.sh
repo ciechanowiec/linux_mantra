@@ -2165,13 +2165,18 @@ echo "   -> Version Control"
 echo "      -> Confirmation"
 echo "         -> When files are created: Do not add"
 echo "         -> When files are deleted: Do not remove"
+echo "Press Enter to continue..."
+read voidInput
+
+echo "9. Perform non-synchronizable Checkstyle settings:"
+echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Tools"
 echo "      -> Checkstyle"
 echo "         -> Add and apply a custom rule set at this link: https://raw.githubusercontent.com/ciechanowiec/linux_mantra/master/resources/static_code_analysis/checkstyle.xml"
 echo "Press Enter to continue..."
 read voidInput
 
-echo "9. Perform non-synchronizable Maven settings:"
+echo "10. Perform non-synchronizable Maven settings:"
 echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Build, Execution, Deployment"
 echo "   -> Build Tools"
@@ -2181,13 +2186,13 @@ echo "      -> Check Automatically download 'Sources', 'Documentation', 'Annotat
 echo "Press Enter to continue..."
 read voidInput
 
-echo "10. Perform non-synchronizable shell check settings."
+echo "11. Perform non-synchronizable shell check settings."
 echo "   -> Open in IntelliJ any Bash script with .sh extension."
 echo "   -> Click 'Install' in the pop-up window above about shell check plugin."
 echo "Press Enter to continue..."
 read voidInput
 
-echo "11. Setting up file templates (removing 'public' modifiers for java files)..."
+echo "12. Setting up file templates (removing 'public' modifiers for java files)..."
 for IDESubDir in "$jetbrainsConfigDir"/*; do
   if [ -d "$IDESubDir" ]
     then
@@ -2250,7 +2255,7 @@ EOF
   fi
 done
 
-echo "12. Setting up .ideavimrc file..."
+echo "13. Setting up .ideavimrc file..."
 touch "$ideavimrcFile"
 cat > "$ideavimrcFile" << EOF
 source ~/.vimrc
