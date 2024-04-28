@@ -451,7 +451,6 @@ cat > "$pomFile" << EOF
         <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.22.0</maven-pmd-plugin.version>
-        <pmdVersion>7.1.0</pmdVersion>
         <spotbugs-maven-plugin.version>4.8.4.0</spotbugs-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <jacoco-maven-plugin.coverage.minimum>0.8</jacoco-maven-plugin.coverage.minimum>
