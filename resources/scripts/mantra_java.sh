@@ -422,8 +422,7 @@ cat > "$pomFile" << EOF
         <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <lombok.version>1.18.30</lombok.version>
-        <jsr305.version>3.0.2</jsr305.version>
-        <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
+        <spotbugs-annotations.version>4.8.4</spotbugs-annotations.version>
         <junit-jupiter-api.version>5.10.2</junit-jupiter-api.version>
         <junit-jupiter-params.version>5.10.2</junit-jupiter-params.version>
         <mockito-core.version>5.11.0</mockito-core.version>
@@ -451,9 +450,9 @@ cat > "$pomFile" << EOF
         <min.maven.version>3.8.6</min.maven.version>
         <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
-        <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
-        <pmdVersion>7.0.0-rc4</pmdVersion>
-        <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
+        <maven-pmd-plugin.version>3.22.0</maven-pmd-plugin.version>
+        <pmdVersion>7.1.0</pmdVersion>
+        <spotbugs-maven-plugin.version>4.8.4.0</spotbugs-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <jacoco-maven-plugin.coverage.minimum>0.8</jacoco-maven-plugin.coverage.minimum>
     </properties>
@@ -480,14 +479,6 @@ cat > "$pomFile" << EOF
             <artifactId>lombok</artifactId>
             <version>\${lombok.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!--  Mainly for @CheckForNull and @Nonnull annotations.
-                  Google groupId is used, because the native groupId isn't
-                  available at repo.maven.apache.org/maven2 -->
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>\${jsr305.version}</version>
         </dependency>
         <dependency>
             <!-- @SuppressFBWarnings annotation for SpotBugs: -->
@@ -806,9 +797,6 @@ cat > "$pomFile" << EOF
                 </executions>
             </plugin>
             <plugin>
-                <!-- Configuration for PMD 7-RC as described here:
-                     - https://github.com/pmd/pmd/discussions/4478#discussioncomment-7607566
-                     - https://maven.apache.org/plugins/maven-pmd-plugin/examples/upgrading-PMD-at-runtime.html -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>\${maven-pmd-plugin.version}</version>
@@ -817,8 +805,7 @@ cat > "$pomFile" << EOF
                         <!-- For default rule sets see:
                              - https://github.com/pmd/pmd/tree/master/pmd-java/src/main/resources
                              - https://github.com/pmd/pmd/blob/master/pmd-core/src/main/resources/rulesets/internal/all-java.xml -->
-                        <ruleset>\${project.basedir}/src/main/resources/static_code_analysis/pmd.xml
-                        </ruleset>
+                        <ruleset>\${project.basedir}/src/main/resources/static_code_analysis/pmd.xml</ruleset>
                     </rulesets>
                     <failOnViolation>\${fail-build-on-static-code-analysis-errors}</failOnViolation>
                     <verbose>true</verbose>
@@ -833,33 +820,6 @@ cat > "$pomFile" << EOF
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-compat6</artifactId>
-                        <version>\${pmdVersion}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-core</artifactId>
-                        <version>\${pmdVersion}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-java</artifactId>
-                        <version>\${pmdVersion}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-javascript</artifactId>
-                        <version>\${pmdVersion}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-jsp</artifactId>
-                        <version>\${pmdVersion}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
