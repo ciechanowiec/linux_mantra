@@ -38,4 +38,10 @@
               (static named inner class) will require inheritance  -->
         <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
     </Match>
+    <Match>
+        <!--  Temporarily disabled. There should have been a fix, but the fix doesn't work:
+              https://github.com/spotbugs/spotbugs/issues/456
+              https://github.com/spotbugs/spotbugs/pull/2709 -->
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    </Match>
 </FindBugsFilter>
