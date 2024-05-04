@@ -869,7 +869,7 @@ cat > "$pomFile" << EOF
                                 <version>(?i).*ALPHA.*</version>
                             </ignoreVersion>
                             <ignoreVersion>
-                                <!-- Ignoring alpha versions, like 5.0.0.Beta2 and 12.0.0.beta3 -->
+                                <!-- Ignoring beta versions, like 5.0.0.Beta2 and 12.0.0.beta3 -->
                                 <type>regex</type>
                                 <version>(?i).*BETA.*</version>
                             </ignoreVersion>
