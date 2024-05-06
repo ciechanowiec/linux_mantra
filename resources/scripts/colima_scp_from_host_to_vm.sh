@@ -19,7 +19,7 @@ hostPath="$1"
 destinationPath="$2"
 
 tmpconfig=$(mktemp)
-(limactl show-ssh --format config colima | grep --invert-match "^  ControlPath\|  ^User"; echo "  ForwardAgent=yes") > "$tmpconfig"
-ssh -F "$tmpconfig" "$USER@lima-colima" "sudo mkdir -p /root/.ssh/; sudo cp ~/.ssh/authorized_keys /root/.ssh/authorized_keys"
-ssh -F "$tmpconfig" root@lima-colima "mkdir -p $destinationPath"
-scp -F "$tmpconfig" "$hostPath" root@lima-colima:"$destinationPath"
+(cat "$HOME/.colima/ssh_config" | grep --invert-match "^  ControlPath\|  ^User"; echo "  ForwardAgent=yes") > "$tmpconfig"
+ssh -F "$tmpconfig" "$USER@colima" "sudo mkdir -p /root/.ssh/; sudo cp ~/.ssh/authorized_keys /root/.ssh/authorized_keys"
+ssh -F "$tmpconfig" root@colima "mkdir -p $destinationPath"
+scp -F "$tmpconfig" "$hostPath" root@colima:"$destinationPath"
