@@ -66,7 +66,12 @@
         <module name="EmptyCatchBlock"/>
         <module name="LeftCurly"/>
         <module name="NeedBraces"/>
+        <!-- Both RightCurly will be active, but with different configurations: -->
         <module name="RightCurly"/>
+        <module name="RightCurly">
+            <property name="option" value="alone"/>
+            <property name="tokens" value="LITERAL_ELSE, METHOD_DEF"/>
+        </module>
 
         <!--
         Class Design
