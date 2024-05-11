@@ -174,7 +174,7 @@ echo "Installing pip (tool for installing and managing Python packages)..."
 sudo apt install python3-pip -y
 
 echo "Installing htop (interactive process viewer)..."
-sudo apt install htop
+sudo apt install htop -y
 
 echo "Installing atril (.djvu files viewer)..."
 sudo apt install atril -y
@@ -249,8 +249,8 @@ sudo apt install exiftool -y
 
 echo "Installing tesseract (command-line OCR engine)"
 # Docs: https://tesseract-ocr.github.io/tessdoc/Installation.html
-sudo apt install tesseract-ocr
-sudo apt install libtesseract-dev
+sudo apt install tesseract-ocr -y
+sudo apt install libtesseract-dev -y
 
 echo "Installing imagemagick (images converter)"
 sudo apt install imagemagick -y
@@ -816,19 +816,19 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 echo "Installing Java 8..."
 # Java 8 Temurin release might be unavailable for macOS, so Zulu is installed:
-yes | sdk install java 8.0.382-zulu
+yes | sdk install java 8.0.412-zulu
 
 echo "Installing Java 11..."
-yes | sdk install java 11.0.20-tem
+yes | sdk install java 11.0.23-tem
 
 echo "Installing Java 17..."
-yes | sdk install java 17.0.8-tem
+yes | sdk install java 17.0.11-tem
 
 echo "Installing Java 21..."
-yes | sdk install java 21-tem
+yes | sdk install java 21.0.3-tem
 
-echo "Setting up Java 11 as the default one..."
-sdk default java 11.0.20-tem
+echo "Setting Java 21 as the default one..."
+sdk default java 21.0.3-tem
 
 echo "Enabling the installed program in the current console..."
 export SDKMAN_DIR="$HOME/.sdkman"
