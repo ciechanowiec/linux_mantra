@@ -271,7 +271,8 @@ sudo apt install gnome-control-center
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then
-pip install yt-dlp --no-warn-script-location
+sudo apt remove yt-dlp -y
+pip3 install yt-dlp --no-warn-script-location
 
 # Consider the following settings Only Office Desktop Editors:
 #   File -> Advanced settings -> Proofing:
@@ -671,6 +672,9 @@ cat >> "$shellFile" << EOF
 # GH CLI AUTOCOMPLETION:
 eval "\$(gh completion -s bash)"
 EOF
+
+echo "7. Adding local bin to PATH..."
+echo "export PATH=\"\$PATH:\$HOME/.local/bin\"" >> "$shellFile"
 
 informAboutProcedureEnd
 
