@@ -264,6 +264,10 @@ sudo apt install libfuse2 -y
 echo "Installing nvtop (top for nvidia GPU)"
 sudo apt install nvtop -y
 
+echo "Installing gnome-control-center (GUI for settings)"
+# Sometimes GUI for settings might miss (https://stackoverflow.com/a/75132841)
+sudo apt install gnome-control-center
+
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then
@@ -859,7 +863,7 @@ export SDKMAN_DIR="$HOME/.sdkman"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 echo "Installing Maven..."
-yes | sdk install maven 3.9.4
+yes | sdk install maven 3.9.6
 
 echo "Adding the Adobe Maven repository..."
 # Details: 1. https://repo.adobe.com/index.html
@@ -1006,20 +1010,19 @@ fi
 echo "3. Clearing and regenerating fonts cache..."
 fc-cache -f -v
 
-echo "4. Downloading new fonts..."
+echo "4. Retrieving new fonts..."
 fontOne="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Regular/JetBrainsMonoNLNerdFontMono-Regular.ttf"
 fontTwo="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Bold/JetBrainsMonoNLNerdFontMono-Bold.ttf"
 fontThree="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/NoLigatures/Italic/JetBrainsMonoNLNerdFontMono-Italic.ttf"
-fontFour="https://fonts.google.com/download?family=Noto%20Serif"
 wget "$fontOne" -P tempFontsDir
 wget "$fontTwo" -P tempFontsDir
 wget "$fontThree" -P tempFontsDir
-wget -O noto_serif.zip "$fontFour"
-unzip noto_serif.zip -d noto_serif
-cp -rf noto_serif/static/NotoSerif/NotoSerif-Bold.ttf \
-  noto_serif/static/NotoSerif/NotoSerif-Italic.ttf \
-  noto_serif/static/NotoSerif/NotoSerif-BoldItalic.ttf \
-  noto_serif/static/NotoSerif/NotoSerif-Regular.ttf \
+# Google's API for downloading Noto Serif is subject to constant changes, so the font is stored locally: 
+unzip "$resourcesDir/font/noto_serif.zip" -d noto_serif 
+cp -rf noto_serif/static/NotoSerif-Bold.ttf \
+  noto_serif/static/NotoSerif-Italic.ttf \
+  noto_serif/static/NotoSerif-BoldItalic.ttf \
+  noto_serif/static/NotoSerif-Regular.ttf \
   tempFontsDir
 
 echo "5. Creating persistent directories for fonts..."
@@ -1237,6 +1240,9 @@ sudo systemctl start bluetooth.service
 echo "Starting pulseaudio after changing settings..."
 systemctl --user start pulseaudio.socket
 systemctl --user start pulseaudio.service
+
+echo "Reloading the daemons..."
+systemctl --user daemon-reload # Command suggested by the hints from the commands above
 
 informAboutProcedureEnd
 
@@ -1726,41 +1732,6 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
-#                                 12. MYSQL                                   #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="mysql"
-# DOCUMENTATION:
-#   1. https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-22-04
-#   2. https://linuxhint.com/installing_mysql_workbench_ubuntu/
-# NOTES:
-#   To login: 'mysql -u root -ppassword'
-
-informAboutProcedureStart
-
-echo "Installing MySQL Server..."
-sudo apt install mysql-server -y
-echo "Installing MySQL Workbench..."
-sudo snap install mysql-workbench-community
-
-echo "Connecting MySQL Workbench with password manager service..."
-# Docs: https://stackoverflow.com/questions/42671914/mysql-workbench-not-saving-passwords-in-keychain
-sudo snap connect mysql-workbench-community:password-manager-service :password-manager-service
-
-echo "Altering the root user so that it can be used within MySQL Workbench..."
-# Docs:
-# 1. https://stackoverflow.com/questions/7864276/cannot-connect-to-database-server-mysql-workbench
-# 2. https://trendoceans.com/how-to-resolve-cannot-connect-to-database-server-mysql-workbench/
-sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';"
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
 #                    12. IMWHEEL (MOUSE SPEED CONFIGURATOR)                   #
 #                                                                             #
 #                                                                             #
@@ -2099,6 +2070,10 @@ launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
 ideavimrcFile="$HOME/.ideavimrc"
 
 printf "\n2. Purging IntelliJ IDEA if present...\n"
+pids=$(pgrep -f idea)
+if [ -n "$pids" ]; then
+    kill $pids
+fi
 sudo snap remove intellij-idea-ultimate
 trash-put "$jetbrainsConfigDir"
 trash-put "$ideavimrcFile"
@@ -2123,16 +2098,19 @@ yes | mvn archetype:generate                          \
   -DartifactId="$projectName"                         \
   -Dversion=1.0-SNAPSHOT
 
+echo "Starting IntelliJ IDEA..."
 nohup "$launcherPath" nosplash "$tempProjectDir" > /dev/null 2>&1 &
 
 printf "\n5. Perform initial settings...\n"
 echo "   5.1. Choose 'Do not import settings' if asked."
 echo "   5.2. Accept user agreement if requested."
 echo "   5.3. Choose 'Don't Send' for data sharing request."
-echo "   5.4. Choose to trust projects in a temporary directory if asked."
-echo "   5.5. Login to your JetBrains account if asked."
+echo "   5.4. Activate IntelliJ IDEA if asked."
+echo "   5.5. Choose to trust projects in a temporary directory if asked."
 echo "Press Enter to continue..."
 read voidInput
+echo "Shutting down IntelliJ IDEA..."
+kill $(pgrep -f idea)
 
 echo "6. Installing the following plugins:"
 echo "   - .ignore"
@@ -2150,9 +2128,11 @@ echo "   - SonarLint"
 echo "   - Terraform and HCL"
 echo "   - VCL/Varnish Language"
 /snap/intellij-idea-ultimate/current/bin/idea.sh installPlugins mobi.hsz.idea.gitignore co.nums.intellij.aem org.asciidoctor.intellij.asciidoc CheckStyle-IDEA "Dummy Text Generator" IdeaVIM com.liferay.ide.intellij.plugin com.mikejhill.intellij.movetab Osmorc Pythonid org.jetbrains.settingsRepository org.sonarlint.idea org.intellij.plugins.hcl rocks.blackcat.vcl
+echo "Plugins installation finished"
+
+echo "Starting IntelliJ IDEA..."
+nohup "$launcherPath" nosplash "$tempProjectDir" > /dev/null 2>&1 &
 echo ""
-echo "Restart IntelliJ IDEA and press Enter to continue..."
-read voidInput
 
 echo "7. Perform synchronizable settings:"
 echo "   Toolbar -> File -> Manage IDE Settings -> Settings repository"
@@ -2478,7 +2458,7 @@ echo "5. Installing 'ddterm' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/3780/ddterm/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 ddtermArchive="ddtermArchive.zip"
-wget -O "$ddtermArchive" https://extensions.gnome.org/extension-data/ddtermamezin.github.com.v43.shell-extension.zip
+wget -O "$ddtermArchive" https://extensions.gnome.org/extension-data/ddtermamezin.github.com.v53.shell-extension.zip
 ddtermDirUnzipped="ddtermDirUnzipped"
 unzip "$ddtermArchive" -d "$ddtermDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
@@ -2551,12 +2531,13 @@ echo "---> Context menus:"
 echo "-----> Show smart actions: [disable]"
 echo "-----> Hover menu: [disable all]"
 echo "-----> Show mini menu when selecting text: [disable]"
+echo "-----> Show sidebar button: [disable]"
 echo "-> Sidebar:"
 echo "---> Always show sidebar: [disable]"
 echo "---> Personalize my top sites in customize sidebar: [disable]"
 echo "---> App and notification settings"
 echo "-----> Allow sidebar apps to show notifications: [disable]"
-echo "-----> Bing Chat: [disable all]"
+echo "-----> Copilot: [disable all]"
 echo "-> Default browser"
 echo "---> [Make default]"
 echo "-> Downloads"
@@ -2573,7 +2554,7 @@ read voidInput
 echo "Adjust default page settings (gear in the right corner):"
 echo "-> Quick links: [off]"
 echo "-> Background: [off]"
-echo "-> New tab tips: [off]"
+echo "-> Show sponsored background: [off]"
 
 echo "Press Enter to continue"
 read voidInput
@@ -2617,7 +2598,7 @@ if [ "$exitCode" != 0 ]
     echo "2. NVIDIA devices detected. Drivers will be installed now..."
     sudo add-apt-repository ppa:graphics-drivers/ppa -y
     sudo apt update
-    sudo apt install nvidia-driver-535 -y
+    sudo apt install nvidia-driver-550 -y
     echo "3. NVIDIA drivers installed. They will start after rebooting"
 fi
 
