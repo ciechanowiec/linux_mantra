@@ -1,0 +1,1 @@
+noto_serif.zip was downloaded on 2024-05-11 from https://fonts.google.com/download?family=Noto+Serif
