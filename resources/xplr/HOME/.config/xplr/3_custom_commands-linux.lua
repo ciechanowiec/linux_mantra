@@ -220,7 +220,7 @@ local decompile = commandMode.cmd("decompile", "Decompile a focused item (normal
     }
 
     source "$HOME/.sdkman/bin/sdkman-init.sh"
-    sdk use java 21-tem
+    sdk use java 21.0.3-tem
     echo ""
     echo "Using the following Java:"
     java -version
