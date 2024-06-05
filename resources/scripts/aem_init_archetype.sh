@@ -35,7 +35,7 @@ sdk use java 8.0.412-zulu
 mvn -B org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate \
     -D archetypeGroupId=com.adobe.aem \
     -D archetypeArtifactId=aem-project-archetype \
-    -D archetypeVersion=43 \
+    -D archetypeVersion=49 \
     -D appTitle="First Hops" \
     -D appId="$appId" \
     -D groupId="eu.ciechanowiec" \
