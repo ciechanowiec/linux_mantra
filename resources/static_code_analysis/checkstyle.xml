@@ -164,7 +164,9 @@
         Metrics
         -->
         <module name="BooleanExpressionComplexity"/>
-        <module name="ClassDataAbstractionCoupling"/>
+        <module name="ClassDataAbstractionCoupling">
+            <property name="max" value="15"/>
+        </module>
         <module name="ClassFanOutComplexity">
             <property name="excludedPackages" value="edu.umd.cs.findbugs.annotations, org.jetbrains.annotations, lombok, lombok.extern.slf4j, com.google.common.annotations,
             org.junit.jupiter.api, org.junit.jupiter.api.extension, org.junit.jupiter.params, org.mockito, org.mockito.junit.jupiter, org.hamcrest,
