@@ -422,7 +422,7 @@ cat > "$pomFile" << EOF
         <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <lombok.version>1.18.30</lombok.version>
-        <spotbugs-annotations.version>4.8.4</spotbugs-annotations.version>
+        <spotbugs-annotations.version>4.8.5</spotbugs-annotations.version>
         <junit-jupiter-api.version>5.10.2</junit-jupiter-api.version>
         <junit-jupiter-params.version>5.10.2</junit-jupiter-params.version>
         <mockito-core.version>5.11.0</mockito-core.version>
@@ -449,10 +449,10 @@ cat > "$pomFile" << EOF
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
         <min.maven.version>3.8.6</min.maven.version>
         <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
-        <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
-        <maven-pmd-plugin.version>3.22.0</maven-pmd-plugin.version>
-        <spotbugs-maven-plugin.version>4.8.4.0</spotbugs-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <maven-checkstyle-plugin.version>3.4.0</maven-checkstyle-plugin.version>
+        <maven-pmd-plugin.version>3.23.0</maven-pmd-plugin.version>
+        <spotbugs-maven-plugin.version>4.8.5.0</spotbugs-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <jacoco-maven-plugin.coverage.minimum>0.8</jacoco-maven-plugin.coverage.minimum>
     </properties>
 
