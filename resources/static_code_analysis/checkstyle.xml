@@ -207,7 +207,6 @@
         <module name="ClassTypeParameterName"/>
         <module name="ConstantName"/>
         <module name="IllegalIdentifierName"/>
-        <module name="InterfaceTypeParameterName"/>
         <module name="LambdaParameterName"/>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
