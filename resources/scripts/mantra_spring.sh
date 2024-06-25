@@ -893,6 +893,11 @@ cat > "$pomFile" << EOF
                                 <type>regex</type>
                                 <version>(?i)[0-9].+\.dev[0-9]*</version>
                             </ignoreVersion>
+                            <ignoreVersion>
+                                <!-- Ignoring ongoing build numbers, like 2.5.0-b34 and 2.5.0-B34 -->
+                                <type>regex</type>
+                                <version>(?i)[0-9].+-b[0-9]+</version>
+                            </ignoreVersion>
                         </ignoreVersions>
                     </ruleSet>
                 </configuration>
