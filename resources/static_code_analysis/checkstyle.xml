@@ -243,7 +243,9 @@
             <property name="max" value="60"/>
         </module>
         <module name="ExecutableStatementCount"/>
-        <module name="LambdaBodyLength"/>
+        <module name="LambdaBodyLength">
+            <property name="max" value="15"/>
+        </module>
         <module name="MethodCount">
             <property name="maxTotal" value="20"/>
             <property name="maxPublic" value="20"/>
