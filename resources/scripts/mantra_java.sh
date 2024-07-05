@@ -682,7 +682,7 @@ cat > "$pomFile" << EOF
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>\${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <failIfNoTests>true</failIfNoTests>
+                    <failIfNoTests>\${enforce-tests-coverage}</failIfNoTests>
                 </configuration>
             </plugin>
             <!-- Prevents from building if integration tests don't pass -->
