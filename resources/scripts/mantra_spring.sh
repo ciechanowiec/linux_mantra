@@ -1062,7 +1062,7 @@ cat > "$pomFile" << EOF
                             <execution>
                                 <id>download-sources</id>
                                 <goals>
-                                    <goal>sources</goal>
+                                    <goal>resolve-sources</goal>
                                 </goals>
                                 <phase>validate</phase>
                                 <configuration>
