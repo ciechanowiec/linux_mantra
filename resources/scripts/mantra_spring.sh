@@ -1215,8 +1215,6 @@ EOF
 printf "${STATUS_TAG} ${ITALIC}.env${RESET_FORMAT} file with default content has been created.\n"
 
 cat > "$projectDirectory/docker-compose.yml" << EOF
-version: "3.9"
-
 services:
   $projectName:
     build:
