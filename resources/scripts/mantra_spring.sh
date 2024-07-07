@@ -1239,7 +1239,10 @@ services:
       - type: volume
         source: \${PROGRAM_NAME}-data
         target: \${LOGGING_DIR}
-    entrypoint: [ "sh", "-c", "./starter.sh" ]
+    # exec is required in order to set the Java process as PID 1 inside the container, since Docker sends
+    # termination signals only to PID 1, and we need those signals to be handled by the java process:
+    entrypoint: [ "sh", "-c", "exec ./starter.sh" ]
+    stop_grace_period: 300s
     hostname: \${PROGRAM_NAME}
     networks:
       - \${PROGRAM_NAME}-network
@@ -1251,6 +1254,7 @@ services:
   postgres:
     image: postgres:latest
     container_name: postgres
+    stop_grace_period: 300s
     hostname: postgres
     command: ["postgres", "-c", "logging_collector=on", "-c", "log_directory=/var/log/postgresql", "-c", "log_statement=all"]
     networks:
@@ -1344,7 +1348,9 @@ ARG LOGGING_DIR
 WORKDIR /app
 # Copy only the built jar from the first stage
 COPY --from=build /app/target/\$PROGRAM_NAME-\$PROGRAM_VERSION.jar /app
-RUN printf '#!/bin/bash\n\njava -jar \$PROGRAM_NAME-\$PROGRAM_VERSION.jar\n\ntail -f /dev/null\n' > starter.sh
+# exec is required in order to set the Java process as PID 1 inside the container, since Docker sends
+# termination signals only to PID 1, and we need those signals to be handled by the java process:
+RUN printf '#!/bin/bash\n\nexec java -jar \$PROGRAM_NAME-\$PROGRAM_VERSION.jar\n\ntail -f /dev/null\n' > starter.sh
 RUN chmod 755 starter.sh
 
 VOLUME \$LOGGING_DIR
