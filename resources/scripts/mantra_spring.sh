@@ -1,7 +1,7 @@
 #!/bin/bash
 # A. Script for generating Spring Boot projects from a template.
-#    The template is based on the output of the following command:
-#    spring init --dependencies=web,actuator,devtools,validation,data-jpa,mysql,h2,lombok \
+#    The template is based on the output of the command similar to this:
+#    spring init --dependencies=web,actuator,validation,data-jpa,mysql,h2,lombok \
 #                --type=maven-project \
 #                --group-id=eu.ciechanowiec \
 #                --artifact-id=demo \
@@ -388,7 +388,7 @@ spring.mvc.hiddenmethod.filter.enabled=true
 logging.level.root=INFO
 # Format like '2023-02-03 21:37:11.056 GMT+1':
 logging.pattern.dateformat=yyyy-MM-dd HH:mm:ss.SSS O
-logging.file.name=\${LOGGING_FILE_ABS_PATH:./logs/application.log}
+logging.file.name=\${PROGRAM_LOGGING_FILE_ABS_PATH:./logs/application.log}
 # Will roll the log file every day and add it name like 'application.log-2023-02-03_21-49.0'
 # (docs: https://logback.qos.ch/manual/appenders.html):
 logging.logback.rollingpolicy.file-name-pattern=\${LOG_FILE}-%d{yyyy-MM-dd}.%i
@@ -422,8 +422,6 @@ printf "${STATUS_TAG} Default application properties have been added to ${ITALIC
 insertContentToApplicationH2Properties () {
   applicationPropertiesFile="$1/src/main/resources/application-h2.properties"
 cat > "$applicationPropertiesFile" << EOF
-spring.devtools.livereload.enabled=true
-
 # DATA
 spring.datasource.url=jdbc:h2:mem:localdb
 spring.sql.init.schema-locations=classpath:sql/schema/test-schema.sql
@@ -443,7 +441,7 @@ insertContentToApplicationProdProperties () {
 cat > "$applicationPropertiesFile" << EOF
 # DATA
 # 'postgres' is a database that exists by default:
-spring.datasource.url=jdbc:postgresql://\${POSTGRES_HOSTNAME:localhost}:5432/postgres
+spring.datasource.url=jdbc:postgresql://\${POSTGRES_HOSTNAME:localhost}:\${POSTGRES_PORT}/postgres
 spring.sql.init.schema-locations=classpath:sql/schema/prod-schema.sql
 EOF
 printf "${STATUS_TAG} Default application properties have been added to ${ITALIC}application-prod.properties${RESET_FORMAT}.\n"
@@ -454,7 +452,7 @@ insertContentToApplicationTestProperties () {
 cat > "$applicationPropertiesFile" << EOF
 # DATA
 # 'postgres' is a database that exists by default:
-spring.datasource.url=jdbc:postgresql://\${POSTGRES_HOSTNAME:localhost}:5432/postgres
+spring.datasource.url=jdbc:postgresql://\${POSTGRES_HOSTNAME:localhost}:\${POSTGRES_PORT}/postgres
 spring.sql.init.schema-locations=classpath:sql/schema/test-schema.sql
 spring.sql.init.data-locations=classpath:sql/data/test-data.sql
 EOF
@@ -645,7 +643,9 @@ cat > "$pomFile" << EOF
     </properties>
 
     <dependencies>
-        <!-- Spring Boot -->
+        <!-- ====================================================================== -->
+        <!-- SPRING BOOT                                                            -->
+        <!-- ====================================================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -653,12 +653,6 @@ cat > "$pomFile" << EOF
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -682,7 +676,9 @@ cat > "$pomFile" << EOF
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Utils -->
+        <!-- ====================================================================== -->
+        <!-- ETC                                                                    -->
+        <!-- ====================================================================== -->
         <dependency>
             <groupId>eu.ciechanowiec</groupId>
             <artifactId>im-aop-loggers</artifactId>
@@ -823,7 +819,6 @@ cat > "$pomFile" << EOF
                     </execution>
                 </executions>
             </plugin>
-            <!-- Requires new Maven version -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -1062,7 +1057,7 @@ cat > "$pomFile" << EOF
                             <execution>
                                 <id>download-sources</id>
                                 <goals>
-                                    <goal>resolve-sources</goal>
+                                    <goal>sources</goal>
                                 </goals>
                                 <phase>validate</phase>
                                 <configuration>
@@ -1200,15 +1195,20 @@ addDocker () {
   projectName=$2
 
 cat > "$projectDirectory/.env" << EOF
+COMPOSE_PARALLEL_LIMIT=1
+
 PROGRAM_NAME=$projectName
 PROGRAM_VERSION=1.0.0
 PROGRAM_PORT=8080
-LOGGING_DIR=/var/logs/$projectName
-LOGGING_FILE_ABS_PATH=/var/logs/$projectName/application.log
+PROGRAM_LOGGING_DIR=/var/logs/$projectName
+PROGRAM_LOGGING_FILE_ABS_PATH=/var/logs/$projectName/application.log
+
+SPRING_ACTIVE_PROFILE=h2
+
 POSTGRES_HOSTNAME=postgres
+POSTGRES_PORT=5432
 POSTGRES_USER=admin
 POSTGRES_PASSWORD=admin
-SPRING_ACTIVE_PROFILE=h2
 PGADMIN_DEFAULT_EMAIL=admin@admin.com
 PGADMIN_DEFAULT_PASSWORD=admin
 EOF
@@ -1222,23 +1222,24 @@ services:
       args:
         PROGRAM_NAME: \${PROGRAM_NAME}
         PROGRAM_VERSION: \${PROGRAM_VERSION}
-        LOGGING_DIR: \${LOGGING_DIR}
+        PROGRAM_LOGGING_DIR: \${PROGRAM_LOGGING_DIR}
     environment:
       PROGRAM_NAME: \${PROGRAM_NAME}
       PROGRAM_VERSION: \${PROGRAM_VERSION}
       PROGRAM_PORT: \${PROGRAM_PORT}
-      LOGGING_DIR: \${LOGGING_DIR}
-      LOGGING_FILE_ABS_PATH: \${LOGGING_FILE_ABS_PATH}
+      PROGRAM_LOGGING_DIR: \${PROGRAM_LOGGING_DIR}
+      PROGRAM_LOGGING_FILE_ABS_PATH: \${PROGRAM_LOGGING_FILE_ABS_PATH}
       SPRING_ACTIVE_PROFILE: \${SPRING_ACTIVE_PROFILE}
       POSTGRES_HOSTNAME: \${POSTGRES_HOSTNAME}
+      POSTGRES_PORT: \${POSTGRES_PORT}
       POSTGRES_USER: \${POSTGRES_USER}
       POSTGRES_PASSWORD: \${POSTGRES_PASSWORD}
-    image: \${PROGRAM_NAME}:latest
+    image: \${PROGRAM_NAME}:\${PROGRAM_VERSION}
     container_name: \${PROGRAM_NAME}
     volumes:
       - type: volume
         source: \${PROGRAM_NAME}-data
-        target: \${LOGGING_DIR}
+        target: \${PROGRAM_LOGGING_DIR}
     # exec is required in order to set the Java process as PID 1 inside the container, since Docker sends
     # termination signals only to PID 1, and we need those signals to be handled by the java process:
     entrypoint: [ "sh", "-c", "exec ./starter.sh" ]
@@ -1247,7 +1248,10 @@ services:
     networks:
       - \${PROGRAM_NAME}-network
     ports:
-      - \${PROGRAM_PORT}:\${PROGRAM_PORT}
+      - target: \${PROGRAM_PORT}
+        published: \${PROGRAM_PORT}
+        protocol: tcp
+        mode: host
     depends_on:
       - postgres
 
@@ -1255,13 +1259,14 @@ services:
     image: postgres:latest
     container_name: postgres
     stop_grace_period: 300s
+    init: true
     hostname: postgres
     command: ["postgres", "-c", "logging_collector=on", "-c", "log_directory=/var/log/postgresql", "-c", "log_statement=all"]
     networks:
       - \${PROGRAM_NAME}-network
     ports:
-      - target: 5432
-        published: 5432
+      - target: \${POSTGRES_PORT}
+        published: \${POSTGRES_PORT}
         protocol: tcp
         mode: host
     environment:
@@ -1281,6 +1286,7 @@ services:
       dockerfile: pgadmin/Dockerfile
       args:
         POSTGRES_USER: \${POSTGRES_USER}
+        POSTGRES_PORT: \${POSTGRES_PORT}
     image: pgadmin
     container_name: pgadmin
     environment:
@@ -1288,13 +1294,13 @@ services:
       PGADMIN_DEFAULT_PASSWORD: \${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_LISTEN_PORT: 5050
       PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    networks:
+      - \${PROGRAM_NAME}-network
     ports:
       - target: 5050
         published: 5050
         protocol: tcp
         mode: host
-    networks:
-      - \${PROGRAM_NAME}-network
     depends_on:
       - postgres
 
@@ -1343,7 +1349,7 @@ FROM eclipse-temurin:21-jdk
 
 ARG PROGRAM_NAME
 ARG PROGRAM_VERSION
-ARG LOGGING_DIR
+ARG PROGRAM_LOGGING_DIR
 
 WORKDIR /app
 # Copy only the built jar from the first stage
@@ -1353,7 +1359,7 @@ COPY --from=build /app/target/\$PROGRAM_NAME-\$PROGRAM_VERSION.jar /app
 RUN printf '#!/bin/bash\n\nexec java -jar \$PROGRAM_NAME-\$PROGRAM_VERSION.jar\n\ntail -f /dev/null\n' > starter.sh
 RUN chmod 755 starter.sh
 
-VOLUME \$LOGGING_DIR
+VOLUME \$PROGRAM_LOGGING_DIR
 EOF
 printf "${STATUS_TAG} ${ITALIC}Dockerfile${RESET_FORMAT} file with default content has been created.\n"
 }
@@ -1369,10 +1375,12 @@ FROM dpage/pgadmin4:latest
 USER root
 
 ARG POSTGRES_USER
+ARG POSTGRES_PORT
 
 COPY ../pgadmin/servers.json /pgadmin4/servers.json
 
 RUN sed -i "s/POSTGRES_USER/"\${POSTGRES_USER}"/g" /pgadmin4/servers.json
+RUN sed -i "s/POSTGRES_PORT/"\${POSTGRES_PORT}"/g" /pgadmin4/servers.json
 EOF
 printf "${STATUS_TAG} ${ITALIC}pgadmin/Dockerfile${RESET_FORMAT} file with default content has been created.\n"
 
@@ -1382,7 +1390,7 @@ cat > "$projectDirectory/pgadmin/servers.json" << EOF
     "1": {
       "Name": "Basic",
       "Group": "Servers",
-      "Port": 5432,
+      "Port": POSTGRES_PORT,
       "Username": "POSTGRES_USER",
       "Host": "postgres",
       "MaintenanceDB": "postgres"
