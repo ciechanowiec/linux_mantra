@@ -457,7 +457,9 @@ cat > "$pomFile" << EOF
     </properties>
 
     <dependencies>
-        <!-- Utils -->
+        <!-- ====================================================================== -->
+        <!-- ETC                                                                    -->
+        <!-- ====================================================================== -->
         <dependency>
             <groupId>eu.ciechanowiec</groupId>
             <artifactId>conditional</artifactId>
@@ -490,7 +492,9 @@ cat > "$pomFile" << EOF
                  on the final classpath -->
             <scope>provided</scope>
         </dependency>
-        <!-- Testing -->
+        <!-- ====================================================================== -->
+        <!-- TESTING                                                                -->
+        <!-- ====================================================================== -->
         <dependency>
             <!--  Basic JUnit library -->
             <groupId>org.junit.jupiter</groupId>
@@ -699,7 +703,6 @@ cat > "$pomFile" << EOF
                     </execution>
                 </executions>
             </plugin>
-            <!-- Requires new Maven version -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -940,7 +943,7 @@ cat > "$pomFile" << EOF
                             <execution>
                                 <id>download-sources</id>
                                 <goals>
-                                    <goal>resolve-sources</goal>
+                                    <goal>sources</goal>
                                 </goals>
                                 <phase>validate</phase>
                                 <configuration>
