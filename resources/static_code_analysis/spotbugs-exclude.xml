@@ -45,7 +45,11 @@
         <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
     </Match>
     <Match>
-        <!--  It's ok to keep configs in servlet instance fields: -->
+        <!--  It's ok to keep, access and update configs in servlet instance fields: -->
         <Bug pattern="MTIA_SUSPECT_SERVLET_INSTANCE_FIELD"/>
+    </Match>
+    <Match>
+        <!--  It's ok to keep, access and update configs in servlet instance fields: -->
+        <Bug pattern="MSF_MUTABLE_SERVLET_FIELD"/>
     </Match>
 </FindBugsFilter>
