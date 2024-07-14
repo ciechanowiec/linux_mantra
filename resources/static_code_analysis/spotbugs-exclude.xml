@@ -44,4 +44,8 @@
               https://github.com/spotbugs/spotbugs/pull/2709 -->
         <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
     </Match>
+    <Match>
+        <!--  It's ok to keep configs in servlet instance fields: -->
+        <Bug pattern="MTIA_SUSPECT_SERVLET_INSTANCE_FIELD"/>
+    </Match>
 </FindBugsFilter>
