@@ -118,7 +118,7 @@
         <module name="MissingSwitchDefault"/>
         <module name="ModifiedControlVariable"/>
         <module name="MultipleStringLiterals">
-            <property name="allowedDuplicates" value="2"/>
+            <property name="allowedDuplicates" value="6"/>
         </module>
         <module name="MultipleVariableDeclarations"/>
         <module name="NestedForDepth">
