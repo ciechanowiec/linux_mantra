@@ -54,6 +54,7 @@
         <exclude name="AvoidDollarSigns"/>
         <exclude name="CallSuperInConstructor"/>
         <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="GenericsNaming"/>
         <exclude name="LocalVariableCouldBeFinal"/>
         <exclude name="MethodArgumentCouldBeFinal"/>
         <exclude name="OnlyOneReturn"/>
@@ -122,7 +123,14 @@
             <property name="ignoreExpressions" value="false"/>
         </properties>
     </rule>
+    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
+        <properties>
+            <!-- Value '7' means that max 6 are allowed: -->
+            <property name="maxDuplicateLiterals" value="7"/>
+        </properties>
+    </rule>
     <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
         <exclude name="CallSuperFirst"/>
         <exclude name="CallSuperLast"/>
         <exclude name="MissingSerialVersionUID"/> <!-- Disablement justification: https://github.com/projectlombok/lombok/wiki/WHY-NOT:-serialVersionUID -->
