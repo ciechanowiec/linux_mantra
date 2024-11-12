@@ -17,8 +17,9 @@
     <rule ref="category/java/bestpractices.xml">
         <exclude name="DoubleBraceInitialization"/>
         <exclude name="GuardLogStatement"/>
-        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
         <exclude name="LiteralsFirstInComparisons"/>
+        <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
+        <exclude name="UnitTestContainsTooManyAsserts"/>
     </rule>
 
     <!--
