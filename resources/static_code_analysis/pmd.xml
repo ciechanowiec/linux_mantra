@@ -9,11 +9,6 @@
     <!--
     BEST PRACTICES
     -->
-    <rule ref="category/java/bestpractices.xml/JUnitTestContainsTooManyAsserts">
-        <properties>
-            <property name="maximumAsserts" value="10"/>
-        </properties>
-    </rule>
     <rule ref="category/java/bestpractices.xml">
         <exclude name="DoubleBraceInitialization"/>
         <exclude name="GuardLogStatement"/>
