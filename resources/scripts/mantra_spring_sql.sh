@@ -628,16 +628,16 @@ cat > "$pomFile" << EOF
         <im-aop-loggers.version>1.1.4</im-aop-loggers.version>
         <conditional.version>$latestConditionalLibVersion</conditional.version>
         <sneakyfun.version>$latestSneakyFunLibVersion</sneakyfun.version>
-        <commons-lang3.version>3.14.0</commons-lang3.version>
-        <spotbugs-annotations.version>4.8.5</spotbugs-annotations.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <spotbugs-annotations.version>4.8.6</spotbugs-annotations.version>
         <!-- Locking down Maven default plugins -->
-        <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
+        <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
         <!-- Plugins -->
         <min.maven.version>3.8.6</min.maven.version>
-        <versions-maven-plugin.version>2.16.1</versions-maven-plugin.version>
-        <maven-checkstyle-plugin.version>3.4.0</maven-checkstyle-plugin.version>
-        <maven-pmd-plugin.version>3.23.0</maven-pmd-plugin.version>
-        <spotbugs-maven-plugin.version>4.8.5.0</spotbugs-maven-plugin.version>
+        <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <maven-pmd-plugin.version>3.26.0</maven-pmd-plugin.version>
+        <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <jacoco-maven-plugin.coverage.minimum>0.8</jacoco-maven-plugin.coverage.minimum>
     </properties>
@@ -1057,7 +1057,7 @@ cat > "$pomFile" << EOF
                             <execution>
                                 <id>download-sources</id>
                                 <goals>
-                                    <goal>sources</goal>
+                                    <goal>resolve-sources</goal>
                                 </goals>
                                 <phase>validate</phase>
                                 <configuration>
