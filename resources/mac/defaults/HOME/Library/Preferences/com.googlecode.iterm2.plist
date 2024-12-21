@@ -609,15 +609,15 @@
 		<integer>1</integer>
 	</dict>
 	<key>NSWindow Frame NSColorPanel</key>
-	<string>0 211 224 278 0 0 2560 1415 </string>
+	<string>0 167 224 278 0 0 1920 1055 </string>
 	<key>NSWindow Frame NSNavPanelAutosaveName</key>
 	<string>174 240 800 448 0 0 1512 944 </string>
 	<key>NSWindow Frame ProfilesPanel</key>
 	<string>1708 608 735 388 0 0 2560 1415 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 0 1281 1415 0 0 2560 1415 </string>
+	<string>0 0 1124 1055 0 0 1920 1055 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>1279 0 1281 1415 0 0 2560 1415 </string>
+	<string>641 85 1109 970 0 0 1920 1055 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
 	<string>473 470 769 945 0 0 2560 1415 </string>
 	<key>NSWindow Frame iTerm Window 3</key>
@@ -1210,26 +1210,12 @@
 					<key>Text</key>
 					<string>[1;2P</string>
 				</dict>
-				<key>0xf704-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[1;5P</string>
-				</dict>
 				<key>0xf705-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[1;2Q</string>
-				</dict>
-				<key>0xf705-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[1;5Q</string>
 				</dict>
 				<key>0xf706-0x20000-0x0</key>
 				<dict>
@@ -1238,26 +1224,12 @@
 					<key>Text</key>
 					<string>[1;2R</string>
 				</dict>
-				<key>0xf706-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[1;5R</string>
-				</dict>
 				<key>0xf707-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[1;2S</string>
-				</dict>
-				<key>0xf707-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[1;5S</string>
 				</dict>
 				<key>0xf708-0x20000-0x0</key>
 				<dict>
@@ -1266,26 +1238,12 @@
 					<key>Text</key>
 					<string>[15;2~</string>
 				</dict>
-				<key>0xf708-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[15;5~</string>
-				</dict>
 				<key>0xf709-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[17;2~</string>
-				</dict>
-				<key>0xf709-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[17;5~</string>
 				</dict>
 				<key>0xf70a-0x20000-0x0</key>
 				<dict>
@@ -1294,26 +1252,12 @@
 					<key>Text</key>
 					<string>[18;2~</string>
 				</dict>
-				<key>0xf70a-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[18;5~</string>
-				</dict>
 				<key>0xf70b-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[19;2~</string>
-				</dict>
-				<key>0xf70b-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[19;5~</string>
 				</dict>
 				<key>0xf70c-0x20000-0x0</key>
 				<dict>
@@ -1322,26 +1266,12 @@
 					<key>Text</key>
 					<string>[20;2~</string>
 				</dict>
-				<key>0xf70c-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[20;5~</string>
-				</dict>
 				<key>0xf70d-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[21;2~</string>
-				</dict>
-				<key>0xf70d-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[21;5~</string>
 				</dict>
 				<key>0xf70e-0x20000-0x0</key>
 				<dict>
@@ -1350,47 +1280,12 @@
 					<key>Text</key>
 					<string>[23;2~</string>
 				</dict>
-				<key>0xf70e-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[23;5~</string>
-				</dict>
 				<key>0xf70f-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[24;2~</string>
-				</dict>
-				<key>0xf70f-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[24;5~</string>
-				</dict>
-				<key>0xf710-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[25;5~</string>
-				</dict>
-				<key>0xf711-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[26;5~</string>
-				</dict>
-				<key>0xf712-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[28;5~</string>
 				</dict>
 				<key>0xf728-0x0-0x0</key>
 				<dict>
@@ -1466,7 +1361,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>JetBrainsMonoNLNerdFontCompleteM-Regular 14</string>
+			<string>JetBrainsMonoNFM-Regular 11</string>
 			<key>Option Key Sends</key>
 			<integer>0</integer>
 			<key>Place Prompt at First Column</key>
@@ -2184,26 +2079,12 @@
 					<key>Text</key>
 					<string>[1;2P</string>
 				</dict>
-				<key>0xf704-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[1;5P</string>
-				</dict>
 				<key>0xf705-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[1;2Q</string>
-				</dict>
-				<key>0xf705-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[1;5Q</string>
 				</dict>
 				<key>0xf706-0x20000-0x0</key>
 				<dict>
@@ -2212,26 +2093,12 @@
 					<key>Text</key>
 					<string>[1;2R</string>
 				</dict>
-				<key>0xf706-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[1;5R</string>
-				</dict>
 				<key>0xf707-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[1;2S</string>
-				</dict>
-				<key>0xf707-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[1;5S</string>
 				</dict>
 				<key>0xf708-0x20000-0x0</key>
 				<dict>
@@ -2240,26 +2107,12 @@
 					<key>Text</key>
 					<string>[15;2~</string>
 				</dict>
-				<key>0xf708-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[15;5~</string>
-				</dict>
 				<key>0xf709-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[17;2~</string>
-				</dict>
-				<key>0xf709-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[17;5~</string>
 				</dict>
 				<key>0xf70a-0x20000-0x0</key>
 				<dict>
@@ -2268,26 +2121,12 @@
 					<key>Text</key>
 					<string>[18;2~</string>
 				</dict>
-				<key>0xf70a-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[18;5~</string>
-				</dict>
 				<key>0xf70b-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[19;2~</string>
-				</dict>
-				<key>0xf70b-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[19;5~</string>
 				</dict>
 				<key>0xf70c-0x20000-0x0</key>
 				<dict>
@@ -2296,26 +2135,12 @@
 					<key>Text</key>
 					<string>[20;2~</string>
 				</dict>
-				<key>0xf70c-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[20;5~</string>
-				</dict>
 				<key>0xf70d-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[21;2~</string>
-				</dict>
-				<key>0xf70d-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[21;5~</string>
 				</dict>
 				<key>0xf70e-0x20000-0x0</key>
 				<dict>
@@ -2324,47 +2149,12 @@
 					<key>Text</key>
 					<string>[23;2~</string>
 				</dict>
-				<key>0xf70e-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[23;5~</string>
-				</dict>
 				<key>0xf70f-0x20000-0x0</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[24;2~</string>
-				</dict>
-				<key>0xf70f-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[24;5~</string>
-				</dict>
-				<key>0xf710-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[25;5~</string>
-				</dict>
-				<key>0xf711-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[26;5~</string>
-				</dict>
-				<key>0xf712-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[28;5~</string>
 				</dict>
 				<key>0xf728-0x0-0x0</key>
 				<dict>
@@ -2440,7 +2230,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>JetBrainsMonoNLNerdFontCompleteM-Regular 14</string>
+			<string>JetBrainsMonoNLNFM-Regular 11</string>
 			<key>Option Key Sends</key>
 			<integer>0</integer>
 			<key>Place Prompt at First Column</key>
@@ -2522,9 +2312,11 @@
 	<key>NoSyncAllAppVersions</key>
 	<array>
 		<string>3.4.19</string>
+		<string>3.5.10</string>
 	</array>
 	<key>NoSyncBFPRecents</key>
 	<array>
+		<string>Menlo</string>
 		<string>JetBrainsMonoNL Nerd Font Mono</string>
 		<string>JetBrainsMono Nerd Font Mono</string>
 		<string>Monaco</string>
@@ -2532,9 +2324,9 @@
 	<key>NoSyncFrame_SharedPreferences</key>
 	<dict>
 		<key>screenFrame</key>
-		<string>{{0, 0}, {2560, 1440}}</string>
+		<string>{{0, 0}, {1920, 1080}}</string>
 		<key>topLeft</key>
-		<string>{818, 966}</string>
+		<string>{993, 875}</string>
 	</dict>
 	<key>NoSyncHaveUsedCopyMode</key>
 	<true/>
@@ -2543,13 +2335,15 @@
 	<key>NoSyncInstallationId</key>
 	<string>94994D82-0359-4271-AE18-2FECDF446C81</string>
 	<key>NoSyncLastOSVersion</key>
-	<string>Version 13.4 (Build 22F66)</string>
+	<string>Version 15.2 (Build 24C101)</string>
 	<key>NoSyncLastSystemPythonVersionRequirement</key>
 	<string>1.17</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>125</integer>
+	<integer>142</integer>
 	<key>NoSyncNextAnnoyanceTime</key>
-	<real>704025079.40248704</real>
+	<real>756540106.97116101</real>
+	<key>NoSyncOnboardingWindowHasBeenShown34</key>
+	<true/>
 	<key>NoSyncRecordedVariables</key>
 	<dict>
 		<key>0</key>
@@ -2625,6 +2419,14 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
+				<string>homeDirectory</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
 				<string>jobName</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
@@ -2642,6 +2444,14 @@
 				<true/>
 				<key>name</key>
 				<string>tab.tmuxWindowTitle</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>uname</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2681,7 +2491,23 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
+				<string>mouseInfo</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
 				<string>path</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>shell</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2873,7 +2699,23 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
+				<string>effective_root_pid</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
 				<string>autoNameFormat</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>sshIntegrationLevel</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2906,6 +2748,14 @@
 				<true/>
 				<key>name</key>
 				<string>commandLine</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>applicationKeypad</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -2972,6 +2822,14 @@
 				<key>isTerminal</key>
 				<true/>
 				<key>name</key>
+				<string>currentTab.currentSession.mouseInfo</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
 				<string>currentTab.currentSession.parentSession.bellCount</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
@@ -2989,6 +2847,14 @@
 				<true/>
 				<key>name</key>
 				<string>currentTab.currentSession.terminalWindowName</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>isHotkeyWindow</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -3117,6 +2983,14 @@
 				<true/>
 				<key>name</key>
 				<string>titleOverrideFormat</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>currentTab.currentSession.effective_root_pid</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -3352,6 +3226,8 @@
 			</dict>
 		</array>
 	</dict>
+	<key>NoSyncRemoveDeprecatedKeyMappings</key>
+	<integer>2</integer>
 	<key>NoSyncRestoreWindowsCount</key>
 	<integer>0</integer>
 	<key>NoSyncTipOfTheDayEligibilityBeganTime</key>
@@ -3359,6 +3235,10 @@
 	<key>NoSyncTipsDisabled</key>
 	<true/>
 	<key>NoSyncTurnOffBracketedPasteOnHostChange</key>
+	<false/>
+	<key>NoSyncUserHasSelectedCommand</key>
+	<true/>
+	<key>NoSyncWindowRestoresWorkspaceAtLaunch</key>
 	<false/>
 	<key>OnlyWhenMoreTabs</key>
 	<false/>
@@ -3444,6 +3324,6 @@
 	<key>findMode_iTerm</key>
 	<integer>0</integer>
 	<key>iTerm Version</key>
-	<string>3.4.19</string>
+	<string>3.5.10</string>
 </dict>
 </plist>

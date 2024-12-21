@@ -256,9 +256,9 @@ local decompile = commandMode.cmd("decompile", "Decompile a focused item (normal
 local idea = commandMode.cmd("idea", "Open a focused directory in IntelliJ IDEA") (
         commandMode.BashExecSilently [===[
   baseName=$(basename -- "$XPLR_FOCUS_PATH")
-  mdfind "kMDItemKind == 'Application'" | grep -i 'IntelliJ IDEA'
+  launcherPath="/opt/homebrew/bin/idea"
 
-  if [ $? -ne 0 ]
+  if [ ! -f "$launcherPath" ]
     then
       echo LogError: "The IntelliJ IDEA launcher hasn't been detected" >> "${XPLR_PIPE_MSG_IN:?}"
       exit 0 # This code must be 0. Otherwise, the above error will not be logged by xplr
@@ -269,7 +269,7 @@ local idea = commandMode.cmd("idea", "Open a focused directory in IntelliJ IDEA"
       echo LogError: "The directory ${XPLR_FOCUS_PATH} doesn't exist" >> "${XPLR_PIPE_MSG_IN:?}"
       exit 0 # This code must be 0. Otherwise, the above error will not be logged by xplr
   fi
-  open -na "IntelliJ IDEA.app" --args "$XPLR_FOCUS_PATH" nosplash
+  nohup "$launcherPath" nosplash "$XPLR_FOCUS_PATH" > /dev/null 2>&1 &
   echo LogSuccess: "Opened the directory in IntelliJ IDEA∶ $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
   ]===]
 )
@@ -309,17 +309,17 @@ local nvim = commandMode.cmd("nvim", "Open a focused text file in NeoVim") (
   ]===]
 )
 
-local pdf = commandMode.cmd("pdf", "Open a focused pdf file in Google Chrome") (
+local pdf = commandMode.cmd("pdf", "Open a focused pdf file in Microsoft Edge") (
         commandMode.BashExecSilently [===[
   # TODO: change to Edge
   baseName=$(basename -- "$XPLR_FOCUS_PATH")
   fileType=$(file --brief "$XPLR_FOCUS_PATH")
   fileTypeLowerCase=$(echo "$fileType" | tr '[:upper:]' '[:lower:]')
-  chromeLauncher="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  edgeLauncher="/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
 
   if [[ "$fileTypeLowerCase" == *"pdf"* ]];
     then
-      "$chromeLauncher" "$XPLR_FOCUS_PATH" &> /dev/null
+      "$edgeLauncher" "$XPLR_FOCUS_PATH" &> /dev/null
       echo LogSuccess: "Opened '${baseName}' in Google Chrome" >> "${XPLR_PIPE_MSG_IN:?}"
   else
       echo LogError: "Is not a valid pdf file∶ $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
