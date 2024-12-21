@@ -446,8 +446,11 @@ eval "$(/opt/homebrew/bin/brew shellenv)" # For the current shell
     exit 1
 fi
 
-echo "4. Evaluating the shell..."
-source "$shellFile"
+if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  then
+    echo "4. Evaluating the shell..."
+    source "$shellFile"
+fi
 
 informAboutProcedureEnd
 
@@ -496,7 +499,7 @@ echo "4. Installing NeoVim..."
 # 1. Do not install via snap, because it might cause problems like this:
 #    https://github.com/LunarVim/LunarVim/issues/3612#issuecomment-1441131186
 # 2. Do not install via apt, because it has an old version
-nix-env --install --attr nixpkgs.neovim
+brew install neovim
 
 echo "5. Installing LazyVim..."
 # LazyVim: https://www.lazyvim.org/
@@ -2010,8 +2013,7 @@ promptOnContinuation
 ###############################################################################
 procedureId="github cli"
 # DOCUMENTATION:
-#   Linux: https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-#   MacOS: https://cli.github.com/manual/installation
+#   https://github.com/cli/cli?tab=readme-ov-file#installation
 #   Caching credentials for GitHub CLI: https://docs.github.com/en/get-started/getting-started-with-git/caching-your-github-credentials-in-git
 # NOTES:
 #   As of writing this script, the official method of GitHub CLI installation on Linux
