@@ -60,7 +60,7 @@ shellFile="null"
 isMacOS=false
 isLinux=false
 expectedLinuxReleaseName="jammy"
-expectedMacReleaseName="macOS 14"
+expectedMacReleaseName="macOS 15"
 
 echo "2. Checking whether the resources directory exists..."
 if [ ! -d "$resourcesDir" ]
@@ -439,6 +439,13 @@ cat >> "$shellFile" << EOF
 
 # 'brew' COMMAND:
 eval "\$(/opt/homebrew/bin/brew shellenv)"
+if type brew &>/dev/null # autocompletion
+  then
+    FPATH="\$(brew --prefix)/share/zsh/site-functions:\${FPATH}"
+
+    autoload -Uz compinit
+    compinit
+fi
 EOF
 eval "$(/opt/homebrew/bin/brew shellenv)" # For the current shell
   else
@@ -446,8 +453,11 @@ eval "$(/opt/homebrew/bin/brew shellenv)" # For the current shell
     exit 1
 fi
 
-echo "4. Evaluating the shell..."
-source "$shellFile"
+if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  then
+    echo "4. Evaluating the shell..."
+    source "$shellFile"
+fi
 
 informAboutProcedureEnd
 
@@ -496,7 +506,7 @@ echo "4. Installing NeoVim..."
 # 1. Do not install via snap, because it might cause problems like this:
 #    https://github.com/LunarVim/LunarVim/issues/3612#issuecomment-1441131186
 # 2. Do not install via apt, because it has an old version
-nix-env --install --attr nixpkgs.neovim
+brew install neovim
 
 echo "5. Installing LazyVim..."
 # LazyVim: https://www.lazyvim.org/
@@ -769,6 +779,7 @@ echo "Installing rust..."
 cat >> "$shellFile" << EOF
 
 # RUST:
+export PATH="\$HOME/.cargo/bin:\$PATH"
 EOF
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 sleep 3 # Give the command above some time to be finished
@@ -1570,7 +1581,7 @@ promptOnContinuation
 ###############################################################################
 procedureId="wallpaper"
 # DOCUMENTATION:
-#   n/a
+#   https://apple.stackexchange.com/a/348454
 # NOTES:
 #   Wallpaper RGB: 82,94,84
 
@@ -1583,8 +1594,8 @@ wallpaperDestinationPath="$wallpaperDestinationDir/$wallpaperFileName"
 
 echo "2. Cleaning the path for the wallpaper..."
 if [ -f "$wallpaperDestinationPath" ]
-  then
-    trash-put "$wallpaperDestinationPath"
+ then
+   trash-put "$wallpaperDestinationPath"
 fi
 
 echo "3. Copying the wallpaper to the destination directory..."
@@ -1592,8 +1603,17 @@ wallpaperResourcesPath="$resourcesDir/$wallpaperFileName"
 cp -rf "$wallpaperResourcesPath" "$wallpaperDestinationDir"
 
 echo "4. Setting up the wallpaper..."
-dconf write /org/gnome/desktop/background/picture-uri "'$wallpaperDestinationPath'"
-dconf write /org/gnome/desktop/screensaver/picture-uri "'$wallpaperDestinationPath'"
+if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  then
+    dconf write /org/gnome/desktop/background/picture-uri "'$wallpaperDestinationPath'"
+    dconf write /org/gnome/desktop/screensaver/picture-uri "'$wallpaperDestinationPath'"
+  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+    then
+      osascript -e 'tell application "System Events" to tell every desktop to set picture to "'"$wallpaperDestinationPath"'"'
+  else
+    echo "Unexpected error occurred. Update failed"
+    exit 1
+fi
 
 informAboutProcedureEnd
 
@@ -2010,8 +2030,7 @@ promptOnContinuation
 ###############################################################################
 procedureId="github cli"
 # DOCUMENTATION:
-#   Linux: https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-#   MacOS: https://cli.github.com/manual/installation
+#   https://github.com/cli/cli?tab=readme-ov-file#installation
 #   Caching credentials for GitHub CLI: https://docs.github.com/en/get-started/getting-started-with-git/caching-your-github-credentials-in-git
 # NOTES:
 #   As of writing this script, the official method of GitHub CLI installation on Linux
@@ -2020,18 +2039,28 @@ procedureId="github cli"
 
 informAboutProcedureStart
 
-echo "1. Downloading GitHub CLI..."
-curl -s https://api.github.com/repos/cli/cli/releases/latest \
-  | grep "browser_download_url.*gh.*amd64.deb" \
-  | cut -d : -f 2,3 \
-  | tr -d \" \
-  | wget -i -
+if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  then
+    echo "1.1. Downloading GitHub CLI..."
+    curl -s https://api.github.com/repos/cli/cli/releases/latest \
+      | grep "browser_download_url.*gh.*amd64.deb" \
+      | cut -d : -f 2,3 \
+      | tr -d \" \
+      | wget -i -
 
-echo "2. Installing GitHub CLI..."
-ghCLIIntstallationFile=$(ls -1 gh*amd64.deb | head -n 1)
-sudo dpkg -i "$ghCLIIntstallationFile"
+    echo "1.2. Installing GitHub CLI..."
+    ghCLIIntstallationFile=$(ls -1 gh*amd64.deb | head -n 1)
+    sudo dpkg -i "$ghCLIIntstallationFile"
+  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+    then
+      echo "1. Installing GitHub CLI..."
+      brew install gh
+  else
+    echo "Unexpected error occurred. Update failed"
+    exit 1
+fi
 
-printf "\n3. Caching credentials for GitHub CLI...\n"
+printf "\n2. Caching credentials for GitHub CLI...\n"
 echo "   Please perform manual login according to prompts in the terminal."
 echo "   If prompted for your preferred protocol for Git operations, select HTTPS."
 gh auth login # Two options will be prompted: GitHub + GitHub Enterprise. The first one should be selected.
@@ -2052,41 +2081,58 @@ procedureId="intellij idea"
 # DOCUMENTATION:
 #   n/a
 # NOTES:
-#   1. Settings for IntelliJ IDEA are of two types: synchronizable and non-synchronizable.
-#   2. Synchronizable settings are stored in a remote git repository and are automatically synced
-#      once that repository is defined. Non-synchronizable settings are, in turn, stored only
-#      locally (no option for syncing them) and should be done manually. The script embraces
-#      both mentioned types of settings.
-#   3. The script below requires a number of manual actions. This is because IntelliJ IDEA
-#      setup cannot be effectively automated in that scope (e.g. its behavior on first
-#      run is often unpredictable and it doesn't have clear configuration files system).
-#   4. Since IntelliJ IDEA 2022.3 there is an inbuilt option 'Setting Sync'. However, it
-#      is very unstable, unpredictable and also doesn't perform sync of all settings.
-#      Besides that, it is impossible to backup or see all settings synced by that
-#      functionality, so there is a risk of loosing settings.
+#   n/a
 
 informAboutProcedureStart
 
 echo "1. Setting up variables..."
 projectName="demoproject"
 tempProjectDir="$tempDir/$projectName"
-jetbrainsConfigDir="$HOME/.config/JetBrains"
-launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
 ideavimrcFile="$HOME/.ideavimrc"
+if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  then
+    jetbrainsConfigDir="$HOME/.config/JetBrains"
+    launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
+  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+    then
+      jetbrainsConfigDir="$HOME/Library/Application Support/JetBrains"
+      launcherPath="/opt/homebrew/bin/idea"
+  else
+    echo "Unexpected error occurred. Update failed"
+    exit 1
+fi
 
 printf "\n2. Purging IntelliJ IDEA if present...\n"
 pids=$(pgrep -f idea)
 if [ -n "$pids" ]; then
     kill $pids
 fi
-sudo snap remove intellij-idea-ultimate
+if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  then
+    sudo snap remove intellij-idea-ultimate
+  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+    then
+      brew uninstall intellij-idea
+  else
+    echo "Unexpected error occurred. Update failed"
+    exit 1
+fi
 trash-put "$jetbrainsConfigDir"
 trash-put "$ideavimrcFile"
 trash-put "$HOME/.cache/JetBrains"
 trash-put "$HOME/.local/share/JetBrains"
 
 printf "\n3. Installing IntelliJ IDEA...\n"
-sudo snap install intellij-idea-ultimate --classic
+if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  then
+    sudo snap install intellij-idea-ultimate --classic
+  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+    then
+      brew install intellij-idea
+  else
+    echo "Unexpected error occurred. Update failed"
+    exit 1
+fi
 
 printf "\n4. A temporary project will be set up and IntelliJ IDEA will be opened...\n"
 if [ -d "$tempProjectDir" ]
@@ -2094,7 +2140,6 @@ if [ -d "$tempProjectDir" ]
     echo "Old temporary project directory found. Removing..."
     trash-put "$tempProjectDir"
 fi
-
 yes | mvn archetype:generate                          \
   -DarchetypeGroupId=org.apache.maven.archetypes      \
   -DarchetypeArtifactId=maven-archetype-quickstart    \
@@ -2102,11 +2147,11 @@ yes | mvn archetype:generate                          \
   -DgroupId=demo.groupId                              \
   -DartifactId="$projectName"                         \
   -Dversion=1.0-SNAPSHOT
-
 echo "Starting IntelliJ IDEA..."
 nohup "$launcherPath" nosplash "$tempProjectDir" > /dev/null 2>&1 &
 
-printf "\n5. Perform initial settings...\n"
+echo ""
+echo "5. Perform initial settings..."
 echo "   5.1. Choose 'Do not import settings' if asked."
 echo "   5.2. Accept user agreement if requested."
 echo "   5.3. Choose 'Don't Send' for data sharing request."
@@ -2114,39 +2159,24 @@ echo "   5.4. Activate IntelliJ IDEA if asked."
 echo "   5.5. Choose to trust projects in a temporary directory if asked."
 echo "Press Enter to continue..."
 read voidInput
-echo "Shutting down IntelliJ IDEA..."
-kill $(pgrep -f idea)
 
-echo "6. Installing the following plugins:"
-echo "   - .ignore"
-echo "   - AEM IDE"
-echo "   - AsciiDoc"
-echo "   - CheckStyle-IDEA"
-echo "   - Dummy Text Generator"
-echo "   - IdeaVim"
-echo "   - Liferay"
-echo "   - MoveTab"
-echo "   - OSGi"
-echo "   - Python"
-echo "   - Settings Repository (Deprecated)"
-echo "   - SonarLint"
-echo "   - Terraform and HCL"
-echo "   - VCL/Varnish Language"
-/snap/intellij-idea-ultimate/current/bin/idea.sh installPlugins mobi.hsz.idea.gitignore co.nums.intellij.aem org.asciidoctor.intellij.asciidoc CheckStyle-IDEA "Dummy Text Generator" IdeaVIM com.liferay.ide.intellij.plugin com.mikejhill.intellij.movetab Osmorc Pythonid org.jetbrains.settingsRepository org.sonarlint.idea org.intellij.plugins.hcl rocks.blackcat.vcl
-echo "Plugins installation finished"
+echo "6. Perform synchronizable settings:"
+echo "   Toolbar -> File -> Manage IDE Settings -> Backup and Sync -> "
+echo "   -> Enable Backup and Sync"
+echo "   -> Get settings from Account"
+echo "Wait until settings are synchronized. After the synchronization is finished, press Enter to continue..."
+read voidInput
+echo "Shutting down IntelliJ IDEA..."
+pids=$(pgrep -f idea)
+if [ -n "$pids" ]; then
+    kill $pids
+fi
 
 echo "Starting IntelliJ IDEA..."
 nohup "$launcherPath" nosplash "$tempProjectDir" > /dev/null 2>&1 &
+
 echo ""
-
-echo "7. Perform synchronizable settings:"
-echo "   Toolbar -> File -> Manage IDE Settings -> Settings repository"
-echo "   -> Upstream URL [like: https://github.com/ciechanowiec/intellij_settings]"
-echo "   -> Overwrite local"
-echo "Restart IntelliJ IDEA and press Enter to continue..."
-read voidInput
-
-echo "8. Perform non-synchronizable Git settings:"
+echo "7. Perform non-synchronizable Git settings:"
 echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Version Control"
 echo "      -> Confirmation"
@@ -2155,7 +2185,7 @@ echo "         -> When files are deleted: Do not remove"
 echo "Press Enter to continue..."
 read voidInput
 
-echo "9. Perform non-synchronizable Checkstyle settings:"
+echo "8. Perform non-synchronizable Checkstyle settings:"
 echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Tools"
 echo "      -> Checkstyle"
@@ -2163,7 +2193,7 @@ echo "         -> Add and apply a custom rule set at this link: https://raw.gith
 echo "Press Enter to continue..."
 read voidInput
 
-echo "10. Perform non-synchronizable Maven settings:"
+echo "9. Perform non-synchronizable Maven settings:"
 echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Build, Execution, Deployment"
 echo "   -> Build Tools"
@@ -2173,13 +2203,13 @@ echo "      -> Check Automatically download 'Sources', 'Documentation', 'Annotat
 echo "Press Enter to continue..."
 read voidInput
 
-echo "11. Perform non-synchronizable shell check settings."
+echo "10. Perform non-synchronizable shell check settings."
 echo "   -> Open in IntelliJ any Bash script with .sh extension."
 echo "   -> Click 'Install' in the pop-up window above about shell check plugin."
 echo "Press Enter to continue..."
 read voidInput
 
-echo "12. Setting up file templates (removing 'public' modifiers for java files)..."
+echo "11. Setting up file templates (removing 'public' modifiers for java files)..."
 for IDESubDir in "$jetbrainsConfigDir"/*; do
   if [ -d "$IDESubDir" ]
     then
@@ -2242,7 +2272,7 @@ EOF
   fi
 done
 
-echo "13. Setting up .ideavimrc file..."
+echo "12. Setting up .ideavimrc file..."
 touch "$ideavimrcFile"
 cat > "$ideavimrcFile" << EOF
 source ~/.vimrc
@@ -2527,39 +2557,15 @@ echo "-----> Address bar and search"
 echo "-------> Search engine used in the address bar: [Google]"
 echo "-> Appearance:"
 echo "---> Customize toolbar:"
-echo "-----> Show favorites bar: [Only on new tabs]"
-echo "-----> Collections button: [disable]"
-echo "-----> Split screen button: [disable]"
-echo "-----> History button: [enable]"
-echo "-----> Browser essentials button: [disable]"
-echo "---> Context menus:"
-echo "-----> Show smart actions: [disable]"
-echo "-----> Hover menu: [disable all]"
-echo "-----> Show mini menu when selecting text: [disable]"
-echo "-----> Show sidebar button: [disable]"
+echo "-----> Show profile type in the profile button: [disable]"
+echo "-----> Show Workspaces: [disable]"
 echo "-> Sidebar:"
-echo "---> Always show sidebar: [disable]"
-echo "---> Personalize my top sites in customize sidebar: [disable]"
 echo "---> App and notification settings"
-echo "-----> Allow sidebar apps to show notifications: [disable]"
 echo "-----> Copilot: [disable all]"
 echo "-> Default browser"
 echo "---> [Make default]"
 echo "-> Downloads"
 echo "--> Location: [$HOME/Desktop]"
-echo "-> Languages"
-echo "---> Check spelling:"
-echo "-----> [English (United States)]"
-echo "-----> [Polish]"
-echo "-----> [Russian]"
-
-echo "Press Enter to continue"
-read voidInput
-
-echo "Adjust default page settings (gear in the right corner):"
-echo "-> Quick links: [off]"
-echo "-> Background: [off]"
-echo "-> Show sponsored background: [off]"
 
 echo "Press Enter to continue"
 read voidInput
@@ -2665,6 +2671,91 @@ busctl call \
     org.freedesktop.Accounts.User \
     SetIconFile \
     s "$photoTargetPath"
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
+#                            7. COMMON REPOS                                  #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="common repos"
+# DOCUMENTATION:
+#   n/a
+
+informAboutProcedureStart
+
+echo "Cloning own repos..."
+cd "$HOME/0_prog" || { echo "Failed to navigate to $HOME/0_prog. Exiting."; exit 1; }
+gh repo clone dock_aem
+gh repo clone linux_mantra
+
+echo "Cloning and resolving Apache Jackrabbit Oak repository..."
+oakDir="$HOME/0_prog/jackrabbit-oak"
+mkdir -v -p "$oakDir"
+if [ ! -d "$oakDir/.git" ]; then
+    echo "Cloning an Oak repository..."
+    git clone https://github.com/apache/jackrabbit-oak.git "$oakDir"
+else
+    echo "Oak repository already exists. Skipping cloning."
+fi
+cd "$oakDir" || { echo "Failed to navigate to $oakDir. Exiting."; exit 1; }
+mvn --fail-never dependency:sources && mvn --fail-never dependency:sources dependency:resolve -Dclassifier=javadoc
+
+echo "Cloning Apache Felix repository..."
+felixDir="$HOME/0_prog/felix-dev"
+mkdir -v -p "$felixDir"
+if [ ! -d "$felixDir/.git" ]; then
+    echo "Cloning a Felix repository..."
+    git clone https://github.com/apache/felix-dev.git "$felixDir"
+else
+    echo "Felix repository already exists. Skipping cloning."
+fi
+
+echo "Cloning Apache Sling repositories..."
+apacheSlingAllReposDir="$HOME/0_prog/apache_sling"
+aggregatorDir="$apacheSlingAllReposDir/sling-aggregator"
+mkdir -v -p "$apacheSlingAllReposDir"
+mkdir -v -p "$aggregatorDir"
+if [ ! -d "$aggregatorDir/.git" ]; then
+    echo "Cloning Apache Sling Aggregator repository..."
+    git clone https://github.com/apache/sling-aggregator.git "$aggregatorDir"
+else
+    echo "Apache Sling Aggregator repository already exists. Skipping cloning."
+fi
+cd "$aggregatorDir" || { echo "Failed to navigate to $aggregatorDir. Exiting."; exit 1; }
+chmod +x generate-repo-list.sh
+repo_list=$(./generate-repo-list.sh)
+IFS=$'\n' read -r -d '' -a repos <<< "$repo_list"
+total_repos=${#repos[@]}
+cloned_repos=0
+for repo in "${repos[@]}"; do
+    # Skip empty lines or invalid URLs
+    if [[ -z "$repo" || "$repo" != http*://* ]]; then
+        continue
+    fi
+    repo_name=$(basename -s .git "$repo")
+    if [ ! -d "$apacheSlingAllReposDir/$repo_name" ]; then
+        echo "Cloning $repo into $apacheSlingAllReposDir/$repo_name..."
+        git clone "$repo" "$apacheSlingAllReposDir/$repo_name"
+        if [ $? -eq 0 ]; then
+            cloned_repos=$((cloned_repos + 1))
+        else
+            echo "Failed to clone $repo. Skipping."
+        fi
+    else
+        echo "Skipping $repo_name (directory exists)."
+    fi
+    echo "Cloned $cloned_repos out of $total_repos repositories."
+    if [ "$cloned_repos" -ge 400 ]; then
+        echo "Cloned 400 repositories. Stopping further cloning."
+        break
+    fi
+done
 
 informAboutProcedureEnd
 
