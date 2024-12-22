@@ -25,7 +25,7 @@ resetCursor() {
 }
 
 if [ "$#" -eq 0 ]; then
-    nvim -c 'startinsert'; resetCursor
+    nvim -c ":e $HOME/Desktop/text-note-$RANDOM.txt"; resetCursor
 else
     nvim "$@"; resetCursor
 fi

@@ -12,13 +12,7 @@ RESET_FORMAT="\e[0m"
 ERROR_TAG="${BOLD_RED}[ERROR]:${RESET_FORMAT}"
 
 expectedLinuxReleaseName="jammy"
-expectedMacReleaseName="macOS 14"
-# It is assumed that the project will be opened in IntelliJ IDEA Ultimate.
-# In case you want to use IntelliJ IDEA Community, comment out the code line below
-# and restore from the comment the next line:
-launcherPathLinux="/snap/intellij-idea-ultimate/current/bin/idea.sh"
-#launcherPathLinux="/snap/intellij-idea-community/current/bin/idea.sh"
-launcherPathMac="$HOME/Applications/IntelliJ IDEA.app"
+expectedMacReleaseName="macOS 15"
 
 verifyOneArgument () {
   if [ $# != 1 ]
@@ -38,13 +32,9 @@ verifyIfSpecifiedDirectoryExists () {
 }
 
 idea() {
-  launcherPathLinux=$1
-  launcherPathMac=$2
-  projectDirectory=$3
+  projectDirectory=$1
   launcherPath=""
 
-  isMacOS=false
-  isLinux=false
   linesWithLinuxReleaseName=0
   linesWithMacReleaseName=0
   if compgen -G "/etc/*-release" > /dev/null; # Checking a file existence with a glob pattern: https://stackoverflow.com/a/34195247
@@ -60,38 +50,22 @@ idea() {
       exit 1
     elif [ "$linesWithLinuxReleaseName" -gt 0 ];
       then
-        isLinux=true
-        launcherPath="$launcherPathLinux"
+        launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
+#        launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
     elif [ "$linesWithMacReleaseName" -gt 0 ];
       then
-        isMacOS=true
-        launcherPath="$launcherPathMac"
+        launcherPath="/opt/homebrew/bin/idea"
     else
       echo "Unsupported operating system. Exiting..."
       exit 1;
   fi
 
-  if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  if [ ! -f "$launcherPath" ]
     then
-        if [ ! -f "$launcherPath" ]
-          then
-            printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT} hasn't been detected. Opening will be aborted.\n"
-            exit 1
-          else
-            nohup "$launcherPathLinux" nosplash "$projectDirectory" > /dev/null 2>&1 &
-        fi
-    elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
-      then
-        if [ ! -d "$launcherPath" ]
-          then
-            printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT} hasn't been detected. Opening will be aborted.\n"
-            exit 1
-          else
-            open -na "IntelliJ IDEA.app" --args "$projectDirectory" nosplash
-        fi
-    else
-      echo "Unexpected error occurred. Launching failed"
+      printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT} hasn't been detected. Opening will be aborted.\n"
       exit 1
+    else
+      nohup "$launcherPath" nosplash "$projectDirectory" > /dev/null 2>&1 &
   fi
 }
 
@@ -103,4 +77,4 @@ idea() {
 
 verifyOneArgument "$@"
 verifyIfSpecifiedDirectoryExists "$@"
-idea "$launcherPathLinux" "$launcherPathMac" "$1"
+idea "$1"

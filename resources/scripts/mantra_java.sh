@@ -1110,13 +1110,9 @@ showFinishMessage () {
 }
 
 openProjectInIDE () {
-  launcherPathLinux=$1
-  launcherPathMac=$2
-  projectDirectory=$3
+  projectDirectory=$1
   launcherPath=""
 
-  isMacOS=false
-  isLinux=false
   linesWithLinuxReleaseName=0
   linesWithMacReleaseName=0
   if compgen -G "/etc/*-release" > /dev/null; # Checking a file existence with a glob pattern: https://stackoverflow.com/a/34195247
@@ -1132,39 +1128,23 @@ openProjectInIDE () {
       exit 1
     elif [ "$linesWithLinuxReleaseName" -gt 0 ];
       then
-        isLinux=true
-        launcherPath="$launcherPathLinux"
+        launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
+#        launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
     elif [ "$linesWithMacReleaseName" -gt 0 ];
       then
-        isMacOS=true
-        launcherPath="$launcherPathMac"
+        launcherPath="/opt/homebrew/bin/idea"
     else
       echo "Unsupported operating system. Exiting..."
       exit 1;
   fi
 
   printf "${BOLD_LIGHT_YELLOW}[IntelliJ IDEA]:${RESET_FORMAT} Opening the project...\n"
-  if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  if [ ! -f "$launcherPath" ]
     then
-        if [ ! -f "$launcherPath" ]
-          then
-            printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT} hasn't been detected. Opening will be aborted.\n"
-            exit 1
-          else
-            nohup "$launcherPathLinux" nosplash "$projectDirectory" > /dev/null 2>&1 &
-        fi
-    elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
-      then
-        if [ ! -d "$launcherPath" ]
-          then
-            printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT} hasn't been detected. Opening will be aborted.\n"
-            exit 1
-          else
-            open -na "IntelliJ IDEA.app" --args "$projectDirectory" nosplash
-        fi
-    else
-      echo "Unexpected error occurred. Launching failed"
+      printf "${ERROR_TAG} The IntelliJ IDEA launcher ${ITALIC}${launcherPath}${RESET_FORMAT} hasn't been detected. Opening will be aborted.\n"
       exit 1
+    else
+      nohup "$launcherPath" nosplash "$projectDirectory" > /dev/null 2>&1 &
   fi
 }
 
@@ -1176,7 +1156,7 @@ openProjectInIDE () {
 
 # Revise and change values of the variables below to meet your needs
 expectedLinuxReleaseName="jammy"
-expectedMacReleaseName="macOS 14"
+expectedMacReleaseName="macOS 15"
 gitCommitterName="Herman"
 gitCommitterSurname="Ciechanowiec"
 gitCommitterEmail="herman@ciechanowiec.eu"
@@ -1184,12 +1164,6 @@ firstLevelPackageName="eu"
 secondLevelPackageName="ciechanowiec"
 projectURL="https://ciechanowiec.eu/"
 pathUntilProjectDirectory="${HOME}/0_prog" # This directory must exist when script is executed
-# It is assumed that the project will be opened in IntelliJ IDEA Ultimate.
-# In case you want to use IntelliJ IDEA Community, comment out the code line below
-# and restore from the comment the next line:
-launcherPathLinux="/snap/intellij-idea-ultimate/current/bin/idea.sh"
-#launcherPathLinux="/snap/intellij-idea-community/current/bin/idea.sh"
-launcherPathMac="$HOME/Applications/IntelliJ IDEA.app"
 
 # ============================================== #
 #                                                #
@@ -1235,4 +1209,4 @@ initCommit "$projectDirectory"
 
 # Finish:
 showFinishMessage "$projectName"
-openProjectInIDE "$launcherPathLinux" "$launcherPathMac" "$projectDirectory"
+openProjectInIDE "$projectDirectory"
