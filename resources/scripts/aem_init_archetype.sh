@@ -1,11 +1,8 @@
 #!/bin/bash
-# 1. For AEM 6.5 the archetype below works on for AEM 6.5.16.
-#    However, AEM 6.5.16 is supposed to work with 6.5.15 uber-jar.
-#    For that reason aemVersionToUse is set for AEM 6.5 to 6.5.15.
-# 2. As of creating this script, if for project generation Java 11+ is used, it will result
+# 1. As of creating this script, if for project generation Java 11+ is used, it will result
 #    in unformatted `{basedir}/pom.xml` (see bug description: https://issues.apache.org/jira/browse/ARCHETYPE-587).
 #    In order to avoid it, Java 8 is used.
-# 3. Use -SNAPSHOT version so that the bundle will be overwritten every time it is reinstalled
+# 2. Use -SNAPSHOT version so that the bundle will be overwritten every time it is reinstalled
 #    (details: https://sling.apache.org/documentation/bundles/osgi-installer.html#:~:text=The%20OSGi%20installer%20is%20a,for%20the%20OSGi%20configuration%20admin)
 
 source "$HOME/.sdkman/bin/sdkman-init.sh" # To make sdk command work
@@ -15,7 +12,7 @@ aemVersionToUse=""
 if [ "$userInput" == "cloud" ]; then
     aemVersionToUse="cloud"
     elif [ "$userInput" == "65" ]; then
-      aemVersionToUse="6.5.15"
+      aemVersionToUse="6.5.22"
     else
       echo "Unknown AEM version. Aborting..."
       exit 1
@@ -35,7 +32,7 @@ sdk use java 8.0.412-zulu
 mvn -B org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate \
     -D archetypeGroupId=com.adobe.aem \
     -D archetypeArtifactId=aem-project-archetype \
-    -D archetypeVersion=50 \
+    -D archetypeVersion=51 \
     -D appTitle="First Hops" \
     -D appId="$appId" \
     -D groupId="eu.ciechanowiec" \
