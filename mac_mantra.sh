@@ -1023,6 +1023,15 @@ echo "10. Disabling autoformat on save..."
 lazyVimInitFile="$HOME/.local/share/nvim/lazy/LazyVim/lua/lazyvim/plugins/lsp/init.lua"
 sed -i.backup 's/autoformat = true,/autoformat = false,/g' "$lazyVimInitFile"
 trash-put "${lazyVimInitFile}.backup"
+cat >> "$HOME/.config/nvim/lua/config/autocmds.lua" << EOF
+
+-- Disable autoformat for all file types
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  callback = function()
+    vim.b.autoformat = false
+  end,
+})
+EOF
 
 informAboutProcedureEnd
 
