@@ -2090,6 +2090,9 @@ set noerrorbells
 " Highlight search results and clear highlighting on escape in normal mode:
 set hls
 nnoremap <ESC> :noh<CR>
+
+" Fix this behaviour: after ESC to close the popup menu, the cursor moves left instead of staying in the space place
+map <C-F10> <Action>(ShowPopupMenu)<Right>
 EOF
 
 informAboutProcedureEnd
