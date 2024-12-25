@@ -261,6 +261,22 @@ docker() {
 }
 alias e='edge'
 alias edge='open -a "Microsoft Edge"'
+fuse() {
+    if [ -z "$1" ]; then
+        echo "Usage: fuse <port>"
+        return 1
+    fi
+    local pids
+    pids=$(lsof -ti tcp:"$1")
+    if [ -n "$pids" ]; then
+        echo "Killing processes on port $1:"
+        echo "$pids" | while read -r pid; do
+            kill -9 "$pid" && echo "Killed process $pid"
+        done
+    else
+        echo "No process found on port $1"
+    fi
+}
 alias logout="launchctl reboot logout" # https://apple.stackexchange.com/a/450798
 alias reboot="sudo shutdown -r now"
 alias shutdown="sudo shutdown -h now"
