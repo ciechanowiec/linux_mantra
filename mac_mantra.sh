@@ -277,6 +277,7 @@ fuse() {
         echo "No process found on port $1"
     fi
 }
+alias ir='( nohup ~/scripts/idea_restart.sh >/dev/null 2>&1 & )'
 alias logout="launchctl reboot logout" # https://apple.stackexchange.com/a/450798
 alias reboot="sudo shutdown -r now"
 alias shutdown="sudo shutdown -h now"
