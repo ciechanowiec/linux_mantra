@@ -856,6 +856,9 @@ yes | sdk install java 17.0.11-tem
 echo "Installing Java 21..."
 yes | sdk install java 21.0.3-tem
 
+echo "Installing Java 21 GraalVM..."
+yes | sdk install java 21.0.2-graalce
+
 echo "Setting Java 21 as the default one..."
 sdk default java 21.0.3-tem
 

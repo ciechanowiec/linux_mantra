@@ -290,6 +290,9 @@ cat >> "$shellFile" << EOF
 
 # MAKE DOCKER CLIENTS SEE THE CUSTOM SOCKET:
 export DOCKER_HOST=unix:///Users/$(whoami)/.colima/default/docker.sock
+# Fix testcontainers (https://github.com/testcontainers/testcontainers-java/issues/7082):
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock"
+export TESTCONTAINERS_RYUK_DISABLED=true
 EOF
 
 echo "11. Disable '%' sign in the end of output..."
@@ -583,6 +586,9 @@ yes | sdk install java 17.0.11-tem
 
 echo "Installing Java 21..."
 yes | sdk install java 21.0.3-tem
+
+echo "Installing Java 21 GraalVM..."
+yes | sdk install java 21.0.2-graalce
 
 echo "Setting Java 21 as the default one..."
 sdk default java 21.0.3-tem
