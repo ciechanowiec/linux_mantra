@@ -285,17 +285,7 @@ alias sleep="sudo pmset sleepnow"
 alias xxclip="perl -pe 'chomp if eof' | pbcopy" # perl is required to drop the last NL character
 EOF
 
-echo "10. Making Docker clients see the custom socket (e.g. required for terraform)..."
-cat >> "$shellFile" << EOF
-
-# MAKE DOCKER CLIENTS SEE THE CUSTOM SOCKET:
-export DOCKER_HOST=unix:///Users/$(whoami)/.colima/default/docker.sock
-# Fix testcontainers (https://github.com/testcontainers/testcontainers-java/issues/7082):
-export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock"
-export TESTCONTAINERS_RYUK_DISABLED=true
-EOF
-
-echo "11. Disable '%' sign in the end of output..."
+echo "10. Disable '%' sign in the end of output..."
 # Docs: https://stackoverflow.com/a/54776364
 cat >> "$shellFile" << EOF
 
@@ -304,7 +294,7 @@ cat >> "$shellFile" << EOF
 export PROMPT_EOL_MARK=''
 EOF
 
-echo "12. Disable 'Last login...' hint on the terminal start..."
+echo "11. Disable 'Last login...' hint on the terminal start..."
 touch "$HOME/.hushlogin"
 
 informAboutProcedureEnd
@@ -1562,6 +1552,16 @@ mv -f *.$releaseFileSuffix ~/.docker/cli-plugins/docker-buildx
 chmod +x ~/.docker/cli-plugins/docker-buildx
 echo "Docker Buildx version installed:"
 docker buildx version # verify installation
+
+echo "7. Adjusting Docker environmental variables..."
+cat >> "$shellFile" << EOF
+
+# MAKE DOCKER CLIENTS SEE THE CUSTOM SOCKET:
+export DOCKER_HOST=unix:///Users/$(whoami)/.colima/default/docker.sock
+# FIX TESTCONTAINERS (https://github.com/testcontainers/testcontainers-java/issues/7082):
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock"
+export TESTCONTAINERS_HOST_OVERRIDE="\$(colima ls -j | jq -r '.address')"
+EOF
 
 informAboutProcedureEnd
 
