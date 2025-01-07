@@ -786,6 +786,9 @@ brew install icdiff
 echo "Installing jq (CLI JSON processor)..."
 brew install jq
 
+echo "Installing vale (syntax-aware linter for prose)..."
+brew install vale
+
 echo "Installing asciidoctor (asciidoc processor with extensions)..."
 brew install asciidoctor
 

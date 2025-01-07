@@ -229,6 +229,9 @@ sudo apt install gnome-screenshot -y
 echo "Installing jq (CLI JSON processor)..."
 sudo apt install jq -y
 
+echo "Installing vale (syntax-aware linter for prose)..."
+sudo apt install vale -y
+
 echo "Installing ruby (interpreted object-oriented scripting language)..."
 sudo apt install ruby -y
 
