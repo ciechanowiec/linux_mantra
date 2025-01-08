@@ -138,11 +138,11 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
-#                          2. MAC DEVELOPER TOOLS                             #
+#                         2. MACOS DEVELOPER TOOLS                            #
 #                                                                             #
 #                                                                             #
 ###############################################################################
-procedureId="mac developer tools"
+procedureId="macos developer tools"
 # DOCUMENTATION:
 #   n/a
 # NOTES:
@@ -150,9 +150,23 @@ procedureId="mac developer tools"
 
 informAboutProcedureStart
 
-echo "Installing developer tools. Confirm installation in pop-up windows if requested..."
-# Installation without manual confirmation in the pop-up window might not work correctly
-xcode-select --install
+clt_installed() {
+    pkgutil --pkg-info=com.apple.pkg.CLTools_Executables &> /dev/null
+}
+echo "Checking if macOS developer tools, including git, are installed..."
+if clt_installed && git --version &> /dev/null; then
+    echo "macOS developer tools, including git, are installed"
+    git --version
+else
+    echo -e "Installing macOS developer tools, including git. \033[1mConfirm installation in pop-up windows if requested...\033[0m"
+    xcode-select --install > /dev/null 2>&1
+    echo "Waiting for macOS developer tools, including git, installation to complete..."
+    until clt_installed && git --version &> /dev/null; do
+        sleep 5
+    done
+    echo "macOS developer tools, including git, were installed successfully"
+    git --version
+fi
 
 informAboutProcedureEnd
 
@@ -1439,129 +1453,7 @@ procedureId="docker"
 
 informAboutProcedureStart
 
-echo "1. Installing Colima required to run Docker..."
-brew install colima
-
-echo "2. Installing QEMU (VM for Colima)..."
-brew install qemu
-
-echo "3. Installing Docker..."
-brew install docker
-brew install docker-compose
-
-echo "4. Configuring Colima to be launched on system startup..."
-# Docs: https://gist.github.com/fardjad/a83c30b9b744b9612d793666f28361a5
-scriptsDir="$HOME/scripts"
-scriptsLogDir="$scriptsDir/logs"
-launchAgent="$HOME/Library/LaunchAgents/eu.ciechanowiec.colima.plist"
-colimaLaunchScript="$scriptsDir/colima-start-fg.sh"
-errorLogFile="$scriptsLogDir/startup.scripts.err"
-outLogFile="$scriptsLogDir/startup.scripts.out"
-colimaBinPath="/opt/homebrew/bin/colima"
-
-if [ ! -d "$scriptsDir" ]
- then
-   echo "Scripts directory doesn't exist. Creating $scriptsDir..."
-   mkdir -p "$scriptsDir"
-fi
-if [ ! -d "$scriptsLogDir" ]
- then
-   echo "Scripts logs directory doesn't exist. Creating $scriptsLogDir..."
-   mkdir -p "$scriptsLogDir"
-fi
-touch "$errorLogFile"
-touch "$outLogFile"
-
-echo "Creating a launch agent..."
-cat > "$launchAgent" << EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"\>
-<plist version="1.0">
- <dict>
-   <key>Label</key>
-   <string>eu.ciechanowiec.colima</string>
-   <key>Program</key>
-   <string>$colimaLaunchScript</string>
-   <key>RunAtLoad</key>
-   <true/>
-   <key>KeepAlive</key>
-   <false/>
-   <key>StandardErrorPath</key>
-   <string>$errorLogFile</string>
-   <key>StandardOutPath</key>
-   <string>$outLogFile</string>
- </dict>
-</plist>
-EOF
-
-echo "Creating a launch script..."
-cat > "$colimaLaunchScript" << EOF
-#!/bin/bash
-
-export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-
-eval "\$(/opt/homebrew/bin/brew shellenv)"
-
-function shutdown() {
-	$colimaBinPath stop
-	exit 0
-}
-
-trap shutdown SIGTERM
-trap shutdown SIGKILL
-trap shutdown SIGINT
-
-# wait until Colima is running
-while true; do
-	$colimaBinPath status &>/dev/null
-	if [[ \$? -eq 0 ]]; then
-		break
-	fi
-	$colimaBinPath start
-	sleep 5
-done
-
-tail -f /dev/null &
-wait \$!
-EOF
-
-echo "Making the launch script executable..."
-sudo chmod +x "$colimaLaunchScript"
-
-echo "5. Defining the Colima template file..."
-colimaTemplateDir="$HOME/.colima/_templates"
-colimaTemplateDestinationFile="$colimaTemplateDir/default.yaml"
-colimaTemplateSourceFile="$resourcesDir/mac/colima/HOME/.colima/_templates/default.yaml"
-mkdir -p "$colimaTemplateDir"
-if [ -f "$colimaTemplateDestinationFile" ]
- then
-   echo "Old template file detected. Removing..."
-   trash-put "$colimaTemplateDestinationFile"
-fi
-cp "$colimaTemplateSourceFile" "$colimaTemplateDestinationFile"
-
-echo "6. Installing Docker Buildx..."
-# Docs: https://github.com/fullheart/my-dev-env/blob/main/osx/docker/colima/install_latest_buildx.sh
-releaseFileSuffix='darwin-arm64'
-if ls *.$releaseFileSuffix 1> /dev/null 2>&1; then
-    rm *.$releaseFileSuffix
-fi
-gh release download --repo 'github.com/docker/buildx' --pattern "*.$releaseFileSuffix"
-mkdir -p ~/.docker/cli-plugins
-mv -f *.$releaseFileSuffix ~/.docker/cli-plugins/docker-buildx
-chmod +x ~/.docker/cli-plugins/docker-buildx
-echo "Docker Buildx version installed:"
-docker buildx version # verify installation
-
-echo "7. Adjusting Docker environmental variables..."
-cat >> "$shellFile" << EOF
-
-# MAKE DOCKER CLIENTS SEE THE CUSTOM SOCKET:
-export DOCKER_HOST=unix:///Users/$(whoami)/.colima/default/docker.sock
-# FIX TESTCONTAINERS (https://github.com/testcontainers/testcontainers-java/issues/7082):
-export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock"
-export TESTCONTAINERS_HOST_OVERRIDE="\$(colima ls -j | jq -r '.address')"
-EOF
+zsh < "$resourcesDir/mac/install_docker_on_mac.sh"
 
 informAboutProcedureEnd
 
