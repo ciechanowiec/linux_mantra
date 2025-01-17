@@ -1131,7 +1131,7 @@ promptOnContinuation
 ###############################################################################
 procedureId="docker"
 # DOCUMENTATION:
-#   https://docs.docker.com/desktop/
+#   n/a
 
 informAboutProcedureStart
 
@@ -1139,46 +1139,43 @@ echo "Stopping Docker..."
 sudo systemctl stop docker.socket
 sudo systemctl stop docker.service
 
-echo "Uninstalling Docker related to Docker Engine..." # Uninstallation as described at https://docs.docker.com/engine/install/ubuntu/
-# Older versions of Docker went by the names of docker, docker.io, or docker-engine. Uninstall any such older versions before attempting to install a new version:
-sudo apt remove docker docker-engine docker.io containerd runc -y
-# Uninstall the Docker Engine, CLI, containerd, and Docker Compose packages:
-sudo apt remove docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-ce-rootless-extras -y
-# Images, containers, volumes, or custom configuration files on your host aren’t automatically removed. To delete all images, containers, and volumes:
+echo "Uninstalling Docker related to Docker Engine..."
+sudo apt remove docker.io docker-compose docker-compose-v2 docker-doc podman-docker -y
+sudo apt remove docker docker-engine containerd runc -y
+sudo apt remove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras -y
 sudo rm -rf /var/lib/docker
 sudo rm -rf /var/lib/containerd
+rm -r "$HOME/.docker"
 
-echo "Uninstalling Docker related to Docker Desktop..." # Uninstallation as described at https://docs.docker.com/desktop/install/ubuntu/
-# Uninstall the tech preview or beta version of Docker Desktop for Linux. Run:
-sudo apt remove docker-desktop
-# For a complete cleanup, remove configuration and data files at $HOME/.docker/desktop, the symlink at /usr/local/bin/com.docker.cli, and purge the remaining systemd service files:
-rm -r $HOME/.docker/desktop
-sudo rm /usr/local/bin/com.docker.cli
+echo "Uninstalling Docker related to Docker Desktop..."
 sudo apt remove docker-desktop -y
+sudo rm /usr/local/bin/com.docker.cli
 
-echo "Uninstalling Docker related to Docker Compose..." # Uninstallation as described at https://docs.docker.com/compose/install/uninstall/
+echo "Uninstalling Docker related to Docker Compose..."
 sudo apt remove docker-compose-plugin -y
-rm $DOCKER_CONFIG/cli-plugins/docker-compose
+rm "$DOCKER_CONFIG/cli-plugins/docker-compose"
 rm /usr/local/lib/docker/cli-plugins/docker-compose
 
 echo "Uninstalling Docker from snap..."
 sudo snap remove docker
 
-echo "Setting up the repository..." # As described at https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+echo "Setting up the repository..."
 sudo apt update -y
 sudo apt install \
     ca-certificates \
     curl \
     gnupg \
     lsb-release -y
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
 echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-echo "Installing Docker Engine and Docker Compose..." # As described at https://docs.docker.com/engine/install/ubuntu/ and https://docs.docker.com/compose/install/linux/
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt update -y
+
+echo "Installing Docker Engine and Docker Compose..."
 sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
 
 echo "Testing Docker installation with sudo..."
@@ -1202,17 +1199,44 @@ docker run hello-world
 docker image rm -f hello-world
 EOF
 
-echo "Logging out from Docker Hub..."
-docker logout
-echo "Logging into Docker Hub..."
-echo "Provide your Docker Hub login:"
-read -r dockerHubLogin
-sudo docker login --username "$dockerHubLogin"
-exitCode=$(echo $?)
-while [ "$exitCode" -ne 0 ];
-  do
-    sudo docker login --username "$dockerHubLogin"
-    exitCode=$(echo $?)
+while true; do
+  read -p "Do you want to log in to Docker Hub? (Y/n): " choice
+  choice=${choice:-Y} # Default to "Y" if Enter is pressed
+  case "$choice" in
+    [Yy]* )
+      if ! sudo -n true 2>/dev/null; then
+        echo "Provide your sudo password to continue"
+        sudo -v
+        if [ $? -ne 0 ]; then
+          echo "Failed to authenticate with sudo. Exiting."
+          exit 1
+        fi
+      fi
+      echo "Logging out from Docker Hub..."
+      docker logout
+      echo "Logging into Docker Hub..."
+      echo "Provide your Docker Hub login:"
+      read -r dockerHubLogin
+      echo "Provide your Docker Hub password"
+      sudo docker login --username "$dockerHubLogin"
+      exitCode=$?
+
+      while [ "$exitCode" -ne 0 ]; do
+        echo "Invalid password. Please try again."
+        echo "Provide your Docker Hub login:"
+        read -r dockerHubLogin
+        sudo docker login --username "$dockerHubLogin"
+        exitCode=$?
+      done
+      break
+      ;;
+    [Nn]* )
+      break
+      ;;
+    * )
+      echo "Invalid state"
+      ;;
+  esac
 done
 
 informAboutProcedureEnd
