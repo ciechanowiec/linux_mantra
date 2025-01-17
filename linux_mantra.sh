@@ -1200,7 +1200,7 @@ docker image rm -f hello-world
 EOF
 
 while true; do
-  read -p "Do you want to log in to Docker Hub? (Y/n): " choice
+  read -p "Do you want to log in to Docker Hub (this is not obligatory for Docker to work)? (Y/n): " choice
   choice=${choice:-Y} # Default to "Y" if Enter is pressed
   case "$choice" in
     [Yy]* )
