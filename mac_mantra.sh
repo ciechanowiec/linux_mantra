@@ -311,6 +311,14 @@ EOF
 echo "11. Disable 'Last login...' hint on the terminal start..."
 touch "$HOME/.hushlogin"
 
+echo "12. Fixing GPG bug..."
+cat >> "$shellFile" << EOF
+
+# Fix GPG bug:
+# Docs: https://github.com/keybase/keybase-issues/issues/2798
+export GPG_TTY=\$(tty)
+EOF
+
 informAboutProcedureEnd
 
 promptOnContinuation
