@@ -52,4 +52,8 @@
         <!--  It's ok to keep, access and update configs in servlet instance fields: -->
         <Bug pattern="MSF_MUTABLE_SERVLET_FIELD"/>
     </Match>
+    <Match>
+        <!--  A lot of false positives  -->
+        <Bug pattern="US_USELESS_SUPPRESSION_ON_FIELD"/>
+    </Match>
 </FindBugsFilter>
