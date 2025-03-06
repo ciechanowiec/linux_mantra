@@ -56,4 +56,8 @@
         <!--  A lot of false positives  -->
         <Bug pattern="US_USELESS_SUPPRESSION_ON_FIELD"/>
     </Match>
+    <Match>
+        <!--  A lot of false positives  -->
+        <Bug pattern="US_USELESS_SUPPRESSION_ON_METHOD"/>
+    </Match>
 </FindBugsFilter>
