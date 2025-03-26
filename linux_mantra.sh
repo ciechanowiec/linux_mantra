@@ -305,6 +305,9 @@ echo "Installing TypeScript..."
 #   good: https://lindevs.com/install-typescript-on-ubuntu
 sudo npm install -g typescript # `npm` comes from node, so node must be preinstalled
 
+echo "Installing Mermaid CLI (diagramming tool)..."
+sudo npm install -g @mermaid-js/mermaid-cli
+
 informAboutProcedureEnd
 
 promptOnContinuation
