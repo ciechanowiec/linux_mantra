@@ -298,6 +298,8 @@ echo "Installing node (server environment)..."
 #   https://github.com/nodejs/snap
 #   https://snapcraft.io/node
 sudo snap install node --classic
+mkdir -p "$HOME/.npm"
+sudo chown -R "$(id -un):$(id -gn)" "$HOME/.npm"
 
 echo "Installing TypeScript..."
 # Installation docs:
@@ -307,47 +309,6 @@ sudo npm install -g typescript # `npm` comes from node, so node must be preinsta
 
 echo "Installing Mermaid CLI (diagramming tool)..."
 sudo npm install -g @mermaid-js/mermaid-cli
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
-#                           3. NIX PACKAGE MANAGER                            #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="nix package manager"
-# DOCUMENTATION:
-#   https://nixos.org/download.html
-# NOTES:
-#   In general, nix isn't a good and convenient tool. Avoid its usage
-
-informAboutProcedureStart
-
-if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
-  then
-    echo "Installing nix package manager..."
-    yes | sh <(curl -L https://nixos.org/nix/install) --daemon
-    echo "Sourcing nix package manager from /etc/bashrc..."
-    sleep 3
-    source /etc/bashrc
-  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
-    then
-      echo "Installing nix package manager..."
-      yes | sh <(curl -L https://nixos.org/nix/install)
-      echo "Sourcing nix package manager from /etc/zshrc..."
-      sleep 3
-      source /etc/zshrc
-  else
-    echo "Unexpected error occurred. The requested action wasn't preformed correctly"
-    exit 1
-fi
-
-echo "Updating nix channels..."
-nix-channel --update # In some cases without this command the nix-env might not work correctly
 
 informAboutProcedureEnd
 
@@ -2738,6 +2699,20 @@ echo "Cloning own repos..."
 cd "$HOME/0_prog" || { echo "Failed to navigate to $HOME/0_prog. Exiting."; exit 1; }
 gh repo clone dock_aem
 gh repo clone linux_mantra
+
+echo "Setting up AEM Archetype project (AEM on-prem)..."
+mkdir -p "$tempDir/firsthops_65"
+cd "$tempDir/firsthops_65" || { echo "Failed to navigate to $tempDir/firsthops_65. Exiting."; exit 1; }
+"$HOME/scripts/aem_init_archetype.sh" 65
+cd "$tempDir/firsthops_65/firsthops" || { echo "Failed to navigate to $tempDir/firsthops_65/firsthops. Exiting."; exit 1; }
+mvn clean package
+
+echo "Setting up AEM Archetype project (AEM cloud)..."
+mkdir -p "$tempDir/firsthops_cloud"
+cd "$tempDir/firsthops_cloud" || { echo "Failed to navigate to $tempDir/firsthops_cloud. Exiting."; exit 1; }
+"$HOME/scripts/aem_init_archetype.sh" cloud
+cd "$tempDir/firsthops_cloud/firsthops" || { echo "Failed to navigate to $tempDir/firsthops_cloud/firsthops. Exiting."; exit 1; }
+mvn clean package
 
 echo "Cloning and resolving Apache Jackrabbit Oak repository..."
 oakDir="$HOME/0_prog/jackrabbit-oak"
