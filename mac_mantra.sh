@@ -276,19 +276,19 @@ docker() {
 alias e='edge'
 alias edge='open -a "Microsoft Edge"'
 fuse() {
-    if [ -z "$1" ]; then
+    if [ -z "\$1" ]; then
         echo "Usage: fuse <port>"
         return 1
     fi
     local pids
-    pids=$(lsof -ti tcp:"$1")
-    if [ -n "$pids" ]; then
-        echo "Killing processes on port $1:"
-        echo "$pids" | while read -r pid; do
-            kill -9 "$pid" && echo "Killed process $pid"
+    pids=$(lsof -ti tcp:"\$1")
+    if [ -n "\$pids" ]; then
+        echo "Killing processes on port \$1:"
+        echo "\$pids" | while read -r pid; do
+            kill -9 "\$pid" && echo "Killed process \$pid"
         done
     else
-        echo "No process found on port $1"
+        echo "No process found on port \$1"
     fi
 }
 alias ir='( nohup ~/scripts/idea_restart.sh >/dev/null 2>&1 & )'
@@ -318,47 +318,6 @@ cat >> "$shellFile" << EOF
 # Docs: https://github.com/keybase/keybase-issues/issues/2798
 export GPG_TTY=\$(tty)
 EOF
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
-#                         4.1. NIX PACKAGE MANAGER                            #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="nix package manager"
-# DOCUMENTATION:
-#   https://nixos.org/download.html
-# NOTES:
-#   In general, nix isn't a good and convenient tool. Avoid its usage
-
-informAboutProcedureStart
-
-if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
-  then
-    echo "Installing nix package manager..."
-    yes | sh <(curl -L https://nixos.org/nix/install) --daemon
-    echo "Sourcing nix package manager from /etc/bashrc..."
-    sleep 3
-    source /etc/bashrc
-  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
-    then
-      echo "Installing nix package manager..."
-      yes | sh <(curl -L https://nixos.org/nix/install)
-      echo "Sourcing nix package manager from /etc/zshrc..."
-      sleep 3
-      source /etc/zshrc
-  else
-    echo "Unexpected error occurred. The requested action wasn't preformed correctly"
-    exit 1
-fi
-
-echo "Updating nix channels..."
-nix-channel --update # In some cases without this command the nix-env might not work correctly
 
 informAboutProcedureEnd
 
@@ -1549,9 +1508,8 @@ read voidInput
 
 echo "Perform manually unsynchronized settings:"
 echo "-> Privacy, search, and services"
-echo "---> Services"
-echo "-----> Address bar and search"
-echo "-------> Search engine used in the address bar: [Google]"
+echo "---> Address bar and search"
+echo "-----> Search engine used in the address bar: [Google]"
 echo "-> Appearance:"
 echo "---> Customize toolbar:"
 echo "-----> Show profile type in the profile button: [disable]"
