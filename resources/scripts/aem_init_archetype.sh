@@ -32,7 +32,7 @@ sdk use java 8.0.412-zulu
 mvn -B org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate \
     -D archetypeGroupId=com.adobe.aem \
     -D archetypeArtifactId=aem-project-archetype \
-    -D archetypeVersion=51 \
+    -D archetypeVersion=52 \
     -D appTitle="First Hops" \
     -D appId="$appId" \
     -D groupId="eu.ciechanowiec" \
@@ -95,11 +95,8 @@ EOF
 echo "$corePomSecondPart" >> "$corePom"
 
 # ADJUST PARENT POM
-sed -i.backup 's/<source>1.8<\/source>/<source>11<\/source>/g' "$parentPom"
-sed -i.backup 's/<target>1.8<\/target>/<target>11<\/target>/g' "$parentPom"
-trash-put "${parentPom}.backup"
 parentPomFirstPart=$(head -n 181 "$parentPom")
-parentPomSecondPart=$(tail -n +185 "$parentPom")
+parentPomSecondPart=$(tail -n +184 "$parentPom")
 echo "$parentPomFirstPart" > "$parentPom"
 cat >> "$parentPom" << EOF
 
