@@ -28,7 +28,7 @@
                   value="Lines must end with UNIX-like end of line. Windows-like line endings are not allowed."/>
     </module>
     <module name="RegexpMultiline">
-        <property name="format" value="(?m)(\n\s*\n\s*(\}|\)))"/>
+        <property name="format" value="(?m)^(?!.*\{\s*$).*?\r?\n(^\s*\r?\n)(?=^\s*\})"/>
         <property name="message" value="Empty lines before a closing brace are not allowed."/>
         <property name="matchAcrossLines" value="true"/>
     </module>
@@ -102,7 +102,8 @@
         <module name="ExplicitInitialization"/>
         <module name="FallThrough"/>
         <module name="HiddenField">
-            <property name="tokens" value="VARIABLE_DEF, PATTERN_VARIABLE_DEF, LAMBDA, RECORD_COMPONENT_DEF"/>
+            <property name="tokens"
+                      value="VARIABLE_DEF, PATTERN_VARIABLE_DEF, LAMBDA, RECORD_COMPONENT_DEF"/>
         </module>
         <module name="IllegalCatch"/>
         <module name="IllegalThrows"/>
