@@ -28,9 +28,15 @@
                   value="Lines must end with UNIX-like end of line. Windows-like line endings are not allowed."/>
     </module>
     <module name="RegexpMultiline">
-        <property name="format" value="(?m)^(?!.*\{\s*$).*?\r?\n(^\s*\r?\n)(?=^\s*\})"/>
+        <property name="format" value="(?m)(\n\s*\n\s*(\}|\)))"/>
         <property name="message" value="Empty lines before a closing brace are not allowed."/>
         <property name="matchAcrossLines" value="true"/>
+    </module>
+    <module name="RegexpMultiline">
+        <property name="format"
+                  value="(?s)class\s+\w+[^{]*extends\s+(?!\b(SlingAllMethodsServlet|SlingSafeMethodsServlet|HttpServlet|ResourceProvider|TestEnvironment|RuntimeException|Exception|JsonSerializer)\b)\w+[^{]*\{"/>
+        <property name="message"
+                  value="Inheritance is allowed only for explicitly specified cases."/>
     </module>
     <module name="RegexpSingleline">
         <property name="format" value="\s+$"/>
@@ -115,6 +121,22 @@
             <property name="ignoreHashCodeMethod" value="true"/>
             <property name="ignoreNumbers"
                       value="-0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -100, -1000, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100, 1000"/>
+        </module>
+        <module name="MatchXpath">
+            <property name="query"
+                      value="//VARIABLE_DEF[./MODIFIERS/ANNOTATION/IDENT[@text='Inject' or @text='ChildResource' or @text='OSGiService' or @text='RequestAttribute' or @text='ResourcePath' or @text='ScriptVariable' or @text='Self' or @text='SlingObject' or @text='ValueMapValue']]"/>
+            <message key="matchxpath.match"
+                     value="Use constructor injection instead of field injection"/>
+        </module>
+        <module name="MatchXpath">
+            <property name="query"
+                      value="//VARIABLE_DEF[
+                            ./MODIFIERS/ANNOTATION/IDENT[@text='Reference']
+                            and
+                            not( ./TYPE//IDENT[@text='List' or @text='Collection'] )
+                         ]"/>
+            <message key="matchxpath.match"
+                     value="Use constructor injection instead of field injection"/>
         </module>
         <module name="MissingSwitchDefault"/>
         <module name="ModifiedControlVariable"/>
@@ -247,6 +269,14 @@
         <module name="RegexpSinglelineJava">
             <property name="format" value="@PostConstruct|@Builder"/>
             <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="@PostConstruct and @Builder are bad practices and not allowed"/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="DefaultInjectionStrategy.OPTIONAL"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="Usage of org.apache.sling.models.annotations.DefaultInjectionStrategy.OPTIONAL is a bad practice and is not allowed"/>
         </module>
 
         <!--
@@ -323,6 +353,13 @@
             <property name="ignoreComments" value="true"/>
             <property name="message"
                       value="Avoid using '== null' for nullability check. Use java.util.Optional instead"/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="\s*return\s*null"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="Returning of nulls is prohibited"/>
             <property name="illegalPattern" value="true"/>
         </module>
     </module>
