@@ -2726,6 +2726,18 @@ fi
 cd "$oakDir" || { echo "Failed to navigate to $oakDir. Exiting."; exit 1; }
 mvn --fail-never dependency:sources && mvn --fail-never dependency:sources dependency:resolve -Dclassifier=javadoc
 
+echo "Cloning and resolving ACS Commons repository..."
+acsCommonsDir="$HOME/0_prog/acs-aem-commons"
+mkdir -v -p "$acsCommonsDir"
+if [ ! -d "$acsCommonsDir/.git" ]; then
+    echo "Cloning an ACS Commons repository..."
+    git clone https://github.com/Adobe-Consulting-Services/acs-aem-commons.git "$acsCommonsDir"
+else
+    echo "ACS Commons repository already exists. Skipping cloning."
+fi
+cd "$acsCommonsDir" || { echo "Failed to navigate to $acsCommonsDir. Exiting."; exit 1; }
+mvn --fail-never dependency:sources && mvn --fail-never dependency:sources dependency:resolve -Dclassifier=javadoc
+
 echo "Cloning Apache Felix repository..."
 felixDir="$HOME/0_prog/felix-dev"
 mkdir -v -p "$felixDir"
