@@ -254,11 +254,11 @@
         <module name="StaticVariableName"/>
         <module name="TypeName">
             <!--
-            If you have 'Manager', 'Service' or 'Handler' in the type name, it means that the name is rather
-            not specific enough (what is the meaning of 'manage', 'service' or 'handle' actions?)
+            If you have 'Provider', 'Service', 'Handler' or 'Manager' in the type name, it means that the name is rather
+            not specific enough (what is the meaning of 'provide', 'service', 'handle' or 'manage' actions?)
             -->
             <property name="format"
-                      value="^(?:Manager|(?!.*Service)(?!.*Handler)(?!.*Manager)[A-Z][a-zA-Z0-9]*)$"/>
+                      value="^(?:Manager|(?!.*Provider)(?!.*Service)(?!.*Handler)(?!.*Manager)[A-Z][a-zA-Z0-9]*)$"/>
             <message key="name.invalidPattern"
                      value="Type name does not match the allowed pattern."/>
         </module>
