@@ -70,6 +70,11 @@
             <property name="methodReportLevel" value="8"/>
         </properties>
     </rule>
+    <rule ref="category/java/design.xml/ExcessiveImports">
+        <properties>
+            <property name="minimum" value="45"/>
+        </properties>
+    </rule>
     <rule ref="category/java/design.xml/ExcessiveParameterList">
         <properties>
             <property name="minimum" value="4"/>
