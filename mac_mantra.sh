@@ -797,6 +797,12 @@ sudo npm install -g @mermaid-js/mermaid-cli
 echo "Installing AIO CLI (Adobe CLI)..."
 sudo npm install -g @adobe/aio-cli
 
+echo "Installing AIO CLI plugins..."
+# Docs:
+# https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/implementing/developing/rapid-development-environments#installing-the-rde-command-line-tools
+aio plugins:install @adobe/aio-cli-plugin-aem-rde
+aio plugins:update
+
 echo "installing gpg (cryptography keys)..."
 brew install gpg
 
