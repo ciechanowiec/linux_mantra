@@ -310,6 +310,9 @@ sudo npm install -g typescript # `npm` comes from node, so node must be preinsta
 echo "Installing Mermaid CLI (diagramming tool)..."
 sudo npm install -g @mermaid-js/mermaid-cli
 
+echo "Installing AIO CLI (Adobe CLI)..."
+sudo npm install -g @adobe/aio-cli
+
 informAboutProcedureEnd
 
 promptOnContinuation
