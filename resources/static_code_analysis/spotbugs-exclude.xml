@@ -60,4 +60,8 @@
         <!--  A lot of false positives  -->
         <Bug pattern="US_USELESS_SUPPRESSION_ON_METHOD"/>
     </Match>
+    <Match>
+        <!--  Nonsense check  -->
+        <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+    </Match>
 </FindBugsFilter>
