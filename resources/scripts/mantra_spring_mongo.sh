@@ -1325,11 +1325,11 @@ openProjectInIDE () {
       exit 1
     elif [ "$linesWithLinuxReleaseName" -gt 0 ];
       then
-        launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
-#        launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
+        # launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
+        launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
     elif [ "$linesWithMacReleaseName" -gt 0 ];
       then
-        launcherPath="/opt/homebrew/bin/idea"
+        launcherPath="/opt/homebrew/bin/idea-ce"
     else
       echo "Unsupported operating system. Exiting..."
       exit 1;

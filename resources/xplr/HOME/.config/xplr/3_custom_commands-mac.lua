@@ -256,7 +256,7 @@ local decompile = commandMode.cmd("decompile", "Decompile a focused item (normal
 local idea = commandMode.cmd("idea", "Open a focused directory in IntelliJ IDEA") (
         commandMode.BashExecSilently [===[
   baseName=$(basename -- "$XPLR_FOCUS_PATH")
-  launcherPath="/opt/homebrew/bin/idea"
+  launcherPath="/opt/homebrew/bin/idea-ce"
 
   if [ ! -f "$launcherPath" ]
     then
