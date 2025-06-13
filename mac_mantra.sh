@@ -1777,7 +1777,7 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
-#                             24. INTELLIJ IDEA                               #
+#                             14. INTELLIJ IDEA                               #
 #                                                                             #
 #                                                                             #
 ###############################################################################
@@ -1796,11 +1796,11 @@ ideavimrcFile="$HOME/.ideavimrc"
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
     jetbrainsConfigDir="$HOME/.config/JetBrains"
-    launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
+    launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
       jetbrainsConfigDir="$HOME/Library/Application Support/JetBrains"
-      launcherPath="/opt/homebrew/bin/idea"
+      launcherPath="/opt/homebrew/bin/idea-ce"
   else
     echo "Unexpected error occurred. Update failed"
     exit 1
@@ -1813,9 +1813,11 @@ if [ -n "$pids" ]; then
 fi
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
+    sudo snap remove intellij-idea-community
     sudo snap remove intellij-idea-ultimate
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
+      brew uninstall intellij-idea-ce
       brew uninstall intellij-idea
   else
     echo "Unexpected error occurred. Update failed"
@@ -1829,10 +1831,10 @@ trash-put "$HOME/.local/share/JetBrains"
 printf "\n3. Installing IntelliJ IDEA...\n"
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
-    sudo snap install intellij-idea-ultimate --classic
+    sudo snap install intellij-idea-community --classic
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
-      brew install intellij-idea
+      brew install intellij-idea-ce
   else
     echo "Unexpected error occurred. Update failed"
     exit 1

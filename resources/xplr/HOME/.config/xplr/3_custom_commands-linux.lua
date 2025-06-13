@@ -256,9 +256,9 @@ local decompile = commandMode.cmd("decompile", "Decompile a focused item (normal
 local idea = commandMode.cmd("idea", "Open a focused directory in IntelliJ IDEA") (
         commandMode.BashExecSilently [===[
   # Version for IntelliJ IDEA Community:
-  # launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
+    launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
   # Version for IntelliJ IDEA Ultimate:
-  launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
+  # launcherPath="/snap/intellij-idea-ultimate/current/bin/idea.sh"
 
   if [ ! -f "$launcherPath" ]
     then
