@@ -895,7 +895,7 @@ cat > "$pomFile" << EOF
                             <ignoreVersion>
                                 <!-- Ignoring release candidate versions, like 2.16.1-rc1 and 1.8.20-RC -->
                                 <type>regex</type>
-                                <version>(?i)[0-9].+-rc[0-9]*</version>
+                                <version>(?i)[0-9].+-rc-?[0-9]*</version>
                             </ignoreVersion>
                             <ignoreVersion>
                                 <!-- Ignoring develop versions, like 15.0.0.Dev01 -->
