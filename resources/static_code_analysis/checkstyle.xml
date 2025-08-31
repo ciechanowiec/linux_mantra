@@ -138,6 +138,11 @@
             <message key="matchxpath.match"
                      value="Use constructor injection instead of field injection"/>
         </module>
+        <module name="MatchXpath">
+            <property name="query" value="//METHOD_CALL[./DOT/IDENT[@text='orElse'] and ./ELIST/EXPR/LITERAL_NULL]"/>
+            <message key="matchxpath.match"
+                     value="Avoid using `.orElse(null)` unless this is an API contract. `orElse(null)` gives you essentially a null and makes `Optional` usage pointless. Consider using `.orElse(someDefaultValue)` or leaving it as an `Optional`"/>
+        </module>
         <module name="MissingSwitchDefault"/>
         <module name="ModifiedControlVariable"/>
         <module name="MultipleStringLiterals">
