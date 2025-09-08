@@ -33,8 +33,12 @@
         <property name="matchAcrossLines" value="true"/>
     </module>
     <module name="RegexpMultiline">
+        <property name="format" value="javax\s*\.\s*servlet"/>
+        <property name="message" value="Usage of javax.servlet package is prohibited. Use jakarta.servlet instead."/>
+    </module>
+    <module name="RegexpMultiline">
         <property name="format"
-                  value="(?s)class\s+\w+[^{]*extends\s+(?!\b(SlingAllMethodsServlet|SlingSafeMethodsServlet|HttpServlet|ResourceProvider|TestEnvironment|RuntimeException|Exception|JsonSerializer|InputStream|AnnotatedStandardMBean)\b)\w+[^{]*\{"/>
+                  value="(?s)class\s+\w+[^{]*extends\s+(?!\b(SlingJakartaAllMethodsServlet|SlingJakartaSafeMethodsServlet|HttpServlet|ResourceProvider|TestEnvironment|RuntimeException|Exception|JsonSerializer|InputStream|AnnotatedStandardMBean)\b)\w+[^{]*\{"/>
         <property name="message"
                   value="Inheritance is allowed only for explicitly specified cases."/>
     </module>
