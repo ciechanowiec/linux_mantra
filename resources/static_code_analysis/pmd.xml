@@ -10,6 +10,7 @@
     BEST PRACTICES
     -->
     <rule ref="category/java/bestpractices.xml">
+        <exclude name="ConstantsInInterface"/>
         <exclude name="DoubleBraceInitialization"/>
         <exclude name="GuardLogStatement"/>
         <exclude name="LiteralsFirstInComparisons"/>
