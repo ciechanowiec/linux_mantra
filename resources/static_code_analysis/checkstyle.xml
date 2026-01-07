@@ -38,7 +38,7 @@
     </module>
     <module name="RegexpMultiline">
         <property name="format"
-                  value="(?s)class\s+\w+[^{]*extends\s+(?!\b(SlingJakartaAllMethodsServlet|SlingJakartaSafeMethodsServlet|HttpServlet|ResourceProvider|TestEnvironment|RuntimeException|Exception|JsonSerializer|InputStream|AnnotatedStandardMBean|TurboFilter)\b)\w+[^{]*\{"/>
+                  value="(?s)class\s+\w+[^{]*extends\s+(?!\b(SlingJakartaAllMethodsServlet|SlingJakartaSafeMethodsServlet|HttpServlet|ResourceProvider|TestEnvironment|RuntimeException|Exception|JsonSerializer|InputStream|AnnotatedStandardMBean|TurboFilter|HttpServletRequestWrapper|HttpServletResponseWrapper)\b)\w+[^{]*\{"/>
         <property name="message"
                   value="Inheritance is allowed only for explicitly specified cases."/>
     </module>
