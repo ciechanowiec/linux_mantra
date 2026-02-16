@@ -239,7 +239,9 @@
         <module name="CatchParameterName"/>
         <module name="ClassTypeParameterName"/>
         <module name="ConstantName"/>
-        <module name="IllegalIdentifierName"/>
+        <module name="IllegalIdentifierName">
+            <property name="format" value="^(?!var$)\S+$"/>
+        </module>
         <module name="LambdaParameterName"/>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
