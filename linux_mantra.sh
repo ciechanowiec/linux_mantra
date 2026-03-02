@@ -2107,11 +2107,11 @@ ideavimrcFile="$HOME/.ideavimrc"
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
     jetbrainsConfigDir="$HOME/.config/JetBrains"
-    launcherPath="/snap/intellij-idea-community/current/bin/idea.sh"
+    launcherPath="/snap/intellij-idea/current/bin/idea.sh"
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
       jetbrainsConfigDir="$HOME/Library/Application Support/JetBrains"
-      launcherPath="/opt/homebrew/bin/idea-ce"
+      launcherPath="/opt/homebrew/bin/idea"
   else
     echo "Unexpected error occurred. Update failed"
     exit 1
@@ -2124,11 +2124,9 @@ if [ -n "$pids" ]; then
 fi
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
-    sudo snap remove intellij-idea-community
-    sudo snap remove intellij-idea-ultimate
+    sudo snap remove intellij-idea
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
-      brew uninstall intellij-idea-ce
       brew uninstall intellij-idea
   else
     echo "Unexpected error occurred. Update failed"
@@ -2142,10 +2140,10 @@ trash-put "$HOME/.local/share/JetBrains"
 printf "\n3. Installing IntelliJ IDEA...\n"
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
-    sudo snap install intellij-idea-community --classic
+    sudo snap install intellij-idea --classic
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
-      brew install intellij-idea-ce
+      brew install intellij-idea
   else
     echo "Unexpected error occurred. Update failed"
     exit 1
