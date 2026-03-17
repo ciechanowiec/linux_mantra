@@ -12,7 +12,7 @@ RESET_FORMAT="\e[0m"
 ERROR_TAG="${BOLD_RED}[ERROR]:${RESET_FORMAT}"
 
 expectedLinuxReleaseName="jammy"
-expectedMacReleaseName="macOS 15"
+expectedMacReleaseName="macOS 26"
 
 verifyOneArgument () {
   if [ $# != 1 ]
