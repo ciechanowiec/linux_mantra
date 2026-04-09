@@ -1,0 +1,16 @@
+extends: default
+image:
+  align: center
+  caption:
+    align: inherit
+footer:
+  columns: =100%
+  recto:
+    center:
+      content: '{page-number}'
+  verso:
+    center:
+      content: '{page-number}'
+role:
+  red:
+    font-color: ff0000
