@@ -256,7 +256,12 @@ local decompile = commandMode.cmd("decompile", "Decompile a focused item (normal
 local idea = commandMode.cmd("idea", "Open a focused directory in IntelliJ IDEA") (
         commandMode.BashExecSilently [===[
   baseName=$(basename -- "$XPLR_FOCUS_PATH")
+  # Try Homebrew path first
   launcherPath="/opt/homebrew/bin/idea"
+  # If Homebrew path is missing or a broken symlink, fallback to the Application bundle
+  if [ ! -f "$launcherPath" ]; then
+    launcherPath="/Applications/IntelliJ IDEA.app/Contents/MacOS/idea"
+  fi
 
   if [ ! -f "$launcherPath" ]
     then

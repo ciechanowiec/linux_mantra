@@ -1328,7 +1328,12 @@ openProjectInIDE () {
         launcherPath="/snap/intellij-idea/current/bin/idea.sh"
     elif [ "$linesWithMacReleaseName" -gt 0 ];
       then
+        # Try Homebrew path first
         launcherPath="/opt/homebrew/bin/idea"
+        # If Homebrew path is missing or a broken symlink, fallback to the Application bundle
+        if [ ! -f "$launcherPath" ]; then
+          launcherPath="/Applications/IntelliJ IDEA.app/Contents/MacOS/idea"
+        fi
     else
       echo "Unsupported operating system. Exiting..."
       exit 1;
