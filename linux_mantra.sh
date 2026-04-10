@@ -2111,7 +2111,12 @@ if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
       jetbrainsConfigDir="$HOME/Library/Application Support/JetBrains"
+      # Try Homebrew path first
       launcherPath="/opt/homebrew/bin/idea"
+      # If Homebrew path is missing or a broken symlink, fallback to the Application bundle
+      if [ ! -f "$launcherPath" ]; then
+        launcherPath="/Applications/IntelliJ IDEA.app/Contents/MacOS/idea"
+      fi
   else
     echo "Unexpected error occurred. Update failed"
     exit 1
