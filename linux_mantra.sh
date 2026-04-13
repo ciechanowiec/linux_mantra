@@ -258,6 +258,9 @@ sudo apt install libtesseract-dev -y
 echo "Installing imagemagick (images converter)"
 sudo apt install imagemagick -y
 
+echo "Installing go (programming language)"
+sudo apt install golang-go
+
 echo "Installing fuse (enables filesystems in userspace)"
 sudo apt install fuse -y
 

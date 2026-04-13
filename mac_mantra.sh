@@ -775,6 +775,9 @@ brew install tesseract
 echo "Installing imagemagick (images converter)"
 brew install imagemagick
 
+echo "Installing go (programming language)"
+brew install go
+
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then
