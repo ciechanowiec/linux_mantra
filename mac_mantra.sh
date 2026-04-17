@@ -777,6 +777,12 @@ brew install imagemagick
 
 echo "Installing go (programming language)"
 brew install go
+# ADDING GO BINARIES TO PATH (so tools installed via `go install` are available):
+cat >> "$shellFile" << EOF
+
+# GO BINARIES ON PATH:
+export PATH=\$PATH:\$(go env GOPATH)/bin
+EOF
 
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
