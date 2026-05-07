@@ -1,0 +1,7 @@
+extends: substitution
+message: "Use a hyphen (-) instead of an em/en dash."
+level: error
+nonword: true
+swap:
+  '—': '-'
+  '–': '-'

@@ -1,0 +1,26 @@
+extends: capitalization
+message: "'%s' should use title-style capitalization."
+level: error
+scope: heading
+match: $title
+exceptions:
+  - Azure
+  - CLI
+  - Cosmos
+  - Docker
+  - Emmet
+  - gRPC
+  - Kubernetes
+  - Linux
+  - macOS
+  - Marketplace
+  - MongoDB
+  - README
+  - REPL
+  - Studio
+  - TypeScript
+  - URLs
+  - Visual
+  - VS
+  - Windows
+  - JSON

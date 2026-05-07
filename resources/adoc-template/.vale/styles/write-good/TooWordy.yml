@@ -1,0 +1,169 @@
+extends: existence
+message: "'%s' is too wordy."
+ignorecase: true
+level: error
+tokens:
+  - a number of
+  - above-mentioned
+  - abundance
+  - accede to
+  - added bonus
+  - adjacent to
+  - adversely impact
+  - aforementioned
+  - all of
+  - all things considered
+  - along the lines of
+  - already existing
+  - amazing
+  - ameliorate
+  - as a matter of fact
+  - as a means of
+  - as a result of
+  - as far as I'm concerned
+  - as of yet
+  - as to
+  - as yet
+  - assistance
+  - at a later date
+  - at all times
+  - at the current time
+  - at the end of the day
+  - at the present moment
+  - at the present time
+  - at this point in time
+  - at this time
+  - at your earliest convenience
+  - attain
+  - basic fundamentals
+  - be of the opinion
+  - because of the fact that
+  - bestow
+  - brief summary
+  - by means of
+  - by virtue of
+  - by virtue of the fact that
+  - circle back
+  - close proximity
+  - come to a conclusion
+  - due to the fact that
+  - during the course of
+  - each and every
+  - elucidate
+  - employ
+  - endeavor
+  - end result
+  - exact same
+  - expedite
+  - facilitate
+  - factual evidence
+  - fellow colleagues
+  - final conclusion
+  - finalize
+  - first and foremost
+  - for all intents and purposes
+  - for the most part
+  - for the purpose of
+  - for the reason that
+  - formulate
+  - free of charge
+  - gather together
+  - general consensus
+  - give rise to
+  - going forward
+  - has the ability to
+  - has the capacity to
+  - have a tendency to
+  - honest truth
+  - if and when
+  - in a manner of speaking
+  - in a timely manner
+  - in a very real sense
+  - in all likelihood
+  - in an effort to
+  - in between
+  - in connection with
+  - in due course
+  - in excess of
+  - in light of the fact that
+  - in many cases
+  - in my opinion
+  - in order to
+  - in regard to
+  - in relation to
+  - in some instances
+  - in spite of the fact that
+  - in terms of
+  - in the amount of
+  - in the event that
+  - in the final analysis
+  - in the majority of cases
+  - in the nature of
+  - in the near future
+  - in the process of
+  - in view of the fact that
+  - inception
+  - is in a position to
+  - it is worth noting that
+  - it seems that
+  - it should be noted that
+  - make use of
+  - merge together
+  - needless to say
+  - new innovation
+  - not certain
+  - not many
+  - not often
+  - not unlike
+  - on a daily basis
+  - on a monthly basis
+  - on a regular basis
+  - on a weekly basis
+  - on an annual basis
+  - on numerous occasions
+  - on the basis of
+  - on the other hand
+  - one particular
+  - owing to the fact that
+  - pass away
+  - past history
+  - personal opinion
+  - pertaining to
+  - please do not hesitate to
+  - point in time
+  - prior to
+  - put simply
+  - reach a conclusion
+  - readily apparent
+  - refer back
+  - relocate
+  - remuneration
+  - residence
+  - revert back
+  - should you wish
+  - span across
+  - strategize
+  - subsequent to
+  - successfully complete
+  - sum total
+  - take action
+  - the month of
+  - the point I am trying to make
+  - time period
+  - took advantage of
+  - touch base
+  - transpire
+  - true facts
+  - unexpected surprise
+  - until such time as
+  - utilization
+  - utilize
+  - various different
+  - what I mean to say is
+  - with a view to
+  - with reference to
+  - with regard to
+  - with regards to
+  - with respect to
+  - with the exception of
+  - witnessed

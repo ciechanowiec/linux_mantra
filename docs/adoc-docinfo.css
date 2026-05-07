@@ -1,0 +1,58 @@
+#tocbot ol,
+#tocbot ul {
+    list-style-type: none;
+}
+
+#tocbot a.toc-link.node-name--H1 {
+    font-style: italic
+}
+
+@media screen {
+    #tocbot > ul.toc-list {
+        margin-bottom: 0.5em;
+        margin-left: 0.125em
+    }
+
+    #tocbot ul.sectlevel0, #tocbot a.toc-link.node-name--H1 + ul {
+        padding-left: 0
+    }
+
+    #tocbot a.toc-link {
+        height: 100%
+    }
+
+    .is-collapsible {
+        max-height: 3000px;
+        overflow: hidden;
+    }
+
+    .is-collapsed {
+        max-height: 0
+    }
+
+    .is-active-link {
+        font-weight: 700
+    }
+}
+
+@media print {
+    #tocbot a.toc-link.node-name--H4 {
+        display: none
+    }
+}
+
+.olist > ol {
+    list-style-type: upper-alpha;
+}
+
+.olist .olist > ol {
+    list-style-type: upper-roman;
+}
+
+.olist .olist .olist > ol {
+    list-style-type: lower-greek;
+}
+
+.olist .olist .olist .olist > ol {
+    list-style-type: lower-roman;
+}

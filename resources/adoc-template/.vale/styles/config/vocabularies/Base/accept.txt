@@ -1,0 +1,16 @@
+declaratively
+OSGi
+Backuper
+Nginx
+Slexamplus
+relocations
+[Ss]ervlet
+[Ss]ervlets
+APIs
+[Kk]eymap
+keymap
+Pandoc
+subtree
+Composum
+Asciidoctor
+proselint
