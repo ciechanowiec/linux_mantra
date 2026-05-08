@@ -15,4 +15,10 @@ Composum
 Asciidoctor
 proselint
 unary
-MBean?s
+MBeans?
+nominalizations?
+deduplicates
+deduplication
+monospaced
+unregister
+onboarding

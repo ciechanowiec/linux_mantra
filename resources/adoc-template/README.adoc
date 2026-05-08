@@ -8,6 +8,10 @@ include::docs/adoc-fragments/200-timestamp.adoc[]
 
 This document uses https://asciidoc.org[AsciiDoc^] markup language and resides in the project repository.
 
+=== Guideline
+
+This document should follow the link:README.adoc[Technical Writing Guideline].
+
 === Export
 . To export the document to the supported output formats, install the following tools:
 .. https://asciidoctor.org/#installation[Asciidoctor^]
@@ -25,14 +29,14 @@ asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
 +
 [source,bash,subs="attributes+"]
 ----
-asciidoctor-pdf --attribute allow-uri-read --require ./docs/lib/auto-list-style.rb {docname}{docfilesuffix}
+asciidoctor-pdf --attribute allow-uri-read --require ./docs/lib/common-style.rb {docname}{docfilesuffix}
 ----
 
 . To export to DOCX - Asciidoctor converts the document to DocBook XML, which Pandoc then converts to DOCX:
 +
 [source,bash,subs="attributes+"]
 ----
-asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --output {docname}{docfilesuffix}
+asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --output {docname}.docx
 ----
 
 === Linting

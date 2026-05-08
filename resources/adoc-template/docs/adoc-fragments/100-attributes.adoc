@@ -17,3 +17,4 @@
 :stylesheet: adoc-css-style.css
 :!table-caption:
 :!figure-caption:
+:!example-caption:

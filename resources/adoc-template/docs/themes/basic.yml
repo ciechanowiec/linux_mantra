@@ -14,3 +14,7 @@ footer:
 role:
   red:
     font-color: ff0000
+  bad-icon:
+    font-color: 'C9302C'
+  good-icon:
+    font-color: '1E7E34'

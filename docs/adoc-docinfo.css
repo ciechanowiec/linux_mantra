@@ -56,3 +56,46 @@
 .olist .olist .olist .olist > ol {
     list-style-type: lower-roman;
 }
+
+.exampleblock.bad-example > .content,
+.exampleblock.good-example > .content {
+    padding: 0.9em 1.1em;
+    border-radius: 4px;
+}
+
+.exampleblock.bad-example > .content {
+    border-left: 4px solid #d9534f;
+    background-color: #fdecea;
+}
+
+.exampleblock.good-example > .content {
+    border-left: 4px solid #28a745;
+    background-color: #e6f4ea;
+}
+
+.exampleblock.bad-example > .title,
+.exampleblock.good-example > .title {
+    font-weight: 600;
+    font-style: normal;
+    margin-bottom: 0.35em;
+}
+
+.exampleblock.bad-example > .title {
+    color: #c9302c;
+}
+
+.exampleblock.good-example > .title {
+    color: #1e7e34;
+}
+
+.bad-icon {
+    color: #c9302c;
+}
+
+.good-icon {
+    color: #1e7e34;
+}
+
+.exampleblock.good-example + .exampleblock.bad-example {
+    margin-top: 2em;
+}
