@@ -1,0 +1,7 @@
+[cols=">.^1,<.^1"]
+|===
+| *Document created:* | 2030-01-01 00:00:00 +0100
+| *Document last modified:* | {docdatetime}
+| *Document generated:* | {localdatetime}
+|===
+

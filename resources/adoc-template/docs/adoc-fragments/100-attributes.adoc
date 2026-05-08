@@ -1,0 +1,19 @@
+:reproducible:
+:doctype: article
+:author: Herman Ciechanowiec
+:email: herman@ciechanowiec.eu
+:chapter-signifier:
+:sectnums:
+:sectnumlevels: 5
+:sectanchors:
+:toc: left
+:toclevels: 5
+:icons: font
+:docinfo: shared,private
+:linkcss:
+:sourcedir: {docdir}
+:pdf-theme: {sourcedir}/docs/themes/basic.yml
+:stylesdir: https://www.ciechanowiec.eu/linux_mantra/
+:stylesheet: adoc-css-style.css
+:!table-caption:
+:!figure-caption:
