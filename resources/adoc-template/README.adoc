@@ -39,23 +39,23 @@ This document uses https://asciidoc.org[AsciiDoc^] markup language and resides i
 
 . To export to HTML:
 +
-[source,bash]
+[source,bash,subs="attributes+"]
 ----
-asciidoctor --attribute allow-uri-read README.adoc
+asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
 ----
 
 . To export to PDF:
 +
-[source,bash]
+[source,bash,subs="attributes+"]
 ----
-asciidoctor-pdf --attribute allow-uri-read --require ./docs/lib/auto-list-style.rb README.adoc
+asciidoctor-pdf --attribute allow-uri-read --require ./docs/lib/auto-list-style.rb {docname}{docfilesuffix}
 ----
 
 . To export to DOCX - Asciidoctor converts the document to DocBook XML, which Pandoc then converts to DOCX:
 +
-[source,bash]
+[source,bash,subs="attributes+"]
 ----
-asciidoctor --backend docbook --attribute allow-uri-read --out-file - README.adoc | pandoc --from docbook --to docx --output README.docx
+asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --output {docname}{docfilesuffix}
 ----
 
 === Linting
@@ -75,7 +75,7 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - README.ado
 
 . Lint the document:
 +
-[source,bash]
+[source,bash,subs="attributes+"]
 ----
-vale README.adoc
+vale {docname}{docfilesuffix}
 ----
