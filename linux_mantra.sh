@@ -310,6 +310,18 @@ echo "Installing TypeScript..."
 #   good: https://lindevs.com/install-typescript-on-ubuntu
 sudo npm install -g typescript # `npm` comes from node, so node must be preinstalled
 
+echo "Installing pnpm (Node.js package manager)..."
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+
+echo "Installing Claude Code CLI (Anthropic's terminal-based AI coding agent)..."
+# Installation docs: https://docs.claude.com/en/docs/claude-code/setup
+# NOTES:
+#   The native installer is the officially recommended method. It installs to
+#   $HOME/.local/bin/claude and auto-updates in the background. The official
+#   docs explicitly warn against `sudo npm install -g @anthropic-ai/claude-code`
+#   due to permission issues and security risks.
+curl -fsSL https://claude.ai/install.sh | bash
+
 echo "Installing Mermaid CLI (diagramming tool)..."
 sudo npm install -g @mermaid-js/mermaid-cli
 
@@ -744,6 +756,40 @@ EOF
     echo "Unexpected error occurred. Update failed"
     exit 1
 fi
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
+#                          9.1. GOOGLE CLOUD CLI                              #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="google cloud cli"
+# DOCUMENTATION:
+#   https://cloud.google.com/sdk/docs/install#deb
+# NOTES:
+#   The apt-based install is Google's officially recommended method on
+#   Debian/Ubuntu. It uses Google's signed package repository so updates
+#   arrive via the normal `apt upgrade` workflow.
+
+echo "1. Installing apt prerequisites for Google Cloud CLI..."
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
+
+echo "2. Adding Google Cloud public signing key..."
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+  | sudo gpg --dearmor --yes -o /usr/share/keyrings/cloud.google.gpg
+
+echo "3. Adding Google Cloud CLI apt repository..."
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+  | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+
+echo "4. Installing Google Cloud CLI..."
+sudo apt-get update && sudo apt-get install -y google-cloud-cli
 
 informAboutProcedureEnd
 

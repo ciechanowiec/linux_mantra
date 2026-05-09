@@ -503,6 +503,29 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                          5.1. GOOGLE CLOUD CLI                              #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="google cloud cli"
+# DOCUMENTATION:
+#   https://cloud.google.com/sdk/docs/install#mac
+#   https://formulae.brew.sh/cask/gcloud-cli
+# NOTES:
+#   Google's primary install method on macOS is the tarball installer; the
+#   Homebrew cask is officially listed as an alternative and is used here for
+#   consistency with the rest of this script (which is brew-based on macOS).
+
+echo "1. Installing Google Cloud CLI..."
+brew update && brew install --cask gcloud-cli
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                                6. SDKMAN                                    #
 #                                                                             #
 #                                                                             #
@@ -802,6 +825,23 @@ echo "Installing TypeScript..."
 #   bad: https://www.typescriptlang.org/download
 #   good: https://lindevs.com/install-typescript-on-ubuntu
 sudo npm install -g typescript # `npm` comes from node, so node must be preinstalled
+
+echo "Installing pnpm (Node.js package manager)..."
+# Installation docs: https://pnpm.io/installation
+# NOTES:
+#   The pnpm standalone install script does NOT support Intel Macs
+#   (darwin-x64). Homebrew is the officially recommended fallback on macOS
+#   and works on both Apple Silicon and Intel.
+brew install pnpm
+
+echo "Installing Claude Code CLI (Anthropic's terminal-based AI coding agent)..."
+# Installation docs: https://docs.claude.com/en/docs/claude-code/setup
+# NOTES:
+#   The native installer is the officially recommended method. It installs to
+#   $HOME/.local/bin/claude and auto-updates in the background. The official
+#   docs explicitly warn against `sudo npm install -g @anthropic-ai/claude-code`
+#   due to permission issues and security risks.
+curl -fsSL https://claude.ai/install.sh | bash
 
 echo "Installing Mermaid CLI (diagramming tool)..."
 sudo npm install -g @mermaid-js/mermaid-cli
