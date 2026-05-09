@@ -1,0 +1,59 @@
+# IDE
+*.iml
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log*
+*.logs*
+logs/
+log/
+
+# Java
+*.class
+target/
+.gradle/
+hs_err_pid*
+
+# Node / TypeScript
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Next.js / Payload CMS
+.next/
+.turbo/
+out/
+
+# Supabase
+.supabase/
+supabase/.branches/
+supabase/.temp/
+
+# Terraform / Cloud
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+
+# Drawio
+*.drawio.png.bkp
+*.drawio.png.dtmp
+
+# Compiled documentation
+README*.pdf
+README*.html
+README*.docx
+
+# IDE / tool exports
+repo.xml
+
+# Local Claude config
+claude/settings.local.json
+.claude/settings.local.json

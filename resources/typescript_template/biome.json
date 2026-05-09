@@ -1,0 +1,93 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.4.14/schema.json",
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true
+    },
+    "files": {
+        "ignoreUnknown": false,
+        "includes": ["src/**/*", "test/**/*", "biome.json", "tsconfig.json", "package.json"]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 120,
+        "lineEnding": "lf"
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+            "semicolons": "always",
+            "trailingCommas": "all"
+        }
+    },
+    "linter": {
+        "enabled": true,
+        "domains": {
+            "project": "all",
+            "types": "all"
+        },
+        "rules": {
+            "recommended": true,
+            "complexity": {
+                "noExcessiveCognitiveComplexity": {
+                    "level": "error",
+                    "options": {
+                        "maxAllowedComplexity": 8
+                    }
+                }
+            },
+            "correctness": {
+                "noUnusedFunctionParameters": "error",
+                "noUnusedImports": "error",
+                "noUnusedPrivateClassMembers": "error",
+                "noUnusedVariables": "error",
+                "useImportExtensions": {
+                    "level": "error",
+                    "options": {
+                        "forceJsExtensions": true
+                    }
+                }
+            },
+            "style": {
+                "noNegationElse": "error",
+                "noNonNullAssertion": "error",
+                "noParameterAssign": "error",
+                "useBlockStatements": "error",
+                "useConst": "error",
+                "useDefaultSwitchClause": "error",
+                "useExplicitLengthCheck": "error",
+                "useNamingConvention": "error",
+                "useReadonlyClassProperties": "error"
+            },
+            "suspicious": {
+                "noConsole": {
+                    "level": "error",
+                    "options": {
+                        "allow": ["error", "warn", "info"]
+                    }
+                },
+                "noDoubleEquals": "error",
+                "noEvolvingTypes": "error",
+                "noExplicitAny": "error",
+                "noFallthroughSwitchClause": "error",
+                "noVar": "error"
+            },
+            "nursery": {
+                "noEqualsToNull": "error",
+                "noFloatingPromises": "error",
+                "useExplicitType": "error"
+            }
+        }
+    },
+    "assist": {
+        "enabled": true,
+        "actions": {
+            "source": {
+                "organizeImports": "on"
+            }
+        }
+    }
+}
