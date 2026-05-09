@@ -817,14 +817,26 @@ brew install postman
 
 echo "installing node (server environment)..."
 brew install node
-mkdir -p "$HOME/.npm"
-sudo chown -R "$(id -un):$(id -gn)" "$HOME/.npm"
+# Point npm's global prefix at a stable, user-owned directory.
+# Why: Homebrew installs npm with a version-pinned prefix
+# (/opt/homebrew/Cellar/node/<version>), so every `brew upgrade node` orphans
+# previously-installed global packages and leaves stale symlinks under
+# /opt/homebrew/bin (e.g. a `tsc` whose underlying package is gone). A user-owned
+# prefix also lets `npm install -g` run without sudo into a brew-owned tree.
+mkdir -p "$HOME/.npm-global"
+npm config set prefix "$HOME/.npm-global"
+export PATH="$HOME/.npm-global/bin:$PATH" # so subsequent steps in this script find npm-installed CLIs
+cat >> "$shellFile" << EOF
+
+# ADDING NPM GLOBAL BINARIES TO PATH:
+export PATH="\$HOME/.npm-global/bin:\$PATH"
+EOF
 
 echo "Installing TypeScript..."
 # Installation docs:
 #   bad: https://www.typescriptlang.org/download
 #   good: https://lindevs.com/install-typescript-on-ubuntu
-sudo npm install -g typescript # `npm` comes from node, so node must be preinstalled
+npm install -g typescript # `npm` comes from node, so node must be preinstalled
 
 echo "Installing pnpm (Node.js package manager)..."
 # Installation docs: https://pnpm.io/installation
@@ -844,10 +856,10 @@ echo "Installing Claude Code CLI (Anthropic's terminal-based AI coding agent)...
 curl -fsSL https://claude.ai/install.sh | bash
 
 echo "Installing Mermaid CLI (diagramming tool)..."
-sudo npm install -g @mermaid-js/mermaid-cli
+npm install -g @mermaid-js/mermaid-cli
 
 echo "Installing AIO CLI (Adobe CLI)..."
-sudo npm install -g @adobe/aio-cli
+npm install -g @adobe/aio-cli
 
 echo "Installing AIO CLI plugins..."
 # Docs:
