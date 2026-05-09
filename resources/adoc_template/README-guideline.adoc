@@ -1,6 +1,5 @@
 [.text-justify]
 = Technical Writing Guideline
-ifdef::env-github[]
 :reproducible:
 :doctype: article
 :author: Herman Ciechanowiec
@@ -21,23 +20,20 @@ ifdef::env-github[]
 :!table-caption:
 :!figure-caption:
 :!example-caption:
+ifdef::env-github[]
 :bad-icon: ❌
 :good-icon: ✅
+endif::[]
+ifndef::env-github[]
+:bad-icon: icon:times-circle[role=bad-icon]
+:good-icon: icon:check-circle[role=good-icon]
+endif::[]
 
 [cols=">.^1,<.^1"]
 |===
 | *Document last modified:* | {docdatetime}
 | *Document generated:* | {localdatetime}
 |===
-endif::[]
-ifndef::env-github[]
-include::docs/adoc-fragments/100-attributes.adoc[]
-
-include::docs/adoc-fragments/200-timestamp.adoc[]
-
-:bad-icon: icon:times-circle[role=bad-icon]
-:good-icon: icon:check-circle[role=good-icon]
-endif::[]
 
 This guideline governs how technical documentation is written. Its purpose is to make documents precise, complete, easy to follow, and consistent across authors and over time. It's intended for specifications, reference documentation, architecture documents, design documents, and protocol descriptions - text whose primary obligation is to convey what a system does, how it works, and how to use it correctly.
 

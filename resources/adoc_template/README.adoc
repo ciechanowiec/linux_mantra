@@ -1,8 +1,31 @@
 [.text-justify]
 = README Template
-include::docs/adoc-fragments/100-attributes.adoc[]
+:reproducible:
+:doctype: article
+:author: Herman Ciechanowiec
+:email: herman@ciechanowiec.eu
+:chapter-signifier:
+:sectnums:
+:sectnumlevels: 5
+:sectanchors:
+:toc: left
+:toclevels: 5
+:icons: font
+:docinfo: shared,private
+:linkcss:
+:sourcedir: {docdir}
+:pdf-theme: {sourcedir}/docs/themes/basic.yml
+:stylesdir: https://www.ciechanowiec.eu/linux_mantra/
+:stylesheet: adoc-css-style.css
+:!table-caption:
+:!figure-caption:
+:!example-caption:
 
-include::docs/adoc-fragments/200-timestamp.adoc[]
+[cols=">.^1,<.^1"]
+|===
+| *Document last modified:* | {docdatetime}
+| *Document generated:* | {localdatetime}
+|===
 
 == About the Document
 

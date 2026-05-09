@@ -1,6 +1,0 @@
-[cols=">.^1,<.^1"]
-|===
-| *Document last modified:* | {docdatetime}
-| *Document generated:* | {localdatetime}
-|===
-
