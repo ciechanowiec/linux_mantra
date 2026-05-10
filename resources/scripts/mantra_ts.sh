@@ -61,6 +61,14 @@ verifyIfNpxExists () {
 	fi
 }
 
+verifyIfPnpmExists () {
+	if ! type pnpm &> /dev/null
+	then
+		printf "${ERROR_TAG} 'pnpm' which is required to install project dependencies hasn't been detected. The script execution has been aborted.\n"
+		exit
+	fi
+}
+
 verifyIfExactlyOneArgument () {
 	if [ $# != 1 ]
 	then
@@ -144,6 +152,21 @@ EOF
 printf "${STATUS_TAG} ${ITALIC}LICENSE.txt${RESET_FORMAT} with default content has been created.\n"
 }
 
+installDependencies () {
+	projectDirectory=$1
+	printf "${STATUS_TAG} Installing project dependencies via pnpm (this may take a moment)...\n"
+	currentDirectory=$(pwd)
+	cd "$projectDirectory" || exit 1
+	if ! pnpm install > /dev/null 2>&1
+	then
+		printf "${ERROR_TAG} Unable to install project dependencies via pnpm. The script execution has been aborted.\n"
+		cd "$currentDirectory" || exit 1
+		exit 1
+	fi
+	cd "$currentDirectory" || exit 1
+	printf "${STATUS_TAG} Project dependencies have been installed.\n"
+}
+
 initGit () {
 	projectDirectory=$1
 	git init "$projectDirectory" &> /dev/null   # Redirect to void hints on git initialization
@@ -174,7 +197,7 @@ initCommit() {
 showFinishMessage () {
 	projectName=$1
 	printf "${BOLD_LIGHT_GREEN}[SUCCESS]:${RESET_FORMAT} The project ${ITALIC}$projectName${RESET_FORMAT} with the following file structure has been created:\n"
-  tree --dirsfirst -a "$projectDirectory"
+  tree --dirsfirst -a -L 2 "$projectDirectory"
 }
 
 openProjectInIDE () {
@@ -245,6 +268,7 @@ showWelcomeMessage
 verifyIfTreeExists
 verifyIfGitExists
 verifyIfNpxExists
+verifyIfPnpmExists
 verifyIfExactlyOneArgument "$@"
 
 projectName=$1 # First passed argument
@@ -259,6 +283,10 @@ bootstrapFromTemplate "$projectDirectory" "$templateRepoPath"
 # Customize template content:
 substituteProjectName "$projectDirectory" "$projectName"
 addLicense "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname"
+
+# Install dependencies (must happen before initCommit so package-lock.json is captured,
+# and before openProjectInIDE so the Biome LSP finds its binary on first start):
+installDependencies "$projectDirectory"
 
 # Setup git:
 initGit "$projectDirectory"
