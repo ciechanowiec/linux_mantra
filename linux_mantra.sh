@@ -654,9 +654,11 @@ alias idea='~/scripts/idea.sh'
 alias mantra_java='~/scripts/mantra_java.sh'
 alias mantra_spring_mongo='~/scripts/mantra_spring_mongo.sh'
 alias mantra_spring_sql='~/scripts/mantra_spring_sql.sh'
+alias mantra_ts='~/scripts/mantra_ts.sh'
 alias mvn_download_sources_and_javadocs='mvn dependency:sources && mvn dependency:sources dependency:resolve -Dclassifier=javadoc'
 alias n='nvim'
 alias nvim="~/scripts/nvim.sh"
+alias p='pnpm'
 alias x='xplr'
 alias xplr='~/scripts/xplr.sh'
 EOF
@@ -1073,8 +1075,8 @@ fontThree="https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetB
 wget "$fontOne" -P tempFontsDir
 wget "$fontTwo" -P tempFontsDir
 wget "$fontThree" -P tempFontsDir
-# Google's API for downloading Noto Serif is subject to constant changes, so the font is stored locally: 
-unzip "$resourcesDir/font/noto_serif.zip" -d noto_serif 
+# Google's API for downloading Noto Serif is subject to constant changes, so the font is stored locally:
+unzip "$resourcesDir/font/noto_serif.zip" -d noto_serif
 cp -rf noto_serif/static/NotoSerif-Bold.ttf \
   noto_serif/static/NotoSerif-Italic.ttf \
   noto_serif/static/NotoSerif-BoldItalic.ttf \
