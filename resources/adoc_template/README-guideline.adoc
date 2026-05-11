@@ -147,7 +147,6 @@ _Heading: "`Connection Pooling.`" Body: discusses pooling, then transaction isol
 _Heading: "`Connection Pooling.`" Body: pool sizing, acquisition, release, leak detection, and the lifecycle of a pooled connection. Transaction isolation is documented in a separate section, with a cross-reference where pool behavior interacts with isolation._
 ====
 
-
 == Terminology and Precision
 
 === Strict Nomenclature
@@ -272,7 +271,6 @@ endif::[]
 _Each replica is a Conflict-free Replicated Data Type (CRDT), so concurrent updates from different replicas can be merged without coordination. Replicas discover each other and detect failures using the Scalable Weakly Consistent Infection-style Membership (SWIM) protocol, which runs over Quick UDP Internet Connections (QUIC)._
 ====
 
-
 == Context and Framing
 
 === Set the Stage
@@ -346,7 +344,6 @@ _(Document titled "`The Order Service Wire Protocol`" opens with: "`This documen
 ====
 _(Document titled "`The Order Service Reference`" opens with: "`This document specifies the wire protocol between client and server, the request and response formats, and the error model. The on-disk storage format and the replication protocol between server nodes are covered separately in the Storage Reference and the Replication Reference.`")_ (Scope is stated. The non-scope is included because a reader of an "`Order Service Reference`" might reasonably expect storage and replication to be covered.)
 ====
-
 
 == Concreteness and Examples
 
@@ -475,7 +472,6 @@ response = client.send(payload)
 assert response.status_code = 202
 ----
 ====
-
 
 == Language and Style
 
@@ -659,7 +655,6 @@ endif::[]
 _Register the handler during initialization and store the returned registration. During shutdown, call `unregister` on the stored registration. When initialization throws, the framework doesn't invoke shutdown, so any partial registration must be cleaned up before the throw._
 ====
 
-
 == Anti-Fluff
 
 === No Marketing
@@ -826,7 +821,6 @@ endif::[]
 _The plan for the service must be revised._
 ====
 
-
 == Document Mechanics
 
 === Stable Section Numbering
@@ -953,12 +947,51 @@ endif::[]
 _Pending changes are persisted by `save` and discarded by `rollback`. Both methods close the current *transaction*. Subsequent operations open a new one._
 ====
 
+== Prompt Constraints as Minimum Floors
+
+This section applies when an AI system uses this guideline to generate a response.
+
+A specific element mentioned in the prompt should be treated as a minimum constraint, not as a theme. The response should include that element at least once. The element's representation in the response should reflect its realistic proportion in the subject domain, not its prominence in the prompt.
+
+The response should be written as if the author chose the content independently, using the prompt only to determine the topic and the minimum constraints. The distribution of content across subtopics should match the distribution a domain expert would produce when writing on that topic without a prompt.
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Acronyms = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad
+====
+_Prompt: "List 20 Java performance optimization techniques. Include something related to garbage collection."_
+
+_Response: lists 9 garbage collection techniques first (GC tuning, heap sizing, GC log analysis, G1 vs ZGC comparison…), then 11 techniques from other areas._
+
+Garbage collection is one subcategory of JVM performance optimization. The response allocated 45% of its content to it because the prompt mentioned it explicitly, not because it represents 45% of the optimization domain.
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Acronyms = YES -->
+++++
+endif::[]
+[.bad-example]
+[.good-example]
+.{good-icon} Good
+====
+_Prompt: "List 20 Java performance optimization techniques. Include something related to garbage collection."_
+
+_Response: lists 20 techniques covering Just-in-Time (JIT) compilation, object pooling, connection pool sizing, lock contention reduction, I/O buffering, profiling, lazy initialization, and other areas, with 1-2 entries on garbage collection tuning placed according to natural fit._
+
+Garbage collection appears once, satisfying the minimum constraint.
+Its share of the response matches its share of the optimization domain, not its share of the prompt.
+====
 
 == About the Document
 
 This document uses https://asciidoc.org[AsciiDoc^] markup language and resides in the project repository.
 
 === Export
+
 . To export the document to the supported output formats, install the following tools:
 .. https://asciidoctor.org/#installation[Asciidoctor^]
 .. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
@@ -988,6 +1021,7 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 === Linting
 
 ==== General Rules
+
 . https://vale.sh[Vale^] lints the document.
 . Vale enforces the following style guides:
 .. Native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary] included.
@@ -998,6 +1032,7 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 . Vale configuration is in `link:.vale.ini[]`.
 
 ==== Usage
+
 . Install Vale as described in the https://vale.sh/docs/install/[official documentation].
 
 . Lint the document:
