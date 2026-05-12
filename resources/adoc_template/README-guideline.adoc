@@ -24,9 +24,15 @@ ifdef::env-github[]
 :bad-icon: ❌
 :good-icon: ✅
 endif::[]
+ifdef::backend-docbook5[]
+:bad-icon: ❌
+:good-icon: ✅
+endif::[]
 ifndef::env-github[]
+ifndef::backend-docbook5[]
 :bad-icon: icon:times-circle[role=bad-icon]
 :good-icon: icon:check-circle[role=good-icon]
+endif::[]
 endif::[]
 
 [cols=">.^1,<.^1"]
