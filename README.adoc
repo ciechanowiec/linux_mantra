@@ -11,35 +11,41 @@
 :toc: left
 :toclevels: 5
 :icons: font
-// Docinfo is used for foldable TOC.
-// -> For full usage example see https://github.com/remkop/picocli
 :docinfo: shared,private
 :linkcss:
+:sourcedir: {docdir}
+:pdf-theme: {sourcedir}/docs/themes/basic.yml
 :stylesdir: https://www.ciechanowiec.eu/linux_mantra/
 :stylesheet: adoc-css-style.css
+:!table-caption:
+:!figure-caption:
+:!example-caption:
 
 == Overview
+
 _Linux Mantra_ is a set of interconnected Bash/Lua scripts and configuration files, which perform automated fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra has been used on a daily basis for over a year. It has undergone rigorous testing and stands as one of the most sophisticated programs of its kind.
 
 == Features
-[upperalpha]
+
 . Linux Mantra performs automized setup of personal Linux/Java/AEM development environment right after installation of an operating system. It installs basic packages (e.g. `curl`, `ffmpeg`, `xclip`, `traceroute`, `fzf`, `xdotool`, `tree`, `unzip`, `wget`, `htop`, `trash-cli`, `vim`), adjusts `.bashrc`, customizes fonts, fixes some bugs, sets up locale formats, mounts a decompiler, personalizes directories in `$HOME`, remaps appropriate input keys, loads dumped `dconf`, configures terminal file manager (`xplr`), initiates often used Bash scripts, establishes GNOME extensions, modifies run modes (`.desktop`) of certain default applications, associates mime types etc.
 . With Linux Mantra, time required to perform the whole setup of personal Linux/Java/AEM development environment is usually less than 45 minutes (depends on the quality of internet connection).
 . Besides the initial setup after installation of an operating system, Linux Mantra can be used to keep record of the ongoing configuration changes in order to assure their reproducibility.
 . Linux Mantra was tested and can be run on Linux Ubuntu 22.x. Other Linux distributions might require adjustments of the program.
 
 == Program Architecture
+
 === Open for Easy Modification
+
 Personal Linux/Java/AEM development environment is subject to continuous change, e.g. due to  obsolescence of some programs, software updates and need for new scripts. For that reason Linux Mantra is designed to be open for easy modification. Thanks to that, changes to the environment can be smoothly and handily implemented into Linux Mantra so that they will be reproducible during next setup.
 
 === `linux_mantra.sh` and `resources`
-[upperalpha]
+
 . Linux Mantra consists of two interdependent parts: a bash script `linux_mantra.sh` and a directory `resources`. The first one is the script that drives the whole program from the very start till the very end. The directory `resources`, in turn, contains files that are used (copied, modified and triggered) by `linux_mantra.sh`.
 . `linux_mantra.sh` and `resources` must be sibling files, i.e. they must be located in the same directory.
 . `linux_mantra.sh` has hardcoded paths to files inside `resources`. It means that changes of files hierarchy inside `resources` must be appropriately reflected in `linux_mantra.sh`.
 
 === Code Blocks in `linux_mantra.sh`
-[upperalpha]
+
 . `linux_mantra.sh` consists of set of code blocks, each of which is visually marked by a big comment-header.
 . The first code block is a set of common functions used throughout the script and the rest of blocks are procedural ones.
 . Every procedural code block starts with informing about the name of a procedure that now will be performed. In the end of every procedure the user is informed about completion, the script stops the execution to give the user time for facultative checks and prompts for continuation.
@@ -47,7 +53,7 @@ Personal Linux/Java/AEM development environment is subject to continuous change,
 . Linux Mantra files incorporate some code related to macOS as the basis for cross-platform solution. However, during the execution of Linux Mantra on a Linux machine, the macOS related code isn't executed and has no relevant impact on the flow of the program.
 
 == How to Run
-[upperalpha]
+
 . By design, Linux Mantra performs _personalized_ setup. Moreover, that setup is _highly_ personalized. Technically, anyone can run Linux Mantra and achieve the result intended by the program, but due to the mentioned particular individualization, that result might not be satisfiable (e.g. someone might prefer different key bindings or wallpaper). Therefore, Linux Mantra isn't supposed to be a universal tool, but rather inspiration for creating other similar tools.
 . Before running Linux Mantra, perform installation of Linux Ubuntu 22.x. The installation should be done in a _minimal_ mode (i.e. without preinstalled set of additional packages like LibreOffice) and in an _erasing the disk_ mode, so that the operating system is clean. Among other options, choose _Download updates while installing Ubuntu_, but don't choose _install third-party software for graphics..._
 . Right after the first boot do not install any additional programs. Right after the first boot just download this repository as a `.zip` archive and unzip it.
@@ -58,9 +64,10 @@ Personal Linux/Java/AEM development environment is subject to continuous change,
 . Note that Linux Mantra isn't run in a fully automatic mode and requires certain interaction with the user (e.g. provision of an e-mail address). The reasons for that are security considerations and open for easy modification principle mentioned above. Another reason is also ineffectiveness of full automation: certain aspects of certain programs (e.g. the location of setting for the download target in the browser) are practically nondeterministic due to constant change of those programs.
 
 == License
+
 The program is subject to MIT No Attribution License
 
-Copyright © 2022-2025 Herman Ciechanowiec
+Copyright © 2022-2026 Herman Ciechanowiec
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
 
