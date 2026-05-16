@@ -22,3 +22,15 @@ deduplication
 monospaced
 unregister
 onboarding
+[Rr]unbook
+[Rr]unbooks
+OAuth
+interoperate
+[Aa]llowlist
+[Bb]locklist
+Postgres
+Grafana
+[Ii]dempotency
+Mostowa
+[Ss]everability
+balancer's

@@ -1,5 +1,5 @@
 [.text-justify]
-= Technical Writing Guideline
+= Writing Guideline
 :reproducible:
 :doctype: article
 :author: Herman Ciechanowiec
@@ -41,71 +41,137 @@ endif::[]
 | *Document generated:* | {localdatetime}
 |===
 
-This guideline governs how technical documentation is written. Its purpose is to make documents precise, complete, easy to follow, and consistent across authors and over time. It's intended for specifications, reference documentation, architecture documents, design documents, and protocol descriptions - text whose primary obligation is to convey what a system does, how it works, and how to use it correctly.
+This guideline governs how written documents are produced. Its purpose is to make documents precise, complete, easy to follow, and consistent across authors and over time.
 
-== Thought Structure
+The guideline applies to non-fiction prose - reference documentation, design documents, runbooks, README files, protocol descriptions, and prose memos. It doesn't apply to fiction, marketing copy, or transient chat.
 
-=== One Sentence, One Thought
+The document is organized in three parts. xref:#part-1[Part 1] states rules that apply to any non-fiction document - any text that describes what exists or has existed, prescribes what should or must be done, performs an act by being written or spoken ("This policy is hereby adopted"), projects intended or possible futures, or aims to persuade the reader. These five purposes often appear together in a single document, and the rules apply to each. xref:#part-2[Part 2] adds rules for technical texts - specifications, reference documentation, architecture documents, design documents, protocol descriptions, and runbooks. xref:#part-3[Part 3] adds rules that apply when the author is an AI system.
+
+[[part-1]]
+== General Rules
+
+=== Audience, Purpose, and Scope
+
+[#identify-audience]
+==== Identify the Audience
+
+A document names its primary reader at the beginning - the role, the assumed knowledge, and the decision the reader will make after reading. Rules that follow on style, depth, and vocabulary are calibrated to that reader. A document that doesn't identify its reader is calibrated to no one.
+
+When the prompt or request names the reader, restate the reader's role and assumed knowledge in one sentence at the document's opening. This is calibration, not echoing - the document still owns its own framing. See xref:#dont-echo[].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The Connection Pool Reference describes the connection pool._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The Connection Pool Reference is written for application engineers integrating against the database driver. It assumes familiarity with relational databases and connection lifecycle. It documents pool configuration, observable behavior, and tuning - enough to size and operate a pool against the supported drivers._
+====
+
+==== State the Purpose
+
+A document states what it's for - the change in the reader's knowledge, capability, or behavior that the document is intended to produce. The purpose is named concretely enough that the reader can predict the kind of content that follows and judge, after reading, whether the document delivered.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_This document covers the rate limiter._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_This document describes how the rate limiter behaves in production today and states the integration requirements that callers must satisfy. After reading it, an integrator should be able to send conforming requests, interpret the responses, and configure a quota for a new tenant._
+====
+
+==== Scope and Non-Scope
+
+A document, and each major section, opens with a statement of what it covers. The scope statement bounds the topic precisely enough that the reader knows, before reading further, whether the document answers the question at hand. A non-scope statement is added only when a reasonable reader would otherwise expect the missing material to appear. A non-scope statement about material no one would expect is filler.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_(Document titled "The Order Service Reference" opens directly with: "An order is a record of a customer's intent to purchase one or more items…")_ (No scope statement. The reader doesn't know whether the document covers the wire protocol, the storage format, the administrative interface, or all three.)
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_(Document titled "The Order Service Wire Protocol" opens with: "This document covers the wire protocol of the Order Service. It doesn't cover unrelated subjects such as employee onboarding or office facilities.")_ (Scope is fine. The non-scope sentence addresses material no reader would have expected.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_(Document titled "The Order Service Reference" opens with: "This document specifies the wire protocol between client and server, the request and response formats, and the error model. The on-disk storage format and the replication protocol between server nodes are covered separately in the Storage Reference and the Replication Reference.")_ (Scope is stated. The non-scope is included because a reader of an "Order Service Reference" might reasonably expect storage and replication to be covered.)
+====
+
+=== Thought Structure
+
+==== One Sentence, One Thought
 
 A sentence carries exactly one assertion. If a sentence contains two independent claims joined by _and_, _but_, _while_, or a semicolon, split it. Compound sentences that link a cause to its consequence are acceptable when the link is the point. Sentences that staple two unrelated facts together aren't.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The connection is established when the handshake completes, and a request is sent as a sequence of frames that are reassembled by the receiver in the order their stream identifiers appear._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _The connection is established when the handshake completes. A request is sent as a sequence of frames. The receiver reassembles the frames in the order their stream identifiers appear._
 ====
 
-=== One Paragraph, One Topic
+==== One Paragraph, One Topic
 
 A paragraph develops one thought: a claim followed by its elaboration, qualifications, and consequences. When the topic shifts, the paragraph ends. A paragraph that introduces a second, parallel topic must be split, even when the two topics are related.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _A transaction groups a series of operations into a single atomic unit and is started by calling `begin`. Indexes accelerate query execution by storing precomputed lookup structures and are maintained automatically by the database._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _A transaction groups a series of operations into a single atomic unit. The transaction is started by calling `begin` and is concluded by either `commit` or `rollback`. Until the transaction is concluded, its changes are visible only to operations performed within the same transaction._
 
 _An index is a precomputed lookup structure that accelerates query execution. The database maintains an index automatically: every insert, update, and delete on the indexed table updates the index in the same transaction as the data change._
 ====
 
-=== No Restatement
+==== No Restatement
 
 A thought appears in exactly one place in the document. Two consecutive sentences that say the same thing in different words are a defect. A paragraph that ends by summarizing itself is a defect. When you find yourself rephrasing, delete the weaker version.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The cache is invalidated when the source changes. Whenever the underlying data is modified, the cached copy is no longer valid and is therefore removed._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
-_The cache entry for a record is invalidated when the record’s `last++_++modified` timestamp changes._
+_The cache entry for a record is invalidated when the record's `last++_++modified` timestamp changes._
 ====
 
-=== Razor Sentences
+==== Razor Sentences
 
 ifdef::backend-html5[]
 ++++
 <!-- vale Google.We = NO -->
 ++++
 endif::[]
-Every sentence does work that no other sentence in the document does. If a sentence can be deleted without losing information, delete it. The usual offenders are sentences that announce upcoming material ("`In this section, we will discuss…`"), sentences that summarize what was just said, and sentences that exist only to introduce a list ("`There are several ways to do this:`" can usually be removed along with its colon).
+Every sentence does work that no other sentence in the document does. If a sentence can be deleted without losing information, delete it. The usual offenders are sentences that announce upcoming material ("In this section, we will discuss…"), sentences that summarize what was just said, and sentences that exist only to introduce a list ("There are several ways to do this:" can usually be removed along with its colon).
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _There are several important things to consider when configuring the load balancer. Let us look at them. The first thing is the algorithm. The algorithm controls how requests are distributed across backends._
 ====
@@ -116,76 +182,77 @@ ifdef::backend-html5[]
 endif::[]
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
-_The load balancer’s algorithm controls how requests are distributed across backends. The supported algorithms are round-robin, least-connections, and consistent-hash. The default is round-robin._
+_The load balancer's algorithm controls how requests are distributed across backends. The supported algorithms are round-robin, least-connections, and consistent-hash. The default is round-robin._
 ====
 
-=== Forward Order
+==== Forward Order
 
 Information flows from the general to the specific, from the prerequisite to the dependent, and from the cause to the consequence. The reader should never need a fact that the document hasn't yet introduced. When a concept is needed before its full definition, give a short gloss at first mention and link to the full definition.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The `onMessage` callback is invoked after the channel has joined the topic. A channel is a logical connection identified by a name and bound to a single topic._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
-_A channel is a logical connection identified by a name and bound to a single topic (see §3.2). When a channel joins a topic, it begins to receive messages published to that topic. Each message is delivered to the channel’s `onMessage` callback._
+_A channel is a logical connection identified by a name and bound to a single topic (see §3.2). When a channel joins a topic, it begins to receive messages published to that topic. Each message is delivered to the channel's `onMessage` callback._
 ====
 
-=== Headings as Promises
+==== Headings as Promises
 
-A heading announces exactly what the section contains. The section delivers exactly that, no more and no less. A section titled "`Authentication`" describes authentication. It doesn't also describe authorization, even briefly. Material that doesn't belong under the heading goes into a separate section.
+A heading announces exactly what the section contains. The section delivers exactly that, no more and no less. A section titled "Authentication" describes authentication. It doesn't also describe authorization, even briefly. Material that doesn't belong under the heading goes into a separate section.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
-_Heading: "`Connection Pooling.`" Body: discusses pooling, then transaction isolation, then a digression on prepared statements._
+_Heading: "Connection Pooling." Body: discusses pooling, then transaction isolation, then a digression on prepared statements._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
-_Heading: "`Connection Pooling.`" Body: pool sizing, acquisition, release, leak detection, and the lifecycle of a pooled connection. Transaction isolation is documented in a separate section, with a cross-reference where pool behavior interacts with isolation._
+_Heading: "Connection Pooling." Body: pool sizing, acquisition, release, leak detection, and the lifecycle of a pooled connection. Transaction isolation is documented in a separate section, with a cross-reference where pool behavior interacts with isolation._
 ====
 
-== Terminology and Precision
+=== Terminology and Precision
 
-=== Strict Nomenclature
+==== Strict Nomenclature
 
-A concept is named once and the name is used everywhere. The name isn't varied for stylistic relief. Treat terms like identifiers in source code: renaming them mid-document is a defect that breaks the reader’s ability to track the same thing across sentences.
+A concept is named once and the name is used everywhere. The name isn't varied for stylistic relief. Treat terms like identifiers in source code: renaming them mid-document is a defect that breaks the reader's ability to track the same thing across sentences.
 
 This applies with equal force to operations. _Create_, _insert_, _add_, _register_, _publish_, and _submit_ aren't synonyms. Each names a specific operation in most systems. When the system distinguishes them, the document distinguishes them. When the system doesn't, pick one and use only that one.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The handler registers itself with the broker. Once the listener is active, the consumer dispatches incoming events to subscribers._ (Three names. One concept.)
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _The handler registers itself with the broker. Once the handler is active, it dispatches incoming events to subscribers._
 ====
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _You can add a record to the table, then submit the changes by committing the transaction._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _A record is inserted into the table by `INSERT INTO`. The change becomes durable when the enclosing transaction is committed._
 ====
 
-=== Defined Terms
+[#defined-terms]
+==== Defined Terms
 
 A term that has a specific meaning in the document is defined the first time it's used in a normative sense. The definition takes the form _X is Y that Z_, where _Y_ is the genus (the broader category) and _Z_ is the differentia (what distinguishes _X_ from other members of _Y_). After the definition, the term is used without redefinition.
 
@@ -195,7 +262,7 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _A token is something the client sends to prove who it is._
 ====
@@ -206,39 +273,39 @@ ifdef::backend-html5[]
 endif::[]
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _A *token* is an opaque string issued by the authentication server that the client presents to prove its identity to a resource server. A token has an issuer, a subject, an expiration time, and a set of scopes that constrain the operations the bearer may perform._
 ====
 
-=== Concrete Vocabulary
+==== Concrete Vocabulary
 
-Use words that two competent practitioners would interpret the same way. When two reasonable readers would disagree on what a word means in context, the word is too vague. Replace abstract qualifiers - _flexible_, _robust_, _scalable_, _modern_, _enterprise-grade_, _seamless_, _intelligent_ - with the specific properties they hide.
+Use words that two competent practitioners would interpret the same way. When two reasonable readers would disagree on what a word means in context, the word is too vague. Replace abstract qualifiers - _flexible_, _robust_, _scalable_, _modern_, _enterprise-grade_, _seamless_, _intelligent_, etc. - with the specific properties they hide.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The platform is flexible and supports seamless integration with modern enterprise systems._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _A new data source is added by implementing the `DataSource` interface and registering it through the plugin manifest. The platform discovers the implementation at startup. Existing sources don't need to be modified or recompiled, and existing queries continue to run unchanged._
 ====
 
-=== Plain Names for Plain Things
+==== Plain Names for Plain Things
 
 Prefer the older, well-understood term over a newer marketing-laden one when both denote the same thing. Use the fancier term only when it carries information the plain term lacks. The test is whether replacing the fancier term with the plain one would lose meaning. When it would not, the fancier term was decoration.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The system leverages a cloud-native, distributed compute fabric to deliver intelligent responses._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _Each request is processed by one of several stateless servers behind a load balancer. The server consults a cache, then the database, then returns the response._
 ====
@@ -251,7 +318,7 @@ Further pairs where the plain form is usually correct:
 * _list_ over _collection_ (when the order matters)
 * _user_ over _actor_ (when it's a person)
 
-=== Acronyms and Abbreviations
+==== Acronyms and Abbreviations
 
 An acronym is expanded the first time it appears in the document and the first time it appears in each major section, in the form _Expanded Form (ACRONYM)_. After expansion, the acronym is used. Acronyms more recognizable than their expansions - HTTP, URL, JSON, XML, SQL, TCP - need not be expanded, except where the expansion adds information the reader needs.
 
@@ -261,7 +328,7 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The CRDT replica synchronizes via the SWIM protocol over QUIC._ (Three acronyms. The reader may know none.)
 ====
@@ -272,99 +339,78 @@ ifdef::backend-html5[]
 endif::[]
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _Each replica is a Conflict-free Replicated Data Type (CRDT), so concurrent updates from different replicas can be merged without coordination. Replicas discover each other and detect failures using the Scalable Weakly Consistent Infection-style Membership (SWIM) protocol, which runs over Quick UDP Internet Connections (QUIC)._
 ====
 
-== Context and Framing
+=== Context and Framing
 
-=== Set the Stage
+==== Set the Stage
 
 Before describing a topic in detail, locate it in the broader landscape. Name the category it belongs to, the problem it solves, and how it relates to adjacent concepts the reader is likely to know. The introduction need not be long. It must give the reader a place to put the new information.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The query planner uses a cost-based optimizer with histograms._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _A relational database receives queries in a declarative language (SQL) and must decide how to execute them. This is the job of the *query planner*: it transforms a SQL statement into an executable plan - a tree of operations such as scans, joins, and aggregations._
 
 _The planner described in this document is *cost-based*: it enumerates candidate plans and chooses the one with the lowest estimated cost. Cost is estimated using *histograms* - summaries of column value distributions, refreshed periodically - which let the planner predict how many rows each operation will produce._
 ====
 
-=== Outer Topics in Outline Only
+==== Outer Topics in Outline Only
 
 When a topic touches an outer topic, summarize the outer topic in just enough detail for the current discussion. Don't reproduce its full documentation. Reference the authoritative source. The summary covers the slice of the outer topic that the current text depends on, no more.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 A section on rate limiting that opens with five paragraphs explaining what HTTP is, what status codes are, and how clients and servers communicate.
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _Rate limiting is the mechanism by which an HTTP server protects itself from excessive requests by a single client. When a client exceeds its quota, the server responds with status `429 Too Many Requests` and a `Retry-After` header indicating when the client may try again. The full semantics of HTTP status codes and headers are defined in RFC 9110._
 ====
 
-=== Why Before How
+==== Why Before How
 
 Before describing a mechanism, state what the mechanism is for. The reader needs the purpose to evaluate the mechanism. _Why_ takes one or two sentences. It doesn't become a sales pitch.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The deduplication subsystem maintains a Bloom filter of recent message IDs and consults it on each incoming message._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _The same message can arrive more than once: producers retry on timeout, and the network can reorder and duplicate packets. To deliver each message to the application at most once, the receiver deduplicates incoming messages by ID. A Bloom filter of recent IDs serves as the first check. On a positive match, the receiver consults the durable index to confirm._
 ====
 
-=== Scope and Non-Scope
+=== Concreteness and Examples
 
-A document, and each major section, opens with a statement of what it covers. The scope statement bounds the topic precisely enough that the reader knows, before reading further, whether the document answers the question at hand. A non-scope statement is added only when a reasonable reader would otherwise expect the missing material to appear. A non-scope statement about material no one would expect is filler.
+[#show-then-tell]
+==== Show, Then Tell
 
-[.bad-example]
-.{bad-icon} Bad
-====
-_(Document titled "`The Order Service Reference`" opens directly with: "`An order is a record of a customer’s intent to purchase one or more items…`")_ (No scope statement. The reader doesn't know whether the document covers the wire protocol, the storage format, the administrative interface, or all three.)
-====
+Where a concept can be illustrated - by an example, a sample, a worked-out case, a quotation - show it. The illustration follows the definition. It doesn't replace it. Definitions establish meaning. Illustrations confirm it. When the concept has interesting boundaries - empty inputs, missing inputs, partial information, edge cases - illustrate at least one boundary alongside the typical case. Misreadings tend to arise at boundaries.
 
 [.bad-example]
-.{bad-icon} Bad
-====
-_(Document titled "`The Order Service Wire Protocol`" opens with: "`This document covers the wire protocol of the Order Service. It doesn't cover unrelated subjects such as employee onboarding or office facilities.`")_ (Scope is fine. The non-scope sentence addresses material no reader would have expected.)
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_(Document titled "`The Order Service Reference`" opens with: "`This document specifies the wire protocol between client and server, the request and response formats, and the error model. The on-disk storage format and the replication protocol between server nodes are covered separately in the Storage Reference and the Replication Reference.`")_ (Scope is stated. The non-scope is included because a reader of an "`Order Service Reference`" might reasonably expect storage and replication to be covered.)
-====
-
-== Concreteness and Examples
-
-=== Show, Then Tell
-
-Where a concept can be illustrated by a code snippet, a request/response pair, a configuration file, a query, or a diagram, show it. The illustration follows the definition. It doesn't replace it. Definitions establish meaning. Illustrations confirm it. When the behavior has interesting boundaries - empty inputs, missing inputs, concurrent access, partial failures, error conditions - illustrate at least one boundary alongside the typical case, since the reader’s first bug will be at a boundary.
-
-[.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _A query parameter is appended to the URL after the path and is used to pass additional data to the server._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _A query parameter is appended to the URL after the path, separated from the path by `?` and from other parameters by `&`. The following URL has two query parameters, `q` and `page`:_
 
@@ -379,12 +425,606 @@ https://example.com/search?tag=db&tag=index&debug
 ....
 ====
 
-=== Realistic Examples
+[#realistic-examples]
+==== Realistic Examples
 
-Examples use names and values that resemble real usage: `OrderService`, `customer++_++id`, `/var/log/app.log`. Avoid `Foo`, `Bar`, `xxx`, and `myThing` except in the most abstract syntactic illustrations. Realistic examples carry information about typical usage. Placeholder examples don't.
+Examples use names, values, and scenarios that resemble real usage: `OrderService`, `customer++_++id`, `/var/log/app.log`. Avoid `Foo`, `Bar`, `xxx`, and `myThing` except in the most abstract illustrations. Realistic examples carry information about typical usage. Placeholder examples don't.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
+====
+_Acme Corp. agrees to provide widgets to Beta Ltd. on a date in the future._
+====
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Acronyms = NO -->
+++++
+endif::[]
+[.good-example]
+.{good-icon} Good example
+====
+_Supplier (Acme Corp., a Delaware corporation, EIN 99-1234567) shall deliver 1,200 sensor modules (part number SNS-V2-A) to Customer (Beta Ltd., a Polish limited liability company, KRS 0000123456) at Mostowa 12, 50-200 Wrocław, Poland, on or before 2026-09-30._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Acronyms = YES -->
+++++
+endif::[]
+
+=== Language and Style
+
+==== Active Voice and Named Actor
+
+A sentence names the actor that performs the action. Passive voice is reserved for cases where the actor is genuinely unknown, irrelevant, or the topic of the sentence ("The request is rejected" is acceptable when the topic is the request, not the rejecter).
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The configuration is loaded and the cache is populated._ (Who loads it? Who populates the cache?)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_On startup, the configuration loader reads `config.yaml` from the working directory and populates the in-memory cache._
+====
+
+==== Direct Verbs
+
+Replace nominalizations with the underlying verbs. _Perform an analysis of_ becomes _analyze_. _Make a decision about_ becomes _decide_. _Provide support for_ becomes _support_. The shorter form is also more precise, because the verb carries the action that the nominalization had abstracted away.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The framework performs the resolution of dependencies and provides notification of state changes._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The framework resolves dependencies and notifies registered listeners of state changes._
+====
+
+==== Natural Phrasing
+
+ifdef::backend-html5[]
+++++
+<!-- vale write-good.TooWordy = NO -->
+<!-- vale Google.We = NO -->
+++++
+endif::[]
+Write the way an experienced practitioner would write a careful internal document. Avoid phrases - _herein_, _aforementioned_, _leverage_, _utilize_, _whilst_, _thereof_ - that a practitioner would not say aloud. Avoid phrases - _super easy_, _just_, _simply_, _merely_ - that minimize the reader's task.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_Herein, the aforementioned mechanism shall be utilized to leverage the synergies between the modules._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale write-good.TooWordy = YES -->
+<!-- vale Google.We = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_The two modules communicate through the event bus defined in §3.1. The producer publishes events. The consumer subscribes and processes them._
+====
+
+==== Specific Numbers
+
+When a quantity matters, give the number, the unit, and the conditions under which it holds. _Fast_, _small_, _large_, _many_, and _most_ aren't numbers. When the number is unknown, say so and give a range or an order of magnitude.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The cache holds many entries and evicts old ones quickly._
+====
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.LyHyphens = NO -->
+++++
+endif::[]
+[.good-example]
+.{good-icon} Good example
+====
+_The cache holds up to 10,000 entries by default. When the cache is full, the least-recently-used entry is evicted on each insertion. Eviction is performed synchronously and typically completes in under 50 µs on commodity hardware._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.LyHyphens = YES -->
+++++
+endif::[]
+
+[#no-hedging]
+==== No Hedging
+
+ifdef::backend-html5[]
+++++
+<!-- vale write-good.Weasel = NO -->
+++++
+endif::[]
+Avoid hedges that weaken claims without adding information: _somewhat_, _fairly_, _quite_, _rather_, _generally_, _usually_ (unless followed by the exception), _kind of_, _a bit_, etc. When a claim has exceptions, state them. When a claim is uncertain, say what the uncertainty is.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The operation is generally pretty fast and usually completes fairly quickly._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale write-good.Weasel = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_The operation completes in under 10 ms for inputs of fewer than 1 million elements. For larger inputs, runtime grows linearly with input size. See §7.4 for benchmarks._
+====
+
+==== No Patronizing
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Contractions = NO -->
+++++
+endif::[]
+Don't tell the reader that something is _easy_, _simple_, _straightforward_, _obvious_, or _trivial_. When it is, the reader can see for themselves. When it isn't, the label rings false. State the steps. Let the reader judge the difficulty.
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Contractions = YES -->
+++++
+endif::[]
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_Configuring the resolver is straightforward - just provide a simple hook implementation._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_To customize resolution, implement the `ResolutionHook` interface and register the implementation through the configuration file under `resolution.hooks`. The framework consults registered hooks in declaration order. The first hook that returns a non-null result determines the outcome._
+====
+
+==== Tense and Mood
+
+Use the present tense for behavior that holds whenever the system is in the relevant state ("The framework calls the start method…"). Use the future tense only for actions that genuinely lie in the future from the reader's reference point - for instance, behavior of a planned but not yet released version. Use the imperative for instructions to the reader ("Register the listener before…").
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_When the connection will be established, the server will be sending a greeting._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_When the connection is established, the server sends a greeting frame containing its protocol version and supported extensions._
+====
+
+==== Person
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.We = NO -->
+++++
+endif::[]
+Use the third person for descriptions of the system. Use the second person ("you") for instructions directed at the reader. Avoid the first-person plural ("we") except in introductions or rationale, where it refers to the document's authors. Don't switch among _you_, _we_, _the user_, and _one_ within a section.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_We register the handler. The user can then look it up. One must be careful to unregister it on shutdown. You should also handle exceptions._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.We = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_Register the handler during initialization and store the returned registration. During shutdown, call `unregister` on the stored registration. When initialization throws, the framework doesn't invoke shutdown, so any partial registration must be cleaned up before the throw._
+====
+
+[#pronoun-antecedents]
+==== Pronoun Antecedents
+
+Every pronoun (_it_, _this_, _they_, _that_) has a single, unambiguous antecedent in the same sentence or the immediately preceding sentence. When the candidate antecedents are two or more, replace the pronoun with the name. _This_ and _that_ at the start of a sentence are followed by the noun they refer to (_this change_, _that release_) when the antecedent isn't a single noun.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The handler calls the resolver, which logs the request, and it returns the result._ (Does _it_ refer to the handler or the resolver?)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The handler calls the resolver. The resolver logs the request and returns the result to the handler._
+====
+
+==== Inclusive Language
+
+Name actors and examples without invoking gender, ethnicity, or other identity attributes unless they're part of the topic. Use _they_ as a singular pronoun for a person of unspecified gender. Use names from a variety of traditions in examples, not from a single naming convention. Avoid metaphors that depend on culturally specific knowledge for a reader who may not share it. Replace terms whose origin demeans a group. The established replacements - _allowlist_ / _blocklist_, _primary_ / _replica_, _main_ branch, etc. - communicate at least as well.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_When the user clicks Submit, he is shown the receipt. If his card is declined, ask him to retry._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_When the user clicks Submit, the receipt is shown. If the card is declined, the user is prompted to retry._
+====
+
+=== Anti-Fluff
+
+[#no-marketing]
+==== No Marketing
+
+Documentation doesn't sell. Remove claims of being _cutting-edge_, _next-generation_, _industry-leading_, _world-class_, _blazing fast_, _rock-solid_, or _battle-tested_. Replace them with what they were trying to claim, in concrete terms, or remove the sentence entirely. When a document does argue for a position, it advances claims supported by evidence, not by superlatives.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The blazing-fast, industry-leading database delivers world-class performance for the most demanding workloads._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The database sustains 50,000 reads per second and 8,000 writes per second on the reference hardware described in Appendix B, with p99 read latency under 5 ms._
+====
+
+==== No Filler Phrases
+
+ifdef::backend-html5[]
+++++
+<!-- vale proselint.CorporateSpeak = NO -->
+<!-- vale proselint.Cliches = NO -->
+<!-- vale write-good.TooWordy = NO -->
+<!-- vale Google.Colons = NO -->
+<!-- vale Google.We = NO -->
+++++
+endif::[]
+Delete phrases that announce structure rather than provide content: _It's important to note that_, _It should be mentioned that_, _As we will see_, _In other words_, _Basically_, _Essentially_, _At the end of the day_, etc. The sentence following the filler is usually fine on its own.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_It's important to note that, basically, the connection is, at the end of the day, not thread-safe._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale proselint.CorporateSpeak = YES -->
+<!-- vale proselint.Cliches = YES -->
+<!-- vale write-good.TooWordy = YES -->
+<!-- vale Google.Colons = YES -->
+<!-- vale Google.We = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_A connection isn't thread-safe. A connection shared between threads must be externally synchronized. Otherwise, behavior is undefined._
+====
+
+==== No Empty Transitions
+
+Connecting words must carry weight. _Furthermore_, _moreover_, _additionally_, and _also_ are warranted only when the next sentence genuinely adds something the reader couldn't infer. _Therefore_, _thus_, and _hence_ are warranted only when the next sentence follows logically from the previous and the reader benefits from the cue.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The session is created on login. Furthermore, the session is bound to a workspace. Moreover, the session has an associated user. Additionally, the session can be saved._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_A session is created by `login`. The session is bound to one workspace and one user, both fixed for the session's lifetime. Pending changes are persisted by `save` and discarded by `rollback`._
+====
+
+[[no-throat-clearing]]
+==== No Throat-Clearing
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.We = NO -->
+++++
+endif::[]
+Sections, paragraphs, and sentences begin with content. They don't begin with announcements that content is about to follow ("Now let us turn our attention to…"), with apologies ("This is a complex topic, but…"), or with restatements of the heading.
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Colons = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad example
+====
+_Section 4.2: Connection Pooling. In this section, we will now turn our attention to the topic of connection pooling, which is a complex but important subject. Connection pooling is the pooling of connections…_
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_Section 4.2: Connection Pooling. A *connection pool* is a fixed-size set of pre-established connections that clients borrow for the duration of an operation and return when finished. Pooling avoids the per-request cost of opening and closing connections._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Colons = YES -->
+<!-- vale Google.We = YES -->
+++++
+endif::[]
+
+==== No Redundant Qualifiers
+
+ifdef::backend-html5[]
+++++
+<!-- vale proselint.Very = NO -->
+<!-- vale write-good.TooWordy = NO -->
+<!-- vale write-good.Weasel = NO -->
+++++
+endif::[]
+Drop qualifiers that don't narrow the claim: _very_, _really_, _actually_, _literally_, _quite_, _truly_, etc. Drop pleonasms: _end result_, _final outcome_, _advance planning_, _future plans_, _added bonus_, _past history_, etc. The shorter form means the same thing.
+ifdef::backend-html5[]
+++++
+<!-- vale proselint.Very = YES -->
+<!-- vale write-good.TooWordy = YES -->
+<!-- vale write-good.Weasel = YES -->
+++++
+endif::[]
+
+ifdef::backend-html5[]
+++++
+<!-- vale write-good.TooWordy = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The actual end result is that the future plans for the service will literally have to be revised._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale write-good.TooWordy = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_The plan for the service must be revised._
+====
+
+=== Document Mechanics
+
+[#cross-references]
+==== Cross-References
+
+A cross-reference points to a numbered section, table, figure, or defined term. References to "above" and "below" are permitted only within the same paragraph or list. Across sections, use the section number.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_As discussed earlier, the resolver follows specific rules._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The resolver follows the rules defined in §5.3._
+====
+
+==== Lists for Enumerable Content
+
+Lists are used for content whose items are genuinely parallel and enumerable: a fixed set of states, a finite set of options, a sequence of steps. Prose is used for arguments, derivations, and connected reasoning. Don't bullet a paragraph. Don't write a list as a single run-on sentence.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+- _The system starts._
+- _Then it loads the configuration._
+- _It also validates it and applies it in order based on priority which is a number from 1 to N._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The system starts in four phases. First, it reads the configuration file. Second, it validates the configuration against the schema. Third, it resolves references between configuration sections. Fourth, it applies each resolved section in ascending order of priority._
+====
+
+A bullet list is appropriate when the items are independent and parallel:
+
+[.good-example]
+.{good-icon} Good example
+====
+_A request is in exactly one of the following states:_
+
+* _RECEIVED - the request has been parsed but not yet authorized._
+* _AUTHORIZED - the caller has been authenticated and authorized._
+* _PROCESSING - the handler is executing._
+* _COMPLETED - the response has been sent._
+* _FAILED - the handler raised an unhandled error._
+====
+
+==== Tables for Multidimensional Comparison
+
+A table is used when each item has the same set of attributes and the reader will compare across attributes. A table isn't used as a layout device for text that isn't tabular. Each column has a header. Each row is independent.
+
+[.good-example]
+.{good-icon} Good example
+====
+[cols="^,^,^,^",options="header",]
+|===
+|State |Visible to caller |Counted in metrics |Eligible for retry
+|RECEIVED |no |no |no
+|AUTHORIZED |no |yes |no
+|PROCESSING |no |yes |no
+|COMPLETED |yes |yes |no
+|FAILED |yes |yes |yes
+|===
+====
+
+[#capitalization-of-defined-terms]
+==== Capitalization of Defined Terms
+
+A defined term is capitalized consistently with its definition. When the term is defined as *Connection Pool*, it's written _Connection Pool_ throughout, not _connection pool_ or _ConnectionPool_ (unless `ConnectionPool` is also a separate identifier referring to the type, in which case both forms appear and the document distinguishes them).
+
+[#dates-and-times]
+==== Dates and Times
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Acronyms = NO -->
+++++
+endif::[]
+Dates are written in ISO 8601 (YYYY-MM-DD). Times include a timezone offset or the timezone name. Durations use ISO 8601 (`P30D`) or are written with explicit units (_30 calendar days_). Relative references - _yesterday_, _next week_, _Q3_ - are avoided unless the reference point is the document's effective date and that date is stated.
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Acronyms = YES -->
+++++
+endif::[]
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.AMPM = NO -->
+<!-- vale proselint.DateCase = NO -->
+<!-- vale proselint.DateSpacing = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The migration completes next Tuesday at 5pm._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.AMPM = YES -->
+<!-- vale proselint.DateCase = YES -->
+<!-- vale proselint.DateSpacing = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_The migration completes on 2026-05-19 at 17:00 Europe/Warsaw._
+====
+
+==== Single Source of Truth
+
+A fact appears in exactly one document. Other documents link to it. When a fact is duplicated across documents, the copies drift and the reader can't tell which is authoritative. The rule applies inside a document too: a parameter's default value is stated in the parameter table, not also in the prose two pages later.
+
+ifdef::backend-html5[]
+++++
+<!-- vale Vale.Terms = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The retention period (90 days) is documented in the Storage Reference. The retention period (90 days) is also documented in the Compliance Manual. The retention period (90 days) is also documented in the Onboarding Guide._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The retention period is defined in §4 of the Storage Reference. The Compliance Manual and the Onboarding Guide reference §4 of the Storage Reference._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Vale.Terms = YES -->
+++++
+endif::[]
+
+=== Accessibility and Translatability
+
+[[alt-text-and-captions]]
+==== Alt Text and Captions
+
+Every figure has a caption that states what the figure shows. Every figure also carries a textual equivalent: alt text for short captions, or accompanying prose for figures that carry information not reproducible in alt text. A reader using a screen reader or reading a print copy without the figure should be able to extract the same information from the text alone.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+`image::architecture.png[]` (No caption. No alt text. A reader without the image gets nothing.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+`image::architecture.png[Client, gateway, order service, and payment service connected by HTTPS; the order service writes to a Postgres database.,title="Order service component layout"]`
+====
+
+==== Translatable Phrasing
+
+ifdef::backend-html5[]
+++++
+<!-- vale proselint.Cliches = NO -->
+<!-- vale write-good.Cliches = NO -->
+<!-- vale proselint.CorporateSpeak = NO -->
+<!-- vale Google.Semicolons = NO -->
+++++
+endif::[]
+A document that may be translated avoids idioms, puns, and culture-specific references. _Cut to the chase_, _hit the ground running_, _the elephant in the room_, and _moving the needle_ rarely survive translation. Sports metaphors and political metaphors are avoided. Examples use names from a variety of traditions; currency, units, and date formats are written in forms that don't presuppose a single locale.
+ifdef::backend-html5[]
+++++
+<!-- vale proselint.Cliches = YES -->
+<!-- vale write-good.Cliches = YES -->
+<!-- vale proselint.CorporateSpeak = YES -->
+<!-- vale Google.Semicolons = YES -->
+++++
+endif::[]
+
+ifdef::backend-html5[]
+++++
+<!-- vale proselint.CorporateSpeak = NO -->
+<!-- vale write-good.Cliches = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The new compaction strategy is a game changer that moves the needle on tail latency._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale write-good.Cliches = YES -->
+<!-- vale proselint.CorporateSpeak = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_The new compaction strategy reduces p99 read latency by 40% on the workload described in §6._
+====
+
+[[part-2]]
+== Technical Texts
+
+This part adds rules for documents whose subject is a technical system: specifications, reference documentation, architecture documents, design documents, protocol descriptions, runbooks, and operator manuals. The rules in xref:#part-1[Part 1] still apply. xref:#part-2[Part 2] specializes them and adds rules that are specific to technical writing.
+
+=== Show, Then Tell - Technical Form
+
+For technical content, the illustration called for by xref:#show-then-tell[Show, Then Tell] is a concrete artifact: a code snippet, a request/response pair, a configuration file, a query, or a diagram. When the behavior has interesting boundaries - empty inputs, missing inputs, concurrent access, partial failures, error conditions - illustrate at least one boundary alongside the typical case. Bugs tend to arise at boundaries.
+
+[.bad-example]
+.{bad-icon} Bad example
 ====
 [source,python]
 ----
@@ -394,7 +1034,7 @@ print(result.stuff)
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 [source,python]
 ----
@@ -406,16 +1046,16 @@ print(order.status)  # "CANCELLED"
 
 === Show the Wire When Behavior is on the Wire
 
-When describing network behavior, show the actual bytes - HTTP requests and responses, JSON payloads, SQL statements, or protocol frames - not a prose summary. The reader can then copy-paste and verify. Prose descriptions of network behavior tend to omit headers, status codes, content types, or escaping rules that turn out to matter.
+For network behavior, the illustration required by xref:#show-then-tell[Show, Then Tell] is the actual bytes - HTTP requests and responses, JSON payloads, SQL statements, or protocol frames - not a prose summary. The reader can then copy-paste and verify. Prose descriptions of network behavior tend to omit headers, status codes, content types, or escaping rules that turn out to matter.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _The client sends a POST request with the order data and receives the created order back._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 [source,http]
 ----
@@ -442,13 +1082,13 @@ Content-Type: application/json
 Diagrams show static structure: components, layers, message flows that are part of the topology, state transitions, and data shapes. Prose and code show dynamic behavior: what happens, in what order, under what conditions. A diagram isn't used to convey behavior that prose conveys more precisely. Prose isn't used to describe a tree or graph that a diagram conveys at a glance.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 A six-page sequence diagram with thirty messages, each labeled with a one-line description, and no accompanying prose.
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 A component diagram showing the client, gateway, order service, and payment service as boxes with the protocols between them, accompanied by prose that describes the request flow, the failure modes, and the retry rules.
 ====
@@ -458,7 +1098,7 @@ A component diagram showing the client, gateway, order service, and payment serv
 A code snippet compiles, parses, or runs as shown. Imports, package declarations, and necessary boilerplate are either included or explicitly elided with a comment such as `// imports omitted`. Snippets that combine several concerns into a fragment that doesn't run are a hidden cost: readers spend time reconstructing the missing parts.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 [source,python]
 ----
@@ -467,7 +1107,7 @@ client.send(payload)
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 [source,python]
 ----
@@ -475,491 +1115,133 @@ client.send(payload)
 client = Client(endpoint="https://api.example.com", timeout=5.0)
 payload = {"event": "user.signed_up", "user_id": "U-12345"}
 response = client.send(payload)
-assert response.status_code = 202
+assert response.status_code == 202
 ----
 ====
 
-== Language and Style
-
-=== Active Voice and Named Actor
-
-A sentence names the actor that performs the action. Passive voice is reserved for cases where the actor is genuinely unknown, irrelevant, or the topic of the sentence ("`The request is rejected`" is acceptable when the topic is the request, not the rejecter).
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_The configuration is loaded and the cache is populated._ (Who loads it? Who populates the cache?)
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_On startup, the configuration loader reads `config.yaml` from the working directory and populates the in-memory cache._
-====
-
-=== Direct Verbs
-
-Replace nominalizations with the underlying verbs. _Perform an analysis of_ becomes _analyze_. _Make a decision about_ becomes _decide_. _Provide support for_ becomes _support_. The shorter form is also more precise, because the verb carries the action that the nominalization had abstracted away.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_The framework performs the resolution of dependencies and provides notification of state changes._
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_The framework resolves dependencies and notifies registered listeners of state changes._
-====
-
-=== Specific Numbers
-
-When a quantity matters, give the number, the unit, and the conditions under which it holds. _Fast_, _small_, _large_, _many_, and _most_ aren't numbers. When the number is unknown, say so and give a range or an order of magnitude.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_The cache holds many entries and evicts old ones quickly._
-====
-
-ifdef::backend-html5[]
-++++
-<!-- vale Google.LyHyphens = NO -->
-++++
-endif::[]
-[.good-example]
-.{good-icon} Good
-====
-_The cache holds up to 10,000 entries by default. When the cache is full, the least-recently-used entry is evicted on each insertion. Eviction is performed synchronously and typically completes in under 50 µs on commodity hardware._
-====
-ifdef::backend-html5[]
-++++
-<!-- vale Google.LyHyphens = YES -->
-++++
-endif::[]
-
-=== No Hedging
-
-ifdef::backend-html5[]
-++++
-<!-- vale write-good.Weasel = NO -->
-++++
-endif::[]
-Avoid hedges that weaken claims without adding information: _somewhat_, _fairly_, _quite_, _rather_, _generally_, _usually_ (unless followed by the exception), _kind of_, _a bit_. When a claim has exceptions, state them. When a claim is uncertain, say what the uncertainty is.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_The operation is generally pretty fast and usually completes fairly quickly._
-====
-ifdef::backend-html5[]
-++++
-<!-- vale write-good.Weasel = YES -->
-++++
-endif::[]
-
-[.good-example]
-.{good-icon} Good
-====
-_The operation completes in under 10 ms for inputs of fewer than 1 million elements. For larger inputs, runtime grows linearly with input size. See §7.4 for benchmarks._
-====
-
-=== Natural Phrasing
-
-ifdef::backend-html5[]
-++++
-<!-- vale write-good.TooWordy = NO -->
-<!-- vale Google.We = NO -->
-++++
-endif::[]
-Write the way an experienced engineer would write a careful internal design document. Avoid phrases - _herein_, _aforementioned_, _leverage_, _utilize_, _whilst_, _thereof_ - that an engineer would not say aloud. Avoid phrases - _super easy_, _just_, _simply_, _merely_ - that minimize the reader’s task.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_Herein, the aforementioned mechanism shall be utilized to leverage the synergies between the modules._
-====
-ifdef::backend-html5[]
-++++
-<!-- vale write-good.TooWordy = YES -->
-<!-- vale Google.We = YES -->
-++++
-endif::[]
-
-[.good-example]
-.{good-icon} Good
-====
-_The two modules communicate through the event bus described above. The producer publishes events. The consumer subscribes and processes them._
-====
-
-=== No Patronizing
-
-ifdef::backend-html5[]
-++++
-<!-- vale Google.Contractions = NO -->
-++++
-endif::[]
-Don't tell the reader that something is _easy_, _simple_, _straightforward_, _obvious_, or _trivial_. When it is, the reader will see. When it isn't, the writer has insulted the reader. State the steps. Let the reader judge the difficulty.
-ifdef::backend-html5[]
-++++
-<!-- vale Google.Contractions = YES -->
-++++
-endif::[]
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_Configuring the resolver is straightforward - just provide a simple hook implementation._
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_To customize resolution, implement the `ResolutionHook` interface and register the implementation through the configuration file under `resolution.hooks`. The framework consults registered hooks in declaration order. The first hook that returns a non-null result determines the outcome._
-====
-
-=== Tense and Mood
-
-Use the present tense for behavior that holds whenever the system is in the relevant state ("`The framework calls the start method…`"). Use the future tense only for actions that genuinely lie in the future from the reader’s reference point - for instance, behavior of a planned but not yet released version. Use the imperative for instructions to the reader ("`Register the listener before…`").
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_When the connection will be established, the server will be sending a greeting._
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_When the connection is established, the server sends a greeting frame containing its protocol version and supported extensions._
-====
-
-=== Person
-
-ifdef::backend-html5[]
-++++
-<!-- vale Google.We = NO -->
-++++
-endif::[]
-Use the third person for descriptions of the system. Use the second person ("`you`") for instructions directed at the reader. Avoid the first-person plural ("`we`") except in introductions or rationale, where it refers to the document’s authors. Don't switch among _you_, _we_, _the user_, and _one_ within a section.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_We register the handler. The user can then look it up. One must be careful to unregister it on shutdown. You should also handle exceptions._
-====
-ifdef::backend-html5[]
-++++
-<!-- vale Google.We = YES -->
-++++
-endif::[]
-
-[.good-example]
-.{good-icon} Good
-====
-_Register the handler during initialization and store the returned registration. During shutdown, call `unregister` on the stored registration. When initialization throws, the framework doesn't invoke shutdown, so any partial registration must be cleaned up before the throw._
-====
-
-== Anti-Fluff
-
-=== No Marketing
-
-Documentation doesn't sell. Remove claims of being _cutting-edge_, _next-generation_, _industry-leading_, _world-class_, _blazing fast_, _rock-solid_, or _battle-tested_. Replace them with what they were trying to claim, in concrete terms, or remove the sentence entirely.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_The blazing-fast, industry-leading database delivers world-class performance for the most demanding workloads._
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_The database sustains 50,000 reads per second and 8,000 writes per second on the reference hardware described in Appendix B, with p99 read latency under 5 ms._
-====
-
-=== No Filler Phrases
-
-ifdef::backend-html5[]
-++++
-<!-- vale proselint.CorporateSpeak = NO -->
-<!-- vale proselint.Cliches = NO -->
-<!-- vale write-good.TooWordy = NO -->
-<!-- vale Google.Colons = NO -->
-<!-- vale Google.We = NO -->
-++++
-endif::[]
-Delete phrases that announce structure rather than provide content: _It's important to note that_, _It should be mentioned that_, _As we will see_, _In other words_, _Basically_, _Essentially_, _At the end of the day_. The sentence following the filler is usually fine on its own.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_It's important to note that, basically, the connection is, at the end of the day, not thread-safe._
-====
-ifdef::backend-html5[]
-++++
-<!-- vale proselint.CorporateSpeak = YES -->
-<!-- vale proselint.Cliches = YES -->
-<!-- vale write-good.TooWordy = YES -->
-<!-- vale Google.Colons = YES -->
-<!-- vale Google.We = YES -->
-++++
-endif::[]
-
-[.good-example]
-.{good-icon} Good
-====
-_A connection isn't thread-safe. A connection shared between threads must be externally synchronized. Otherwise, behavior is undefined._
-====
-
-=== No Empty Transitions
-
-Connecting words must carry weight. _Furthermore_, _moreover_, _additionally_, and _also_ are warranted only when the next sentence genuinely adds something the reader couldn't infer. _Therefore_, _thus_, and _hence_ are warranted only when the next sentence follows logically from the previous and the reader benefits from the cue.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_The session is created on login. Furthermore, the session is bound to a workspace. Moreover, the session has an associated user. Additionally, the session can be saved._
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_A session is created by `login`. The session is bound to one workspace and one user, both fixed for the session’s lifetime. Pending changes are persisted by `save` and discarded by `rollback`._
-====
-
-=== No Throat-Clearing
-
-ifdef::backend-html5[]
-++++
-<!-- vale Google.We = NO -->
-++++
-endif::[]
-Sections, paragraphs, and sentences begin with content. They don't begin with announcements that content is about to follow ("`Now let us turn our attention to…`"), with apologies ("`This is a complex topic, but…`"), or with restatements of the heading.
-
-ifdef::backend-html5[]
-++++
-<!-- vale Google.Colons = NO -->
-++++
-endif::[]
-[.bad-example]
-.{bad-icon} Bad
-====
-_Section 4.2: Connection Pooling. In this section, we will now turn our attention to the topic of connection pooling, which is a complex but important subject. Connection pooling is the pooling of connections…_
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_Section 4.2: Connection Pooling. A *connection pool* is a fixed-size set of pre-established connections that clients borrow for the duration of an operation and return when finished. Pooling avoids the per-request cost of opening and closing connections._
-====
-ifdef::backend-html5[]
-++++
-<!-- vale Google.Colons = YES -->
-<!-- vale Google.We = YES -->
-++++
-endif::[]
-
-=== No Empty Sections
-
-A section that has nothing to say is removed. Don't write "`TBD`" or "`This section intentionally left blank`" in a published document. Don't include a "`Conclusion`" or "`Summary`" section that only restates section headings.
-
-ifdef::backend-html5[]
-++++
-<!-- vale Google.We = NO -->
-++++
-endif::[]
-[.bad-example]
-.{bad-icon} Bad
-====
-_§9. Conclusion. In this document, we've discussed the data model, the API, and the configuration mechanism. We hope you found it useful._
-====
-ifdef::backend-html5[]
-++++
-<!-- vale Google.We = YES -->
-++++
-endif::[]
-
-[.good-example]
-.{good-icon} Good
-====
-_(No conclusion section. The document ends after the last substantive section.)_
-====
-
-=== No Redundant Qualifiers
-
-ifdef::backend-html5[]
-++++
-<!-- vale proselint.Very = NO -->
-<!-- vale write-good.TooWordy = NO -->
-<!-- vale write-good.Weasel = NO -->
-++++
-endif::[]
-Drop qualifiers that don't narrow the claim: _very_, _really_, _actually_, _literally_, _quite_, _truly_. Drop pleonasms: _end result_, _final outcome_, _advance planning_, _future plans_, _added bonus_, _past history_. The shorter form means the same thing.
-ifdef::backend-html5[]
-++++
-<!-- vale proselint.Very = YES -->
-<!-- vale write-good.TooWordy = YES -->
-<!-- vale write-good.Weasel = YES -->
-++++
-endif::[]
-
-ifdef::backend-html5[]
-++++
-<!-- vale write-good.TooWordy = NO -->
-++++
-endif::[]
-[.bad-example]
-.{bad-icon} Bad
-====
-_The actual end result is that the future plans for the service will literally have to be revised._
-====
-ifdef::backend-html5[]
-++++
-<!-- vale write-good.TooWordy = YES -->
-++++
-endif::[]
-
-[.good-example]
-.{good-icon} Good
-====
-_The plan for the service must be revised._
-====
-
-== Document Mechanics
-
-=== Stable Section Numbering
-
-Sections are numbered hierarchically (1, 1.1, 1.1.1) and referenced by number rather than title. Once published, a section number isn't reassigned to different content. A new section added after §3.2 and before §3.3 either becomes §3.2.1 (when subordinate to §3.2) or shifts later numbers. Renumbering breaks external references and is avoided when an additional sub-level would do.
-
-=== Cross-References
-
-A cross-reference points to a numbered section, table, figure, or defined term. References to "`above`" and "`below`" are permitted only within the same paragraph or list. Across sections, use the section number.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-_As discussed earlier, the resolver follows specific rules._
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_The resolver follows the rules defined in §5.3._
-====
-
-=== Lists for Enumerable Content
-
-Lists are used for content whose items are genuinely parallel and enumerable: a fixed set of states, a finite set of options, a sequence of steps. Prose is used for arguments, derivations, and connected reasoning. Don't bullet a paragraph. Don't write a list as a single run-on sentence.
-
-[.bad-example]
-.{bad-icon} Bad
-====
-- The system starts.
-- Then it loads the configuration.
-- It also validates it and applies it in order based on priority which is a number from 1 to N.
-====
-
-[.good-example]
-.{good-icon} Good
-====
-_The system starts in four phases. First, it reads the configuration file. Second, it validates the configuration against the schema. Third, it resolves references between configuration sections. Fourth, it applies each resolved section in ascending order of priority._
-====
-
-A bullet list is appropriate when the items are independent and parallel:
-
-[.good-example]
-.{good-icon} Good
-====
-_A request is in exactly one of the following states:_
-
-* _RECEIVED - the request has been parsed but not yet authorized._
-* _AUTHORIZED - the caller has been authenticated and authorized._
-* _PROCESSING - the handler is executing._
-* _COMPLETED - the response has been sent._
-* _FAILED - the handler raised an unhandled error._
-====
-
-=== Tables for Multidimensional Comparison
-
-A table is used when each item has the same set of attributes and the reader will compare across attributes. A table isn't used as a layout device for text that isn't tabular. Each column has a header. Each row is independent.
-
-[.good-example]
-.{good-icon} Good
-====
-[cols="^,^,^,^",options="header",]
-|===
-|State |Visible to caller |Counted in metrics |Eligible for retry
-|RECEIVED |no |no |no
-|AUTHORIZED |no |yes |no
-|PROCESSING |no |yes |no
-|COMPLETED |yes |yes |no
-|FAILED |yes |yes |yes
-|===
-====
-
-=== Code Formatting
+=== Code Markup
 
 Code, identifiers, file paths, configuration keys, and protocol headers are set in a monospaced font. Inline code uses backticks: `commit`, `org.example.api`, `/etc/app.conf`, `Content-Type`. Code blocks are tagged with a language for syntax highlighting. Identifiers are written exactly as they appear in code, including case.
 
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
 _Call commit to persist the changes._
 ====
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _Call `commit` to persist the changes._
 ====
 
-=== Capitalization of Defined Terms
+[[part-3]]
+== When the Author is an AI
 
-A defined term is capitalized consistently with its definition. When the term is defined as *Connection Pool*, it's written _Connection Pool_ throughout, not _connection pool_ or _ConnectionPool_ (unless `ConnectionPool` is also a separate identifier referring to the type, in which case both forms appear and the document distinguishes them).
+This part adds rules that apply when an AI system is given this guideline as a style instruction. The rules in xref:#part-1[Part 1] and xref:#part-2[Part 2] still apply. xref:#part-3[Part 3] addresses failure modes specific to AI authorship: inventing facts, restating the prompt, hedging from uncertainty, narrating rule application, treating the guideline's markup as content, and over-weighting items mentioned in the prompt.
 
-=== Quotation and Emphasis
+=== Don't Invent Facts
+
+When you don't have a fact - an identifier, a path, a version number, a quotation, a citation, a metric, a date - state that you don't have it. Don't fabricate plausible-looking values. A reader uses the fact, and a fabricated fact becomes a defect that compounds with every downstream use.
 
 ifdef::backend-html5[]
 ++++
 <!-- vale Google.Acronyms = NO -->
 ++++
 endif::[]
-Italics emphasize a term being defined for the first time, or a term being mentioned rather than used. Bold is used sparingly for terms whose definition follows immediately. Quotation marks are used for verbatim quotations from external sources, not for emphasis. Don't use ALL CAPS for emphasis except when reproducing identifiers that are themselves all caps.
-
-ifdef::backend-html5[]
-++++
-<!-- vale proselint.Very = NO -->
-<!-- vale write-good.Weasel = NO -->
-++++
-endif::[]
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
 ====
-_The session is VERY important and you should "`save`" it often._
+_The service runs on Postgres 16.4 with `max_connections=300` and exposes a `/health` endpoint that returns the build SHA._ (None of the version, parameter, or endpoint was stated in the input.)
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale proselint.Very = YES -->
 <!-- vale Google.Acronyms = YES -->
-<!-- vale write-good.Weasel = YES -->
 ++++
 endif::[]
 
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
-_Pending changes are persisted by `save` and discarded by `rollback`. Both methods close the current *transaction*. Subsequent operations open a new one._
+_The service runs on Postgres. The exact version and connection-pool configuration aren't stated in the input. Whether a health endpoint exists isn't documented either, and the service's route table would have to be checked to confirm._
 ====
 
-== Prompt Constraints as Minimum Floors
+[#dont-echo]
+=== Don't Echo the Prompt
 
-This section applies when an AI system uses this guideline to generate a response.
+Begin with content. Don't open with a restatement of the request ("You asked about X. Here is information about X."). The reader wrote the prompt. They don't need it read back to them.
 
-A specific element mentioned in the prompt should be treated as a minimum constraint, not as a theme. The response should include that element at least once. The element's representation in the response should reflect its realistic proportion in the subject domain, not its prominence in the prompt.
+Restating the audience and assumed knowledge to calibrate the document isn't echoing - see xref:#identify-audience[]. The prohibited pattern is summarizing the question back to the questioner before answering it.
 
-The response should be written as if the author chose the content independently, using the prompt only to determine the topic and the minimum constraints. The distribution of content across subtopics should match the distribution a domain expert would produce when writing on that topic without a prompt.
+[.bad-example]
+.{bad-icon} Bad example
+====
+_You asked about connection pooling. Here is a description of connection pooling. Connection pooling is a technique used in software systems to manage database connections._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_A connection pool is a fixed-size set of pre-established connections that clients borrow for the duration of an operation and return when finished._
+====
+
+=== Don't Throat-Clear
+
+++++
+<!-- vale Google.Quotes = NO -->
+++++
+
+Specializes xref:#no-throat-clearing[] rule for the AI failure mode. Don't open a response with service-style preambles - "Sure!", "Great question!", "I'd be happy to help.", "Of course!", "Certainly.", "Absolutely.", etc. The first sentence carries content.
+
+++++
+<!-- vale Google.Quotes = NO -->
+++++
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Exclamation = NO -->
+<!-- vale Google.FirstPerson = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad example
+====
+_Sure! I'd be happy to explain HTTP connection pooling. Let me walk you through it step by step._
+
+_HTTP connection pooling is..._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Exclamation = YES -->
+<!-- vale Google.FirstPerson = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_An HTTP connection pool keeps a fixed number of TCP connections to a remote host open across requests. The client borrows a connection for one request, returns it on completion, and the pool reuses it for the next request to the same host._
+====
+
+=== Don't Annotate Rule Application
+
+Don't tell the reader which rule from this guideline you are applying. "Per §3.2, I'll use direct verbs here" is meta-commentary, not content. Apply the rule. Don't narrate the application.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_Following the guideline, I'll keep this terse and use direct verbs. Here is a description of connection pooling..._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_A connection pool is a fixed-size set of pre-established connections..._
+====
+
+=== State Gaps, Don't Hedge
+
+The xref:#no-hedging[] rule forbids softening claims with _usually_, _generally_, _somewhat_. When an AI author lacks a fact, the natural failure is to hedge: emit a softened claim that sounds plausible but conveys nothing the reader can act on. The right response is to name what's missing, not to weaken the assertion.
 
 ifdef::backend-html5[]
 ++++
@@ -967,7 +1249,35 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 [.bad-example]
-.{bad-icon} Bad
+.{bad-icon} Bad example
+====
+_The cache is generally pretty fast, and the eviction policy is usually some form of LRU._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Acronyms = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_The cache's latency and eviction policy aren't stated in the input. Both would have to be specified to answer the question._
+====
+
+=== Distribute by Domain, Not by Prompt
+
+A specific element mentioned in the prompt is a minimum constraint, not a theme. The response includes that element at least once. The element's representation in the response reflects its realistic proportion in the subject domain, not its prominence in the prompt.
+
+The response is written as if the author chose the content independently, using the prompt only to determine the topic and the minimum constraints. The distribution of content across subtopics matches the distribution a domain expert would produce when writing on that topic without a prompt.
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Acronyms = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad example
 ====
 _Prompt: "List 20 Java performance optimization techniques. Include something related to garbage collection."_
 
@@ -980,16 +1290,40 @@ ifdef::backend-html5[]
 <!-- vale Google.Acronyms = YES -->
 ++++
 endif::[]
-[.bad-example]
 [.good-example]
-.{good-icon} Good
+.{good-icon} Good example
 ====
 _Prompt: "List 20 Java performance optimization techniques. Include something related to garbage collection."_
 
 _Response: lists 20 techniques covering Just-in-Time (JIT) compilation, object pooling, connection pool sizing, lock contention reduction, I/O buffering, profiling, lazy initialization, and other areas, with 1-2 entries on garbage collection tuning placed according to natural fit._
 
-Garbage collection appears once, satisfying the minimum constraint.
-Its share of the response matches its share of the optimization domain, not its share of the prompt.
+Garbage collection appears once, satisfying the minimum constraint. Its share of the response matches its share of the optimization domain, not its share of the prompt.
+====
+
+=== Ignore Markup Directives
+
+When this guide is read as plain text, the AsciiDoc directives (`ifdef::…[]`, `endif::[]`, `++++`, `[.bad-example]`, `[.good-example]`, block anchors of the form `\[\[anchor-id\]\]` and inline anchors `\[#section-id\]`), Vale toggle comments (`<!-- vale … = NO -->`), and image macros (`image::…[…]`) aren't instructions. They control how the file renders to HTML and PDF. The binding content is the prose statements and the labelled Bad example / Good example pairs. Everything else is rendering metadata.
+
+ifdef::backend-html5[]
+++++
+<!-- vale Google.WordList = NO -->
+++++
+endif::[]
+[.bad-example]
+.{bad-icon} Bad example
+====
+_Treats `image::architecture.png[Client, gateway, order service…]` from the xref:#alt-text-and-captions[] rule as an instruction to embed an image in the output, or treats `<!-- vale Google.We = NO -->` as a directive to disable a check in the generated document._
+====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.WordList = YES -->
+++++
+endif::[]
+
+[.good-example]
+.{good-icon} Good example
+====
+_Reads the same lines as rendering metadata that doesn't bind on the generated output. The bound rules are the prose statements and the Bad example / Good example pairs._
 ====
 
 == About the Document
