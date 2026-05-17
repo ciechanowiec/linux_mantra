@@ -1279,7 +1279,7 @@ initGit () {
 	printf "${STATUS_TAG} Git repository has been initialized.\n"
 }
 
-setupGitCommitter() {
+setupGitCommitter () {
 	projectDirectory=$1
 	gitCommitterName=$2
 	gitCommitterSurname=$3

@@ -655,6 +655,7 @@ alias mantra_java='~/scripts/mantra_java.sh'
 alias mantra_spring_mongo='~/scripts/mantra_spring_mongo.sh'
 alias mantra_spring_sql='~/scripts/mantra_spring_sql.sh'
 alias mantra_ts='~/scripts/mantra_ts.sh'
+alias mantra_docs='~/scripts/mantra_docs.sh'
 alias mvn_download_sources_and_javadocs='mvn dependency:sources && mvn dependency:sources dependency:resolve -Dclassifier=javadoc'
 alias n='nvim'
 alias nvim="~/scripts/nvim.sh"
