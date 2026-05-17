@@ -36,6 +36,7 @@ This document uses https://asciidoc.org[AsciiDoc^] markup language and resides i
 This document should follow the link:README.adoc[Technical Writing Guideline].
 
 === Export
+
 . To export the document to the supported output formats, install the following tools:
 .. https://asciidoctor.org/#installation[Asciidoctor^]
 .. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
@@ -65,6 +66,7 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 === Linting
 
 ==== General Rules
+
 . https://vale.sh[Vale^] lints the document.
 . Vale enforces the following style guides:
 .. Native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary] included.
@@ -75,6 +77,7 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 . Vale configuration is in `link:.vale.ini[]`.
 
 ==== Usage
+
 . Install Vale as described in the https://vale.sh/docs/install/[official documentation].
 
 . Lint the document:

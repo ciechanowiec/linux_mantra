@@ -34,3 +34,17 @@ Grafana
 Mostowa
 [Ss]everability
 balancer's
+[Mm]ixin
+[Mm]ixins
+[Ss]upertype
+[Ss]upertypes
+[Nn]amespace
+[Nn]amespaces
+referenceable
+versionable
+lockable
+autosaving
+pluggable
+XPath
+checkin
+workspace's
