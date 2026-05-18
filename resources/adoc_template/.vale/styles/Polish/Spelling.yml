@@ -1,0 +1,8 @@
+extends: spelling
+message: "Nie znaleziono '%s' w słowniku."
+level: error
+dicpath: .vale/styles/Polish
+dictionaries:
+  - pl_PL
+ignore:
+  - Polish/exceptions.txt

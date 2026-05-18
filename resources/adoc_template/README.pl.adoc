@@ -1,0 +1,89 @@
+[.text-justify]
+= Szablon README
+:reproducible:
+:doctype: article
+:author: Herman Ciechanowiec
+:email: herman@ciechanowiec.eu
+:chapter-signifier:
+:sectnums:
+:sectnumlevels: 5
+:sectanchors:
+:toc: left
+:toclevels: 5
+:icons: font
+:docinfo: shared,private
+:linkcss:
+:sourcedir: {docdir}
+:pdf-theme: {sourcedir}/docs/themes/basic.yml
+:stylesdir: https://www.ciechanowiec.eu/linux_mantra/
+:stylesheet: adoc-css-style.css
+:!table-caption:
+:!figure-caption:
+:!example-caption:
+
+[cols=">.^1,<.^1"]
+|===
+| *Ostatnia modyfikacja dokumentu:* | {docdatetime}
+| *Data wygenerowania dokumentu:* | {localdatetime}
+|===
+
+== O dokumencie
+
+Niniejszy dokument wykorzystuje język znaczników https://asciidoc.org[AsciiDoc^] i znajduje się w repozytorium projektu.
+
+=== Wytyczne
+
+Dokument powinien być zgodny z link:README.adoc[wytycznymi pisania technicznego].
+
+=== Eksport
+
+. Aby wyeksportować dokument do obsługiwanych formatów wyjściowych, należy zainstalować następujące narzędzia:
+.. https://asciidoctor.org/#installation[Asciidoctor^]
+.. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
+.. https://pandoc.org/installing.html[Pandoc^]
+
+. Eksport do HTML:
++
+[source,bash,subs="attributes+"]
+----
+asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
+----
+
+. Eksport do PDF:
++
+[source,bash,subs="attributes+"]
+----
+asciidoctor-pdf --attribute allow-uri-read --require ./docs/lib/common-style.rb {docname}{docfilesuffix}
+----
+
+. Eksport do DOCX - Asciidoctor konwertuje dokument do formatu DocBook XML, który następnie Pandoc przekształca do DOCX:
++
+[source,bash,subs="attributes+"]
+----
+asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --output {docname}.docx
+----
+
+=== Sprawdzanie pisowni
+
+==== Reguły ogólne
+
+. Narzędzie https://vale.sh[Vale^] sprawdza dokument.
+. Vale stosuje następujące przewodniki stylu:
+.. natywny https://vale.sh/docs/styles#vale[styl Vale^] wraz z dołączonym https://github.com/vale-cli/en_US-web/tree/master[słownikiem angielskim],
+.. zmodyfikowany https://developers.google.com/style[przewodnik Google Developer Documentation Style Guide^] poprzez pakiet https://github.com/vale-cli/Google[Google^],
+.. zmodyfikowany https://vale.sh/hub/jdkato/write-good/[linter write-good^] poprzez pakiet https://github.com/vale-cli/write-good[write-good^],
+.. https://github.com/amperser/proselint/[proselint^] poprzez pakiet https://github.com/vale-cli/proselint[proselint^],
+.. własne reguły projektu,
+.. polski słownik ortograficzny dla plików `*.pl.adoc`.
+. Konfiguracja Vale znajduje się w pliku `link:.vale.ini[]`.
+
+==== Użycie
+
+. Należy zainstalować Vale zgodnie z https://vale.sh/docs/install/[oficjalną dokumentacją].
+
+. Sprawdzanie dokumentu:
++
+[source,bash,subs="attributes+"]
+----
+vale {docname}{docfilesuffix}
+----

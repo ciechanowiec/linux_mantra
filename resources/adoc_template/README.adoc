@@ -74,6 +74,7 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 .. modified https://vale.sh/hub/jdkato/write-good/[write-good linter^] via the https://github.com/vale-cli/write-good[write-good package^]
 .. https://github.com/amperser/proselint/[proselint^] via the https://github.com/vale-cli/proselint[proselint package^]
 .. custom project rules
+.. Polish spelling dictionary for `*.pl.adoc` files
 . Vale configuration is in `link:.vale.ini[]`.
 
 ==== Usage
