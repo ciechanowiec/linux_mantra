@@ -41,6 +41,7 @@ Dokument powinien być zgodny z link:README.adoc[wytycznymi pisania technicznego
 .. https://asciidoctor.org/#installation[Asciidoctor^]
 .. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
 .. https://pandoc.org/installing.html[Pandoc^]
+.. https://www.python.org/downloads/[Python 3^]
 
 . Eksport do HTML:
 +
@@ -60,7 +61,7 @@ asciidoctor-pdf --attribute allow-uri-read --require ./docs/lib/common-style.rb 
 +
 [source,bash,subs="attributes+"]
 ----
-asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --output {docname}.docx
+asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --reference-doc={sourcedir}/docs/themes/reference.docx --output {docname}.docx && python3 {sourcedir}/docs/lib/apply_docx_numbering.py {docname}.docx
 ----
 
 === Sprawdzanie pisowni
