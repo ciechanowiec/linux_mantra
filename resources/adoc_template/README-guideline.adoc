@@ -111,6 +111,7 @@ _(Document titled "The Order Service Reference" opens with: "This document speci
 
 === Thought Structure
 
+[#one-sentence-one-thought]
 ==== One Sentence, One Thought
 
 A sentence carries exactly one assertion. If a sentence contains two independent claims joined by _and_, _but_, _while_, or a semicolon, split it. Compound sentences that link a cause to its consequence are acceptable when the link is the point. Sentences that staple two unrelated facts together aren't.
@@ -484,6 +485,22 @@ _The framework performs the resolution of dependencies and provides notification
 .{good-icon} Good example
 ====
 _The framework resolves dependencies and notifies registered listeners of state changes._
+====
+
+==== Avoid Parentheses and Semicolons
+
+A parenthetical buries content the reader still has to process. When the content matters, write it as a separate sentence. When it doesn't matter, delete it. A semicolon joins two independent clauses into one sentence, which xref:#one-sentence-one-thought[] forbids - split the clauses into two sentences.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The connection pool (default size 10) is configured via `pool.size`; the value is read at startup._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The connection pool is configured via `pool.size`. The default size is 10. The value is read at startup._
 ====
 
 ==== Natural Phrasing
