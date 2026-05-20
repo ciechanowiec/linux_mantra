@@ -108,6 +108,18 @@ ORDERED_FMT_RE = re.compile(
     r'|upperLetter|upperRoman)"'
 )
 
+# Author paragraph separator -------------------------------------------------
+#
+# Pandoc joins the AsciiDoc :author: and :email: with a single space, so the
+# byline renders as "Firstname Lastname email@host". Insert " | " before the
+# email so the byline reads "Firstname Lastname | email@host".
+
+AUTHOR_PARA_RE = re.compile(
+    r'<w:p>\s*<w:pPr>\s*<w:pStyle w:val="Author"\s*/>\s*</w:pPr>.*?</w:p>',
+    re.DOTALL,
+)
+EMAIL_SEP_RE = re.compile(r' ([\w.+\-]+@[\w.\-]+)')
+
 
 def _inject_heading(numbering_xml: str) -> str:
     if f'<w:nsid w:val="{HEADING_NSID}" />' in numbering_xml:
@@ -185,6 +197,15 @@ def patch(numbering_xml: str) -> str:
     return _unify_ordered_lists(_inject_heading(numbering_xml))
 
 
+def _separate_author_email(document_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        para = match.group(0)
+        if ' | ' in para:
+            return para
+        return EMAIL_SEP_RE.sub(r' | \1', para, count=1)
+    return AUTHOR_PARA_RE.sub(fix, document_xml)
+
+
 def main(docx_path: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         with zipfile.ZipFile(docx_path) as zf:
@@ -195,6 +216,12 @@ def main(docx_path: str) -> None:
         patched = patch(numbering)
         with open(numbering_path, 'w', encoding='utf-8') as f:
             f.write(patched)
+        document_path = os.path.join(tmp, 'word', 'document.xml')
+        with open(document_path, encoding='utf-8') as f:
+            document = f.read()
+        document = _separate_author_email(document)
+        with open(document_path, 'w', encoding='utf-8') as f:
+            f.write(document)
         out_tmp = docx_path + '.tmp'
         with zipfile.ZipFile(out_tmp, 'w', zipfile.ZIP_DEFLATED) as zf:
             for root, _, files in os.walk(tmp):
