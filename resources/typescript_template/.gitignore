@@ -7,6 +7,7 @@
 .DS_Store
 Thumbs.db
 ~$*.docx
+*.docx.tmp
 
 # Logs
 *.log*
