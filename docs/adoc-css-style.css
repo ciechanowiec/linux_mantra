@@ -70,3 +70,9 @@ img {
 table.tableblock {
     table-layout: fixed;
 }
+
+table.tableblock td,
+table.tableblock th {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
