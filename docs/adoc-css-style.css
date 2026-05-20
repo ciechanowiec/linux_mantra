@@ -66,3 +66,7 @@ img {
 .olist .olist .olist .olist > ol {
     list-style-type: lower-roman;
 }
+
+table.tableblock {
+    table-layout: fixed;
+}
