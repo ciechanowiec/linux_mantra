@@ -120,6 +120,18 @@ AUTHOR_PARA_RE = re.compile(
 )
 EMAIL_SEP_RE = re.compile(r' ([\w.+\-]+@[\w.\-]+)')
 
+# Empty heading paragraphs ---------------------------------------------------
+#
+# With :doctype: book, Asciidoctor wraps any content between the document title
+# and the first chapter in a DocBook <preface> with an empty <title/>. Pandoc
+# renders that as an empty Heading1 paragraph, which the multilevel numbering
+# above then decorates with a stray "1." and bumps every subsequent chapter
+# number by one. Drop Heading1-6 paragraphs whose text runs are empty.
+
+PARAGRAPH_RE = re.compile(r'<w:p\b[^>]*>.*?</w:p>', re.DOTALL)
+HEADING_PSTYLE_RE = re.compile(r'<w:pStyle w:val="Heading[1-6]"')
+TEXT_RUN_RE = re.compile(r'<w:t[^>]*>([^<]*)</w:t>')
+
 
 def _inject_heading(numbering_xml: str) -> str:
     if f'<w:nsid w:val="{HEADING_NSID}" />' in numbering_xml:
@@ -206,6 +218,17 @@ def _separate_author_email(document_xml: str) -> str:
     return AUTHOR_PARA_RE.sub(fix, document_xml)
 
 
+def _strip_empty_headings(document_xml: str) -> str:
+    def keep_or_drop(match: 're.Match[str]') -> str:
+        body = match.group(0)
+        if not HEADING_PSTYLE_RE.search(body):
+            return body
+        if any(t.strip() for t in TEXT_RUN_RE.findall(body)):
+            return body
+        return ''
+    return PARAGRAPH_RE.sub(keep_or_drop, document_xml)
+
+
 def main(docx_path: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         with zipfile.ZipFile(docx_path) as zf:
@@ -220,6 +243,7 @@ def main(docx_path: str) -> None:
         with open(document_path, encoding='utf-8') as f:
             document = f.read()
         document = _separate_author_email(document)
+        document = _strip_empty_headings(document)
         with open(document_path, 'w', encoding='utf-8') as f:
             f.write(document)
         out_tmp = docx_path + '.tmp'
