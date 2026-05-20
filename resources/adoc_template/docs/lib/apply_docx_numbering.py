@@ -38,7 +38,7 @@ HEADING_NSID = "170cd2df"  # distinctive marker for idempotency check
 _heading_levels = []
 for i in range(9):
     pstyle = f'<w:pStyle w:val="Heading{i+1}" />' if i < 6 else ''
-    lvl_text = '.'.join(f'%{j+1}' for j in range(i + 1))
+    lvl_text = '.'.join(f'%{j+1}' for j in range(i + 1)) + '.'
     ind_left = i * 360
     _heading_levels.append(
         f'<w:lvl w:ilvl="{i}">'
