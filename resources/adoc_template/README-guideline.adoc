@@ -491,11 +491,21 @@ _The framework resolves dependencies and notifies registered listeners of state 
 
 A parenthetical buries content the reader still has to process. When the content matters, write it as a separate sentence. When it doesn't matter, delete it. A semicolon joins two independent clauses into one sentence, which xref:#one-sentence-one-thought[] forbids - split the clauses into two sentences.
 
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Semicolons = NO -->
+++++
+endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
 _The connection pool (default size 10) is configured via `pool.size`; the value is read at startup._
 ====
+ifdef::backend-html5[]
+++++
+<!-- vale Google.Semicolons = YES -->
+++++
+endif::[]
 
 [.good-example]
 .{good-icon} Good example
@@ -878,6 +888,29 @@ _A request is in exactly one of the following states:_
 * _FAILED - the handler raised an unhandled error._
 ====
 
+[#exhaustive-lists]
+==== Exhaustive Lists
+
+A list is either complete or explicitly marked as incomplete. When the list enumerates the members of a set, all members appear. When the list is a sample, it opens or closes with a phrase that names the omission - _among others_, _the most common are…_, _see §X for the full list_. A list that looks complete but omits members is a defect: a reader who acts on the listed items as the full set acts on a false premise.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The supported authentication methods are password, OAuth, and SAML._ (The system also supports certificate-based authentication and an external IdP integration, but the list reads as exhaustive. A reader who designs an integration around the three listed methods discovers the gap only during implementation.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The supported authentication methods are password, OAuth, SAML, certificate-based authentication, and external IdP integration._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_The most commonly used authentication methods are password, OAuth, and SAML. The full set, including certificate-based and external-IdP methods, is listed in §6.2._
+====
+
 ==== Tables for Multidimensional Comparison
 
 A table is used when each item has the same set of attributes and the reader will compare across attributes. A table isn't used as a layout device for text that isn't tabular. Each column has a header. Each row is independent.
@@ -1094,9 +1127,10 @@ Content-Type: application/json
 ----
 ====
 
+[[diagrams-and-prose]]
 === Diagrams for Structure, Prose for Behavior
 
-Diagrams show static structure: components, layers, message flows that are part of the topology, state transitions, and data shapes. Prose and code show dynamic behavior: what happens, in what order, under what conditions. A diagram isn't used to convey behavior that prose conveys more precisely. Prose isn't used to describe a tree or graph that a diagram conveys at a glance.
+Use a diagram for static structure: components, layers, topology, state transitions, and data shapes. Use prose or code for dynamic behavior: what happens, in what order, under what conditions. A diagram doesn't convey behavior that prose expresses more precisely. Prose doesn't describe a tree or graph that a diagram conveys at a glance.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1108,6 +1142,44 @@ A six-page sequence diagram with thirty messages, each labeled with a one-line d
 .{good-icon} Good example
 ====
 A component diagram showing the client, gateway, order service, and payment service as boxes with the protocols between them, accompanied by prose that describes the request flow, the failure modes, and the retry rules.
+====
+
+=== ASCII Diagrams
+
+When xref:#diagrams-and-prose[the rule above] calls for a diagram, render it as an inline ASCII diagram if the structure fits. An ASCII diagram travels with the text - it survives copy-paste, renders in plain-text contexts, and doesn't depend on an asset pipeline. Use one when the topology genuinely earns a picture: a fan-out, a layered stack, a tree, a state machine with a small number of states. Skip it when one or two sentences of prose convey the same relationship, and when the structure is too large or too irregular to render legibly in characters.
+
+A clean ASCII diagram has aligned components, consistent connectors, and labels that name each component. Boxes are drawn with one consistent set of characters throughout the document. Each arrow points in one direction and connects two named components. A diagram that forces the reader to count spaces or trace ambiguous connections is worse than the prose it replaced.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_The gateway dispatches each incoming request to one of three downstream services - the search service, the catalog service, or the cart service - based on the request path. The search service queries an inverted index. The catalog service queries a relational database. The cart service queries a key-value store._
+
+(The topology is a fan-out, and the reader has to assemble it from sequential prose. A diagram would show it at a glance.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+....
+                    +-----------+
+                    |  gateway  |
+                    +-----+-----+
+                          |
+          +---------------+---------------+
+          |               |               |
+          v               v               v
+    +-----------+   +-----------+   +-----------+
+    |  search   |   |  catalog  |   |   cart    |
+    +-----+-----+   +-----+-----+   +-----+-----+
+          |               |               |
+          v               v               v
+    +-----------+   +-----------+   +-----------+
+    |   index   |   |    db     |   |   redis   |
+    +-----------+   +-----------+   +-----------+
+....
+
+_Each arrow is a synchronous call. The gateway routes by request path. Downstream services don't call each other._
 ====
 
 === Self-Contained Snippets
