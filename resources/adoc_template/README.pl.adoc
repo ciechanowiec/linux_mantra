@@ -62,7 +62,7 @@ asciidoctor-pdf --attribute allow-uri-read --require ./docs/lib/common-style.rb 
 +
 [source,bash,subs="attributes+"]
 ----
-asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --reference-doc={sourcedir}/docs/themes/reference.docx --output {docname}.docx && python3 {sourcedir}/docs/lib/apply_docx_numbering.py {docname}.docx
+asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --reference-doc={sourcedir}/docs/themes/reference.docx --output {docname}.docx && python3 {sourcedir}/docs/lib/apply_docx_formatting.py {docname}.docx
 ----
 
 === Sprawdzanie pisowni
