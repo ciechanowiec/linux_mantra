@@ -132,6 +132,57 @@ PARAGRAPH_RE = re.compile(r'<w:p\b[^>]*>.*?</w:p>', re.DOTALL)
 HEADING_PSTYLE_RE = re.compile(r'<w:pStyle w:val="Heading[1-6]"')
 TEXT_RUN_RE = re.compile(r'<w:t[^>]*>([^<]*)</w:t>')
 
+# SourceCode justification ---------------------------------------------------
+#
+# Normal is justified (w:jc=both), and Pandoc's SourceCode paragraph style is
+# basedOn Normal without overriding jc, so code blocks inherit justification
+# and Word spreads tokens to fill the line. Force SourceCode to left-align.
+
+SOURCECODE_STYLE_RE = re.compile(
+    r'(<w:style\b[^>]*w:styleId="SourceCode"[^>]*>)(.*?)(</w:style>)',
+    re.DOTALL,
+)
+SOURCECODE_PPR_RE = re.compile(r'<w:pPr\b[^>]*>(.*?)</w:pPr>', re.DOTALL)
+
+# Page size + table sizing ---------------------------------------------------
+#
+# Pandoc's reference.docx doesn't carry an explicit page size, so Word falls
+# back to its locale default (Letter on US installs, A4 on EU). Pin the body
+# section to A4 with 1" margins so the rendered DOCX is consistent everywhere.
+#
+# Pandoc emits each table with <w:tblW w:type="pct" w:w="5000" /> (= 100% of
+# the parent width) plus <w:tblLayout w:type="fixed"/> and absolute gridCol
+# widths. When a table is nested inside a list, Pandoc also adds an absolute
+# <w:tblInd w:w="1440"/>; Word then renders the table at "100% of text area"
+# AND offsets it by the indent, so the right edge spills past the margin.
+# Rewrite each table to size = usable_text_width - tblInd so the right edge
+# lines up with the body-text right margin while the indent is preserved on
+# the left. Column proportions are kept by scaling gridCol values to that
+# new total.
+
+PG_WIDTH_A4_DXA = 11906   # 210mm at 1440 dxa/inch
+PG_HEIGHT_A4_DXA = 16838  # 297mm
+PG_MARGIN_DXA = 1440      # 1 inch margins
+USABLE_TEXT_WIDTH_DXA = PG_WIDTH_A4_DXA - 2 * PG_MARGIN_DXA  # = 9026
+
+PG_SZ_TAG = f'<w:pgSz w:w="{PG_WIDTH_A4_DXA}" w:h="{PG_HEIGHT_A4_DXA}" />'
+PG_MAR_TAG = (
+    f'<w:pgMar w:top="{PG_MARGIN_DXA}" w:right="{PG_MARGIN_DXA}" '
+    f'w:bottom="{PG_MARGIN_DXA}" w:left="{PG_MARGIN_DXA}" '
+    f'w:header="720" w:footer="720" w:gutter="0" />'
+)
+
+SECT_PR_RE = re.compile(r'(<w:sectPr\b[^>]*>)(.*?)(</w:sectPr>)', re.DOTALL)
+PG_SZ_EXISTING_RE = re.compile(r'<w:pgSz\b[^/]*/?>')
+PG_MAR_EXISTING_RE = re.compile(r'<w:pgMar\b[^/]*/?>')
+
+TABLE_RE = re.compile(r'<w:tbl>.*?</w:tbl>', re.DOTALL)
+TBL_IND_RE = re.compile(r'<w:tblInd w:w="(\d+)" w:type="dxa"\s*/>')
+TBL_W_RE = re.compile(r'<w:tblW [^/]*/>')
+TBL_GRID_RE = re.compile(r'<w:tblGrid>(.*?)</w:tblGrid>', re.DOTALL)
+GRID_COL_RE = re.compile(r'<w:gridCol w:w="(\d+)"\s*/>')
+TC_W_RE = re.compile(r'<w:tcW w:w="(\d+)" w:type="dxa"\s*/>')
+
 
 def _inject_heading(numbering_xml: str) -> str:
     if f'<w:nsid w:val="{HEADING_NSID}" />' in numbering_xml:
@@ -218,6 +269,75 @@ def _separate_author_email(document_xml: str) -> str:
     return AUTHOR_PARA_RE.sub(fix, document_xml)
 
 
+def _left_align_source_code(styles_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        open_tag, body, close_tag = match.group(1), match.group(2), match.group(3)
+        if '<w:jc ' in body:
+            return match.group(0)
+        ppr_match = SOURCECODE_PPR_RE.search(body)
+        if ppr_match:
+            new_ppr = (
+                ppr_match.group(0).rsplit('</w:pPr>', 1)[0]
+                + '<w:jc w:val="left" /></w:pPr>'
+            )
+            body = body[:ppr_match.start()] + new_ppr + body[ppr_match.end():]
+        else:
+            body = '<w:pPr><w:jc w:val="left" /></w:pPr>' + body
+        return open_tag + body + close_tag
+    return SOURCECODE_STYLE_RE.sub(fix, styles_xml, count=1)
+
+
+def _force_a4_section(document_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        open_tag, body, close_tag = match.group(1), match.group(2), match.group(3)
+        if PG_SZ_EXISTING_RE.search(body):
+            body = PG_SZ_EXISTING_RE.sub(PG_SZ_TAG, body, count=1)
+        else:
+            body = body + PG_SZ_TAG
+        if PG_MAR_EXISTING_RE.search(body):
+            body = PG_MAR_EXISTING_RE.sub(PG_MAR_TAG, body, count=1)
+        else:
+            body = body + PG_MAR_TAG
+        return open_tag + body + close_tag
+    return SECT_PR_RE.sub(fix, document_xml)
+
+
+def _fit_table_widths(document_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        body = match.group(0)
+        ind_match = TBL_IND_RE.search(body)
+        indent = int(ind_match.group(1)) if ind_match else 0
+        grid_match = TBL_GRID_RE.search(body)
+        if not grid_match:
+            return body
+        cols = [int(w) for w in GRID_COL_RE.findall(grid_match.group(1))]
+        if not cols:
+            return body
+        total = sum(cols)
+        budget = USABLE_TEXT_WIDTH_DXA - indent
+        if budget <= 0 or total <= 0:
+            return body
+        new_cols = [max(1, w * budget // total) for w in cols]
+        new_cols[-1] += budget - sum(new_cols)
+        new_total = sum(new_cols)
+        new_grid = (
+            '<w:tblGrid>'
+            + ''.join(f'<w:gridCol w:w="{w}" />' for w in new_cols)
+            + '</w:tblGrid>'
+        )
+        body = body[:grid_match.start()] + new_grid + body[grid_match.end():]
+        # Replace <w:tblW> with an explicit dxa width so Word doesn't expand
+        # the table to 100% of the parent (which ignores the indent offset).
+        body = TBL_W_RE.sub(
+            f'<w:tblW w:w="{new_total}" w:type="dxa" />', body, count=1,
+        )
+        def scale_tc(m: 're.Match[str]') -> str:
+            return f'<w:tcW w:w="{int(m.group(1)) * budget // total}" w:type="dxa" />'
+        body = TC_W_RE.sub(scale_tc, body)
+        return body
+    return TABLE_RE.sub(fix, document_xml)
+
+
 def _strip_empty_headings(document_xml: str) -> str:
     def keep_or_drop(match: 're.Match[str]') -> str:
         body = match.group(0)
@@ -239,11 +359,19 @@ def main(docx_path: str) -> None:
         patched = patch(numbering)
         with open(numbering_path, 'w', encoding='utf-8') as f:
             f.write(patched)
+        styles_path = os.path.join(tmp, 'word', 'styles.xml')
+        with open(styles_path, encoding='utf-8') as f:
+            styles = f.read()
+        styles = _left_align_source_code(styles)
+        with open(styles_path, 'w', encoding='utf-8') as f:
+            f.write(styles)
         document_path = os.path.join(tmp, 'word', 'document.xml')
         with open(document_path, encoding='utf-8') as f:
             document = f.read()
         document = _separate_author_email(document)
         document = _strip_empty_headings(document)
+        document = _force_a4_section(document)
+        document = _fit_table_widths(document)
         with open(document_path, 'w', encoding='utf-8') as f:
             f.write(document)
         out_tmp = docx_path + '.tmp'
