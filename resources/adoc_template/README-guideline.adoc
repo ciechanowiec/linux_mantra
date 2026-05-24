@@ -15,6 +15,7 @@
 :linkcss:
 :sourcedir: {docdir}
 :pdf-theme: {sourcedir}/docs/themes/basic.yml
+:pdf-fontsdir: {sourcedir}/docs/themes/fonts;GEM_FONTS_DIR
 :stylesdir: https://www.ciechanowiec.eu/linux_mantra/
 :stylesheet: adoc-css-style.css
 :!table-caption:

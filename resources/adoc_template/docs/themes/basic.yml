@@ -1,4 +1,13 @@
 extends: default-with-font-fallbacks
+font:
+  catalog:
+    merge: true
+    Noto Emoji Full:
+      normal: NotoEmoji-Regular.ttf
+      bold: NotoEmoji-Regular.ttf
+      italic: NotoEmoji-Regular.ttf
+      bold_italic: NotoEmoji-Regular.ttf
+  fallbacks: [M+ 1p Fallback, Noto Emoji Full, Noto Emoji]
 image:
   align: center
   caption:
