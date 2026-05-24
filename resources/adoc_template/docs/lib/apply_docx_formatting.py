@@ -287,6 +287,7 @@ PG_WIDTH_A4_DXA = 11906   # 210mm at 1440 dxa/inch
 PG_HEIGHT_A4_DXA = 16838  # 297mm
 PG_MARGIN_DXA = 1440      # 1 inch margins
 USABLE_TEXT_WIDTH_DXA = PG_WIDTH_A4_DXA - 2 * PG_MARGIN_DXA  # = 9026
+EMU_PER_DXA = 914400 // 1440  # = 635, EMUs per twip
 
 PG_SZ_TAG = f'<w:pgSz w:w="{PG_WIDTH_A4_DXA}" w:h="{PG_HEIGHT_A4_DXA}" />'
 PG_MAR_TAG = (
@@ -374,6 +375,105 @@ def _fit_table_widths(document_xml: str) -> str:
 
 
 # ============================================================================
+# document.xml — inline image sizing
+# ============================================================================
+#
+# Pandoc carries through the source bitmap's pixel dimensions, so a screenshot
+# wider than the page text area overflows the right margin. Cap each inline
+# drawing at usable_text_width minus the host paragraph's left indent so the
+# image's right edge lines up with body text. Height is scaled to preserve
+# the aspect ratio. The indent is read from <w:ind> on the paragraph or, when
+# absent, from the level definition of the numbering the paragraph points at,
+# so an image inside a deep nested list still ends flush with surrounding text.
+
+PARA_IND_LEFT_RE = re.compile(r'<w:ind\b[^/>]*\bw:left="(\d+)"')
+PARA_PPR_RE = re.compile(r'<w:pPr\b[^>]*>(.*?)</w:pPr>', re.DOTALL)
+PARA_NUMPR_RE = re.compile(r'<w:numPr>(.*?)</w:numPr>', re.DOTALL)
+PARA_ILVL_RE = re.compile(r'<w:ilvl w:val="(\d+)"')
+PARA_NUMID_RE = re.compile(r'<w:numId w:val="(\d+)"')
+WP_EXTENT_RE = re.compile(r'<wp:extent\s+cx="(\d+)"\s+cy="(\d+)"\s*/>')
+A_EXT_RE = re.compile(r'<a:ext\s+cx="(\d+)"\s+cy="(\d+)"\s*/>')
+
+NumberingIndex = Dict[str, List[int]]
+
+
+def _build_numbering_index(numbering_xml: str) -> NumberingIndex:
+    """Map each w:numId to the list of left-indent dxa values per ilvl."""
+    abstract_indents: Dict[str, List[int]] = {}
+    for am in re.finditer(
+        r'<w:abstractNum w:abstractNumId="(\d+)">(.*?)</w:abstractNum>',
+        numbering_xml, re.DOTALL,
+    ):
+        aid, body = am.group(1), am.group(2)
+        levels: List[int] = []
+        for lvl in re.finditer(r'<w:lvl w:ilvl="(\d+)">(.*?)</w:lvl>', body, re.DOTALL):
+            ilvl = int(lvl.group(1))
+            ind_m = PARA_IND_LEFT_RE.search(lvl.group(2))
+            indent = int(ind_m.group(1)) if ind_m else 0
+            while len(levels) <= ilvl:
+                levels.append(0)
+            levels[ilvl] = indent
+        abstract_indents[aid] = levels
+
+    num_to_indents: NumberingIndex = {}
+    for nm in re.finditer(
+        r'<w:num w:numId="(\d+)">(.*?)</w:num>',
+        numbering_xml, re.DOTALL,
+    ):
+        nid, body = nm.group(1), nm.group(2)
+        am_m = re.search(r'<w:abstractNumId w:val="(\d+)"\s*/>', body)
+        if am_m:
+            num_to_indents[nid] = abstract_indents.get(am_m.group(1), [])
+    return num_to_indents
+
+
+def _paragraph_indent(paragraph_xml: str, numbering: NumberingIndex) -> int:
+    ppr_m = PARA_PPR_RE.search(paragraph_xml)
+    if not ppr_m:
+        return 0
+    ppr_body = ppr_m.group(1)
+    direct = PARA_IND_LEFT_RE.search(ppr_body)
+    if direct:
+        return int(direct.group(1))
+    num_m = PARA_NUMPR_RE.search(ppr_body)
+    if not num_m:
+        return 0
+    ilvl_m = PARA_ILVL_RE.search(num_m.group(1))
+    numid_m = PARA_NUMID_RE.search(num_m.group(1))
+    if not (ilvl_m and numid_m):
+        return 0
+    ilvl = int(ilvl_m.group(1))
+    indents = numbering.get(numid_m.group(1), [])
+    return indents[ilvl] if ilvl < len(indents) else 0
+
+
+def _make_resize_images(numbering: NumberingIndex) -> XmlTransform:
+    def _resize_images(document_xml: str) -> str:
+        def fix(match: 're.Match[str]') -> str:
+            para = match.group(0)
+            if '<w:drawing' not in para:
+                return para
+            indent = _paragraph_indent(para, numbering)
+            budget_dxa = USABLE_TEXT_WIDTH_DXA - indent
+            if budget_dxa <= 0:
+                return para
+            budget_emu = budget_dxa * EMU_PER_DXA
+
+            def scale(m: 're.Match[str]', tag: str) -> str:
+                cx, cy = int(m.group(1)), int(m.group(2))
+                if cx <= budget_emu:
+                    return m.group(0)
+                new_cy = cy * budget_emu // cx
+                return f'<{tag} cx="{budget_emu}" cy="{new_cy}" />'
+
+            para = WP_EXTENT_RE.sub(lambda m: scale(m, 'wp:extent'), para)
+            para = A_EXT_RE.sub(lambda m: scale(m, 'a:ext'), para)
+            return para
+        return PARAGRAPH_RE.sub(fix, document_xml)
+    return _resize_images
+
+
+# ============================================================================
 # Pipeline
 # ============================================================================
 #
@@ -414,8 +514,19 @@ def main(docx_path: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         with zipfile.ZipFile(docx_path) as zf:
             zf.extractall(tmp)
+        # Patch numbering.xml first so image sizing can read the final
+        # per-level indents when resolving paragraph indents.
+        _patch_part(tmp, 'word/numbering.xml', TRANSFORMS['word/numbering.xml'])
+        with open(os.path.join(tmp, 'word', 'numbering.xml'), encoding='utf-8') as f:
+            numbering_index = _build_numbering_index(f.read())
         for rel_path, transforms in TRANSFORMS.items():
-            _patch_part(tmp, rel_path, transforms)
+            if rel_path == 'word/numbering.xml':
+                continue
+            extra = (
+                [_make_resize_images(numbering_index)]
+                if rel_path == 'word/document.xml' else []
+            )
+            _patch_part(tmp, rel_path, transforms + extra)
         out_tmp = docx_path + '.tmp'
         with zipfile.ZipFile(out_tmp, 'w', zipfile.ZIP_DEFLATED) as zf:
             for root, _, files in os.walk(tmp):
