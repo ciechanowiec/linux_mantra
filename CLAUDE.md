@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Not an application — a personalized, interactive setup script for the author's Linux/Java/AEM (and parallel macOS) workstation. The deliverables are two long, top-level Bash scripts that drive every step of provisioning a freshly installed OS:
 
-- `linux_mantra.sh` (~2.9k lines) — Ubuntu 22.x (`jammy`)
+- `linux_mantra.sh` (~2.9k lines) — Ubuntu 26.x (`resolute`)
 - `mac_mantra.sh` (~2.3k lines) — macOS 26
 
 Each script is the entry point for its platform. Together with the sibling `resources/` directory, they form a self-contained tool: the scripts hardcode paths into `resources/` and copy/source/trigger files from there.

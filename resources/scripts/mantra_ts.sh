@@ -250,7 +250,7 @@ openProjectInIDE () {
 # ============================================== #
 
 # Revise and change values of the variables below to meet your needs
-expectedLinuxReleaseName="jammy"
+expectedLinuxReleaseName="resolute"
 expectedMacReleaseName="macOS 26"
 gitCommitterName="Herman"
 gitCommitterSurname="Ciechanowiec"

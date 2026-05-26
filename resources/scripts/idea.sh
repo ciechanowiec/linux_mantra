@@ -11,7 +11,7 @@ ITALIC="\e[3m"
 RESET_FORMAT="\e[0m"
 ERROR_TAG="${BOLD_RED}[ERROR]:${RESET_FORMAT}"
 
-expectedLinuxReleaseName="jammy"
+expectedLinuxReleaseName="resolute"
 expectedMacReleaseName="macOS 26"
 
 verifyOneArgument () {

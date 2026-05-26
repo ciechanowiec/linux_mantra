@@ -59,7 +59,7 @@ osType="null"
 shellFile="null"
 isMacOS=false
 isLinux=false
-expectedLinuxReleaseName="jammy"
+expectedLinuxReleaseName="resolute"
 expectedMacReleaseName="macOS 26"
 
 echo "2. Checking whether the resources directory exists..."

@@ -59,7 +59,7 @@ osType="null"
 shellFile="null"
 isMacOS=false
 isLinux=false
-expectedLinuxReleaseName="jammy"
+expectedLinuxReleaseName="resolute"
 expectedMacReleaseName="macOS 26"
 
 echo "2. Checking whether the resources directory exists..."
@@ -1533,7 +1533,6 @@ procedureId="apt refresh"
 informAboutProcedureStart
 
 echo "1. Disabling Ubuntu Software GUI automatic apt refresh..."
-# Docs for the following: https://linuxconfig.org/disable-automatic-updates-on-ubuntu-22-04-jammy-jellyfish-linux
 aptUpdateConfigFile="/etc/apt/apt.conf.d/20auto-upgrades"
 sudo bash -c "cat > ${aptUpdateConfigFile} << EOF
 APT::Periodic::Update-Package-Lists \"0\";
@@ -1681,31 +1680,6 @@ if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
     echo "Unexpected error occurred. Update failed"
     exit 1
 fi
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
-#                        12. BLACK SCREEN BUG FIX                             #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="black screen bug fix"
-# DOCUMENTATION:
-#   https://askubuntu.com/questions/1341208/screen-share-show-black-screen-after-upgrade-from-ubuntu-20-10-to-21-04
-# NOTES:
-#   For Linux Ubuntu 21+ there is a bug so that there is a black screen
-#   while screen sharing. The code below fixes it.
-
-informAboutProcedureStart
-
-echo "Enabling X org to fix the bug with black screen while screen sharing..."
-displayManagerConfigFile="/etc/gdm3/custom.conf"
-
-sudo sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' "$displayManagerConfigFile"
 
 informAboutProcedureEnd
 
@@ -2516,7 +2490,7 @@ procedureId="gnome extensions"
 #    Usually, new versions of extensions don't have significant changes and extensions for
 #    a given GNOME Shell version work correctly with other versions.
 #    Extensions below have hardcoded references for their latest versions (as of date
-#    when creating the references) for GNOME Shell 42.9 delivered with Ubuntu 22.04).
+#    when creating the references) for GNOME Shell 50 delivered with Ubuntu 26.04).
 #    When updating the script for newer GNOME Shell and Ubuntu versions, those references
 #    should be updated.
 # 2. For GNOME extensions to start working, GNOME Session must be restarted. Currently,
@@ -2540,7 +2514,7 @@ echo "3. Installing 'Panel Date Format' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/1462/panel-date-format/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 panelDateFormatArchive="panelDateFormatArchive.zip"
-wget -O "$panelDateFormatArchive" https://extensions.gnome.org/extension-data/panel-date-formatkeiii.github.com.v11.shell-extension.zip
+wget -O "$panelDateFormatArchive" https://extensions.gnome.org/extension-data/panel-date-formatkeiii.github.com.v24.shell-extension.zip
 panelDateFormatDirUnzipped="panelDateFormatDirUnzipped"
 unzip "$panelDateFormatArchive" -d "$panelDateFormatDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
@@ -2553,7 +2527,7 @@ echo "4. Installing 'Just Perfection' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/3843/just-perfection/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 justPerfectionArchive="justPerfectionArchive.zip"
-wget -O "$justPerfectionArchive" https://extensions.gnome.org/extension-data/just-perfection-desktopjust-perfection.v26.shell-extension.zip
+wget -O "$justPerfectionArchive" https://extensions.gnome.org/extension-data/just-perfection-desktopjust-perfection.v36.shell-extension.zip
 justPerfectionDirUnzipped="justPerfectionDirUnzipped"
 unzip "$justPerfectionArchive" -d "$justPerfectionDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
@@ -2567,7 +2541,7 @@ echo "5. Installing 'ddterm' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/3780/ddterm/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 ddtermArchive="ddtermArchive.zip"
-wget -O "$ddtermArchive" https://extensions.gnome.org/extension-data/ddtermamezin.github.com.v53.shell-extension.zip
+wget -O "$ddtermArchive" https://extensions.gnome.org/extension-data/ddtermamezin.github.com.v66.shell-extension.zip
 ddtermDirUnzipped="ddtermDirUnzipped"
 unzip "$ddtermArchive" -d "$ddtermDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
@@ -2683,7 +2657,7 @@ if [ "$exitCode" != 0 ]
     echo "2. NVIDIA devices detected. Drivers will be installed now..."
     sudo add-apt-repository ppa:graphics-drivers/ppa -y
     sudo apt update
-    sudo apt install nvidia-driver-570 -y
+    sudo apt install nvidia-driver-595 -y
     echo "3. NVIDIA drivers installed. They will start after rebooting"
 fi
 
@@ -2705,7 +2679,7 @@ procedureId="insync"
 informAboutProcedureStart
 
 insyncVersion="3.9.10.60041"
-installFile="insync_${insyncVersion}-jammy_amd64.deb"
+installFile="insync_${insyncVersion}-resolute_amd64.deb"
 
 echo "Downloading insync..."
 wget "https://cdn.insynchq.com/builds/linux/$insyncVersion/$installFile"
