@@ -1757,8 +1757,8 @@ echo "3. Composing a main configuration file..."
 mainConfigurationFile="$resourcesDir/xplr/HOME/.config/xplr/init.lua"
 
 echo "3.1. Extracting an xplr version..." # docs: https://xplr.dev/en/post-install
-xplrVersion=$(xplr --version | cut -d ' ' -f 2) # result like: 0.19.0
-xplrVersionAsConfigEntry="version = \"${xplrVersion:?}\"" # result like: version = "0.19.0"
+xplrVersion=$(xplr --version | cut -d ' ' -f 2) # result like: 0.20.2
+xplrVersionAsConfigEntry="version = \"${xplrVersion:?}\"" # result like: version = "0.20.2"
 echo "-- 1_version" > "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
 echo "$xplrVersionAsConfigEntry" >> "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
 cat "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua" > "$mainConfigurationFile"

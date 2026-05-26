@@ -1938,8 +1938,8 @@ echo "3. Composing a main configuration file..."
 mainConfigurationFile="$resourcesDir/xplr/HOME/.config/xplr/init.lua"
 
 echo "3.1. Extracting an xplr version..." # docs: https://xplr.dev/en/post-install
-xplrVersion=$(xplr --version | cut -d ' ' -f 2) # result like: 0.19.0
-xplrVersionAsConfigEntry="version = \"${xplrVersion:?}\"" # result like: version = "0.19.0"
+xplrVersion=$(xplr --version | cut -d ' ' -f 2) # result like: 0.20.2
+xplrVersionAsConfigEntry="version = \"${xplrVersion:?}\"" # result like: version = "0.20.2"
 echo "-- 1_version" > "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
 echo "$xplrVersionAsConfigEntry" >> "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
 cat "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua" > "$mainConfigurationFile"
@@ -2550,7 +2550,6 @@ unzip "$justPerfectionArchive" -d "$justPerfectionDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
 #   "uuid": "just-perfection-desktop@just-perfection",
 justPerfectionUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$justPerfectionDirUnzipped/metadata.json")
-echo "$justPerfectionUUID"
 mv "$justPerfectionDirUnzipped" "$justPerfectionUUID"
 cp -rf "$justPerfectionUUID" "$extensionsDir"
 

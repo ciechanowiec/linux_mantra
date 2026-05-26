@@ -284,7 +284,7 @@ bootstrapFromTemplate "$projectDirectory" "$templateRepoPath"
 substituteProjectName "$projectDirectory" "$projectName"
 addLicense "$projectDirectory" "$gitCommitterName" "$gitCommitterSurname"
 
-# Install dependencies (must happen before initCommit so package-lock.json is captured,
+# Install dependencies (must happen before initCommit so pnpm-lock.yaml is captured,
 # and before openProjectInIDE so the Biome LSP finds its binary on first start):
 installDependencies "$projectDirectory"
 

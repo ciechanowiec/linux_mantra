@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "APT REFRESH STARTED: $(date)"
 echo "1. Downloading packages information from all configured sources..."
 /usr/bin/apt update -y

@@ -1,7 +1,7 @@
 #!/bin/bash
 # A. Script for generating Spring Boot projects from a template.
 #    The template is based on the output of the command similar to this:
-#    spring init --dependencies=web,actuator,validation,data-jpa,mysql,h2,lombok \
+#    spring init --dependencies=web,actuator,validation,data-mongodb,lombok \
 #                --type=maven-project \
 #                --group-id=eu.ciechanowiec \
 #                --artifact-id=demo \
