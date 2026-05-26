@@ -283,7 +283,7 @@ echo "Installing imagemagick (images converter)"
 sudo apt install imagemagick -y
 
 echo "Installing go (programming language)"
-sudo apt install golang-go
+sudo apt install golang-go -y
 
 echo "Installing fuse (enables filesystems in userspace)"
 sudo apt install fuse -y
@@ -2596,43 +2596,6 @@ pkill edge
 
 echo "Removing redundant repository added by Microsoft..."
 sudo trash-put /etc/apt/sources.list.d/microsoft-edge-dev.list
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
-#                             18. NVIDIA DRIVERS                              #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="nvidia drivers"
-# DOCUMENTATION:
-#   https://github.com/NVIDIA/open-gpu-kernel-modules
-# NOTES:
-#   1. The NVIDIA driver version that is installed below was hardcoded. Due to stability
-#      considerations, update of that hardcoded version should be done manually and tested.
-#   2. To check whether drivers were installed correctly, run after installation
-#      and rebooting the following command: `nvidia-smi`
-
-informAboutProcedureStart
-
-echo "1. Searching for NVIDIA devices..."
-# If no devices were found, the command below will exit with code `1`
-lspci -v | grep -i 'nvidia' &> /dev/null
-exitCode=$?
-if [ "$exitCode" != 0 ]
-  then
-    echo "2. No NVIDIA devices were found. No drivers will be installed"
-  else
-    echo "2. NVIDIA devices detected. Drivers will be installed now..."
-    sudo add-apt-repository ppa:graphics-drivers/ppa -y
-    sudo apt update
-    sudo apt install nvidia-driver-595 -y
-    echo "3. NVIDIA drivers installed. They will start after rebooting"
-fi
 
 informAboutProcedureEnd
 
