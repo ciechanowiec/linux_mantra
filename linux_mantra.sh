@@ -190,6 +190,13 @@ sudo apt install vim -y
 echo "Installing pip (tool for installing and managing Python packages)..."
 sudo apt install python3-pip -y
 
+echo "Installing pipx (tool for installing Python apps in isolated environments)..."
+# Required since Ubuntu 23.04+ enforces PEP 668: `pip3 install ...` is blocked
+# system-wide (externally-managed-environment). pipx is the recommended path
+# for installing Python CLI apps (e.g. yt-dlp).
+sudo apt install pipx -y
+pipx ensurepath
+
 echo "Installing htop (interactive process viewer)..."
 sudo apt install htop -y
 
@@ -294,8 +301,9 @@ sudo apt install gnome-control-center
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then
+# 3. Ubuntu 23.04+ blocks `pip3 install` system-wide (PEP 668), so use pipx
 sudo apt remove yt-dlp -y
-pip3 install yt-dlp --no-warn-script-location
+pipx install yt-dlp
 
 # Consider the following settings Only Office Desktop Editors:
 #   File -> Advanced settings -> Proofing:
@@ -337,6 +345,13 @@ echo "Installing Claude Code CLI (Anthropic's terminal-based AI coding agent)...
 #   $HOME/.local/bin/claude and auto-updates in the background. The official
 #   docs explicitly warn against `sudo npm install -g @anthropic-ai/claude-code`
 #   due to permission issues and security risks.
+#   $HOME/.local/bin must be on PATH both right now (so the installer's
+#   post-install check passes) and in future shells. The grep-guarded append
+#   keeps the entry in $shellFile idempotent across re-runs of the mantra.
+if ! grep -qF '.local/bin' "$shellFile"; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$shellFile"
+fi
+export PATH="$HOME/.local/bin:$PATH"
 curl -fsSL https://claude.ai/install.sh | bash
 
 echo "Installing Mermaid CLI (diagramming tool)..."
@@ -540,7 +555,7 @@ EOF
 echo "7. Opening an nvim application in order to initialize it..."
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
-    gnome-terminal -- bash -c "nvim test.lua -c 'startinsert'" # Need lua file to initiate LSP
+    ptyxis -- bash -c "nvim test.lua -c 'startinsert'" # Need lua file to initiate LSP
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
 # On Apple Script:
@@ -705,7 +720,12 @@ eval "\$(gh completion -s bash)"
 EOF
 
 echo "7. Adding local bin to PATH..."
-echo "export PATH=\"\$PATH:\$HOME/.local/bin\"" >> "$shellFile"
+# Defense in depth: the same guarded append also runs at the Claude install
+# site (procedure 3). Kept here so persistence survives even if procedure 3
+# was skipped or ran in a different shell.
+if ! grep -qF '.local/bin' "$shellFile"; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$shellFile"
+fi
 
 informAboutProcedureEnd
 
@@ -2400,7 +2420,7 @@ sudo apt install input-remapper -y
 
 echo "Starting the application for a while to initialize the configuration directory..."
 # Running in a new terminal, because doing it in the current might block it:
-sudo gnome-terminal -- bash -c "input-remapper-gtk"
+sudo ptyxis -- bash -c "input-remapper-gtk"
 sleep 5;
 sudo pkill input-remapper
 
@@ -2472,7 +2492,7 @@ sudo systemctl stop input-remapper
 # Run IR to trigger generation of $HOME/.config/input-remapper/xmodmap.json
 # - without this file remapping will not work.
 # Running in a new terminal, because doing it in the current might block it:
-sudo gnome-terminal -- bash -c "input-remapper-gtk"
+sudo ptyxis -- bash -c "input-remapper-gtk"
 sleep 5;
 sudo pkill input-remapper
 sudo systemctl start input-remapper

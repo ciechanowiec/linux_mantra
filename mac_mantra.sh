@@ -813,7 +813,8 @@ EOF
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then
-pip3 install yt-dlp --no-warn-script-location
+# 3. Homebrew Python blocks `pip3 install` system-wide (PEP 668), so use pipx
+pipx install yt-dlp
 
 echo "Installing postman (app for building and using APIs)..."
 brew install postman
@@ -1054,7 +1055,7 @@ EOF
 echo "7. Opening an nvim application in order to initialize it..."
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
-    gnome-terminal -- bash -c "nvim test.lua -c 'startinsert'" # Need lua file to initiate LSP
+    ptyxis -- bash -c "nvim test.lua -c 'startinsert'" # Need lua file to initiate LSP
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
 # On Apple Script:

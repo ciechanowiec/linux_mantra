@@ -283,7 +283,7 @@ local nvim = commandMode.cmd("nvim", "Open a focused text file in NeoVim") (
   if [[ "$fileTypeLowerCase" == *"text"*
      || "$fileTypeLowerCase" == *"json"* ]];
     then
-      gnome-terminal -- bash -c "nvim $XPLR_FOCUS_PATH"
+      ptyxis -- bash -c "nvim $XPLR_FOCUS_PATH"
       echo LogSuccess: "Opened '${baseName}' in NeoVim" >> "${XPLR_PIPE_MSG_IN:?}"
   else
       echo LogError: "Is not a valid text file∶ $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
