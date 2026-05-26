@@ -1251,18 +1251,7 @@ echo "Setting Docker to be run without 'sudo' prefix..." # As described at https
 sudo groupadd docker
 sudo usermod -aG docker "$USER"
 # To run Docker without 'sudo' prefix, a reboot after the above commands is required.
-# However, it is possible to test without the reboot whether Docker without 'sudo' prefix
-# can be run. In order to do that, the 'newgrp docker' command should be executed.
-# By default, the 'newgrp docker' command will terminate the script. To prevent it,
-# it is needed to use a heredoc code block as shown below, where it is tested
-# whether Docker without 'sudo' prefix can be run. However, that 'newgrp docker'
-# command has only local effect for one session of the terminal. To run Docker
-# without 'sudo' prefix globally, reboot is required, as mentioned above
-newgrp docker << EOF
-echo "Testing Docker installation without sudo..."
-docker run hello-world
-docker image rm -f hello-world
-EOF
+echo "Docker without 'sudo' prefix will be available after the next reboot."
 
 while true; do
   read -p "Do you want to log in to Docker Hub (this is not obligatory for Docker to work)? (Y/n): " choice
