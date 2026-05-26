@@ -114,14 +114,31 @@ if [ "$linesWithLinuxReleaseName" -gt 0 ] && [ "$linesWithMacReleaseName" -gt 0 
     exit 1;
 fi
 
-echo "5. Updating the operating system..."
+echo "5. Verifying that the root filesystem is on a LUKS-encrypted device..."
+if [ "$isLinux" == true ];
+  then
+    rootDevice=$(findmnt -no SOURCE /)
+    if [ -z "$rootDevice" ];
+      then
+        echo "Unable to resolve the root device. Exiting..."
+        exit 1
+    fi
+    if ! lsblk -s -no TYPE "$rootDevice" 2>/dev/null | grep -qx crypt;
+      then
+        echo "Root filesystem ($rootDevice) is not on a LUKS-encrypted device."
+        echo "Reinstall Linux Ubuntu with 'Encrypt with a passphrase' enabled. Exiting..."
+        exit 1
+    fi
+fi
+
+echo "6. Updating the operating system..."
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
-    echo "5.1. Downloading packages information from all configured sources..."
+    echo "6.1. Downloading packages information from all configured sources..."
     sudo apt update -y
-    echo "5.2. Installing available upgrades of all packages currently installed on the system..."
+    echo "6.2. Installing available upgrades of all packages currently installed on the system..."
     sudo apt upgrade -y
-    echo "5.3. Removing unnecessary dependencies..."
+    echo "6.3. Removing unnecessary dependencies..."
     sudo apt autoremove -y
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
