@@ -1360,58 +1360,6 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
-#                            12. CAMERA CONTROLS                              #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="camera controls"
-# DOCUMENTATION:
-#   https://github.com/soyersoyer/cameractrls
-
-informAboutProcedureStart
-
-sudo apt install libsdl2-2.0-0 libturbojpeg -y
-
-cameractrlsDir="$HOME/.cameractrls"
-
-if [ -d "$cameractrlsDir" ]
-  then
-    echo "Old cameractrls directory found. Removing..."
-    trash-put "$cameractrlsDir"
-fi
-
-echo "Creating a directory for cameractrls..."
-mkdir -p "$cameractrlsDir"
-
-echo "Cloning the repository with the program..."
-git clone https://github.com/soyersoyer/cameractrls.git "$cameractrlsDir"
-
-echo "Installing the program..."
-desktop-file-install --dir="$HOME/.local/share/applications" \
-  --set-key=Exec --set-value="$cameractrlsDir/cameractrlsgtk4.py" \
-  --set-key=Path --set-value="$cameractrlsDir" \
-  --set-key=Icon --set-value="$cameractrlsDir/pkg/hu.irl.cameractrls.svg" \
-  "$cameractrlsDir/pkg/hu.irl.cameractrls.desktop"
-
-sleep 5 # let the desktop application start up
-
-echo "Configuring the camera Razer Kiyo Pro..."
-# 1. The command below configures Razer Kiyo Pro.
-# 2. Camera ID used in the command below stays the same across
-#    different machines (usb-Razer_Inc_Razer_Kiyo_Pro-video-index0).
-# 3. Settings will be saved and then have effect even if during
-#    execution of the command below the camera wasn't connected.
-"$cameractrlsDir/cameractrls.py" \
-  -d /dev/v4l/by-id/usb-Razer_Inc_Razer_Kiyo_Pro-video-index0 \
-  -c brightness=128,contrast=128,saturation=149,sharpness=137
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
 #                               12. REPO (AEM)                                #
 #                                                                             #
 #                                                                             #
