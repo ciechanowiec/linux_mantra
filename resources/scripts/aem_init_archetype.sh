@@ -27,7 +27,7 @@ parentPom="$targetDir/pom.xml"
 latestConditionalLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/conditional/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
 latestSneakyFunLibVersion=$(curl --silent https://repo.maven.apache.org/maven2/eu/ciechanowiec/sneakyfun/maven-metadata.xml | grep '<latest>' | cut -d '>' -f 2 | cut -d '<' -f 1)
 
-sdk use java 8.0.412-zulu
+sdk use java 8.0.492-zulu
 
 mvn -B org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate \
     -D archetypeGroupId=com.adobe.aem \
@@ -43,7 +43,7 @@ mvn -B org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate \
     -D version="1.0-SNAPSHOT" \
     -D aemVersion="$aemVersionToUse"
 
-sdk use java 11.0.23-tem
+sdk use java 11.0.31-tem
 
 cd "$targetDir" || exit 1
 git init

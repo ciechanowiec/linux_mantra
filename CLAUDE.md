@@ -39,6 +39,7 @@ Other conventions:
 - Resource paths are written out explicitly as `$resourcesDir/<subdir>/<file>` rather than computed. If you move a file under `resources/`, grep both top-level scripts for the old path and update every reference.
 - The scripts deliberately do not use `set -euo pipefail`. Failure handling is explicit per command (`|| exit 1`, `if [ ! -d … ]; then … exit 1; fi`). Match that style instead of adding global strict-mode flags.
 - New helper scripts that the mantra triggers belong under `resources/scripts/` and should be `chmod +x` before commit.
+- **Software versions are pinned in multiple files, not just the top-level mantra scripts.** Helper scripts under `resources/scripts/` (e.g. `aem_init_archetype.sh` pins both a Java 8 and a Java 11 SDKMAN identifier) and config payloads under `resources/` (e.g. `resources/xplr/HOME/.config/xplr/3_custom_commands-*.lua` pin a Java 21 SDKMAN identifier) reuse the same pins as `linux_mantra.sh` / `mac_mantra.sh`. When bumping any pinned version (Java/Maven via SDKMAN, Insync `.deb`, iTerm2 `.zip`, NVIDIA driver branch, GNOME extension `.zip` URL, xplr release tag, etc.), **before editing, grep the entire repo for every occurrence of the old version string** (e.g. `grep -rEn '8\.0\.412-zulu|11\.0\.23-tem|…' .`) and update them all in one pass. Updating only the top-level scripts will leave drifted references in `resources/`.
 
 ## Resources layout (what each subtree is for)
 

@@ -873,25 +873,25 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 echo "Installing Java 8..."
 # Java 8 Temurin release might be unavailable for macOS, so Zulu is installed:
-yes | sdk install java 8.0.412-zulu
+yes | sdk install java 8.0.492-zulu
 
 echo "Installing Java 11..."
-yes | sdk install java 11.0.23-tem
+yes | sdk install java 11.0.31-tem
 
 echo "Installing Java 17..."
-yes | sdk install java 17.0.11-tem
+yes | sdk install java 17.0.19-tem
 
 echo "Installing Java 21..."
-yes | sdk install java 21.0.3-tem
+yes | sdk install java 21.0.11-tem
 
-echo "Installing Java 21 GraalVM..."
-yes | sdk install java 21.0.2-graalce
+echo "Installing Java 25 GraalVM..."
+yes | sdk install java 25.0.2-graalce
 
 echo "Installing Java 25..."
-yes | sdk install java 25-tem
+yes | sdk install java 25.0.3-tem
 
 echo "Setting Java 21 as the default one..."
-sdk default java 21.0.3-tem
+sdk default java 21.0.11-tem
 
 echo "Enabling the installed program in the current console..."
 export SDKMAN_DIR="$HOME/.sdkman"
@@ -922,7 +922,7 @@ export SDKMAN_DIR="$HOME/.sdkman"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 echo "Installing Maven..."
-yes | sdk install maven 3.9.6
+yes | sdk install maven 3.9.16
 
 echo "Adding the Adobe Maven repository..."
 # Details: 1. https://repo.adobe.com/index.html
@@ -2683,7 +2683,7 @@ if [ "$exitCode" != 0 ]
     echo "2. NVIDIA devices detected. Drivers will be installed now..."
     sudo add-apt-repository ppa:graphics-drivers/ppa -y
     sudo apt update
-    sudo apt install nvidia-driver-550 -y
+    sudo apt install nvidia-driver-570 -y
     echo "3. NVIDIA drivers installed. They will start after rebooting"
 fi
 
@@ -2704,10 +2704,11 @@ procedureId="insync"
 
 informAboutProcedureStart
 
-installFile="insync_3.8.6.50504-jammy_amd64.deb"
+insyncVersion="3.9.10.60041"
+installFile="insync_${insyncVersion}-jammy_amd64.deb"
 
 echo "Downloading insync..."
-wget "https://cdn.insynchq.com/builds/linux/$installFile"
+wget "https://cdn.insynchq.com/builds/linux/$insyncVersion/$installFile"
 
 echo "Installing insync..."
 sudo dpkg -i "$installFile"
