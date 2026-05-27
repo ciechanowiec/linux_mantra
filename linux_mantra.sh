@@ -260,6 +260,8 @@ sudo apt install icdiff -y
 
 echo "Installing flameshot (tool for taking screenshots)..."
 sudo apt install flameshot -y
+mkdir -p "$HOME/.config/flameshot"
+cp -f "$resourcesDir/linux/flameshot.ini" "$HOME/.config/flameshot/flameshot.ini"
 
 echo "Installing jq (CLI JSON processor)..."
 sudo apt install jq -y

@@ -62,7 +62,42 @@ icon-theme='Yaru-sage'
 show-battery-percentage=false
 
 [org/gnome/desktop/notifications]
-show-in-lock-screen=true
+application-children=['firefox-firefox', 'code', 'intellij-idea-intellij-idea', 'org-gnome-ptyxis', 'org-gnome-extensions', 'apport-gtk', 'org-flameshot-flameshot']
+show-in-lock-screen=false
+
+[org/gnome/desktop/notifications/application/apport-gtk]
+application-id='apport-gtk.desktop'
+enable=false
+
+[org/gnome/desktop/notifications/application/code]
+application-id='code.desktop'
+enable=false
+
+[org/gnome/desktop/notifications/application/firefox-firefox]
+application-id='firefox_firefox.desktop'
+
+[org/gnome/desktop/notifications/application/intellij-idea-intellij-idea]
+application-id='intellij-idea_intellij-idea.desktop'
+
+[org/gnome/desktop/notifications/application/io-snapcraft-sessionagent]
+enable=false
+
+[org/gnome/desktop/notifications/application/org-flameshot-flameshot]
+application-id='org.flameshot.Flameshot.desktop'
+enable=false
+
+[org/gnome/desktop/notifications/application/org-gnome-extensions]
+application-id='org.gnome.Extensions.desktop'
+enable=false
+
+[org/gnome/desktop/notifications/application/org-gnome-goa-daemon]
+enable=false
+
+[org/gnome/desktop/notifications/application/org-gnome-ptyxis]
+application-id='org.gnome.Ptyxis.desktop'
+
+[org/gnome/desktop/notifications/application/org-gnome-zenity]
+enable=false
 
 [org/gnome/desktop/peripherals/keyboard]
 delay=uint32 180
