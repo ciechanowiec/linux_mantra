@@ -193,7 +193,7 @@ name='Terminal'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5]
 binding='<Super>KP_Subtract'
-command='sh -c "gnome-screenshot -acf /tmp/test && cat /tmp/test | xclip -i -selection clipboard -target image/png"'
+command='flameshot gui --clipboard'
 name='Screenshot'
 
 [org/gnome/settings-daemon/plugins/power]
