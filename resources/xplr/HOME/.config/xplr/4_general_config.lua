@@ -12,7 +12,7 @@ xplr.config.general.logs.error.format = "(ERROR"
 xplr.fn.builtin.fmt_general_table_row_cols_4 = function(m)
     return tostring(os.date("%Y-%m-%d  %H:%M", m.last_modified / 1000000000))
 end
-xplr.config.general.show_hidden = true
+xplr.config.general.show_hidden = false
 
 -- The function below overrides the original function from
 -- https://github.com/sayanarijit/xplr/blob/main/src/init.lua
