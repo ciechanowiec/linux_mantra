@@ -704,8 +704,8 @@ echo "5.2. Setting up Linux aliases..."
 cat >> "$shellFile" << EOF
 
 # LINUX ALIASES:
-alias e="edge"
-alias edge="(nohup microsoft-edge > /dev/null 2>&1 & disown)"
+alias f="firefox"
+alias firefox="(nohup firefox > /dev/null 2>&1 & disown)"
 alias logout="pkill -KILL -u $(whoami)"
 alias scaling="dconf write /org/gnome/desktop/interface/text-scaling-factor" # Usage: 'scaling 1.0', 'scaling 1.4' (range from 0 to 2)
 alias shutdown="shutdown now"
