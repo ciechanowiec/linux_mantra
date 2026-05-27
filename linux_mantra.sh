@@ -933,8 +933,8 @@ yes | sdk install java 25.0.2-graalce
 echo "Installing Java 25..."
 yes | sdk install java 25.0.3-tem
 
-echo "Setting Java 21 as the default one..."
-sdk default java 21.0.11-tem
+echo "Setting Java 25 as the default one..."
+sdk default java 25.0.3-tem
 
 echo "Enabling the installed program in the current console..."
 export SDKMAN_DIR="$HOME/.sdkman"
