@@ -2080,6 +2080,16 @@ else
     echo "proidc repository already exists. Skipping cloning."
 fi
 
+echo "Cloning slexamplus repository..."
+slexamplusDir="$HOME/0_prog/slexamplus"
+mkdir -v -p "$slexamplusDir"
+if [ ! -d "$slexamplusDir/.git" ]; then
+    echo "Cloning a slexamplus repository..."
+    git clone https://github.com/ciechanowiec/slexamplus.git "$slexamplusDir"
+else
+    echo "slexamplus repository already exists. Skipping cloning."
+fi
+
 echo "Cloning Next.js repository..."
 nextjsDir="$HOME/0_prog/next.js"
 mkdir -v -p "$nextjsDir"
