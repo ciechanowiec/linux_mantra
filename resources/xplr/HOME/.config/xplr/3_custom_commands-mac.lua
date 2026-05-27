@@ -136,7 +136,8 @@ local nvim = commandMode.cmd("nvim", "Open a focused text file in NeoVim") (
   fileTypeLowerCase=$(echo "$fileType" | tr '[:upper:]' '[:lower:]')
 
   if [[ "$fileTypeLowerCase" == *"text"*
-     || "$fileTypeLowerCase" == *"json"* ]];
+     || "$fileTypeLowerCase" == *"json"*
+     || "$fileTypeLowerCase" == *"empty"* ]];
     then
       # On Apple Script:
       #   1. https://apple.stackexchange.com/a/335779
