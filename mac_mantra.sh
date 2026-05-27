@@ -2014,20 +2014,6 @@ cd "$HOME/0_prog" || { echo "Failed to navigate to $HOME/0_prog. Exiting."; exit
 gh repo clone dock_aem
 gh repo clone linux_mantra
 
-echo "Setting up AEM Archetype project (AEM on-prem)..."
-mkdir -p "$tempDir/firsthops_65"
-cd "$tempDir/firsthops_65" || { echo "Failed to navigate to $tempDir/firsthops_65. Exiting."; exit 1; }
-"$HOME/scripts/aem_init_archetype.sh" 65
-cd "$tempDir/firsthops_65/firsthops" || { echo "Failed to navigate to $tempDir/firsthops_65/firsthops. Exiting."; exit 1; }
-mvn clean package
-
-echo "Setting up AEM Archetype project (AEM cloud)..."
-mkdir -p "$tempDir/firsthops_cloud"
-cd "$tempDir/firsthops_cloud" || { echo "Failed to navigate to $tempDir/firsthops_cloud. Exiting."; exit 1; }
-"$HOME/scripts/aem_init_archetype.sh" cloud
-cd "$tempDir/firsthops_cloud/firsthops" || { echo "Failed to navigate to $tempDir/firsthops_cloud/firsthops. Exiting."; exit 1; }
-mvn clean package
-
 echo "Cloning and resolving Apache Jackrabbit Oak repository..."
 oakDir="$HOME/0_prog/jackrabbit-oak"
 mkdir -v -p "$oakDir"
@@ -2060,6 +2046,58 @@ if [ ! -d "$felixDir/.git" ]; then
     git clone https://github.com/apache/felix-dev.git "$felixDir"
 else
     echo "Felix repository already exists. Skipping cloning."
+fi
+
+echo "Cloning and building Sling Rocket repository..."
+slingRocketDir="$HOME/0_prog/sling_rocket"
+mkdir -v -p "$slingRocketDir"
+if [ ! -d "$slingRocketDir/.git" ]; then
+    echo "Cloning a Sling Rocket repository..."
+    git clone https://github.com/ciechanowiec/sling_rocket.git "$slingRocketDir"
+else
+    echo "Sling Rocket repository already exists. Skipping cloning."
+fi
+cd "$slingRocketDir/src/2_rocket-instance/maven-project" || { echo "Failed to navigate to $slingRocketDir/src/2_rocket-instance/maven-project. Exiting."; exit 1; }
+mvn clean install
+
+echo "Cloning Payload CMS repository..."
+payloadDir="$HOME/0_prog/payload"
+mkdir -v -p "$payloadDir"
+if [ ! -d "$payloadDir/.git" ]; then
+    echo "Cloning a Payload CMS repository..."
+    git clone https://github.com/payloadcms/payload.git "$payloadDir"
+else
+    echo "Payload CMS repository already exists. Skipping cloning."
+fi
+
+echo "Cloning proidc repository..."
+proidcDir="$HOME/0_prog/proidc"
+mkdir -v -p "$proidcDir"
+if [ ! -d "$proidcDir/.git" ]; then
+    echo "Cloning a proidc repository..."
+    git clone https://github.com/ciechanowiec/proidc.git "$proidcDir"
+else
+    echo "proidc repository already exists. Skipping cloning."
+fi
+
+echo "Cloning Next.js repository..."
+nextjsDir="$HOME/0_prog/next.js"
+mkdir -v -p "$nextjsDir"
+if [ ! -d "$nextjsDir/.git" ]; then
+    echo "Cloning a Next.js repository..."
+    git clone https://github.com/vercel/next.js.git "$nextjsDir"
+else
+    echo "Next.js repository already exists. Skipping cloning."
+fi
+
+echo "Cloning Node.js repository..."
+nodejsDir="$HOME/0_prog/node"
+mkdir -v -p "$nodejsDir"
+if [ ! -d "$nodejsDir/.git" ]; then
+    echo "Cloning a Node.js repository..."
+    git clone https://github.com/nodejs/node.git "$nodejsDir"
+else
+    echo "Node.js repository already exists. Skipping cloning."
 fi
 
 echo "Cloning Apache Sling repositories..."
