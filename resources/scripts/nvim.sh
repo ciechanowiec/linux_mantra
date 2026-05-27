@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Ensure brew-installed nvim is on PATH when invoked from non-interactive
+# contexts (e.g. GNOME custom keybindings), which skip ~/.bashrc's body.
+if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 resetCursor() {
   case "$(uname)" in
     # For Linux-based systems

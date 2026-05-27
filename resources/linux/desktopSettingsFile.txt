@@ -178,7 +178,7 @@ name='Microsoft Edge'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2]
 binding='<Super>n'
-command="gnome-terminal -- nvim -c 'startinsert'"
+command='ptyxis -- bash -c "${HOME}/scripts/nvim.sh"'
 name='NeoVim'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3]
