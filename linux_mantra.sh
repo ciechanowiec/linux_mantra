@@ -711,7 +711,7 @@ alias scaling="dconf write /org/gnome/desktop/interface/text-scaling-factor" # U
 alias shutdown="shutdown now"
 alias xxclip="perl -pe 'chomp if eof' | xclip -selection clipboard" # perl is required to drop the last NL character
 fuse() {
-    fuser --kill --namespace tcp "$1"
+    fuser --kill --namespace tcp "\$1"
 }
 EOF
 
