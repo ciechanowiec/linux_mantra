@@ -184,6 +184,7 @@ clock-menu-position=1
 dash=false
 keyboard-layout=false
 startup-status=0
+support-notifier-showed-version=36
 
 [org/gnome/shell/extensions/panel-date-format]
 format='%R  |  %d.%m.%y  |  %A'
