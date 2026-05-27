@@ -702,7 +702,16 @@ brew install pipx
 pipx ensurepath
 sudo pipx ensurepath --global # optional to allow pipx actions with --global argument
 pipx install trash-cli
+# argcomplete is required for pipx shell completion; brew's pipx (unlike apt's)
+# does not pull it in automatically.
+pipx install argcomplete
 export PATH="$PATH:/Users/$(whoami)/.local/bin"
+cat >> "$shellFile" << EOF
+
+# PIPX AUTOCOMPLETION:
+autoload -U +X bashcompinit && bashcompinit
+eval "\$(register-python-argcomplete pipx)"
+EOF
 
 echo "Installing fzf (file finder)..."
 brew install fzf

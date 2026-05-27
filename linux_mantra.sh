@@ -196,6 +196,19 @@ echo "Installing pipx (tool for installing Python apps in isolated environments)
 # for installing Python CLI apps (e.g. yt-dlp).
 sudo apt install pipx -y
 pipx ensurepath
+# `pipx ensurepath` already writes the PATH line to ~/.bashrc, but the guarded
+# append is kept as defense in depth, and the bare export makes `~/.local/bin`
+# visible to later `pipx install` calls in this same shell so they don't warn
+# about a missing PATH.
+if ! grep -qF '.local/bin' "$shellFile"; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$shellFile"
+fi
+export PATH="$HOME/.local/bin:$PATH"
+cat >> "$shellFile" << EOF
+
+# PIPX AUTOCOMPLETION:
+eval "\$(register-python-argcomplete pipx)"
+EOF
 
 echo "Installing htop (interactive process viewer)..."
 sudo apt install htop -y
