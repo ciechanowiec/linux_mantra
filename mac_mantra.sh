@@ -1236,6 +1236,49 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                                14. FIREFOX                                  #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="firefox"
+# DOCUMENTATION:
+#   https://www.mozilla.org/firefox/
+#   defaultbrowser CLI: https://github.com/kerma/defaultbrowser
+#   Firefox Sync: https://support.mozilla.org/kb/how-do-i-set-up-firefox-sync
+
+informAboutProcedureStart
+
+echo "1. Installing the Firefox application..."
+brew install --cask firefox
+
+echo "2. Installing defaultbrowser CLI (used to set the default browser headlessly)..."
+brew install defaultbrowser
+
+echo "3. Initiating Firefox so it registers as an HTTP/HTTPS handler with Launch Services..."
+open -a Firefox
+sleep 7 # let the app register handlers
+
+echo "4. Setting Firefox as the default browser..."
+# `defaultbrowser firefox` flips the system handler. On modern macOS a confirmation
+# dialog ("Use 'Firefox'") still pops up - it must be accepted manually in step 5.
+defaultbrowser firefox
+
+echo ""
+echo "5. If a macOS dialog asks to confirm the default browser change, click 'Use Firefox'."
+echo "   Press Enter when done..."
+read voidInput
+
+printf "\n6. Log in to Firefox and enable Sync to restore bookmarks, history, passwords, extensions, and settings.\n"
+echo "   Press Enter when done..."
+read voidInput
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                             14. GITHUB CLI                                  #
 #                                                                             #
 #                                                                             #
