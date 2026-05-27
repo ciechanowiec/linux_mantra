@@ -112,6 +112,34 @@ dynamic-workspaces=false
 experimental-features=['scale-monitor-framebuffer']
 text-scaling-factor=1.3999999999999999
 
+[org/gnome/Ptyxis]
+audible-bell=false
+cursor-blink-mode='on'
+cursor-shape='ibeam'
+default-columns=uint32 94
+default-profile-uuid='f47c1425c08eb5e6dbf158526a16df8e'
+default-rows=uint32 44
+font-name='JetBrainsMonoNL Nerd Font Mono 12'
+interface-style='system'
+profile-uuids=['f47c1425c08eb5e6dbf158526a16df8e']
+restore-session=false
+restore-window-size=false
+use-system-font=false
+visual-bell=false
+window-size=(uint32 190, uint32 45)
+
+[org/gnome/Ptyxis/Profiles/f47c1425c08eb5e6dbf158526a16df8e]
+bold-is-bright=true
+exit-action='close'
+palette='dracula'
+
+[org/gnome/Ptyxis/Shortcuts]
+close-tab='<ctrl>w'
+move-next-tab='<alt>Right'
+move-previous-tab='<alt>Left'
+new-tab='<ctrl>t'
+search='<ctrl>f'
+
 [org/gnome/nautilus/icon-view]
 default-zoom-level='larger'
 
