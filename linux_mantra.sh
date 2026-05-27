@@ -731,6 +731,16 @@ if ! grep -qF '.local/bin' "$shellFile"; then
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$shellFile"
 fi
 
+echo "8. Configuring history (bigger buffer + zsh-style arrow-key prefix search)..."
+cat >> "$shellFile" << EOF
+
+# BIGGER HISTORY + PREFIX SEARCH ON ARROW KEYS:
+HISTSIZE=10000
+HISTFILESIZE=20000
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+EOF
+
 informAboutProcedureEnd
 
 promptOnContinuation
