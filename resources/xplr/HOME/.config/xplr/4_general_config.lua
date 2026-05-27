@@ -1,6 +1,14 @@
 -- 4_styling
 xplr.config.general.focus_ui.style.bg = "DarkGray"
 xplr.config.general.focus_selection_ui.style.bg = "DarkGray"
+
+-- xplr hardcodes a closing `)` after the level word in log lines
+-- (see src/ui.rs: format!("{prefix}) {line}")), so we
+-- prepend `(` here to balance it: "HH:MM:SS|(SUCCESS) message".
+xplr.config.general.logs.info.format = "(INFO"
+xplr.config.general.logs.success.format = "(SUCCESS"
+xplr.config.general.logs.warning.format = "(WARNING"
+xplr.config.general.logs.error.format = "(ERROR"
 xplr.fn.builtin.fmt_general_table_row_cols_4 = function(m)
     return tostring(os.date("%Y-%m-%d  %H:%M", m.last_modified / 1000000000))
 end
