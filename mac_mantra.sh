@@ -1491,64 +1491,6 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
-#                           18. MICROSOFT EDGE                                #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="microsoft edge"
-# DOCUMENTATION:
-#   n/a
-# NOTES:
-#   Automation of browser settings isn't reasonable because of dynamic nature of the application.
-#   Attempts for such automation were made, but the solution wasn't sustainable and reproducible
-#   to the satisfying extent
-
-informAboutProcedureStart
-
-echo "Installing Microsoft Edge..."
-brew install --cask microsoft-edge
-
-echo "Microsoft Edge will be opened now..."
-open -a "Microsoft Edge"
-
-echo "Sign in with your Microsoft Edge account and sync the settings"
-echo "Press Enter to continue"
-read voidInput
-
-echo "Perform manually unsynchronized settings:"
-echo "-> Privacy, search, and services"
-echo "---> Address bar and search"
-echo "-----> Search engine used in the address bar: [Google]"
-echo "-> Appearance:"
-echo "---> Customize toolbar:"
-echo "-----> Show profile type in the profile button: [disable]"
-echo "-----> Show Workspaces: [disable]"
-echo "-> Sidebar:"
-echo "---> App and notification settings"
-echo "-----> Copilot: [disable all]"
-echo "-> Default browser"
-echo "---> [Make default]"
-echo "-> Downloads"
-echo "--> Location: [$HOME/Desktop]"
-
-echo "Press Enter to continue"
-read voidInput
-
-echo "Closing Microsoft Edge..."
-killAll "Microsoft Edge"
-
-echo "Setting Edge as the default browser..."
-brew install defaultbrowser
-sleep 3 # Give some time to finish installation
-defaultbrowser edgemac
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
 #                           19. DISPLAY BRIGHTNESS                            #
 #                                                                             #
 #                                                                             #
@@ -1861,6 +1803,8 @@ echo "   5.2. Accept user agreement if requested."
 echo "   5.3. Choose 'Don't Send' for data sharing request."
 echo "   5.4. Activate IntelliJ IDEA if asked."
 echo "   5.5. Choose to trust projects in a temporary directory if asked."
+echo "   5.6. If the 'Enable Embedded Browser' dialog appears, click 'Install Profile...'"
+echo "        (installs the JCEF AppArmor profile; required since Ubuntu restricts unprivileged user namespaces)."
 echo "Press Enter to continue..."
 read voidInput
 

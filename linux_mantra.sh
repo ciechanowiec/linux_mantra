@@ -2104,6 +2104,8 @@ echo "   5.2. Accept user agreement if requested."
 echo "   5.3. Choose 'Don't Send' for data sharing request."
 echo "   5.4. Activate IntelliJ IDEA if asked."
 echo "   5.5. Choose to trust projects in a temporary directory if asked."
+echo "   5.6. If the 'Enable Embedded Browser' dialog appears, click 'Install Profile...'"
+echo "        (installs the JCEF AppArmor profile; required since Ubuntu restricts unprivileged user namespaces)."
 echo "Press Enter to continue..."
 read voidInput
 
@@ -2457,72 +2459,6 @@ echo "7. Disabling extensions update notifications..."
 # https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check
 # https://unix.stackexchange.com/a/747690
 git clone https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check.git "$HOME/.local/share/gnome-shell/extensions/disable-gnome-extension-update-check@thjderjktyrjkt.gitlab.com"
-
-informAboutProcedureEnd
-
-promptOnContinuation
-
-###############################################################################
-#                                                                             #
-#                                                                             #
-#                           17. MICROSOFT EDGE                                #
-#                                                                             #
-#                                                                             #
-###############################################################################
-procedureId="microsoft edge"
-# DOCUMENTATION:
-#   https://www.omgubuntu.co.uk/2021/01/how-to-install-edge-on-ubuntu-linux
-# NOTES:
-#   Automation of browser settings isn't reasonable because of dynamic nature of the application.
-#   Attempts for such automation were made, but the solution wasn't sustainable and reproducible
-#   to the satisfying extent
-
-informAboutProcedureStart
-
-echo "Setting up an apt Microsoft repository..."
-curl --verbose https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-sudo install --owner root --group root --mode 644 microsoft.gpg /etc/apt/trusted.gpg.d
-sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge-dev.list'
-sudo rm microsoft.gpg
-
-echo "Updating apt repositories..."
-sudo apt update
-
-echo "Installing Microsoft Edge..."
-sudo apt install microsoft-edge-stable
-
-echo "Microsoft Edge will be opened now..."
-(nohup microsoft-edge > /dev/null 2>&1 & disown)
-
-echo "Sign in with your Microsoft Edge account and sync the settings"
-echo "Press Enter to continue"
-read voidInput
-
-echo "Perform manually unsynchronized settings:"
-echo "-> Privacy, search, and services"
-echo "---> Services"
-echo "-----> Address bar and search"
-echo "-------> Search engine used in the address bar: [Google]"
-echo "-> Appearance:"
-echo "---> Customize toolbar:"
-echo "-----> Show profile type in the profile button: [disable]"
-echo "-----> Show Workspaces: [disable]"
-echo "-> Sidebar:"
-echo "---> App and notification settings"
-echo "-----> Copilot: [disable all]"
-echo "-> Default browser"
-echo "---> [Make default]"
-echo "-> Downloads"
-echo "--> Location: [$HOME/Desktop]"
-
-echo "Press Enter to continue"
-read voidInput
-
-echo "Closing Microsoft Edge..."
-pkill edge
-
-echo "Removing redundant repository added by Microsoft..."
-sudo trash-put /etc/apt/sources.list.d/microsoft-edge-dev.list
 
 informAboutProcedureEnd
 
