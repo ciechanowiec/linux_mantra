@@ -134,7 +134,7 @@ local nvim = commandMode.cmd("nvim", "Open a focused text file in NeoVim") (
      || "$fileTypeLowerCase" == *"json"*
      || "$fileTypeLowerCase" == *"empty"* ]];
     then
-      nohup ptyxis -- bash -c "${HOME}/scripts/nvim.sh \"$XPLR_FOCUS_PATH\"" > /dev/null 2>&1 &
+      nohup ptyxis -- "${HOME}/scripts/nvim.sh" "$XPLR_FOCUS_PATH" > /dev/null 2>&1 &
       echo LogSuccess: "Opened '${baseName}' in NeoVim" >> "${XPLR_PIPE_MSG_IN:?}"
   else
       echo LogError: "Is not a valid text file∶ $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
