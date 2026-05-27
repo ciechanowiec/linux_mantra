@@ -53,6 +53,7 @@ function setup()
   
   -- BASIC FILE TYPES	
   xplr.config.node_types.directory.meta.icon = cyan ""
+  xplr.config.node_types.directory.style.fg = "Cyan"
   xplr.config.node_types.file.meta.icon = ""
   xplr.config.node_types.symlink.meta.icon = ""
 
@@ -340,6 +341,29 @@ function setup()
   xplr.config.node_types.special["config.ru"] = { meta = { icon = "" } }
   xplr.config.node_types.special["makefile"] = { meta = { icon = "" } }
   xplr.config.node_types.special["mix.lock"] = { meta = { icon = "" } }
+
+  -- Apply the default directory name color to folders that have a custom icon
+  -- via node_types.special[], since a special entry otherwise overrides
+  -- node_types.directory.style.
+  local cyanDirSpecials = {
+    "Desktop", "Documents", "Downloads", "Music", "Pictures",
+    "Public", "Templates", "Videos",
+    "0_prog", "MyDrive", "scripts",
+    "bin", "img", "jcr_root", "lib", "resources", "src", "target",
+    ".git", ".github", "node_modules", "docs",
+  }
+  for _, name in ipairs(cyanDirSpecials) do
+    local entry = xplr.config.node_types.special[name]
+    if entry ~= nil then
+      entry.style = entry.style or {}
+      entry.style.fg = "Cyan"
+      if entry.meta and entry.meta.icon then
+        local stripped = entry.meta.icon:gsub("\27%[[%d;]*m", "")
+        entry.meta.icon = cyan(stripped)
+      end
+      xplr.config.node_types.special[name] = entry
+    end
+  end
 end
 
 return { setup = setup }
