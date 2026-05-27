@@ -1028,19 +1028,12 @@ fi
 echo "Once an nvim application is initialized, close it and press Enter to continue..."
 read voidInput
 
-echo "8. Fixing JSON LSP bug..."
-# At the moment there is a bug related to JSON LSP installation within NeoVim
-# It is reproducible at least on macOS. Therefore, JSON LSP is being disabled below:
-masonConfigFile="$HOME/.local/share/nvim/lazy/mason-lspconfig.nvim/lua/mason-lspconfig/mappings/server.lua"
-sed -i.backup 's/\["jsonls"\] = "json-lsp",//g' "$masonConfigFile"
-trash-put "${masonConfigFile}.backup"
-
-echo "9. Disabling plugin updates notifications..."
+echo "8. Disabling plugin updates notifications..."
 lazyVimBasicConfigFile="$HOME/.local/share/nvim/lazy/lazy.nvim/lua/lazy/core/config.lua"
 sed -i.backup 's/notify = true, -- get a notification when new updates/notify = false, -- get a notification when new updates/g' "$lazyVimBasicConfigFile"
 trash-put "${lazyVimBasicConfigFile}.backup"
 
-echo "10. Disabling autoformat on save..."
+echo "9. Disabling autoformat on save..."
 lazyVimInitFile="$HOME/.local/share/nvim/lazy/LazyVim/lua/lazyvim/plugins/lsp/init.lua"
 sed -i.backup 's/autoformat = true,/autoformat = false,/g' "$lazyVimInitFile"
 trash-put "${lazyVimInitFile}.backup"
