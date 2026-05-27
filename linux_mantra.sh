@@ -2269,8 +2269,11 @@ sudo apt install git python3-setuptools gettext -y
 sudo apt install input-remapper -y
 
 echo "Starting the application for a while to initialize the configuration directory..."
-# Running in a new terminal, because doing it in the current might block it:
-sudo ptyxis -- bash -c "input-remapper-gtk"
+# Running in a new terminal, because doing it in the current might block it.
+# input-remapper-gtk must not be launched via sudo: it strips $DBUS_SESSION_BUS_ADDRESS
+# and $XDG_RUNTIME_DIR, so GTK cannot reach the user session bus. The GUI escalates
+# privileges itself via pkexec when it needs to talk to the daemon.
+ptyxis -- bash -c "input-remapper-gtk"
 sleep 5;
 sudo pkill input-remapper
 
@@ -2341,8 +2344,9 @@ sudo input-remapper-control --command stop-all
 sudo systemctl stop input-remapper
 # Run IR to trigger generation of $HOME/.config/input-remapper/xmodmap.json
 # - without this file remapping will not work.
-# Running in a new terminal, because doing it in the current might block it:
-sudo ptyxis -- bash -c "input-remapper-gtk"
+# Running in a new terminal, because doing it in the current might block it.
+# Unprivileged for the same DBus reason as above.
+ptyxis -- bash -c "input-remapper-gtk"
 sleep 5;
 sudo pkill input-remapper
 sudo systemctl start input-remapper
