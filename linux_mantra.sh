@@ -2510,7 +2510,7 @@ informAboutProcedureStart
 echo "Setting up a profile image..."
 photoSourcePath="$resourcesDir/avatar.jpg"
 photoTargetPath="$HOME/Pictures/avatar.jpg"
-sudo apt install imagemagick
+sudo apt install imagemagick -y
 convert "$photoSourcePath" -resize 500x500 "$photoTargetPath"
 userID=$(id -u "$(whoami)")
 busctl call \
