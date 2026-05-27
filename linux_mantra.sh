@@ -2463,10 +2463,22 @@ ddtermUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$ddtermDirUnzipped/metad
 mv "$ddtermDirUnzipped" "$ddtermUUID"
 cp -rf "$ddtermUUID" "$extensionsDir"
 
-echo "6. Enabling extensions. They will start working after GNOME session is restarted..."
+echo "6. Compiling extensions' GSettings schemas..."
+# Extension zips from extensions.gnome.org ship the `.gschema.xml` sources but
+# not the compiled `gschemas.compiled` binary that GNOME Shell 50 requires to
+# load the extension. Compile every `schemas/` directory we just installed.
+for schemasDir in "$extensionsDir"/*/schemas
+do
+    if [ -d "$schemasDir" ]
+      then
+        glib-compile-schemas "$schemasDir"
+    fi
+done
+
+echo "7. Enabling extensions. They will start working after GNOME session is restarted..."
 dconf write /org/gnome/shell/enabled-extensions "['$panelDateFormatUUID', '$justPerfectionUUID', '$ddtermUUID']"
 
-echo "7. Disabling extensions update notifications..."
+echo "8. Disabling extensions update notifications..."
 # https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check
 # https://unix.stackexchange.com/a/747690
 git clone https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check.git "$HOME/.local/share/gnome-shell/extensions/disable-gnome-extension-update-check@thjderjktyrjkt.gitlab.com"
