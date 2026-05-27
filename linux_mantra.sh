@@ -612,7 +612,26 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 })
 EOF
 
-echo "10. Sourcing .vimrc file..."
+echo "10. Suppressing noice.nvim popup notifications..."
+# Filters out the floating error/notification popups (e.g. TextYankPost Lua errors)
+# that noice.nvim renders in the top-right of the editor window.
+noiceConfigFile="$HOME/.config/nvim/lua/plugins/noice.lua"
+touch "$noiceConfigFile"
+cat > "$noiceConfigFile" << EOF
+return {
+  {
+    "folke/noice.nvim",
+    opts = {
+      routes = {
+        { filter = { event = "msg_show", kind = "" }, opts = { skip = true } },
+        { filter = { event = "notify", find = "TextYankPost" }, opts = { skip = true } },
+      },
+    },
+  },
+}
+EOF
+
+echo "11. Sourcing .vimrc file..."
 nvimInitFile="$HOME/.config/nvim/init.lua"
 cat >> "$nvimInitFile" << EOF
 
