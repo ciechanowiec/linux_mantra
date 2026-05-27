@@ -51,8 +51,10 @@ sources=[('xkb', 'pl'), ('xkb', 'ru')]
 xkb-options=@as []
 
 [org/gnome/desktop/interface]
+accent-color='slate'
 color-scheme='prefer-light'
 cursor-theme='breeze_cursors'
+enable-animations=true
 enable-hot-corners=false
 font-hinting='slight'
 gtk-theme='Yaru-sage'
@@ -60,7 +62,7 @@ icon-theme='Yaru-sage'
 show-battery-percentage=false
 
 [org/gnome/desktop/notifications]
-show-in-lock-screen=false
+show-in-lock-screen=true
 
 [org/gnome/desktop/peripherals/keyboard]
 delay=uint32 180
@@ -95,6 +97,7 @@ idle-delay=uint32 0
 allow-volume-above-100-percent=false
 
 [org/gnome/desktop/wm/keybindings]
+maximize=['<Super>Up']
 minimize=['<Super>Down']
 move-to-monitor-left=@as []
 move-to-monitor-right=@as []
@@ -111,6 +114,7 @@ use-default-font=false
 wrap-last-split-mode='word'
 
 [org/gnome/mutter]
+auto-maximize=true
 dynamic-workspaces=false
 experimental-features=['scale-monitor-framebuffer']
 text-scaling-factor=1.3999999999999999
@@ -199,7 +203,7 @@ sleep-inactive-ac-type='nothing'
 sleep-inactive-battery-type='nothing'
 
 [org/gnome/shell]
-disabled-extensions=['ubuntu-dock@ubuntu.com', 'ding@rastersoft.com']
+disabled-extensions=['ubuntu-dock@ubuntu.com', 'ding@rastersoft.com', 'tiling-assistant@ubuntu.com']
 favorite-apps=@as []
 
 [org/gnome/shell/extensions/desktop-icons]

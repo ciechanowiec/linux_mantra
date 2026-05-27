@@ -2428,12 +2428,13 @@ echo "3. Installing 'Panel Date Format' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/1462/panel-date-format/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 panelDateFormatArchive="panelDateFormatArchive.zip"
-wget -O "$panelDateFormatArchive" https://extensions.gnome.org/extension-data/panel-date-formatkeiii.github.com.v24.shell-extension.zip
+wget -O "$panelDateFormatArchive" https://extensions.gnome.org/extension-data/panel-date-formatkeiii.github.com.v24.shell-extension.zip || exit 1
 panelDateFormatDirUnzipped="panelDateFormatDirUnzipped"
-unzip "$panelDateFormatArchive" -d "$panelDateFormatDirUnzipped"
+unzip "$panelDateFormatArchive" -d "$panelDateFormatDirUnzipped" || exit 1
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
 #   "uuid": "panel-date-format@keiii.github.com",
 panelDateFormatUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$panelDateFormatDirUnzipped/metadata.json")
+[ -n "$panelDateFormatUUID" ] || { echo "ERROR: empty UUID for panel-date-format" >&2; exit 1; }
 mv "$panelDateFormatDirUnzipped" "$panelDateFormatUUID"
 cp -rf "$panelDateFormatUUID" "$extensionsDir"
 
@@ -2441,12 +2442,13 @@ echo "4. Installing 'Just Perfection' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/3843/just-perfection/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 justPerfectionArchive="justPerfectionArchive.zip"
-wget -O "$justPerfectionArchive" https://extensions.gnome.org/extension-data/just-perfection-desktopjust-perfection.v36.shell-extension.zip
+wget -O "$justPerfectionArchive" https://extensions.gnome.org/extension-data/just-perfection-desktopjust-perfection.v36.shell-extension.zip || exit 1
 justPerfectionDirUnzipped="justPerfectionDirUnzipped"
-unzip "$justPerfectionArchive" -d "$justPerfectionDirUnzipped"
+unzip "$justPerfectionArchive" -d "$justPerfectionDirUnzipped" || exit 1
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
 #   "uuid": "just-perfection-desktop@just-perfection",
 justPerfectionUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$justPerfectionDirUnzipped/metadata.json")
+[ -n "$justPerfectionUUID" ] || { echo "ERROR: empty UUID for just-perfection" >&2; exit 1; }
 mv "$justPerfectionDirUnzipped" "$justPerfectionUUID"
 cp -rf "$justPerfectionUUID" "$extensionsDir"
 
@@ -2454,12 +2456,13 @@ echo "5. Installing 'ddterm' extension..."
 # 1. Extension page: https://extensions.gnome.org/extension/3780/ddterm/
 # 2. Configuration for this extension is made in a separate `dconf` procedure
 ddtermArchive="ddtermArchive.zip"
-wget -O "$ddtermArchive" https://extensions.gnome.org/extension-data/ddtermamezin.github.com.v66.shell-extension.zip
+wget -O "$ddtermArchive" https://extensions.gnome.org/extension-data/ddtermamezin.github.com.v66.shell-extension.zip || exit 1
 ddtermDirUnzipped="ddtermDirUnzipped"
-unzip "$ddtermArchive" -d "$ddtermDirUnzipped"
+unzip "$ddtermArchive" -d "$ddtermDirUnzipped" || exit 1
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
 #   "uuid": "ddterm@amezin.github.com",
 ddtermUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$ddtermDirUnzipped/metadata.json")
+[ -n "$ddtermUUID" ] || { echo "ERROR: empty UUID for ddterm" >&2; exit 1; }
 # ddterm has no gsetting to suppress the "There is still a process running"
 # confirmation when closing a tab/window - the dialog is hardcoded in
 # `terminalpage.js`. Force the foreground-process guard to always short-circuit
@@ -2482,11 +2485,6 @@ done
 
 echo "7. Enabling extensions. They will start working after GNOME session is restarted..."
 dconf write /org/gnome/shell/enabled-extensions "['$panelDateFormatUUID', '$justPerfectionUUID', '$ddtermUUID']"
-
-echo "8. Disabling extensions update notifications..."
-# https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check
-# https://unix.stackexchange.com/a/747690
-git clone https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check.git "$HOME/.local/share/gnome-shell/extensions/disable-gnome-extension-update-check@thjderjktyrjkt.gitlab.com"
 
 informAboutProcedureEnd
 
