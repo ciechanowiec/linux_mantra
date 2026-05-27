@@ -1978,13 +1978,36 @@ promptOnContinuation
 ###############################################################################
 procedureId="github cli"
 # DOCUMENTATION:
+#   https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian
 #   https://github.com/cli/cli?tab=readme-ov-file#installation
 #   Caching credentials for GitHub CLI: https://docs.github.com/en/get-started/getting-started-with-git/caching-your-github-credentials-in-git
+# NOTES:
+#   On Linux, GitHub CLI is installed via the official apt repository rather than
+#   Homebrew because Linuxbrew's bundled libcurl/openssl makes `gh repo clone`
+#   extremely slow over HTTPS.
 
 informAboutProcedureStart
 
-echo "1. Installing GitHub CLI..."
-brew install gh
+if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
+  then
+    echo "1. Installing GitHub CLI..."
+    (type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
+      && sudo mkdir -p -m 755 /etc/apt/keyrings \
+      && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      && cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+      && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+      && sudo mkdir -p -m 755 /etc/apt/sources.list.d \
+      && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+      && sudo apt update \
+      && sudo apt install gh -y
+  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+    then
+      echo "1. Installing GitHub CLI..."
+      brew install gh
+  else
+    echo "Unexpected error occurred. Update failed"
+    exit 1
+fi
 
 printf "\n2. Caching credentials for GitHub CLI...\n"
 echo "   Please perform manual login according to prompts in the terminal."
