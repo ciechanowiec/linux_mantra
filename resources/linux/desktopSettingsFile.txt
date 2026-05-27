@@ -215,12 +215,31 @@ show-home=false
 start-corner='bottom-right'
 
 [org/gnome/shell/extensions/just-perfection]
+accessibility-menu=false
+activities-button=false
 app-menu=false
+calendar=false
+clock-menu=true
 clock-menu-position=1
 dash=false
+events-button=false
 keyboard-layout=false
+panel-notification-icon=true
+power-icon=true
+quick-settings=true
+quick-settings-airplane-mode=true
+quick-settings-backlight=false
+quick-settings-dark-mode=false
+quick-settings-do-not-disturb=true
+quick-settings-night-light=false
+show-apps-button=false
 startup-status=0
 support-notifier-showed-version=36
+weather=false
+window-menu-take-screenshot-button=true
+window-picker-icon=true
+workspaces-in-app-grid=true
+world-clock=false
 
 [org/gnome/shell/extensions/panel-date-format]
 format='%R  |  %d.%m.%y  |  %A'
