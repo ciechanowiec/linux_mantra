@@ -95,7 +95,7 @@ local decompile = commandMode.cmd("decompile", "Decompile a focused item (normal
       echo LogError: "Decompilation might have failed" >> "${XPLR_PIPE_MSG_IN:?}"
     else
       decompiledItem="$targetPath/$baseName"
-      unzip "$decompiledItem" -d "$targetPath"
+      7z x -y -o"$targetPath" "$decompiledItem"
       trash-put "$decompiledItem"
       echo LogSuccess: "Decompiled $XPLR_FOCUS_PATH" >> "${XPLR_PIPE_MSG_IN:?}"
       echo FocusPath: "$targetPath" >> "${XPLR_PIPE_MSG_IN:?}"
@@ -228,14 +228,19 @@ local unarchive = commandMode.cmd("unarchive", "Unzip/untar/unjar a focused file
     # For that reason the script below tries different options.
 
     # 1. Test with unzip
+    # Detection is done with `unzip -t`, but the actual extraction is delegated
+    # to `7z x` because Info-ZIP `unzip` (5.52 on macOS, 6.00 on Linux) silently
+    # drops entries from archives using Zip64, Unicode filenames, or modern
+    # compression methods (Zstd/LZMA) -- producing empty files or missing entries.
+    # p7zip handles all of those correctly.
     echo "Testing the archive with unzip..."
     unzip -t "$XPLR_FOCUS_PATH"
     exitCode=$?
     if [ "$exitCode" == 0 ]
       then
         mkdirForTargetPath
-        echo "Unzipping the archive with unzip..."
-        yes | unzip "$XPLR_FOCUS_PATH" -d "$targetPath"
+        echo "Unzipping the archive with 7z..."
+        7z x -y -o"$targetPath" "$XPLR_FOCUS_PATH"
         finishWithSuccess
       else
         # 2. Test with gzip
