@@ -1697,9 +1697,9 @@ procedureId="startup ubuntu logo"
 informAboutProcedureStart
 
 echo "Removing Ubuntu logo from the startup screen..."
-sudo trash-put /usr/share/plymouth/ubuntu-logo.png
+sudo trash-put /usr/share/plymouth/themes/spinner/bgrt-fallback.png
 # Without the removed file updates might not work correctly, so it is saved as empty:
-sudo echo "" | sudo tee /usr/share/plymouth/ubuntu-logo.png > /dev/null
+sudo echo "" | sudo tee /usr/share/plymouth/themes/spinner/bgrt-fallback.png > /dev/null
 
 informAboutProcedureEnd
 
