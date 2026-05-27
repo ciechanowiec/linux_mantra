@@ -2460,6 +2460,11 @@ unzip "$ddtermArchive" -d "$ddtermDirUnzipped"
 # Extract the UUID. It is stored in `metadata.json` file in the line like this:
 #   "uuid": "ddterm@amezin.github.com",
 ddtermUUID=$(grep -o -P "(?<=\"uuid\": \").*(?=\",)" < "$ddtermDirUnzipped/metadata.json")
+# ddterm has no gsetting to suppress the "There is still a process running"
+# confirmation when closing a tab/window - the dialog is hardcoded in
+# `terminalpage.js`. Force the foreground-process guard to always short-circuit
+# so the dialog is never shown.
+sed -i 's/!this\.terminal\.has_foreground_process()/true/' "$ddtermDirUnzipped/ddterm/app/terminalpage.js"
 mv "$ddtermDirUnzipped" "$ddtermUUID"
 cp -rf "$ddtermUUID" "$extensionsDir"
 
