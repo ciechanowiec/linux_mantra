@@ -1980,33 +1980,11 @@ procedureId="github cli"
 # DOCUMENTATION:
 #   https://github.com/cli/cli?tab=readme-ov-file#installation
 #   Caching credentials for GitHub CLI: https://docs.github.com/en/get-started/getting-started-with-git/caching-your-github-credentials-in-git
-# NOTES:
-#   As of writing this script, the official method of GitHub CLI installation on Linux
-#   didn't work (see the issue: https://github.com/cli/cli/issues/6175). For that
-#   reason for Linux the program is installed below directly from official binaries.
 
 informAboutProcedureStart
 
-if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
-  then
-    echo "1.1. Downloading GitHub CLI..."
-    curl -s https://api.github.com/repos/cli/cli/releases/latest \
-      | grep "browser_download_url.*gh.*amd64.deb" \
-      | cut -d : -f 2,3 \
-      | tr -d \" \
-      | wget -i -
-
-    echo "1.2. Installing GitHub CLI..."
-    ghCLIIntstallationFile=$(ls -1 gh*amd64.deb | head -n 1)
-    sudo dpkg -i "$ghCLIIntstallationFile"
-  elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
-    then
-      echo "1. Installing GitHub CLI..."
-      brew install gh
-  else
-    echo "Unexpected error occurred. Update failed"
-    exit 1
-fi
+echo "1. Installing GitHub CLI..."
+brew install gh
 
 printf "\n2. Caching credentials for GitHub CLI...\n"
 echo "   Please perform manual login according to prompts in the terminal."
