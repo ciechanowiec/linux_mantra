@@ -44,7 +44,7 @@ xplr.fn.builtin.fmt_general_table_row_cols_2 = function(m)
         end
     end
 
-    local p = m.permissions
+    local p = xplr.util.node(m.absolute_path).permissions
 
     local r = ""
 

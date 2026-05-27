@@ -1,2 +1,2 @@
 -- 1_version
-version = "0.20.2"
+version = "1.1.0"

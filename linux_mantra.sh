@@ -961,76 +961,6 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 echo "Installing Maven..."
 yes | sdk install maven 3.9.16
 
-echo "Adding the Adobe Maven repository..."
-# Details: 1. https://repo.adobe.com/index.html
-#          2. https://redquark.org/aem/day-04-setup-aem-dev-environment/
-mavenDir="$HOME/.m2"
-if [ ! -d "$mavenDir" ]
-  then
-    mkdir -p "$mavenDir"
-fi
-mavenSettingsFile="$HOME/.m2/settings.xml"
-touch "$mavenSettingsFile"
-cat > "$mavenSettingsFile" << EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<settings xmlns="https://maven.apache.org/SETTINGS/1.0.0"
-          xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="https://maven.apache.org/SETTINGS/1.0.0
-                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
-    <profiles>
-        <!-- ====================================================== -->
-        <!-- A D O B E   P U B L I C   P R O F I L E                -->
-        <!-- ====================================================== -->
-      <profile>
-          <id>adobe-public</id>
-
-          <activation>
-              <activeByDefault>false</activeByDefault>
-          </activation>
-
-          <properties>
-              <releaseRepository-Id>adobe-public-releases</releaseRepository-Id>
-              <releaseRepository-Name>Adobe Public Releases</releaseRepository-Name>
-              <releaseRepository-URL>https://repo.adobe.com/nexus/content/groups/public</releaseRepository-URL>
-          </properties>
-
-          <repositories>
-              <repository>
-                  <id>adobe-public-releases</id>
-                  <name>Adobe Public Repository</name>
-                  <url>https://repo.adobe.com/nexus/content/groups/public</url>
-                  <releases>
-                      <enabled>true</enabled>
-                      <updatePolicy>never</updatePolicy>
-                  </releases>
-                  <snapshots>
-                      <enabled>false</enabled>
-                  </snapshots>
-              </repository>
-          </repositories>
-
-          <pluginRepositories>
-              <pluginRepository>
-                  <id>adobe-public-releases</id>
-                  <name>Adobe Public Repository</name>
-                  <url>https://repo.adobe.com/nexus/content/groups/public</url>
-                  <releases>
-                      <enabled>true</enabled>
-                      <updatePolicy>never</updatePolicy>
-                  </releases>
-                  <snapshots>
-                      <enabled>false</enabled>
-                  </snapshots>
-              </pluginRepository>
-          </pluginRepositories>
-      </profile>
-    </profiles>
-    <activeProfiles>
-        <activeProfile>adobe-public</activeProfile>
-    </activeProfiles>
-</settings>
-EOF
-
 echo "Enabling the installed program in the current console..."
 export SDKMAN_DIR="$HOME/.sdkman"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
@@ -1871,16 +1801,13 @@ if [ -d "$xplrSettingsDir" ]
 fi
 
 echo "2. Installing xplr..." # docs: https://xplr.dev/en/install
-# Hardcoded version is installed, because new versions of xplr
-# are very dynamic, UI constantly changes, and old settings stop
-# working correctly:
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
-    wget https://github.com/sayanarijit/xplr/releases/download/v0.20.2/xplr-linux.tar.gz
+    wget https://github.com/sayanarijit/xplr/releases/latest/download/xplr-linux.tar.gz
     tar --verbose --extract --file xplr-linux.tar.gz
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
-      wget https://github.com/sayanarijit/xplr/releases/download/v0.20.2/xplr-macos.tar.gz
+      wget https://github.com/sayanarijit/xplr/releases/latest/download/xplr-macos.tar.gz
       tar --verbose --extract --file xplr-macos.tar.gz
   else
     echo "Unexpected error occurred. Update failed"
@@ -1895,8 +1822,8 @@ echo "3. Composing a main configuration file..."
 mainConfigurationFile="$resourcesDir/xplr/HOME/.config/xplr/init.lua"
 
 echo "3.1. Extracting an xplr version..." # docs: https://xplr.dev/en/post-install
-xplrVersion=$(xplr --version | cut -d ' ' -f 2) # result like: 0.20.2
-xplrVersionAsConfigEntry="version = \"${xplrVersion:?}\"" # result like: version = "0.20.2"
+xplrVersion=$(xplr --version | cut -d ' ' -f 2) # result like: X.Y.Z
+xplrVersionAsConfigEntry="version = \"${xplrVersion:?}\"" # result like: version = "X.Y.Z"
 echo "-- 1_version" > "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
 echo "$xplrVersionAsConfigEntry" >> "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua"
 cat "$resourcesDir/xplr/HOME/.config/xplr/1_version.lua" > "$mainConfigurationFile"
