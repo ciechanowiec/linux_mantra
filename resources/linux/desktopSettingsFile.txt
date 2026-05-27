@@ -172,9 +172,9 @@ command='shutdown now'
 name='Shutdown'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1]
-binding='<Super>e'
-command='microsoft-edge'
-name='Microsoft Edge'
+binding='<Super>f'
+command='firefox'
+name='Firefox'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2]
 binding='<Super>n'
@@ -183,12 +183,12 @@ name='NeoVim'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3]
 binding='<Super>x'
-command='gnome-terminal --geometry 94x45+0+0 -- xplr'
+command='ptyxis -- xplr'
 name='XPLR'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4]
 binding='<Super>t'
-command='gnome-terminal --geometry 94x45+0+0'
+command='ptyxis'
 name='Terminal'
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5]
