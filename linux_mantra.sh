@@ -266,6 +266,9 @@ cp -f "$resourcesDir/linux/flameshot.ini" "$HOME/.config/flameshot/flameshot.ini
 echo "Installing jq (CLI JSON processor)..."
 sudo apt install jq -y
 
+echo "Installing libxml2-utils (provides xmllint)..."
+sudo apt install libxml2-utils -y
+
 echo "Installing vale (syntax-aware linter for prose)..."
 snap install vale
 
@@ -2719,6 +2722,11 @@ for repo in "${repos[@]}"; do
         continue
     fi
     repo_name=$(basename -s .git "$repo")
+    # sling-whiteboard is an experimental sandbox repo; exclude it from cloning
+    if [ "$repo_name" = "sling-whiteboard" ]; then
+        echo "Skipping $repo_name (excluded)."
+        continue
+    fi
     if [ ! -d "$apacheSlingAllReposDir/$repo_name" ]; then
         echo "Cloning $repo into $apacheSlingAllReposDir/$repo_name..."
         git clone "$repo" "$apacheSlingAllReposDir/$repo_name"

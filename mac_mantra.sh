@@ -725,6 +725,9 @@ brew install icdiff
 echo "Installing jq (CLI JSON processor)..."
 brew install jq
 
+echo "Installing libxml2 (provides xmllint)..."
+brew install libxml2
+
 echo "Installing vale (syntax-aware linter for prose)..."
 brew install vale
 
@@ -2201,6 +2204,11 @@ for repo in "${repos[@]}"; do
         continue
     fi
     repo_name=$(basename -s .git "$repo")
+    # sling-whiteboard is an experimental sandbox repo; exclude it from cloning
+    if [ "$repo_name" = "sling-whiteboard" ]; then
+        echo "Skipping $repo_name (excluded)."
+        continue
+    fi
     if [ ! -d "$apacheSlingAllReposDir/$repo_name" ]; then
         echo "Cloning $repo into $apacheSlingAllReposDir/$repo_name..."
         git clone "$repo" "$apacheSlingAllReposDir/$repo_name"
