@@ -205,6 +205,22 @@ _The `onMessage` callback is invoked after the channel has joined the topic. A c
 _A channel is a logical connection identified by a name and bound to a single topic (see §3.2). When a channel joins a topic, it begins to receive messages published to that topic. Each message is delivered to the channel's `onMessage` callback._
 ====
 
+==== Affirmative Before Negative
+
+A claim states what something is or does before it states what it is not or does not do. The affirmative gives the reader the fact to hold. The negation then refines the fact by ruling out an alternative the reader might otherwise assume. A negation placed first forces the reader to carry a list of exclusions with nothing yet to attach them to.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+_Setting `cache.ttl` doesn't change the maximum number of entries or the eviction order. It controls only how long an entry remains valid after it's written._
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+_Setting `cache.ttl` controls only how long an entry remains valid after it's written. It doesn't change the maximum number of entries or the eviction order._
+====
+
 ==== Headings as Promises
 
 A heading announces exactly what the section contains. The section delivers exactly that, no more and no less. A section titled "Authentication" describes authentication. It doesn't also describe authorization, even briefly. Material that doesn't belong under the heading goes into a separate section.
