@@ -1,0 +1,8 @@
+extends: substitution
+message: "Use a straight quote (\") instead of a typographic quotation mark."
+level: error
+nonword: true
+swap:
+  '„': '"'
+  '“': '"'
+  '”': '"'
