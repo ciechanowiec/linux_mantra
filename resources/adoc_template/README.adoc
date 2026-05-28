@@ -34,7 +34,7 @@ This document uses https://asciidoc.org[AsciiDoc^] markup language and resides i
 
 === Guideline
 
-This document should follow the link:README.adoc[Technical Writing Guideline].
+This document should follow the link:README-guideline.adoc[Writing Guideline].
 
 === Export
 

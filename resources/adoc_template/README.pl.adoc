@@ -34,7 +34,7 @@ Niniejszy dokument wykorzystuje język znaczników https://asciidoc.org[AsciiDoc
 
 === Wytyczne
 
-Dokument powinien być zgodny z link:README.adoc[wytycznymi pisania technicznego].
+Dokument powinien być zgodny z link:README-guideline.adoc[wytycznymi pisania].
 
 === Eksport
 
