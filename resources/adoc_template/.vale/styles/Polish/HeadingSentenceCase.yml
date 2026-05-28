@@ -1,0 +1,12 @@
+extends: capitalization
+message: "'%s' - w polskich nagłówkach stosuj zapis zdaniowy."
+level: error
+scope: heading
+match: $sentence
+exceptions:
+  - Linux
+  - Java
+  - AEM
+  - Docker
+  - TypeScript
+  - README

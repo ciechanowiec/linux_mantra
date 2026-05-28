@@ -1,0 +1,16 @@
+extends: existence
+message: "'%s' to złe sformułowanie. Unikaj go."
+level: error
+ignorecase: true
+tokens:
+  - tak naprawdę
+  - w zasadzie
+  - generalnie
+  - naprawdę
+  - na prawdę
+  - poniekąd
+  - de facto
+  - jak gdyby
+  - z zastrzeżeniem
+  - poprostu
+  - po prostu

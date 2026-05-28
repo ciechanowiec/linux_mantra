@@ -1,0 +1,10 @@
+extends: substitution
+message: "Napisz '%s' zamiast '%s'."
+level: error
+swap:
+  napewno: na pewno
+  wogóle: w ogóle
+  conajmniej: co najmniej
+  wziąść: wziąć
+  włanczać: włączać
+  w każdym bądź razie: w każdym razie
