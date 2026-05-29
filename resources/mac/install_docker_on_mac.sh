@@ -234,20 +234,33 @@ if [ -f "$COLIMA_TEMPLATE_DESTINATION_FILE" ]; then
       ;;
   esac
 fi
+echo "Sizing the Colima virtual machine against the host's capabilities..."
+# CPU: half of the host's logical cores (the other half stays with macOS).
+COLIMA_CPU=$(( $(sysctl -n hw.logicalcpu) / 2 ))
+[ "$COLIMA_CPU" -lt 1 ] && COLIMA_CPU=1
+# Memory: half of the host's RAM in GiB (hw.memsize is reported in bytes).
+COLIMA_MEMORY=$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 / 2 ))
+[ "$COLIMA_MEMORY" -lt 1 ] && COLIMA_MEMORY=1
+# Disk: half of the total capacity of the volume backing $HOME, in GiB.
+# The Colima disk is a sparse max-size cap, so it only consumes what is actually used.
+COLIMA_DISK=$(( $(df -k "$HOME" | awk 'NR==2 {print $2}') / 1024 / 1024 / 2 ))
+[ "$COLIMA_DISK" -lt 1 ] && COLIMA_DISK=1
+echo "Allocating to Colima: cpu=$COLIMA_CPU, memory=${COLIMA_MEMORY}GiB, disk=${COLIMA_DISK}GiB"
+
 echo "Writing: $COLIMA_TEMPLATE_DESTINATION_FILE..."
 cat > "$COLIMA_TEMPLATE_DESTINATION_FILE" << EOF
 # Number of CPUs to be allocated to the virtual machine.
 # Default: 2
-cpu: 4
+cpu: $COLIMA_CPU
 
 # Size of the disk in GiB to be allocated to the virtual machine.
 # NOTE: changing this has no effect after the virtual machine has been created.
 # Default: 60
-disk: 220
+disk: $COLIMA_DISK
 
 # Size of the memory in GiB to be allocated to the virtual machine.
 # Default: 2
-memory: 16
+memory: $COLIMA_MEMORY
 
 # Architecture of the virtual machine (x86_64, aarch64, host).
 # Default: host
