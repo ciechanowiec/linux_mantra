@@ -758,6 +758,24 @@ echo "Installing yt-dlp (YouTube downloader)..."
 # 3. Homebrew Python blocks `pip3 install` system-wide (PEP 668), so use pipx
 pipx install yt-dlp
 
+echo "Installing deno (JavaScript runtime required by yt-dlp)..."
+# yt-dlp's YouTube extractor requires an external JavaScript runtime to solve
+# challenges; without one it warns and some formats go missing. deno is the only
+# runtime yt-dlp enables by default, so having it on PATH is enough - no yt-dlp
+# config flags are needed. Docs: https://github.com/yt-dlp/yt-dlp/wiki/EJS
+brew install deno
+# Beyond a runtime, yt-dlp also needs the EJS challenge solver script, which it
+# does not download unless opted in. `--remote-components ejs:github` (the
+# upstream-recommended source) fetches the solver from yt-dlp's GitHub releases
+# and runs it sandboxed under deno. Persist it in the yt-dlp config so YouTube
+# extraction works without passing the flag each invocation.
+mkdir -p "$HOME/.config/yt-dlp"
+cat > "$HOME/.config/yt-dlp/config" << EOF
+# Solve YouTube JS challenges via the EJS solver script (run under deno).
+# See https://github.com/yt-dlp/yt-dlp/wiki/EJS
+--remote-components ejs:github
+EOF
+
 echo "Installing postman (app for building and using APIs)..."
 brew install postman
 

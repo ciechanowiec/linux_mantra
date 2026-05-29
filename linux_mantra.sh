@@ -321,6 +321,32 @@ echo "Installing yt-dlp (YouTube downloader)..."
 sudo apt remove yt-dlp -y
 pipx install yt-dlp
 
+echo "Installing deno (JavaScript runtime required by yt-dlp)..."
+# yt-dlp's YouTube extractor requires an external JavaScript runtime to solve
+# challenges; without one it warns and some formats go missing. deno is the only
+# runtime yt-dlp enables by default, so having it on PATH is enough - no yt-dlp
+# config flags are needed. deno ships in neither apt nor snap, so use the official
+# installer (same `curl ... | sh` pattern as pnpm/Claude Code above; it relies on
+# the `unzip` installed earlier). `-y` makes it non-interactive and
+# `--no-modify-path` keeps it from editing shell files - we manage PATH ourselves,
+# grep-guarded, so re-runs stay idempotent. Docs: https://github.com/yt-dlp/yt-dlp/wiki/EJS
+curl -fsSL https://deno.land/install.sh | sh -s -- -y --no-modify-path
+if ! grep -qF '.deno/bin' "$shellFile"; then
+    echo 'export PATH="$HOME/.deno/bin:$PATH"' >> "$shellFile"
+fi
+export PATH="$HOME/.deno/bin:$PATH"
+# Beyond a runtime, yt-dlp also needs the EJS challenge solver script, which it
+# does not download unless opted in. `--remote-components ejs:github` (the
+# upstream-recommended source) fetches the solver from yt-dlp's GitHub releases
+# and runs it sandboxed under deno. Persist it in the yt-dlp config so YouTube
+# extraction works without passing the flag each invocation.
+mkdir -p "$HOME/.config/yt-dlp"
+cat > "$HOME/.config/yt-dlp/config" << EOF
+# Solve YouTube JS challenges via the EJS solver script (run under deno).
+# See https://github.com/yt-dlp/yt-dlp/wiki/EJS
+--remote-components ejs:github
+EOF
+
 # Consider the following settings Only Office Desktop Editors:
 #   File -> Advanced settings -> Proofing:
 #   -> Math AutoCorrect -> uncheck "Replace text as you type"
