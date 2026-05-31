@@ -2304,6 +2304,9 @@ set hls
 " Let the IDE handle Ctrl+W (otherwise IdeaVim swallows it as Vim's window-command prefix and IntelliJ's "Close Tab" shortcut never fires):
 sethandler <C-w> a:ide
 
+" Let the IDE handle Ctrl+B (otherwise IdeaVim swallows it as Vim's scroll-page-backward and IntelliJ's "Go to Declaration or Usages" shortcut never fires):
+sethandler <C-b> a:ide
+
 " Fix this behaviour: after ESC to close the popup menu, the cursor moves left instead of staying in the space place
 map <C-F10> <Action>(ShowPopupMenu)<Right>
 EOF
