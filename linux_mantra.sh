@@ -222,8 +222,8 @@ sudo apt install mpv -y
 echo "Installing audacious (audio player)..."
 sudo apt install audacious -y
 
-echo "Installing simplescreenrecorder (screencast program)..."
-sudo apt install simplescreenrecorder -y
+echo "Installing obs-studio (Wayland/NVIDIA-compatible screencast program)..."
+sudo apt install obs-studio -y
 
 echo "Installing rtorrent (terminal-based BitTorrent client)..."
 sudo apt install rtorrent -y
