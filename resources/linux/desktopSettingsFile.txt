@@ -120,10 +120,10 @@ report-technical-problems=false
 
 [org/gnome/desktop/screensaver]
 lock-delay=uint32 0
-lock-enabled=false
+lock-enabled=true
 picture-options='zoom'
 picture-uri='/home/herman/Pictures/background.png'
-ubuntu-lock-on-suspend=false
+ubuntu-lock-on-suspend=true
 
 [org/gnome/desktop/session]
 idle-delay=uint32 0
