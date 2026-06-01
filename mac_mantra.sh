@@ -403,18 +403,15 @@ EOF
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" # For the current shell
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
-cat >> "$shellFile" << EOF
-
-# 'brew' COMMAND:
-eval "\$(/opt/homebrew/bin/brew shellenv)"
-if type brew &>/dev/null # autocompletion
-  then
-    FPATH="\$(brew --prefix)/share/zsh/site-functions:\${FPATH}"
-
-    autoload -Uz compinit
-    compinit
-fi
-EOF
+# Register Homebrew BEFORE oh-my-zsh's `source` line so oh-my-zsh's single compinit picks
+# up brew completions. Appending a brew block with its own `compinit` AFTER oh-my-zsh (the
+# previous approach) ran compinit twice and re-scanned/re-dumped the completion cache on
+# every shell start, adding ~1s to startup; reruns of this procedure stacked even more.
+sed -i.backup '/source \$ZSH\/oh-my-zsh.sh/i\
+# Homebrew (before oh-my-zsh so its single compinit registers brew completions):\
+eval "$(/opt/homebrew/bin/brew shellenv)"\
+FPATH="/opt/homebrew/share/zsh/site-functions:${FPATH}"
+' "$shellFile"
 eval "$(/opt/homebrew/bin/brew shellenv)" # For the current shell
   else
     echo "Unexpected error occurred. The requested action wasn't preformed correctly"
@@ -1048,8 +1045,9 @@ fi
 echo "4. Updating .vimrc..."
 vimrcFile="$HOME/.vimrc"
 cat > "$vimrcFile" << EOF
-" Use system clipboard (https://stackoverflow.com/questions/27898407/intellij-idea-with-ideavim-cannot-copy-text-from-another-source):
-set clipboard=unnamedplus
+" Sync the unnamed register with the system clipboard so y/p use it (https://stackoverflow.com/questions/27898407/intellij-idea-with-ideavim-cannot-copy-text-from-another-source):
+" 'unnamed' is the '*' register (the macOS pasteboard); 'unnamedplus' is '+' (the Linux Ctrl+C clipboard). Listing both makes y/p hit the OS clipboard on either platform.
+set clipboard=unnamed,unnamedplus
 
 " Enable repeatable pasting in visual mode (https://stackoverflow.com/questions/7163947/paste-multiple-times):
 xnoremap p pgvy
@@ -2119,6 +2117,9 @@ echo "12. Setting up .ideavimrc file..."
 touch "$ideavimrcFile"
 cat > "$ideavimrcFile" << EOF
 source ~/.vimrc
+
+" Use the IDE's native paste for put operations (IdeaVim-only value; must NOT go in ~/.vimrc - plain Vim rejects it with E474):
+set clipboard+=ideaput
 
 " Make by default search case insensitive (https://stackoverflow.com/questions/2287440/how-to-do-case-insensitive-search-in-vim):
 set ignorecase
