@@ -1359,6 +1359,7 @@ procedureId="firefox"
 # DOCUMENTATION:
 #   https://www.mozilla.org/firefox/
 #   defaultbrowser CLI: https://github.com/kerma/defaultbrowser
+#   duti CLI (sets file-type associations): https://github.com/moretension/duti
 #   Firefox Sync: https://support.mozilla.org/kb/how-do-i-set-up-firefox-sync
 
 informAboutProcedureStart
@@ -1377,12 +1378,16 @@ fi
 if brew list defaultbrowser > /dev/null 2>&1; then
     brew uninstall defaultbrowser
 fi
+if brew list duti > /dev/null 2>&1; then
+    brew uninstall duti
+fi
 
 echo "2. Installing the Firefox application..."
 brew install --cask firefox
 
-echo "3. Installing defaultbrowser CLI (used to set the default browser headlessly)..."
+echo "3. Installing defaultbrowser and duti CLIs (used to set the default browser and file associations headlessly)..."
 brew install defaultbrowser
+brew install duti
 
 echo "4. Initiating Firefox so it registers as an HTTP/HTTPS handler with Launch Services..."
 # `open -a Firefox` resolves the name via Launch Services, which has not registered
@@ -1401,7 +1406,12 @@ echo "6. If a macOS dialog asks to confirm the default browser change, click 'Us
 echo "   Press Enter when done..."
 read voidInput
 
-printf "\n7. Log in to Firefox and enable Sync to restore bookmarks, history, passwords, extensions, and settings.\n"
+echo "7. Setting Firefox as the default viewer for PDF files..."
+# `com.adobe.pdf` is the system UTI for PDF files; `all` covers every Launch Services
+# role (viewer/editor). Without this, PDFs keep opening in Preview.
+duti -s org.mozilla.firefox com.adobe.pdf all
+
+printf "\n8. Log in to Firefox and enable Sync to restore bookmarks, history, passwords, extensions, and settings.\n"
 echo "   Press Enter when done..."
 read voidInput
 
