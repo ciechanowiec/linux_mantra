@@ -793,6 +793,19 @@ brew install tesseract
 echo "Installing imagemagick (images converter)"
 brew install imagemagick
 
+echo "Installing poppler (provides pdftotext for extracting text from PDFs)"
+brew install poppler
+
+echo "Installing mupdf-tools (provides mutool for PDF rendering and text extraction)"
+brew install mupdf-tools
+
+echo "Installing qpdf (PDF transformation, repair and inspection tool)"
+brew install qpdf
+
+echo "Installing pdfminer.six (Python PDF text extraction; provides pdf2txt.py and dumppdf.py)"
+# PEP 668 blocks system-wide `pip3 install`, so use pipx (configured earlier in this block)
+pipx install pdfminer.six
+
 echo "Installing go (programming language)"
 brew install go
 # ADDING GO BINARIES TO PATH (so tools installed via `go install` are available):

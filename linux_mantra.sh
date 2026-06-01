@@ -322,6 +322,19 @@ sudo apt install libtesseract-dev -y
 echo "Installing imagemagick (images converter)"
 sudo apt install imagemagick -y
 
+echo "Installing poppler-utils (provides pdftotext for extracting text from PDFs)"
+sudo apt install poppler-utils -y
+
+echo "Installing mupdf-tools (provides mutool for PDF rendering and text extraction)"
+sudo apt install mupdf-tools -y
+
+echo "Installing qpdf (PDF transformation, repair and inspection tool)"
+sudo apt install qpdf -y
+
+echo "Installing pdfminer.six (Python PDF text extraction; provides pdf2txt.py and dumppdf.py)"
+# PEP 668 blocks system-wide `pip3 install`, so use pipx (configured earlier in this block)
+pipx install pdfminer.six
+
 echo "Installing go (programming language)"
 sudo apt install golang-go -y
 
