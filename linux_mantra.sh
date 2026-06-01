@@ -114,6 +114,13 @@ if [ "$linesWithLinuxReleaseName" -gt 0 ] && [ "$linesWithMacReleaseName" -gt 0 
     exit 1;
 fi
 
+echo "4.1. Verifying that this script matches the detected operating system..."
+if [ "$isMacOS" == true ];
+  then
+    echo "linux_mantra.sh is intended for Linux, but macOS was detected. Run mac_mantra.sh instead. Exiting..."
+    exit 1
+fi
+
 echo "5. Verifying that the root filesystem is on a LUKS-encrypted device..."
 if [ "$isLinux" == true ];
   then
