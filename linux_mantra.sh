@@ -142,7 +142,24 @@ if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
     sudo apt autoremove -y
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
-      softwareupdate --verbose --install --all
+      # macOS perpetually re-offers "Command Line Tools for Xcode" as an available
+      # (and even Recommended) update, so --all / --recommended re-download and
+      # reinstall it on every run. Install updates by label, skipping that entry.
+      echo "5.1. Collecting available updates..."
+      updateLabels=$(softwareupdate --list 2>/dev/null \
+        | grep -E '^[[:space:]]*\* Label:' \
+        | sed -E 's/^[[:space:]]*\* Label: //' \
+        | grep -v 'Command Line Tools')
+      if [ -z "$updateLabels" ];
+        then
+          echo "5.2. No applicable updates found"
+        else
+          echo "5.2. Installing available updates..."
+          while IFS= read -r updateLabel; do
+            echo "Installing: $updateLabel"
+            softwareupdate --verbose --install "$updateLabel"
+          done <<< "$updateLabels"
+      fi
   else
     echo "Unexpected error occurred. Update failed"
     exit 1
@@ -541,20 +558,37 @@ procedureId="vim"
 
 informAboutProcedureStart
 
-echo "1. Setting up vim as a default editor if this is Linux..."
+echo "1. Purging an existing vim/NeoVim setup if present..."
+# Remove everything this procedure installs so it can be safely rerun from a clean
+# state (mirrors the IntelliJ IDEA procedure).
+nvimPids=$(pgrep -x nvim)
+if [ -n "$nvimPids" ]; then
+    kill $nvimPids
+fi
+if brew list neovim > /dev/null 2>&1; then
+    brew uninstall neovim
+fi
+[ -e "$HOME/.vimrc" ]            && trash-put "$HOME/.vimrc"
+[ -e "$HOME/.config/nvim" ]      && trash-put "$HOME/.config/nvim"
+[ -e "$HOME/.config/nvim.bak" ]  && trash-put "$HOME/.config/nvim.bak"
+[ -e "$HOME/.local/share/nvim" ] && trash-put "$HOME/.local/share/nvim"
+[ -e "$HOME/.local/state/nvim" ] && trash-put "$HOME/.local/state/nvim"
+[ -e "$HOME/.cache/nvim" ]       && trash-put "$HOME/.cache/nvim"
+
+echo "2. Setting up vim as a default editor if this is Linux..."
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
     sudo update-alternatives --set editor /usr/bin/vim.basic
 fi
 
-echo "2. Enabling cycling for {hjkl} vim keys if this is macOS..."
+echo "3. Enabling cycling for {hjkl} vim keys if this is macOS..."
 if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
   then
     # Docs: https://stackoverflow.com/a/43340099
     defaults write -g ApplePressAndHoldEnabled -bool false
 fi
 
-echo "3. Updating .vimrc..."
+echo "4. Updating .vimrc..."
 vimrcFile="$HOME/.vimrc"
 cat > "$vimrcFile" << EOF
 " Use system clipboard (https://stackoverflow.com/questions/27898407/intellij-idea-with-ideavim-cannot-copy-text-from-another-source):
@@ -567,20 +601,19 @@ xnoremap p pgvy
 set wrap
 EOF
 
-echo "4. Installing NeoVim..."
+echo "5. Installing NeoVim..."
 # 1. Do not install via snap, because it might cause problems like this:
 #    https://github.com/LunarVim/LunarVim/issues/3612#issuecomment-1441131186
 # 2. Do not install via apt, because it has an old version
 brew install neovim
 
-echo "5. Installing LazyVim..."
+echo "6. Installing LazyVim..."
 # LazyVim: https://www.lazyvim.org/
-mkdir -p "$HOME/.config/nvim"
-mv ~/.config/nvim ~/.config/nvim.bak
+# The purge step above guarantees a clean ~/.config/nvim, so clone directly.
 git clone https://github.com/LazyVim/starter ~/.config/nvim
 rm -rf ~/.config/nvim/.git
 
-echo "6. Setting light LazyVim theme..."
+echo "7. Setting light LazyVim theme..."
 # Theme: https://github.com/folke/tokyonight.nvim
 nvimColorConfigFile="$HOME/.config/nvim/lua/plugins/colorscheme.lua"
 touch "$nvimColorConfigFile"
@@ -594,7 +627,7 @@ return {
 }
 EOF
 
-echo "7. Opening an nvim application in order to initialize it..."
+echo "8. Opening an nvim application in order to initialize it..."
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
     ptyxis -- bash -c "nvim test.lua -c 'startinsert'" # Need lua file to initiate LSP
@@ -603,18 +636,18 @@ if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
 # On Apple Script:
 #   1. https://apple.stackexchange.com/a/335779
 #   2. https://stackoverflow.com/questions/56862644/open-iterm2-from-bash-script-run-commands#comment105229692_56862822
+# Always open nvim in a NEW iTerm window and target that window explicitly.
+# Writing to "current session of current window" would type the command into the
+# session running this script (whose stdin is then consumed by the `read` below),
+# so nvim must run in its own dedicated window.
 osascript -e '
-if application "iTerm" is not running then
-    activate application "iTerm"
-else
-    tell application "iTerm"
-      create window with default profile
-      activate
-      tell current session of current window
+tell application "iTerm"
+    activate
+    set nvimWindow to (create window with default profile)
+    tell current session of nvimWindow
         write text "nvim test.lua"
-      end tell
     end tell
-end if'
+end tell'
   else
     echo "Unexpected error occurred. The requested action wasn't preformed correctly"
     exit 1
@@ -622,12 +655,12 @@ fi
 echo "Once an nvim application is initialized, close it and press Enter to continue..."
 read voidInput
 
-echo "8. Disabling plugin updates notifications..."
+echo "9. Disabling plugin updates notifications..."
 lazyVimBasicConfigFile="$HOME/.local/share/nvim/lazy/lazy.nvim/lua/lazy/core/config.lua"
 sed -i.backup 's/notify = true, -- get a notification when new updates/notify = false, -- get a notification when new updates/g' "$lazyVimBasicConfigFile"
 trash-put "${lazyVimBasicConfigFile}.backup"
 
-echo "9. Disabling autoformat on save..."
+echo "10. Disabling autoformat on save..."
 lazyVimInitFile="$HOME/.local/share/nvim/lazy/LazyVim/lua/lazyvim/plugins/lsp/init.lua"
 sed -i.backup 's/autoformat = true,/autoformat = false,/g' "$lazyVimInitFile"
 trash-put "${lazyVimInitFile}.backup"
@@ -641,7 +674,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 })
 EOF
 
-echo "10. Suppressing noice.nvim popup notifications..."
+echo "11. Suppressing noice.nvim popup notifications..."
 # Filters out the floating error/notification popups (e.g. TextYankPost Lua errors)
 # that noice.nvim renders in the top-right of the editor window.
 noiceConfigFile="$HOME/.config/nvim/lua/plugins/noice.lua"
@@ -660,7 +693,7 @@ return {
 }
 EOF
 
-echo "11. Sourcing .vimrc file..."
+echo "12. Sourcing .vimrc file..."
 nvimInitFile="$HOME/.config/nvim/init.lua"
 cat >> "$nvimInitFile" << EOF
 
@@ -942,11 +975,34 @@ procedureId="sdkman"
 #   file automatically during installation) must be located on the last lines of `.bashrc`/`.zshrc` file
 
 echo "1. Installing SDKMAN..."
-curl -s "https://get.sdkman.io" | bash
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    # The SDKMAN installer hard-requires Bash 4+, but macOS ships Bash 3.2, so
+    # the installer must be run under a modern Bash. Homebrew's Bash (assumed to
+    # be already installed) provides it. `brew install bash` is idempotent:
+    echo "1.1. Ensuring a modern Bash via Homebrew (macOS ships Bash 3.2, SDKMAN needs Bash 4+)..."
+    brew install bash
+    echo "1.2. Installing SDKMAN with Homebrew's Bash..."
+    curl -s "https://get.sdkman.io" | "$(brew --prefix)/bin/bash"
+  else
+    curl -s "https://get.sdkman.io" | bash
+fi
 sleep 3 # Required for the above command to be fully completed
 
-echo "2. Sourcing SDKMAN..."
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+echo "2. Selecting the Bash used to run SDKMAN..."
+# SDKMAN's runtime uses Bash 4+ syntax (e.g. ${var^^}), which macOS's Bash 3.2
+# cannot parse ("bad substitution"). So every `sdk` command below is run under
+# the same modern Bash that installed SDKMAN. On Linux the system Bash already
+# qualifies, so plain `bash` is used there.
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    sdkmanBash="$(brew --prefix)/bin/bash"
+  else
+    sdkmanBash="bash"
+fi
+
+echo "3. Verifying SDKMAN is usable..."
+"$sdkmanBash" -c 'export SDKMAN_DIR="$HOME/.sdkman"; source "$HOME/.sdkman/bin/sdkman-init.sh"; sdk version'
 
 informAboutProcedureEnd
 
@@ -967,36 +1023,34 @@ procedureId="java"
 
 informAboutProcedureStart
 
-echo "Sourcing sdk command..."
-# For an unknown reason, without the following sourcing, sdk command might not be recognized:
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-echo "Installing Java 8..."
-# Java 8 Temurin release might be unavailable for macOS, so Zulu is installed:
-yes | sdk install java 8.0.492-zulu
-
-echo "Installing Java 11..."
-yes | sdk install java 11.0.31-tem
-
-echo "Installing Java 17..."
-yes | sdk install java 17.0.19-tem
-
-echo "Installing Java 21..."
-yes | sdk install java 21.0.11-tem
-
-echo "Installing Java 25 GraalVM..."
-yes | sdk install java 25.0.2-graalce
-
-echo "Installing Java 25..."
-yes | sdk install java 25.0.3-tem
-
-echo "Setting Java 25 as the default one..."
-sdk default java 25.0.3-tem
-
-echo "Enabling the installed program in the current console..."
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+# SDKMAN's runtime uses Bash 4+ syntax that macOS's Bash 3.2 cannot parse, so
+# `sdk` runs under a modern Bash (Homebrew's on macOS; the system Bash on Linux).
+# Resolved here so this procedure is runnable independently of the SDKMAN one:
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    sdkmanBash="$(brew --prefix)/bin/bash"
+  else
+    sdkmanBash="bash"
+fi
+"$sdkmanBash" -c '
+  export SDKMAN_DIR="$HOME/.sdkman"
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  echo "Installing Java 8..."
+  # Java 8 Temurin release might be unavailable for macOS, so Zulu is installed:
+  yes | sdk install java 8.0.492-zulu
+  echo "Installing Java 11..."
+  yes | sdk install java 11.0.31-tem
+  echo "Installing Java 17..."
+  yes | sdk install java 17.0.19-tem
+  echo "Installing Java 21..."
+  yes | sdk install java 21.0.11-tem
+  echo "Installing Java 25 GraalVM..."
+  yes | sdk install java 25.0.2-graalce
+  echo "Installing Java 25..."
+  yes | sdk install java 25.0.3-tem
+  echo "Setting Java 25 as the default one..."
+  sdk default java 25.0.3-tem
+'
 
 informAboutProcedureEnd
 
@@ -1017,17 +1071,21 @@ procedureId="maven"
 
 informAboutProcedureStart
 
-echo "Sourcing sdk command..."
-# For an unknown reason, without this sourcing, sdk command might not be recognized:
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-
+# SDKMAN's runtime uses Bash 4+ syntax that macOS's Bash 3.2 cannot parse, so
+# `sdk` runs under a modern Bash (Homebrew's on macOS; the system Bash on Linux).
+# Resolved here so this procedure is runnable independently of the SDKMAN one:
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    sdkmanBash="$(brew --prefix)/bin/bash"
+  else
+    sdkmanBash="bash"
+fi
 echo "Installing Maven..."
-yes | sdk install maven 3.9.16
-
-echo "Enabling the installed program in the current console..."
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+"$sdkmanBash" -c '
+  export SDKMAN_DIR="$HOME/.sdkman"
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  yes | sdk install maven 3.9.16
+'
 
 informAboutProcedureEnd
 
@@ -1048,17 +1106,21 @@ procedureId="spring boot"
 
 informAboutProcedureStart
 
-echo "Sourcing sdk command..."
-# For an unknown reason, without this sourcing, sdk command might not be recognized:
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-
+# SDKMAN's runtime uses Bash 4+ syntax that macOS's Bash 3.2 cannot parse, so
+# `sdk` runs under a modern Bash (Homebrew's on macOS; the system Bash on Linux).
+# Resolved here so this procedure is runnable independently of the SDKMAN one:
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    sdkmanBash="$(brew --prefix)/bin/bash"
+  else
+    sdkmanBash="bash"
+fi
 echo "Installing Spring Boot..."
-sdk install springboot
-
-echo "Enabling the installed program in the current console..."
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+"$sdkmanBash" -c '
+  export SDKMAN_DIR="$HOME/.sdkman"
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  sdk install springboot
+'
 
 informAboutProcedureEnd
 

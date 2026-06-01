@@ -469,7 +469,47 @@ colima stop
 echo "Attempting to start Colima..."
 colima start
 echo "Will run sample docker container to verify the installation..."
-docker run hello-world
+if ! docker run hello-world; then
+  # The most common reason for the verification to fail on an otherwise working setup is a
+  # corporate VPN/proxy that performs TLS interception: it re-signs HTTPS traffic with a
+  # corporate root CA. macOS trusts that CA (so `brew` downloads succeed), but the Colima
+  # Linux VM ships only the stock public root store, so the in-VM Docker daemon rejects the
+  # re-signed certificates when pulling images (`x509: certificate signed by unknown
+  # authority`, e.g. from production.cloudfront.docker.com). This step is a no-op on a
+  # non-corporate machine (the host simply has no extra anchors to add), so it is safe to run
+  # universally. The host home directory is mounted into the VM at the same path, so the
+  # absolute paths below are valid inside the VM as well.
+  echo "Verification failed - attempting to recover from a possible corporate VPN/proxy TLS interception..."
+  HOST_CA_BUNDLE="$HOME/.colima/host-ca-certificates.pem"
+  HOST_CA_INSTALLER="$HOME/.colima/install-host-ca.sh"
+  echo "Exporting host-trusted CA certificates to $HOST_CA_BUNDLE..."
+  {
+    security find-certificate -a -p /Library/Keychains/System.keychain 2>/dev/null
+    security find-certificate -a -p "$HOME/Library/Keychains/login.keychain-db" 2>/dev/null
+  } > "$HOST_CA_BUNDLE"
+  echo "Writing the in-VM CA installer to $HOST_CA_INSTALLER..."
+  cat > "$HOST_CA_INSTALLER" << EOF
+#!/bin/sh
+# Installs the host's trusted CA certificates into the Colima VM so that the in-VM Docker
+# daemon trusts a corporate VPN/proxy that performs TLS interception. Idempotent.
+set -e
+HOST_CA="$HOST_CA_BUNDLE"
+DEST=/usr/local/share/ca-certificates
+if [ ! -s "\$HOST_CA" ]; then
+  echo "No host CA bundle at \$HOST_CA - nothing to install."
+  exit 0
+fi
+rm -f "\$DEST"/colima-host-ca-*.crt
+csplit -z -s -f "\$DEST/colima-host-ca-" -b '%03d.crt' "\$HOST_CA" '/-----BEGIN CERTIFICATE-----/' '{*}'
+update-ca-certificates
+command -v systemctl >/dev/null 2>&1 && systemctl restart docker >/dev/null 2>&1 || true
+EOF
+  chmod +x "$HOST_CA_INSTALLER"
+  echo "Installing host-trusted CA certificates into the Colima VM..."
+  colima ssh -- sudo sh "$HOST_CA_INSTALLER"
+  echo "Re-running sample docker container to re-verify the installation..."
+  docker run hello-world
+fi
 
 if [[ $? -ne 0 ]]; then
   echo -e "\033[31mDocker installation failed\033[0m"

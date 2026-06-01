@@ -125,7 +125,24 @@ if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
     sudo apt autoremove -y
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
-      softwareupdate --verbose --install --all
+      # macOS perpetually re-offers "Command Line Tools for Xcode" as an available
+      # (and even Recommended) update, so --all / --recommended re-download and
+      # reinstall it on every run. Install updates by label, skipping that entry.
+      echo "5.1. Collecting available updates..."
+      updateLabels=$(softwareupdate --list 2>/dev/null \
+        | grep -E '^[[:space:]]*\* Label:' \
+        | sed -E 's/^[[:space:]]*\* Label: //' \
+        | grep -v 'Command Line Tools')
+      if [ -z "$updateLabels" ];
+        then
+          echo "5.2. No applicable updates found"
+        else
+          echo "5.2. Installing available updates..."
+          while IFS= read -r updateLabel; do
+            echo "Installing: $updateLabel"
+            softwareupdate --verbose --install "$updateLabel"
+          done <<< "$updateLabels"
+      fi
   else
     echo "Unexpected error occurred. Update failed"
     exit 1
@@ -284,7 +301,7 @@ fuse() {
         return 1
     fi
     local pids
-    pids=$(lsof -ti tcp:"\$1")
+    pids=\$(lsof -ti tcp:"\$1")
     if [ -n "\$pids" ]; then
         echo "Killing processes on port \$1:"
         echo "\$pids" | while read -r pid; do
@@ -541,11 +558,34 @@ procedureId="sdkman"
 #   file automatically during installation) must be located on the last lines of `.bashrc`/`.zshrc` file
 
 echo "1. Installing SDKMAN..."
-curl -s "https://get.sdkman.io" | bash
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    # The SDKMAN installer hard-requires Bash 4+, but macOS ships Bash 3.2, so
+    # the installer must be run under a modern Bash. Homebrew's Bash (assumed to
+    # be already installed) provides it. `brew install bash` is idempotent:
+    echo "1.1. Ensuring a modern Bash via Homebrew (macOS ships Bash 3.2, SDKMAN needs Bash 4+)..."
+    brew install bash
+    echo "1.2. Installing SDKMAN with Homebrew's Bash..."
+    curl -s "https://get.sdkman.io" | "$(brew --prefix)/bin/bash"
+  else
+    curl -s "https://get.sdkman.io" | bash
+fi
 sleep 3 # Required for the above command to be fully completed
 
-echo "2. Sourcing SDKMAN..."
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+echo "2. Selecting the Bash used to run SDKMAN..."
+# SDKMAN's runtime uses Bash 4+ syntax (e.g. ${var^^}), which macOS's Bash 3.2
+# cannot parse ("bad substitution"). So every `sdk` command below is run under
+# the same modern Bash that installed SDKMAN. On Linux the system Bash already
+# qualifies, so plain `bash` is used there.
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    sdkmanBash="$(brew --prefix)/bin/bash"
+  else
+    sdkmanBash="bash"
+fi
+
+echo "3. Verifying SDKMAN is usable..."
+"$sdkmanBash" -c 'export SDKMAN_DIR="$HOME/.sdkman"; source "$HOME/.sdkman/bin/sdkman-init.sh"; sdk version'
 
 informAboutProcedureEnd
 
@@ -566,36 +606,34 @@ procedureId="java"
 
 informAboutProcedureStart
 
-echo "Sourcing sdk command..."
-# For an unknown reason, without the following sourcing, sdk command might not be recognized:
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-echo "Installing Java 8..."
-# Java 8 Temurin release might be unavailable for macOS, so Zulu is installed:
-yes | sdk install java 8.0.492-zulu
-
-echo "Installing Java 11..."
-yes | sdk install java 11.0.31-tem
-
-echo "Installing Java 17..."
-yes | sdk install java 17.0.19-tem
-
-echo "Installing Java 21..."
-yes | sdk install java 21.0.11-tem
-
-echo "Installing Java 25 GraalVM..."
-yes | sdk install java 25.0.2-graalce
-
-echo "Installing Java 25..."
-yes | sdk install java 25.0.3-tem
-
-echo "Setting Java 25 as the default one..."
-sdk default java 25.0.3-tem
-
-echo "Enabling the installed program in the current console..."
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+# SDKMAN's runtime uses Bash 4+ syntax that macOS's Bash 3.2 cannot parse, so
+# `sdk` runs under a modern Bash (Homebrew's on macOS; the system Bash on Linux).
+# Resolved here so this procedure is runnable independently of the SDKMAN one:
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    sdkmanBash="$(brew --prefix)/bin/bash"
+  else
+    sdkmanBash="bash"
+fi
+"$sdkmanBash" -c '
+  export SDKMAN_DIR="$HOME/.sdkman"
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  echo "Installing Java 8..."
+  # Java 8 Temurin release might be unavailable for macOS, so Zulu is installed:
+  yes | sdk install java 8.0.492-zulu
+  echo "Installing Java 11..."
+  yes | sdk install java 11.0.31-tem
+  echo "Installing Java 17..."
+  yes | sdk install java 17.0.19-tem
+  echo "Installing Java 21..."
+  yes | sdk install java 21.0.11-tem
+  echo "Installing Java 25 GraalVM..."
+  yes | sdk install java 25.0.2-graalce
+  echo "Installing Java 25..."
+  yes | sdk install java 25.0.3-tem
+  echo "Setting Java 25 as the default one..."
+  sdk default java 25.0.3-tem
+'
 
 informAboutProcedureEnd
 
@@ -616,17 +654,21 @@ procedureId="maven"
 
 informAboutProcedureStart
 
-echo "Sourcing sdk command..."
-# For an unknown reason, without this sourcing, sdk command might not be recognized:
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-
+# SDKMAN's runtime uses Bash 4+ syntax that macOS's Bash 3.2 cannot parse, so
+# `sdk` runs under a modern Bash (Homebrew's on macOS; the system Bash on Linux).
+# Resolved here so this procedure is runnable independently of the SDKMAN one:
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    sdkmanBash="$(brew --prefix)/bin/bash"
+  else
+    sdkmanBash="bash"
+fi
 echo "Installing Maven..."
-yes | sdk install maven 3.9.16
-
-echo "Enabling the installed program in the current console..."
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+"$sdkmanBash" -c '
+  export SDKMAN_DIR="$HOME/.sdkman"
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  yes | sdk install maven 3.9.16
+'
 
 informAboutProcedureEnd
 
@@ -647,17 +689,21 @@ procedureId="spring boot"
 
 informAboutProcedureStart
 
-echo "Sourcing sdk command..."
-# For an unknown reason, without this sourcing, sdk command might not be recognized:
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-
+# SDKMAN's runtime uses Bash 4+ syntax that macOS's Bash 3.2 cannot parse, so
+# `sdk` runs under a modern Bash (Homebrew's on macOS; the system Bash on Linux).
+# Resolved here so this procedure is runnable independently of the SDKMAN one:
+if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
+  then
+    sdkmanBash="$(brew --prefix)/bin/bash"
+  else
+    sdkmanBash="bash"
+fi
 echo "Installing Spring Boot..."
-sdk install springboot
-
-echo "Enabling the installed program in the current console..."
-export SDKMAN_DIR="$HOME/.sdkman"
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+"$sdkmanBash" -c '
+  export SDKMAN_DIR="$HOME/.sdkman"
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  sdk install springboot
+'
 
 informAboutProcedureEnd
 
@@ -890,7 +936,10 @@ informAboutProcedureStart
 iTermInstallationArchive="iTerm2-3_6_10.zip"
 
 echo "1. Downloading the iTerm2 archive..."
-wget "https://iterm2.com/downloads/stable/$iTermInstallationArchive"
+# iterm2.com sits behind Cloudflare, which throttles wget's default 'Wget/...' User-Agent
+# down to a few hundred B/s (browsers are unaffected). Present a browser User-Agent to
+# avoid the throttling - otherwise the download crawls with an ETA of days.
+wget --user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" "https://iterm2.com/downloads/stable/$iTermInstallationArchive"
 
 echo "2. Installing the iTerm application..."
 iTermTempDir="$(pwd)/iTermTempDir"
@@ -959,20 +1008,37 @@ procedureId="vim"
 
 informAboutProcedureStart
 
-echo "1. Setting up vim as a default editor if this is Linux..."
+echo "1. Purging an existing vim/NeoVim setup if present..."
+# Remove everything this procedure installs so it can be safely rerun from a clean
+# state (mirrors the IntelliJ IDEA procedure).
+nvimPids=$(pgrep -x nvim)
+if [ -n "$nvimPids" ]; then
+    kill $nvimPids
+fi
+if brew list neovim > /dev/null 2>&1; then
+    brew uninstall neovim
+fi
+[ -e "$HOME/.vimrc" ]            && trash-put "$HOME/.vimrc"
+[ -e "$HOME/.config/nvim" ]      && trash-put "$HOME/.config/nvim"
+[ -e "$HOME/.config/nvim.bak" ]  && trash-put "$HOME/.config/nvim.bak"
+[ -e "$HOME/.local/share/nvim" ] && trash-put "$HOME/.local/share/nvim"
+[ -e "$HOME/.local/state/nvim" ] && trash-put "$HOME/.local/state/nvim"
+[ -e "$HOME/.cache/nvim" ]       && trash-put "$HOME/.cache/nvim"
+
+echo "2. Setting up vim as a default editor if this is Linux..."
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
     sudo update-alternatives --set editor /usr/bin/vim.basic
 fi
 
-echo "2. Enabling cycling for {hjkl} vim keys if this is macOS..."
+echo "3. Enabling cycling for {hjkl} vim keys if this is macOS..."
 if [ "$isMacOS" == true ] && [ "$isLinux" == false ];
   then
     # Docs: https://stackoverflow.com/a/43340099
     defaults write -g ApplePressAndHoldEnabled -bool false
 fi
 
-echo "3. Updating .vimrc..."
+echo "4. Updating .vimrc..."
 vimrcFile="$HOME/.vimrc"
 cat > "$vimrcFile" << EOF
 " Use system clipboard (https://stackoverflow.com/questions/27898407/intellij-idea-with-ideavim-cannot-copy-text-from-another-source):
@@ -985,20 +1051,19 @@ xnoremap p pgvy
 set wrap
 EOF
 
-echo "4. Installing NeoVim..."
+echo "5. Installing NeoVim..."
 # 1. Do not install via snap, because it might cause problems like this:
 #    https://github.com/LunarVim/LunarVim/issues/3612#issuecomment-1441131186
 # 2. Do not install via apt, because it has an old version
 brew install neovim
 
-echo "5. Installing LazyVim..."
+echo "6. Installing LazyVim..."
 # LazyVim: https://www.lazyvim.org/
-mkdir -p "$HOME/.config/nvim"
-mv ~/.config/nvim ~/.config/nvim.bak
+# The purge step above guarantees a clean ~/.config/nvim, so clone directly.
 git clone https://github.com/LazyVim/starter ~/.config/nvim
 rm -rf ~/.config/nvim/.git
 
-echo "6. Setting light LazyVim theme..."
+echo "7. Setting light LazyVim theme..."
 # Theme: https://github.com/folke/tokyonight.nvim
 nvimColorConfigFile="$HOME/.config/nvim/lua/plugins/colorscheme.lua"
 touch "$nvimColorConfigFile"
@@ -1012,7 +1077,7 @@ return {
 }
 EOF
 
-echo "7. Opening an nvim application in order to initialize it..."
+echo "8. Opening an nvim application in order to initialize it..."
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
     ptyxis -- bash -c "nvim test.lua -c 'startinsert'" # Need lua file to initiate LSP
@@ -1021,27 +1086,18 @@ if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
 # On Apple Script:
 #   1. https://apple.stackexchange.com/a/335779
 #   2. https://stackoverflow.com/questions/56862644/open-iterm2-from-bash-script-run-commands#comment105229692_56862822
+# Always open nvim in a NEW iTerm window and target that window explicitly.
+# Writing to "current session of current window" would type the command into the
+# session running this script (whose stdin is then consumed by the `read` below),
+# so nvim must run in its own dedicated window.
 osascript -e '
-if application "iTerm" is not running then
-    tell application "iTerm"
-        activate
-        delay 1 -- Allow time for iTerm to launch
-        create window with default profile
-        tell current session of current window
-            write text "nvim test.lua"
-        end tell
+tell application "iTerm"
+    activate
+    set nvimWindow to (create window with default profile)
+    tell current session of nvimWindow
+        write text "nvim test.lua"
     end tell
-else
-    tell application "iTerm"
-        activate
-        if (count of windows) = 0 then
-            create window with default profile
-        end if
-        tell current session of current window
-            write text "nvim test.lua"
-        end tell
-    end tell
-end if'
+end tell'
   else
     echo "Unexpected error occurred. The requested action wasn't preformed correctly"
     exit 1
@@ -1049,12 +1105,12 @@ fi
 echo "Once an nvim application is initialized, close it and press Enter to continue..."
 read voidInput
 
-echo "8. Disabling plugin updates notifications..."
+echo "9. Disabling plugin updates notifications..."
 lazyVimBasicConfigFile="$HOME/.local/share/nvim/lazy/lazy.nvim/lua/lazy/core/config.lua"
 sed -i.backup 's/notify = true, -- get a notification when new updates/notify = false, -- get a notification when new updates/g' "$lazyVimBasicConfigFile"
 trash-put "${lazyVimBasicConfigFile}.backup"
 
-echo "9. Disabling autoformat on save..."
+echo "10. Disabling autoformat on save..."
 lazyVimInitFile="$HOME/.local/share/nvim/lazy/LazyVim/lua/lazyvim/plugins/lsp/init.lua"
 sed -i.backup 's/autoformat = true,/autoformat = false,/g' "$lazyVimInitFile"
 trash-put "${lazyVimInitFile}.backup"
@@ -1068,7 +1124,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 })
 EOF
 
-echo "10. Suppressing noice.nvim popup notifications..."
+echo "11. Suppressing noice.nvim popup notifications..."
 # Filters out the floating error/notification popups (e.g. TextYankPost Lua errors)
 # that noice.nvim renders in the top-right of the editor window.
 noiceConfigFile="$HOME/.config/nvim/lua/plugins/noice.lua"
@@ -1208,7 +1264,9 @@ sudo cp -R "$altTabTempDir/AltTab.app" "$HOME/Applications"
 sleep 5 # Let the above command to be finished
 
 echo "3. Initiating the AltTab application..."
-open -a AltTab
+# `open -a AltTab` resolves the name via Launch Services, which has not registered
+# the freshly-copied app yet, so open it by absolute path instead.
+open "$HOME/Applications/AltTab.app"
 sleep 5 # Give the application time to be initiated
 
 printf "\n4. Give AltTab necessary permissions if requested. Press Enter when done...\n"
@@ -1219,16 +1277,24 @@ killall AltTab
 sleep 3 # Give the application time to be killed
 
 echo "6. Configuring the AltTab application..."
-# Disable menu bar icon:
-defaults write com.lwouis.alt-tab-macos.plist menubarIcon -int 3
-defaults write com.lwouis.alt-tab-macos.plist holdShortcut -string "⌘"
+# Export the freshly-installed domain, override only the keys we care about, then
+# import it back so AltTab's own defaults are preserved. holdShortcut is stored as
+# an NSKeyedArchiver dict { secureData = encoded key combo, string = display glyph };
+# the secureData blob below is the archived "hold ⌘" shortcut.
+altTabPlist="$tempDir/com.lwouis.alt-tab-macos.plist"
+defaults export com.lwouis.alt-tab-macos "$altTabPlist"
+# Hide the menu bar icon:
+plutil -replace menubarIconShown -bool NO "$altTabPlist"
+# Hold ⌘ (instead of the default ⌥) to summon AltTab:
+plutil -replace holdShortcut -xml '<dict><key>secureData</key><data>YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRyb290gAGlCwwZGhtVJG51bGzWDQ4PEBESExQVFBcUXW1vZGlmaWVyRmxhZ3NfEBtjaGFyYWN0ZXJzSWdub3JpbmdNb2RpZmllcnNWJGNsYXNzWmNoYXJhY3RlcnNXa2V5Q29kZVd2ZXJzaW9ugAOAAIAEgACAAoAAEf//EgAQAADSHB0eH1okY2xhc3NuYW1lWCRjbGFzc2VzWlNSU2hvcnRjdXSiHiBYTlNPYmplY3QIERokKTI3SUxRU1lfbHqYn6qyury+wMLExsnO097n8vUAAAAAAAABAQAAAAAAAAAhAAAAAAAAAAAAAAAAAAAA/g==</data><key>string</key><string>⌘</string></dict>' "$altTabPlist"
+# Ignore/hide certain apps (e.g. show iTerm2 only when it has standalone windows,
+# not when it is running only as the dropdown panel):
+altTabExceptions='[{"ignore":"0","bundleIdentifier":"com.apple.finder","hide":"2"},{"ignore":"2","bundleIdentifier":"com.apple.ScreenSharing","hide":"0"},{"ignore":"2","bundleIdentifier":"com.microsoft.rdc.macos","hide":"0"},{"ignore":"2","bundleIdentifier":"com.teamviewer.TeamViewer","hide":"0"},{"ignore":"2","bundleIdentifier":"org.virtualbox.app.VirtualBoxVM","hide":"0"},{"ignore":"2","bundleIdentifier":"com.parallels.","hide":"0"},{"ignore":"2","bundleIdentifier":"com.citrix.XenAppViewer","hide":"0"},{"ignore":"2","bundleIdentifier":"com.citrix.receiver.icaviewer.mac","hide":"0"},{"ignore":"2","bundleIdentifier":"com.nicesoftware.dcvviewer","hide":"0"},{"ignore":"2","bundleIdentifier":"com.vmware.fusion","hide":"0"},{"ignore":"2","bundleIdentifier":"com.utmapp.UTM","hide":"0"},{"ignore":"0","bundleIdentifier":"com.McAfee.McAfeeSafariHost","hide":"1"},{"ignore":"0","bundleIdentifier":"com.googlecode.iterm2","hide":"2"}]'
+plutil -replace exceptions -string "$altTabExceptions" "$altTabPlist"
+defaults import com.lwouis.alt-tab-macos "$altTabPlist"
 
-echo "7. Making the AltTab application to ignore iTerm2 when no iTerm2 windows are open..."
-finalBlackList="[{\"ignore\":\"0\",\"bundleIdentifier\":\"com.McAfee.McAfeeSafariHost\",\"hide\":\"1\"},{\"ignore\":\"0\",\"bundleIdentifier\":\"com.apple.finder\",\"hide\":\"2\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"com.microsoft.rdc.macos\",\"hide\":\"0\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"com.teamviewer.TeamViewer\",\"hide\":\"0\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"org.virtualbox.app.VirtualBoxVM\",\"hide\":\"0\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"com.parallels.\",\"hide\":\"0\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"com.citrix.XenAppViewer\",\"hide\":\"0\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"com.citrix.receiver.icaviewer.mac\",\"hide\":\"0\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"com.nicesoftware.dcvviewer\",\"hide\":\"0\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"com.vmware.fusion\",\"hide\":\"0\"},{\"ignore\":\"2\",\"bundleIdentifier\":\"com.apple.ScreenSharing\",\"hide\":\"0\"},{\"ignore\":\"0\",\"bundleIdentifier\":\"com.googlecode.iterm2\",\"hide\":\"2\"}]"
-defaults write com.lwouis.alt-tab-macos.plist blacklist -string "$finalBlackList"
-
-echo "8. Opening the AltTab application..."
-open -a AltTab
+echo "7. Opening the AltTab application..."
+open "$HOME/Applications/AltTab.app"
 
 informAboutProcedureEnd
 
@@ -1260,10 +1326,12 @@ echo "2. Configuring the Tiles application..."
 cp -v "$resourcesDir/mac/defaults/HOME/Library/Preferences/com.sempliva.Tiles.plist" "$HOME/Library/Preferences/com.sempliva.Tiles.plist"
 
 echo "3. Opening the Tiles application..."
-open -a Tiles
+# `open -a Tiles` resolves the name via Launch Services, which has not registered
+# the freshly-copied app yet, so open it by absolute path instead.
+tilesPath="$HOME/Applications/Tiles.app"
+open "$tilesPath"
 
 echo "4. Setting up the Tiles to launch on startup..."
-tilesPath="$HOME/Applications/Tiles.app"
 # On login item adding: https://apple.stackexchange.com/a/310502
 # On variables in the command below: https://stackoverflow.com/q/23923017
 # The command below outputs 'login item UNKNOWN', which is ok: https://copyprogramming.com/howto/can-login-items-be-added-via-the-command-line-in-high-sierra?utm_content=cmp-true
@@ -1288,27 +1356,45 @@ procedureId="firefox"
 
 informAboutProcedureStart
 
-echo "1. Installing the Firefox application..."
+echo "1. Purging an existing Firefox setup if present..."
+# Remove everything this procedure installs so it can be safely rerun from a clean
+# state. The Firefox profile (~/Library/Application Support/Firefox) is left intact
+# and restored via Sync in the last step; add `--zap` to the uninstall for a full wipe.
+firefoxPids=$(pgrep -x firefox)
+if [ -n "$firefoxPids" ]; then
+    kill $firefoxPids
+fi
+if brew list --cask firefox > /dev/null 2>&1; then
+    brew uninstall --cask firefox
+fi
+if brew list defaultbrowser > /dev/null 2>&1; then
+    brew uninstall defaultbrowser
+fi
+
+echo "2. Installing the Firefox application..."
 brew install --cask firefox
 
-echo "2. Installing defaultbrowser CLI (used to set the default browser headlessly)..."
+echo "3. Installing defaultbrowser CLI (used to set the default browser headlessly)..."
 brew install defaultbrowser
 
-echo "3. Initiating Firefox so it registers as an HTTP/HTTPS handler with Launch Services..."
-open -a Firefox
+echo "4. Initiating Firefox so it registers as an HTTP/HTTPS handler with Launch Services..."
+# `open -a Firefox` resolves the name via Launch Services, which has not registered
+# the freshly-installed app yet, so open it by absolute path instead.
+firefoxPath="/Applications/Firefox.app"
+open "$firefoxPath"
 sleep 7 # let the app register handlers
 
-echo "4. Setting Firefox as the default browser..."
+echo "5. Setting Firefox as the default browser..."
 # `defaultbrowser firefox` flips the system handler. On modern macOS a confirmation
-# dialog ("Use 'Firefox'") still pops up - it must be accepted manually in step 5.
+# dialog ("Use 'Firefox'") still pops up - it must be accepted manually in step 6.
 defaultbrowser firefox
 
 echo ""
-echo "5. If a macOS dialog asks to confirm the default browser change, click 'Use Firefox'."
+echo "6. If a macOS dialog asks to confirm the default browser change, click 'Use Firefox'."
 echo "   Press Enter when done..."
 read voidInput
 
-printf "\n6. Log in to Firefox and enable Sync to restore bookmarks, history, passwords, extensions, and settings.\n"
+printf "\n7. Log in to Firefox and enable Sync to restore bookmarks, history, passwords, extensions, and settings.\n"
 echo "   Press Enter when done..."
 read voidInput
 
@@ -1379,8 +1465,8 @@ procedureId="system settings"
 
 informAboutProcedureStart
 
-echo "Closing open System Preferences panes in order to prevent them from overriding settings that will be changed now..."
-osascript -e 'tell application "System Preferences" to quit'
+echo "Closing open System Settings panes in order to prevent them from overriding settings that will be changed now..."
+osascript -e 'tell application "System Settings" to quit'
 
 echo "Changing Network..."
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
@@ -1409,12 +1495,16 @@ echo "Changing Appearance..."
 defaults write "Apple Global Domain" AppleAquaColorVariant -int 6
 defaults write "Apple Global Domain" AppleHighlightColor -string "0.847059 0.847059 0.862745 Graphite"
 defaults write "Apple Global Domain" AppleAccentColor -string "-1"
-defaults write "Apple Global Domain" AppleShowScrollBars Always
+defaults write "Apple Global Domain" AppleShowScrollBars -string Always
 
-echo "Changing Control Center..."
-defaults write com.apple.controlcenter "NSStatusItem Visible Bluetooth" -int 1
-defaults write com.apple.airplay showInMenuBarIfPresent -int 0
-defaults delete com.apple.Spotlight "NSStatusItem Visible Item-0"
+echo "Changing Control Center and menu bar..."
+# The Control Center / menu bar layout (which items appear, their order, and the
+# clock format) is stored as complex customization-state blobs that `defaults write`
+# cannot set cleanly, so the captured plists are imported wholesale.
+defaults import com.apple.controlcenter "$resourcesDir/mac/defaults/HOME/Library/Preferences/com.apple.controlcenter.plist"
+defaults import com.apple.menuextra.clock "$resourcesDir/mac/defaults/HOME/Library/Preferences/com.apple.menuextra.clock.plist"
+killall ControlCenter 2>/dev/null
+killall SystemUIServer 2>/dev/null
 
 echo "Changing Desktop & Dock..."
 defaults write com.apple.dock autohide -int 1
@@ -1429,28 +1519,36 @@ defaults write com.apple.WindowManager AutoHide -int 1
 defaults write com.apple.dock autohide-delay -float 1000; killall Dock
 
 echo "Changing Spotlight..."
-defaults write com.apple.Spotlight orderedItems -array \
-    '{"enabled"=1; "name"="APPLICATIONS";}' \
-    '{"enabled"=0; "name"="MENU_EXPRESSION";}' \
-    '{"enabled"=0; "name"="CONTACT";}' \
-    '{"enabled"=0; "name"="MENU_CONVERSION";}' \
-    '{"enabled"=0; "name"="MENU_DEFINITION";}' \
-    '{"enabled"=0; "name"="DOCUMENTS";}' \
-    '{"enabled"=0; "name"="EVENT_TODO";}' \
-    '{"enabled"=0; "name"="DIRECTORIES";}' \
-    '{"enabled"=0; "name"="FONTS";}' \
-    '{"enabled"=0; "name"="IMAGES";}' \
-    '{"enabled"=0; "name"="MESSAGES";}' \
-    '{"enabled"=0; "name"="MOVIES";}' \
-    '{"enabled"=0; "name"="MUSIC";}' \
-    '{"enabled"=0; "name"="MENU_OTHER";}' \
-    '{"enabled"=0; "name"="PDF";}' \
-    '{"enabled"=0; "name"="PRESENTATIONS";}' \
-    '{"enabled"=0; "name"="MENU_SPOTLIGHT_SUGGESTIONS";}' \
-    '{"enabled"=0; "name"="SPREADSHEETS";}' \
-    '{"enabled"=0; "name"="SYSTEM_PREFS";}' \
-    '{"enabled"=0; "name"="TIPS";}' \
-    '{"enabled"=0; "name"="BOOKMARKS";}'
+# macOS 26 stores Spotlight's per-source toggles in EnabledPreferenceRules (the legacy
+# `orderedItems` array is no longer read). Counter-intuitively, a rule listed here is a
+# source that is turned OFF; sources NOT listed (e.g. "Apps") stay ON. The list below is
+# the captured "apps only" configuration - every non-app source is disabled. App-specific
+# rules whose app is not installed are simply inert until that app is present.
+defaults write com.apple.Spotlight EnabledPreferenceRules -array \
+    "Custom.relatedContents" \
+    "System.files" \
+    "System.folders" \
+    "System.iphoneApps" \
+    "System.menuItems" \
+    "com.apple.AppStore" \
+    "com.apple.iBooksX" \
+    "com.apple.calculator" \
+    "com.apple.iCal" \
+    "com.apple.AddressBook" \
+    "com.apple.Dictionary" \
+    "com.apple.mail" \
+    "com.microsoft.Outlook" \
+    "com.apple.Notes" \
+    "com.microsoft.OneDrive" \
+    "com.apple.Photos" \
+    "com.apple.podcasts" \
+    "com.apple.reminders" \
+    "com.apple.Safari" \
+    "com.apple.shortcuts" \
+    "com.apple.systempreferences" \
+    "com.apple.tips" \
+    "com.apple.VoiceMemos"
+killall Spotlight 2>/dev/null
 
 echo "Changing Sound..."
 sudo nvram StartupMute=%01
@@ -1466,7 +1564,7 @@ defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 defaults write "Apple Global Domain" InitialKeyRepeat -int 15
 defaults write "Apple Global Domain" KeyRepeat -int 2
 defaults write kCFPreferencesAnyApplication TSMLanguageIndicatorEnabled 0
-echo "Go to 'System Preferences' -> 'Keyboard' and set preferrable input sources"
+echo "Go to 'System Settings' -> 'Keyboard' and set preferrable input sources"
 echo "Press Enter to continue..."
 read voidInput
 
@@ -1486,12 +1584,12 @@ defaults delete com.apple.dock persistent-others
 defaults delete com.apple.dock recent-apps
 killall Dock
 # Disable desktop icons
-defaults write com.apple.finder CreateDesktop false
+defaults write com.apple.finder CreateDesktop -bool false
 killall Finder
 
 echo ""
 echo "Setting Touch ID..."
-echo "Go to 'System Preferences' -> 'Touch ID & Password' and set your Touch ID"
+echo "Go to 'System Settings' -> 'Touch ID & Password' and set your Touch ID"
 echo "Press Enter to continue..."
 read voidInput
 
@@ -1585,32 +1683,16 @@ procedureId="display brightness"
 # DOCUMENTATION:
 #   n/a
 # NOTES:
-#   There is no straightforward way how to programmatically disable automatic brightness
-#   adjustments setting. Several solutions were tried (e.g. https://stackoverflow.com/a/41915690),
-#   but none of them worked well.
+#   These display settings are toggled manually. There is no reliable headless way to control
+#   them on Apple Silicon: the `brightness` CLI fails with "failed to set brightness of display
+#   ... (error -536870201)" and simulating the brightness-up key via `osascript ... key code
+#   144` proved unreliable too (see https://stackoverflow.com/a/41915690).
 
 informAboutProcedureStart
 
-echo "1. Setting max screen brightness..."
-# Docs: https://www.maketecheasier.com/adjust-screen-brightness-from-terminal-macos/
-while true; do
-	osascript -e 'tell application "System Events"' -e 'key code 144' -e ' end tell'
-	if [[ $? -eq 0 ]]; then
-		break
-	fi
- echo "Unable to execute the script. Provide the permissions required for the running application in System Preferences -> Privacy Tab -> Accessibility"
-	sleep 5
-done
-counter=1
-while [ $counter -le 20 ]
- do
-   osascript -e 'tell application "System Events"' -e 'key code 144' -e ' end tell'
-   ((counter++))
-done
-
-printf "\n2. Disabling automatic brightness adjustments...\n"
-echo "Go to 'System Preferences' -> 'Displays':"
-echo "   Uncheck the checkbox 'Automatically adjust brightness'"
+echo "Go to 'System Settings' -> 'Displays':"
+echo "   Turn off 'Automatically adjust brightness'"
+echo "   Turn off 'True Tone'"
 echo "Press Enter to continue..."
 read voidInput
 
