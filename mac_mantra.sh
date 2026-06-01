@@ -1492,7 +1492,7 @@ defaults write "Apple Global Domain" AppleICUNumberSymbols '
 }'
 
 echo "Changing Accessibility - Display..."
-defaults write com.apple.Accessibility EnhancedBackgroundContrastEnabled -int 1
+defaults write com.apple.Accessibility EnhancedBackgroundContrastEnabled -int 0
 # Ideally, also the following command should be executed, because without that property
 # the "Reduce transparency" setting might not fully work. However, execution of that command
 # within the script fails, but regardless of that failure the setting works as expected after
@@ -1522,6 +1522,8 @@ defaults write com.apple.dock "mru-spaces" -int 0
 defaults write com.apple.dock "wvous-br-corner" -int 1
 defaults write com.apple.dock "wvous-br-modifier" -int 0
 defaults write com.apple.WindowManager AutoHide -int 1
+# Disable the margins macOS adds around tiled windows ("Window Margins" off)
+defaults write com.apple.WindowManager EnableTiledWindowMargins -int 0
 # Docs: https://apple.stackexchange.com/a/82084
 defaults write com.apple.dock autohide-delay -float 1000; killall Dock
 
@@ -1571,6 +1573,12 @@ defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 defaults write "Apple Global Domain" InitialKeyRepeat -int 15
 defaults write "Apple Global Domain" KeyRepeat -int 2
 defaults write kCFPreferencesAnyApplication TSMLanguageIndicatorEnabled 0
+# Disable all automatic text substitutions (Keyboard -> Text Input -> Edit...)
+defaults write "Apple Global Domain" NSAutomaticCapitalizationEnabled -bool false
+defaults write "Apple Global Domain" NSAutomaticSpellingCorrectionEnabled -bool false
+defaults write "Apple Global Domain" NSAutomaticQuoteSubstitutionEnabled -bool false
+defaults write "Apple Global Domain" NSAutomaticDashSubstitutionEnabled -bool false
+defaults write "Apple Global Domain" NSAutomaticPeriodSubstitutionEnabled -bool false
 echo "Go to 'System Settings' -> 'Keyboard' and set preferrable input sources"
 echo "Press Enter to continue..."
 read voidInput
@@ -1592,6 +1600,8 @@ defaults delete com.apple.dock recent-apps
 killall Dock
 # Disable desktop icons
 defaults write com.apple.finder CreateDesktop -bool false
+# Use List view by default in Finder windows
+defaults write com.apple.finder FXPreferredViewStyle -string Nlsv
 killall Finder
 
 echo ""
