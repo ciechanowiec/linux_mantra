@@ -48,8 +48,8 @@ Its purpose is to make documents precise, complete, easy to follow, and consiste
 The guideline applies to non-fiction prose - reference documentation, design documents, runbooks, README files, protocol descriptions, and prose memos.
 It doesn't apply to fiction, marketing copy, or transient chat.
 
-The document is organized in three parts. xref:#part-1[Part 1] states rules that apply to any non-fiction document - any text that describes what exists or has existed, prescribes what should or must be done, performs an act by being written or spoken ("This policy is hereby adopted"), projects intended or possible futures, or aims to persuade the reader.
-These five purposes often appear together in a single document, and the rules apply to each. xref:#part-2[Part 2] adds rules for technical texts - specifications, reference documentation, architecture documents, design documents, protocol descriptions, and runbooks. xref:#part-3[Part 3] adds rules that apply when the author is an AI system.
+The document is organized in four parts. xref:#part-1[Part 1] states rules that apply to any non-fiction document - any text that describes what exists or has existed, prescribes what should or must be done, performs an act by being written or spoken ("This policy is hereby adopted"), projects intended or possible futures, or aims to persuade the reader.
+These five purposes often appear together in a single document, and the rules apply to each. xref:#part-2[Part 2] adds rules for technical texts - specifications, reference documentation, architecture documents, design documents, protocol descriptions, and runbooks. xref:#part-3[Part 3] adds rules that apply when the author is an AI system. xref:#part-4[Part 4] adds rules for the AsciiDoc markup that carries the document.
 
 [[part-1]]
 == General Rules
@@ -1023,6 +1023,61 @@ _The plan for the service must be revised._
 
 === Document Mechanics
 
+[#section-nesting]
+==== Section Nesting
+
+A section can have any number of subsections, and a subsection can nest further subsections when the material requires it. Two limits bound this nesting.
+
+First, subsections nest at most four levels below a top-level section, so a heading is at most five levels deep counting the top-level section. In xref:#part-4[AsciiDoc], a top-level section is written `==` and each deeper level adds one `=`, making `======` the deepest permitted heading:
+
+[source,asciidoc]
+----
+== 1
+=== 2
+==== 3
+===== 4
+====== 5
+----
+
+Second, a section has zero subsections, or two or more. A section never has exactly one subsection. A lone subsection means either that its content belongs in the parent section's prose or that a sibling subsection is missing.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+== Configuration
+=== Connection Pool
+The connection pool is configured via `pool.size`.
+----
+(One section, one subsection.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Configuration
+The connection pool is configured via `pool.size`.
+----
+(The lone subsection's content is folded into the parent section.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Configuration
+=== Connection Pool
+The connection pool is configured via `pool.size`.
+=== Cache
+The cache is configured via `cache.ttl`.
+----
+(Two sibling subsections.)
+====
+
 [#cross-references]
 ==== Cross-References
 
@@ -1689,6 +1744,36 @@ endif::[]
 ====
 _Reads the same lines as rendering metadata that doesn't bind on the generated output.
 The bound rules are the prose statements and the Bad example / Good example pairs._
+====
+
+[[part-4]]
+== AsciiDoc Documents
+
+This part adds rules for the AsciiDoc markup that carries the document. The rules in xref:#part-1[Part 1], xref:#part-2[Part 2], and xref:#part-3[Part 3] still apply. They govern the prose. This part governs the markup the prose is written in.
+
+[#one-sentence-per-line]
+=== Don't Write One Sentence Per Line
+
+Write each paragraph as continuous prose. Don't start a new source line for every sentence. AsciiDoc joins consecutive non-blank lines into one paragraph, so a per-sentence line break produces no change in the rendered output. The source reads as a list of fragments instead of a paragraph, and a sentence edit no longer aligns with the unit a reader thinks in.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The cache stores recently used entries.
+Each entry has a key and a value.
+An entry is evicted when the cache is full.
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The cache stores recently used entries. Each entry has a key and a value. An entry is evicted when the cache is full.
+----
 ====
 
 == About the Document
