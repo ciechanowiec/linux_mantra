@@ -1719,20 +1719,64 @@ promptOnContinuation
 ###############################################################################
 procedureId="display brightness"
 # DOCUMENTATION:
-#   n/a
+#   https://github.com/MonitorControl/MonitorControl
 # NOTES:
-#   These display settings are toggled manually. There is no reliable headless way to control
-#   them on Apple Silicon: the `brightness` CLI fails with "failed to set brightness of display
-#   ... (error -536870201)" and simulating the brightness-up key via `osascript ... key code
-#   144` proved unreliable too (see https://stackoverflow.com/a/41915690).
+#   1. The Apple-native display settings below are toggled manually. There is no reliable
+#      headless way to control them on Apple Silicon: the `brightness` CLI fails with "failed
+#      to set brightness of display ... (error -536870201)" and simulating the brightness-up
+#      key via `osascript ... key code 144` proved unreliable too
+#      (see https://stackoverflow.com/a/41915690).
+#   2. MonitorControl makes the hardware brightness keys drive every display at once: the
+#      native macOS keys only dim the built-in panel, whereas with `enableBrightnessSync` a
+#      single key press changes the built-in and every external (DDC) display together.
+#   3. Only durable preference keys are embedded below. The exported plist also held
+#      per-display, machine-specific keys (current brightness `value16/18/98(...)`,
+#      `SwBrightness(...)`, serial-bound `maxDDC...(...)`) and Sparkle/window runtime state
+#      (`SULastCheckTime`, `NSWindow Frame`, `buildNumber`, `appAlreadyLaunched`, ...). Those
+#      are intentionally omitted — MonitorControl regenerates them per machine/monitor on
+#      first run, so embedding them would only pin stale values from the author's setup.
+#   4. For the keys to work at all times MonitorControl must be running; enable
+#      "Launch at login" in step 4 below (it is a system login item, not a plist key, so it
+#      cannot be set via `defaults`).
 
 informAboutProcedureStart
 
+echo "1. Disabling Apple-native auto-brightness..."
 echo "Go to 'System Settings' -> 'Displays':"
 echo "   Turn off 'Automatically adjust brightness'"
 echo "   Turn off 'True Tone'"
 echo "Press Enter to continue..."
 read voidInput
+
+echo "2. Installing MonitorControl..."
+brew install --cask monitorcontrol
+
+echo "3. Initiating MonitorControl to generate its preferences and request permissions..."
+open -a MonitorControl
+sleep 5 # Give the application time to be initiated
+
+printf "\n4. In MonitorControl: grant the requested Accessibility permission and enable 'Launch at login'. Press Enter when done...\n"
+read voidInput
+
+echo "5. Killing MonitorControl..."
+killall MonitorControl 2>/dev/null
+sleep 3 # Give the application time to be killed
+
+echo "6. Configuring MonitorControl..."
+monitorControlDomain="app.monitorcontrol.MonitorControl"
+# Sync brightness across all displays so one key press moves every screen at once:
+defaults write "$monitorControlDomain" enableBrightnessSync -bool true
+# Allow software dimming below the hardware minimum (down to zero):
+defaults write "$monitorControlDomain" allowZeroSwBrightness -bool true
+# Keep combined (hardware + software) brightness and smooth transitions enabled:
+defaults write "$monitorControlDomain" disableCombinedBrightness -bool false
+defaults write "$monitorControlDomain" disableSmoothBrightness -bool false
+# Menu bar icon style and "do nothing" startup action, as configured manually:
+defaults write "$monitorControlDomain" menuIcon -int 2
+defaults write "$monitorControlDomain" startupAction -int 0
+
+echo "7. Opening MonitorControl..."
+open -a MonitorControl
 
 informAboutProcedureEnd
 
