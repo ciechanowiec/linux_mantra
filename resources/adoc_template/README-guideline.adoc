@@ -70,15 +70,15 @@ See xref:#dont-echo[].
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The Connection Pool Reference describes the connection pool._
+The Connection Pool Reference describes the connection pool.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The Connection Pool Reference is written for application engineers integrating against the database driver.
+The Connection Pool Reference is written for application engineers integrating against the database driver.
 It assumes familiarity with relational databases and connection lifecycle.
-It documents pool configuration, observable behavior, and tuning - enough to size and operate a pool against the supported drivers._
+It documents pool configuration, observable behavior, and tuning - enough to size and operate a pool against the supported drivers.
 ====
 
 ==== State the Purpose
@@ -89,14 +89,14 @@ The purpose is named concretely enough that the reader can predict the kind of c
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_This document covers the rate limiter._
+This document covers the rate limiter.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_This document describes how the rate limiter behaves in production today and states the integration requirements that callers must satisfy.
-After reading it, an integrator should be able to send conforming requests, interpret the responses, and configure a quota for a new tenant._
+This document describes how the rate limiter behaves in production today and states the integration requirements that callers must satisfy.
+After reading it, an integrator should be able to send conforming requests, interpret the responses, and configure a quota for a new tenant.
 ====
 
 ==== Scope and Non-Scope
@@ -109,23 +109,23 @@ A non-scope statement about material no one would expect is filler.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_(Document titled "The Order Service Reference" opens directly with: "An order is a record of a customer's intent to purchase one or more items…")_ (No scope statement.
+(Document titled "The Order Service Reference" opens directly with: "An order is a record of a customer's intent to purchase one or more items…") (No scope statement.
 The reader doesn't know whether the document covers the wire protocol, the storage format, the administrative interface, or all three.)
 ====
 
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_(Document titled "The Order Service Wire Protocol" opens with: "This document covers the wire protocol of the Order Service.
-It doesn't cover unrelated subjects such as employee onboarding or office facilities.")_ (Scope is fine.
+(Document titled "The Order Service Wire Protocol" opens with: "This document covers the wire protocol of the Order Service.
+It doesn't cover unrelated subjects such as employee onboarding or office facilities.") (Scope is fine.
 The non-scope sentence addresses material no reader would have expected.)
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_(Document titled "The Order Service Reference" opens with: "This document specifies the wire protocol between client and server, the request and response formats, and the error model.
-The on-disk storage format and the replication protocol between server nodes are covered separately in the Storage Reference and the Replication Reference.")_ (Scope is stated.
+(Document titled "The Order Service Reference" opens with: "This document specifies the wire protocol between client and server, the request and response formats, and the error model.
+The on-disk storage format and the replication protocol between server nodes are covered separately in the Storage Reference and the Replication Reference.") (Scope is stated.
 The non-scope is included because a reader of an "Order Service Reference" might reasonably expect storage and replication to be covered.)
 ====
 
@@ -142,15 +142,15 @@ Sentences that staple two unrelated facts together aren't.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The connection is established when the handshake completes, and a request is sent as a sequence of frames that are reassembled by the receiver in the order their stream identifiers appear._
+The connection is established when the handshake completes, and a request is sent as a sequence of frames that are reassembled by the receiver in the order their stream identifiers appear.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The connection is established when the handshake completes.
+The connection is established when the handshake completes.
 A request is sent as a sequence of frames.
-The receiver reassembles the frames in the order their stream identifiers appear._
+The receiver reassembles the frames in the order their stream identifiers appear.
 ====
 
 ==== One Paragraph, One Topic
@@ -162,19 +162,19 @@ A paragraph that introduces a second, parallel topic must be split, even when th
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_A transaction groups a series of operations into a single atomic unit and is started by calling `begin`.
-Indexes accelerate query execution by storing precomputed lookup structures and are maintained automatically by the database._
+A transaction groups a series of operations into a single atomic unit and is started by calling `begin`.
+Indexes accelerate query execution by storing precomputed lookup structures and are maintained automatically by the database.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A transaction groups a series of operations into a single atomic unit.
+A transaction groups a series of operations into a single atomic unit.
 The transaction is started by calling `begin` and is concluded by either `commit` or `rollback`.
-Until the transaction is concluded, its changes are visible only to operations performed within the same transaction._
+Until the transaction is concluded, its changes are visible only to operations performed within the same transaction.
 
-_An index is a precomputed lookup structure that accelerates query execution.
-The database maintains an index automatically: every insert, update, and delete on the indexed table updates the index in the same transaction as the data change._
+An index is a precomputed lookup structure that accelerates query execution.
+The database maintains an index automatically: every insert, update, and delete on the indexed table updates the index in the same transaction as the data change.
 ====
 
 ==== No Restatement
@@ -187,14 +187,14 @@ When you find yourself rephrasing, delete the weaker version.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The cache is invalidated when the source changes.
-Whenever the underlying data is modified, the cached copy is no longer valid and is therefore removed._
+The cache is invalidated when the source changes.
+Whenever the underlying data is modified, the cached copy is no longer valid and is therefore removed.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The cache entry for a record is invalidated when the record's `last++_++modified` timestamp changes._
+The cache entry for a record is invalidated when the record's `last++_++modified` timestamp changes.
 ====
 
 ==== Razor Sentences
@@ -211,10 +211,10 @@ The usual offenders are sentences that announce upcoming material ("In this sect
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_There are several important things to consider when configuring the load balancer.
+There are several important things to consider when configuring the load balancer.
 Let us look at them.
 The first thing is the algorithm.
-The algorithm controls how requests are distributed across backends._
+The algorithm controls how requests are distributed across backends.
 ====
 ifdef::backend-html5[]
 ++++
@@ -225,9 +225,9 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The load balancer's algorithm controls how requests are distributed across backends.
+The load balancer's algorithm controls how requests are distributed across backends.
 The supported algorithms are round-robin, least-connections, and consistent-hash.
-The default is round-robin._
+The default is round-robin.
 ====
 
 ==== Forward Order
@@ -239,16 +239,16 @@ When a concept is needed before its full definition, give a short gloss at first
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The `onMessage` callback is invoked after the channel has joined the topic.
-A channel is a logical connection identified by a name and bound to a single topic._
+The `onMessage` callback is invoked after the channel has joined the topic.
+A channel is a logical connection identified by a name and bound to a single topic.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A channel is a logical connection identified by a name and bound to a single topic (see §3.2).
+A channel is a logical connection identified by a name and bound to a single topic (see §3.2).
 When a channel joins a topic, it begins to receive messages published to that topic.
-Each message is delivered to the channel's `onMessage` callback._
+Each message is delivered to the channel's `onMessage` callback.
 ====
 
 ==== Affirmative Before Negative
@@ -261,15 +261,15 @@ A negation placed first forces the reader to carry a list of exclusions with not
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Setting `cache.ttl` doesn't change the maximum number of entries or the eviction order.
-It controls only how long an entry remains valid after it's written._
+Setting `cache.ttl` doesn't change the maximum number of entries or the eviction order.
+It controls only how long an entry remains valid after it's written.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_Setting `cache.ttl` controls only how long an entry remains valid after it's written.
-It doesn't change the maximum number of entries or the eviction order._
+Setting `cache.ttl` controls only how long an entry remains valid after it's written.
+It doesn't change the maximum number of entries or the eviction order.
 ====
 
 ==== Headings as Promises
@@ -283,14 +283,14 @@ Material that doesn't belong under the heading goes into a separate section.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Heading: "Connection Pooling." Body: discusses pooling, then transaction isolation, then a digression on prepared statements._
+Heading: "Connection Pooling." Body: discusses pooling, then transaction isolation, then a digression on prepared statements.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_Heading: "Connection Pooling." Body: pool sizing, acquisition, release, leak detection, and the lifecycle of a pooled connection.
-Transaction isolation is documented in a separate section, with a cross-reference where pool behavior interacts with isolation._
+Heading: "Connection Pooling." Body: pool sizing, acquisition, release, leak detection, and the lifecycle of a pooled connection.
+Transaction isolation is documented in a separate section, with a cross-reference where pool behavior interacts with isolation.
 ====
 
 === Terminology and Precision
@@ -309,29 +309,30 @@ When the system doesn't, pick one and use only that one.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The handler registers itself with the broker.
-Once the listener is active, the consumer dispatches incoming events to subscribers._ (Three names.
+The handler registers itself with the broker.
+Once the listener is active, the consumer dispatches incoming events to subscribers.
+(Three names.
 One concept.)
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The handler registers itself with the broker.
-Once the handler is active, it dispatches incoming events to subscribers._
+The handler registers itself with the broker.
+Once the handler is active, it dispatches incoming events to subscribers.
 ====
 
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_You can add a record to the table, then submit the changes by committing the transaction._
+You can add a record to the table, then submit the changes by committing the transaction.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A record is inserted into the table by `INSERT INTO`.
-The change becomes durable when the enclosing transaction is committed._
+A record is inserted into the table by `INSERT INTO`.
+The change becomes durable when the enclosing transaction is committed.
 ====
 
 [#defined-terms]
@@ -349,7 +350,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_A token is something the client sends to prove who it is._
+A token is something the client sends to prove who it is.
 ====
 ifdef::backend-html5[]
 ++++
@@ -360,8 +361,8 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_A *token* is an opaque string issued by the authentication server that the client presents to prove its identity to a resource server.
-A token has an issuer, a subject, an expiration time, and a set of scopes that constrain the operations the bearer may perform._
+A _token_ is an opaque string issued by the authentication server that the client presents to prove its identity to a resource server.
+A token has an issuer, a subject, an expiration time, and a set of scopes that constrain the operations the bearer may perform.
 ====
 
 ==== Concrete Vocabulary
@@ -373,15 +374,15 @@ Replace abstract qualifiers - _flexible_, _robust_, _scalable_, _modern_, _enter
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The platform is flexible and supports seamless integration with modern enterprise systems._
+The platform is flexible and supports seamless integration with modern enterprise systems.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A new data source is added by implementing the `DataSource` interface and registering it through the plugin manifest.
+A new data source is added by implementing the `DataSource` interface and registering it through the plugin manifest.
 The platform discovers the implementation at startup.
-Existing sources don't need to be modified or recompiled, and existing queries continue to run unchanged._
+Existing sources don't need to be modified or recompiled, and existing queries continue to run unchanged.
 ====
 
 ==== Plain Names for Plain Things
@@ -394,14 +395,14 @@ When it would not, the fancier term was decoration.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The system leverages a cloud-native, distributed compute fabric to deliver intelligent responses._
+The system leverages a cloud-native, distributed compute fabric to deliver intelligent responses.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_Each request is processed by one of several stateless servers behind a load balancer.
-The server consults a cache, then the database, then returns the response._
+Each request is processed by one of several stateless servers behind a load balancer.
+The server consults a cache, then the database, then returns the response.
 ====
 
 Further pairs where the plain form is usually correct:
@@ -426,7 +427,8 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The CRDT replica synchronizes via the SWIM protocol over QUIC._ (Three acronyms.
+The CRDT replica synchronizes via the SWIM protocol over QUIC.
+(Three acronyms.
 The reader may know none.)
 ====
 ifdef::backend-html5[]
@@ -438,8 +440,8 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_Each replica is a Conflict-free Replicated Data Type (CRDT), so concurrent updates from different replicas can be merged without coordination.
-Replicas discover each other and detect failures using the Scalable Weakly Consistent Infection-style Membership (SWIM) protocol, which runs over Quick UDP Internet Connections (QUIC)._
+Each replica is a Conflict-free Replicated Data Type (CRDT), so concurrent updates from different replicas can be merged without coordination.
+Replicas discover each other and detect failures using the Scalable Weakly Consistent Infection-style Membership (SWIM) protocol, which runs over Quick UDP Internet Connections (QUIC).
 ====
 
 === Context and Framing
@@ -454,17 +456,17 @@ It must give the reader a place to put the new information.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The query planner uses a cost-based optimizer with histograms._
+The query planner uses a cost-based optimizer with histograms.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A relational database receives queries in a declarative language (SQL) and must decide how to execute them.
-This is the job of the *query planner*: it transforms a SQL statement into an executable plan - a tree of operations such as scans, joins, and aggregations._
+A relational database receives queries in a declarative language (SQL) and must decide how to execute them.
+This is the job of the _query planner_: it transforms a SQL statement into an executable plan - a tree of operations such as scans, joins, and aggregations.
 
-_The planner described in this document is *cost-based*: it enumerates candidate plans and chooses the one with the lowest estimated cost.
-Cost is estimated using *histograms* - summaries of column value distributions, refreshed periodically - which let the planner predict how many rows each operation will produce._
+The planner described in this document is _cost-based_: it enumerates candidate plans and chooses the one with the lowest estimated cost.
+Cost is estimated using _histograms_ - summaries of column value distributions, refreshed periodically - which let the planner predict how many rows each operation will produce.
 ====
 
 ==== Outer Topics in Outline Only
@@ -483,9 +485,9 @@ A section on rate limiting that opens with five paragraphs explaining what HTTP 
 [.good-example]
 .{good-icon} Good example
 ====
-_Rate limiting is the mechanism by which an HTTP server protects itself from excessive requests by a single client.
+Rate limiting is the mechanism by which an HTTP server protects itself from excessive requests by a single client.
 When a client exceeds its quota, the server responds with status `429 Too Many Requests` and a `Retry-After` header indicating when the client may try again.
-The full semantics of HTTP status codes and headers are defined in RFC 9110._
+The full semantics of HTTP status codes and headers are defined in RFC 9110.
 ====
 
 ==== Why Before How
@@ -497,16 +499,16 @@ It doesn't become a sales pitch.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The deduplication subsystem maintains a Bloom filter of recent message IDs and consults it on each incoming message._
+The deduplication subsystem maintains a Bloom filter of recent message IDs and consults it on each incoming message.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The same message can arrive more than once: producers retry on timeout, and the network can reorder and duplicate packets.
+The same message can arrive more than once: producers retry on timeout, and the network can reorder and duplicate packets.
 To deliver each message to the application at most once, the receiver deduplicates incoming messages by ID.
 A Bloom filter of recent IDs serves as the first check.
-On a positive match, the receiver consults the durable index to confirm._
+On a positive match, the receiver consults the durable index to confirm.
 ====
 
 === Concreteness and Examples
@@ -525,22 +527,22 @@ Misreadings tend to arise at boundaries.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_A query parameter is appended to the URL after the path and is used to pass additional data to the server._
+A query parameter is appended to the URL after the path and is used to pass additional data to the server.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A query parameter is appended to the URL after the path, separated from the path by `?` and from other parameters by `&`.
-The following URL has two query parameters, `q` and `page`:_
+A query parameter is appended to the URL after the path, separated from the path by `?` and from other parameters by `&`.
+The following URL has two query parameters, `q` and `page`:
 
 ....
 https://example.com/search?q=postgres+index&page=2
 ....
 
-_A parameter without a value is permitted.
+A parameter without a value is permitted.
 Its value is the empty string.
-A parameter that appears more than once produces a list of values whose order matches the order in the URL:_
+A parameter that appears more than once produces a list of values whose order matches the order in the URL:
 
 ....
 https://example.com/search?tag=db&tag=index&debug
@@ -558,7 +560,7 @@ Placeholder examples don't.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Acme Corp. agrees to provide widgets to Beta Ltd. on a date in the future._
+Acme Corp. agrees to provide widgets to Beta Ltd. on a date in the future.
 ====
 
 ifdef::backend-html5[]
@@ -569,7 +571,7 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_Supplier (Acme Corp., a Delaware corporation, EIN 99-1234567) shall deliver 1,200 sensor modules (part number SNS-V2-A) to Customer (Beta Ltd., a Polish limited liability company, KRS 0000123456) at Mostowa 12, 50-200 Wrocław, Poland, on or before 2026-09-30._
+Supplier (Acme Corp., a Delaware corporation, EIN 99-1234567) shall deliver 1,200 sensor modules (part number SNS-V2-A) to Customer (Beta Ltd., a Polish limited liability company, KRS 0000123456) at Mostowa 12, 50-200 Wrocław, Poland, on or before 2026-09-30.
 ====
 ifdef::backend-html5[]
 ++++
@@ -587,14 +589,15 @@ Passive voice is reserved for cases where the actor is genuinely unknown, irrele
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The configuration is loaded and the cache is populated._ (Who loads it?
+The configuration is loaded and the cache is populated.
+(Who loads it?
 Who populates the cache?)
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_On startup, the configuration loader reads `config.yaml` from the working directory and populates the in-memory cache._
+On startup, the configuration loader reads `config.yaml` from the working directory and populates the in-memory cache.
 ====
 
 ==== Direct Verbs
@@ -605,13 +608,13 @@ The shorter form is also more precise, because the verb carries the action that 
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The framework performs the resolution of dependencies and provides notification of state changes._
+The framework performs the resolution of dependencies and provides notification of state changes.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The framework resolves dependencies and notifies registered listeners of state changes._
+The framework resolves dependencies and notifies registered listeners of state changes.
 ====
 
 ==== Avoid Parentheses and Semicolons
@@ -629,7 +632,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The connection pool (default size 10) is configured via `pool.size`; the value is read at startup._
+The connection pool (default size 10) is configured via `pool.size`; the value is read at startup.
 ====
 ifdef::backend-html5[]
 ++++
@@ -640,8 +643,8 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The connection pool is configured via `pool.size`.
-The default size is 10. The value is read at startup._
+The connection pool is configured via `pool.size`.
+The default size is 10. The value is read at startup.
 ====
 
 ==== Natural Phrasing
@@ -659,7 +662,7 @@ Avoid phrases - _super easy_, _just_, _simply_, _merely_ - that minimize the rea
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Herein, the aforementioned mechanism shall be utilized to leverage the synergies between the modules._
+Herein, the aforementioned mechanism shall be utilized to leverage the synergies between the modules.
 ====
 ifdef::backend-html5[]
 ++++
@@ -671,8 +674,8 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The two modules communicate through the event bus defined in §3.1. The producer publishes events.
-The consumer subscribes and processes them._
+The two modules communicate through the event bus defined in §3.1. The producer publishes events.
+The consumer subscribes and processes them.
 ====
 
 ==== Specific Numbers
@@ -683,7 +686,7 @@ When the number is unknown, say so and give a range or an order of magnitude.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The cache holds many entries and evicts old ones quickly._
+The cache holds many entries and evicts old ones quickly.
 ====
 
 ifdef::backend-html5[]
@@ -694,9 +697,9 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The cache holds up to 10,000 entries by default.
+The cache holds up to 10,000 entries by default.
 When the cache is full, the least-recently-used entry is evicted on each insertion.
-Eviction is performed synchronously and typically completes in under 50 µs on commodity hardware._
+Eviction is performed synchronously and typically completes in under 50 µs on commodity hardware.
 ====
 ifdef::backend-html5[]
 ++++
@@ -719,7 +722,7 @@ When a claim is uncertain, say what the uncertainty is.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The operation is generally pretty fast and usually completes fairly quickly._
+The operation is generally pretty fast and usually completes fairly quickly.
 ====
 ifdef::backend-html5[]
 ++++
@@ -730,9 +733,9 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The operation completes in under 10 ms for inputs of fewer than 1 million elements.
+The operation completes in under 10 ms for inputs of fewer than 1 million elements.
 For larger inputs, runtime grows linearly with input size.
-See §7.4 for benchmarks._
+See §7.4 for benchmarks.
 ====
 
 ==== No Patronizing
@@ -756,15 +759,15 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Configuring the resolver is straightforward - just provide a simple hook implementation._
+Configuring the resolver is straightforward - just provide a simple hook implementation.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_To customize resolution, implement the `ResolutionHook` interface and register the implementation through the configuration file under `resolution.hooks`.
+To customize resolution, implement the `ResolutionHook` interface and register the implementation through the configuration file under `resolution.hooks`.
 The framework consults registered hooks in declaration order.
-The first hook that returns a non-null result determines the outcome._
+The first hook that returns a non-null result determines the outcome.
 ====
 
 ==== Tense and Mood
@@ -776,13 +779,13 @@ Use the imperative for instructions to the reader ("Register the listener before
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_When the connection will be established, the server will be sending a greeting._
+When the connection will be established, the server will be sending a greeting.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_When the connection is established, the server sends a greeting frame containing its protocol version and supported extensions._
+When the connection is established, the server sends a greeting frame containing its protocol version and supported extensions.
 ====
 
 ==== Person
@@ -800,10 +803,10 @@ Don't switch among _you_, _we_, _the user_, and _one_ within a section.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_We register the handler.
+We register the handler.
 The user can then look it up.
 One must be careful to unregister it on shutdown.
-You should also handle exceptions._
+You should also handle exceptions.
 ====
 ifdef::backend-html5[]
 ++++
@@ -814,9 +817,9 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_Register the handler during initialization and store the returned registration.
+Register the handler during initialization and store the returned registration.
 During shutdown, call `unregister` on the stored registration.
-When initialization throws, the framework doesn't invoke shutdown, so any partial registration must be cleaned up before the throw._
+When initialization throws, the framework doesn't invoke shutdown, so any partial registration must be cleaned up before the throw.
 ====
 
 [#pronoun-antecedents]
@@ -828,14 +831,15 @@ When the candidate antecedents are two or more, replace the pronoun with the nam
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The handler calls the resolver, which logs the request, and it returns the result._ (Does _it_ refer to the handler or the resolver?)
+The handler calls the resolver, which logs the request, and it returns the result.
+(Does _it_ refer to the handler or the resolver?)
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The handler calls the resolver.
-The resolver logs the request and returns the result to the handler._
+The handler calls the resolver.
+The resolver logs the request and returns the result to the handler.
 ====
 
 ==== Inclusive Language
@@ -850,15 +854,15 @@ The established replacements - _allowlist_ / _blocklist_, _primary_ / _replica_,
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_When the user clicks Submit, he is shown the receipt.
-If his card is declined, ask him to retry._
+When the user clicks Submit, he is shown the receipt.
+If his card is declined, ask him to retry.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_When the user clicks Submit, the receipt is shown.
-If the card is declined, the user is prompted to retry._
+When the user clicks Submit, the receipt is shown.
+If the card is declined, the user is prompted to retry.
 ====
 
 === Anti-Fluff
@@ -874,13 +878,13 @@ When a document does argue for a position, it advances claims supported by evide
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The blazing-fast, industry-leading database delivers world-class performance for the most demanding workloads._
+The blazing-fast, industry-leading database delivers world-class performance for the most demanding workloads.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The database sustains 50,000 reads per second and 8,000 writes per second on the reference hardware described in Appendix B, with p99 read latency under 5 ms._
+The database sustains 50,000 reads per second and 8,000 writes per second on the reference hardware described in Appendix B, with p99 read latency under 5 ms.
 ====
 
 ==== No Filler Phrases
@@ -900,7 +904,7 @@ The sentence following the filler is usually fine on its own.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_It's important to note that, basically, the connection is, at the end of the day, not thread-safe._
+It's important to note that, basically, the connection is, at the end of the day, not thread-safe.
 ====
 ifdef::backend-html5[]
 ++++
@@ -915,9 +919,9 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_A connection isn't thread-safe.
+A connection isn't thread-safe.
 A connection shared between threads must be externally synchronized.
-Otherwise, behavior is undefined._
+Otherwise, behavior is undefined.
 ====
 
 ==== No Empty Transitions
@@ -927,18 +931,18 @@ Connecting words must carry weight. _Furthermore_, _moreover_, _additionally_, a
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The session is created on login.
+The session is created on login.
 Furthermore, the session is bound to a workspace.
 Moreover, the session has an associated user.
-Additionally, the session can be saved._
+Additionally, the session can be saved.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A session is created by `login`.
+A session is created by `login`.
 The session is bound to one workspace and one user, both fixed for the session's lifetime.
-Pending changes are persisted by `save` and discarded by `rollback`._
+Pending changes are persisted by `save` and discarded by `rollback`.
 ====
 
 [[no-throat-clearing]]
@@ -960,17 +964,17 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Section 4.2: Connection Pooling.
+Section 4.2: Connection Pooling.
 In this section, we will now turn our attention to the topic of connection pooling, which is a complex but important subject.
-Connection pooling is the pooling of connections…_
+Connection pooling is the pooling of connections…
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_Section 4.2: Connection Pooling.
-A *connection pool* is a fixed-size set of pre-established connections that clients borrow for the duration of an operation and return when finished.
-Pooling avoids the per-request cost of opening and closing connections._
+Section 4.2: Connection Pooling.
+A _connection pool_ is a fixed-size set of pre-established connections that clients borrow for the duration of an operation and return when finished.
+Pooling avoids the per-request cost of opening and closing connections.
 ====
 ifdef::backend-html5[]
 ++++
@@ -1007,7 +1011,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The actual end result is that the future plans for the service will literally have to be revised._
+The actual end result is that the future plans for the service will literally have to be revised.
 ====
 ifdef::backend-html5[]
 ++++
@@ -1018,7 +1022,7 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The plan for the service must be revised._
+The plan for the service must be revised.
 ====
 
 === Document Mechanics
@@ -1026,9 +1030,11 @@ _The plan for the service must be revised._
 [#section-nesting]
 ==== Section Nesting
 
-A section can have any number of subsections, and a subsection can nest further subsections when the material requires it. Two limits bound this nesting.
+A section can have any number of subsections, and a subsection can nest further subsections when the material requires it.
+Two limits bound this nesting.
 
-First, subsections nest at most four levels below a top-level section, so a heading is at most five levels deep counting the top-level section. In xref:#part-4[AsciiDoc], a top-level section is written `==` and each deeper level adds one `=`, making `======` the deepest permitted heading:
+First, subsections nest at most four levels below a top-level section, so a heading is at most five levels deep counting the top-level section.
+In xref:#part-4[AsciiDoc], a top-level section is written `==` and each deeper level adds one `=`, making `======` the deepest permitted heading:
 
 [source,asciidoc]
 ----
@@ -1039,7 +1045,9 @@ First, subsections nest at most four levels below a top-level section, so a head
 ====== 5
 ----
 
-Second, a section has zero subsections, or two or more. A section never has exactly one subsection. A lone subsection means either that its content belongs in the parent section's prose or that a sibling subsection is missing.
+Second, a section has zero subsections, or two or more.
+A section never has exactly one subsection.
+A lone subsection means either that its content belongs in the parent section's prose or that a sibling subsection is missing.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1050,6 +1058,7 @@ Second, a section has zero subsections, or two or more. A section never has exac
 === Connection Pool
 The connection pool is configured via `pool.size`.
 ----
+
 (One section, one subsection.)
 ====
 
@@ -1061,6 +1070,7 @@ The connection pool is configured via `pool.size`.
 == Configuration
 The connection pool is configured via `pool.size`.
 ----
+
 (The lone subsection's content is folded into the parent section.)
 ====
 
@@ -1075,6 +1085,7 @@ The connection pool is configured via `pool.size`.
 === Cache
 The cache is configured via `cache.ttl`.
 ----
+
 (Two sibling subsections.)
 ====
 
@@ -1084,17 +1095,18 @@ The cache is configured via `cache.ttl`.
 A cross-reference points to a numbered section, table, figure, or defined term.
 References to "above" and "below" are permitted only within the same paragraph or list.
 Across sections, use the section number.
+In AsciiDoc documents, the anchor that a cross-reference targets and the markup that carries the cross-reference are governed by the sections xref:#explicit-anchors[] and xref:#internal-references-with-xref[].
 
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_As discussed earlier, the resolver follows specific rules._
+As discussed earlier, the resolver follows specific rules.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The resolver follows the rules defined in §5.3._
+The resolver follows the rules defined in §5.3.
 ====
 
 ==== Lists for Enumerable Content
@@ -1107,19 +1119,19 @@ Don't write a list as a single run-on sentence.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-- _The system starts._
-- _Then it loads the configuration._
-- _It also validates it and applies it in order based on priority which is a number from 1 to N._
+- The system starts.
+- Then it loads the configuration.
+- It also validates it and applies it in order based on priority which is a number from 1 to N.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The system starts in four phases.
+The system starts in four phases.
 First, it reads the configuration file.
 Second, it validates the configuration against the schema.
 Third, it resolves references between configuration sections.
-Fourth, it applies each resolved section in ascending order of priority._
+Fourth, it applies each resolved section in ascending order of priority.
 ====
 
 A bullet list is appropriate when the items are independent and parallel:
@@ -1127,13 +1139,13 @@ A bullet list is appropriate when the items are independent and parallel:
 [.good-example]
 .{good-icon} Good example
 ====
-_A request is in exactly one of the following states:_
+A request is in exactly one of the following states:
 
-* _RECEIVED - the request has been parsed but not yet authorized._
-* _AUTHORIZED - the caller has been authenticated and authorized._
-* _PROCESSING - the handler is executing._
-* _COMPLETED - the response has been sent._
-* _FAILED - the handler raised an unhandled error._
+* RECEIVED - the request has been parsed but not yet authorized.
+* AUTHORIZED - the caller has been authenticated and authorized.
+* PROCESSING - the handler is executing.
+* COMPLETED - the response has been sent.
+* FAILED - the handler raised an unhandled error.
 ====
 
 [#exhaustive-lists]
@@ -1147,21 +1159,22 @@ A list that looks complete but omits members is a defect: a reader who acts on t
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The supported authentication methods are password, OAuth, and SAML._ (The system also supports certificate-based authentication and an external IdP integration, but the list reads as exhaustive.
+The supported authentication methods are password, OAuth, and SAML.
+(The system also supports certificate-based authentication and an external IdP integration, but the list reads as exhaustive.
 A reader who designs an integration around the three listed methods discovers the gap only during implementation.)
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The supported authentication methods are password, OAuth, SAML, certificate-based authentication, and external IdP integration._
+The supported authentication methods are password, OAuth, SAML, certificate-based authentication, and external IdP integration.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The most commonly used authentication methods are password, OAuth, and SAML.
-The full set, including certificate-based and external-IdP methods, is listed in §6.2._
+The most commonly used authentication methods are password, OAuth, and SAML.
+The full set, including certificate-based and external-IdP methods, is listed in §6.2.
 ====
 
 ==== Tables for Multidimensional Comparison
@@ -1189,7 +1202,7 @@ Each row is independent.
 ==== Capitalization of Defined Terms
 
 A defined term is capitalized consistently with its definition.
-When the term is defined as *Connection Pool*, it's written _Connection Pool_ throughout, not _connection pool_ or _ConnectionPool_ (unless `ConnectionPool` is also a separate identifier referring to the type, in which case both forms appear and the document distinguishes them).
+When the term is defined as _Connection Pool_, it's written _Connection Pool_ throughout, not _connection pool_ or _ConnectionPool_ (unless `ConnectionPool` is also a separate identifier referring to the type, in which case both forms appear and the document distinguishes them).
 
 [#dates-and-times]
 ==== Dates and Times
@@ -1219,7 +1232,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The migration completes next Tuesday at 5pm._
+The migration completes next Tuesday at 5pm.
 ====
 ifdef::backend-html5[]
 ++++
@@ -1232,7 +1245,7 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The migration completes on 2026-05-19 at 17:00 Europe/Warsaw._
+The migration completes on 2026-05-19 at 17:00 Europe/Warsaw.
 ====
 
 ==== Single Source of Truth
@@ -1250,16 +1263,16 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The retention period (90 days) is documented in the Storage Reference.
+The retention period (90 days) is documented in the Storage Reference.
 The retention period (90 days) is also documented in the Compliance Manual.
-The retention period (90 days) is also documented in the Onboarding Guide._
+The retention period (90 days) is also documented in the Onboarding Guide.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_The retention period is defined in §4 of the Storage Reference.
-The Compliance Manual and the Onboarding Guide reference §4 of the Storage Reference._
+The retention period is defined in §4 of the Storage Reference.
+The Compliance Manual and the Onboarding Guide reference §4 of the Storage Reference.
 ====
 ifdef::backend-html5[]
 ++++
@@ -1321,7 +1334,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The new compaction strategy is a game changer that moves the needle on tail latency._
+The new compaction strategy is a game changer that moves the needle on tail latency.
 ====
 ifdef::backend-html5[]
 ++++
@@ -1333,7 +1346,7 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The new compaction strategy reduces p99 read latency by 40% on the workload described in §6._
+The new compaction strategy reduces p99 read latency by 40% on the workload described in §6.
 ====
 
 [[part-2]]
@@ -1378,7 +1391,7 @@ Prose descriptions of network behavior tend to omit headers, status codes, conte
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The client sends a POST request with the order data and receives the created order back._
+The client sends a POST request with the order data and receives the created order back.
 ====
 
 [.good-example]
@@ -1439,10 +1452,10 @@ A diagram that forces the reader to count spaces or trace ambiguous connections 
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The gateway dispatches each incoming request to one of three downstream services - the search service, the catalog service, or the cart service - based on the request path.
+The gateway dispatches each incoming request to one of three downstream services - the search service, the catalog service, or the cart service - based on the request path.
 The search service queries an inverted index.
 The catalog service queries a relational database.
-The cart service queries a key-value store._
+The cart service queries a key-value store.
 
 (The topology is a fan-out, and the reader has to assemble it from sequential prose.
 A diagram would show it at a glance.)
@@ -1469,9 +1482,9 @@ A diagram would show it at a glance.)
     +-----------+   +-----------+   +-----------+
 ....
 
-_Each arrow is a synchronous call.
+Each arrow is a synchronous call.
 The gateway routes by request path.
-Downstream services don't call each other._
+Downstream services don't call each other.
 ====
 
 === Self-Contained Snippets
@@ -1502,6 +1515,7 @@ assert response.status_code == 202
 ----
 ====
 
+[#code-markup]
 === Code Markup
 
 Code, identifiers, file paths, configuration keys, and protocol headers are set in a monospaced font.
@@ -1512,13 +1526,13 @@ Identifiers are written exactly as they appear in code, including case.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Call commit to persist the changes._
+Call commit to persist the changes.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_Call `commit` to persist the changes._
+Call `commit` to persist the changes.
 ====
 
 [[part-3]]
@@ -1541,7 +1555,8 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The service runs on Postgres 16.4 with `max_connections=300` and exposes a `/health` endpoint that returns the build SHA._ (None of the version, parameter, or endpoint was stated in the input.)
+The service runs on Postgres 16.4 with `max_connections=300` and exposes a `/health` endpoint that returns the build SHA.
+(None of the version, parameter, or endpoint was stated in the input.)
 ====
 ifdef::backend-html5[]
 ++++
@@ -1552,9 +1567,9 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The service runs on Postgres.
+The service runs on Postgres.
 The exact version and connection-pool configuration aren't stated in the input.
-Whether a health endpoint exists isn't documented either, and the service's route table would have to be checked to confirm._
+Whether a health endpoint exists isn't documented either, and the service's route table would have to be checked to confirm.
 ====
 
 [#dont-echo]
@@ -1571,15 +1586,15 @@ The prohibited pattern is summarizing the question back to the questioner before
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_You asked about connection pooling.
+You asked about connection pooling.
 Here is a description of connection pooling.
-Connection pooling is a technique used in software systems to manage database connections._
+Connection pooling is a technique used in software systems to manage database connections.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A connection pool is a fixed-size set of pre-established connections that clients borrow for the duration of an operation and return when finished._
+A connection pool is a fixed-size set of pre-established connections that clients borrow for the duration of an operation and return when finished.
 ====
 
 === Don't Throat-Clear
@@ -1605,11 +1620,11 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Sure!
+Sure!
 I'd be happy to explain HTTP connection pooling.
-Let me walk you through it step by step._
+Let me walk you through it step by step.
 
-_HTTP connection pooling is..._
+HTTP connection pooling is...
 ====
 ifdef::backend-html5[]
 ++++
@@ -1621,8 +1636,8 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_An HTTP connection pool keeps a fixed number of TCP connections to a remote host open across requests.
-The client borrows a connection for one request, returns it on completion, and the pool reuses it for the next request to the same host._
+An HTTP connection pool keeps a fixed number of TCP connections to a remote host open across requests.
+The client borrows a connection for one request, returns it on completion, and the pool reuses it for the next request to the same host.
 ====
 
 === Don't Annotate Rule Application
@@ -1635,14 +1650,14 @@ Don't narrate the application.
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Following the guideline, I'll keep this terse and use direct verbs.
-Here is a description of connection pooling..._
+Following the guideline, I'll keep this terse and use direct verbs.
+Here is a description of connection pooling...
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-_A connection pool is a fixed-size set of pre-established connections..._
+A connection pool is a fixed-size set of pre-established connections...
 ====
 
 === State Gaps, Don't Hedge
@@ -1659,7 +1674,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_The cache is generally pretty fast, and the eviction policy is usually some form of LRU._
+The cache is generally pretty fast, and the eviction policy is usually some form of LRU.
 ====
 ifdef::backend-html5[]
 ++++
@@ -1670,8 +1685,8 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_The cache's latency and eviction policy aren't stated in the input.
-Both would have to be specified to answer the question._
+The cache's latency and eviction policy aren't stated in the input.
+Both would have to be specified to answer the question.
 ====
 
 === Distribute by Domain, Not by Prompt
@@ -1691,10 +1706,10 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Prompt: "List 20 Java performance optimization techniques.
-Include something related to garbage collection."_
+Prompt: "List 20 Java performance optimization techniques.
+Include something related to garbage collection."
 
-_Response: lists 9 garbage collection techniques first (GC tuning, heap sizing, GC log analysis, G1 vs ZGC comparison…), then 11 techniques from other areas._
+Response: lists 9 garbage collection techniques first (GC tuning, heap sizing, GC log analysis, G1 vs ZGC comparison…), then 11 techniques from other areas.
 
 Garbage collection is one subcategory of JVM performance optimization.
 The response allocated 45% of its content to it because the prompt mentioned it explicitly, not because it represents 45% of the optimization domain.
@@ -1707,10 +1722,10 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_Prompt: "List 20 Java performance optimization techniques.
-Include something related to garbage collection."_
+Prompt: "List 20 Java performance optimization techniques.
+Include something related to garbage collection."
 
-_Response: lists 20 techniques covering Just-in-Time (JIT) compilation, object pooling, connection pool sizing, lock contention reduction, I/O buffering, profiling, lazy initialization, and other areas, with 1-2 entries on garbage collection tuning placed according to natural fit._
+Response: lists 20 techniques covering Just-in-Time (JIT) compilation, object pooling, connection pool sizing, lock contention reduction, I/O buffering, profiling, lazy initialization, and other areas, with 1-2 entries on garbage collection tuning placed according to natural fit.
 
 Garbage collection appears once, satisfying the minimum constraint.
 Its share of the response matches its share of the optimization domain, not its share of the prompt.
@@ -1731,7 +1746,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-_Treats `image::architecture.png[Client, gateway, order service…]` from the xref:#alt-text-and-captions[] rule as an instruction to embed an image in the output, or treats `<!-- vale Google.We = NO -->` as a directive to disable a check in the generated document._
+Treats `image::architecture.png[Client, gateway, order service…]` from the xref:#alt-text-and-captions[] rule as an instruction to embed an image in the output, or treats `<!-- vale Google.We = NO -->` as a directive to disable a check in the generated document.
 ====
 ifdef::backend-html5[]
 ++++
@@ -1742,8 +1757,8 @@ endif::[]
 [.good-example]
 .{good-icon} Good example
 ====
-_Reads the same lines as rendering metadata that doesn't bind on the generated output.
-The bound rules are the prose statements and the Bad example / Good example pairs._
+Reads the same lines as rendering metadata that doesn't bind on the generated output.
+The bound rules are the prose statements and the Bad example / Good example pairs.
 ====
 
 [[part-4]]
@@ -1773,6 +1788,144 @@ An entry is evicted when the cache is full.
 [source,asciidoc]
 ----
 The cache stores recently used entries. Each entry has a key and a value. An entry is evicted when the cache is full.
+----
+====
+
+[#explicit-anchors]
+=== Explicit Anchors
+
+A part of the text that a cross-reference targets carries an explicit anchor: a block anchor `+[[kebab-case-id]]+` on the line directly above a heading, or an inline anchor of the same form placed directly on text inside a block.
+The anchor sits on the most specific part of the text that defines the referenced concept - the section when the section as a whole defines it, the paragraph or list item when that alone defines it, or the single defining word.
+An anchor ID is a lowercase kebab-case name in the document's language, and it names the content, not the content's position.
+An explicit ID survives retitling.
+An auto-generated ID is derived from the heading text, so renaming the heading silently breaks every reference to it.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+== Configuration
+
+The defaults are listed in <<_connection_pool>>.
+
+=== Connection Pool
+----
+
+(The reference targets the auto-generated ID.
+Renaming the heading to "Pooling" breaks the reference.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Configuration
+
+The defaults are listed in the section xref:#connection-pool[].
+
+[[connection-pool]]
+=== Connection Pool
+
+A [[lease]]_lease_ is the exclusive right to use one pooled connection for the duration of an operation. [[pool-size-default]]The default pool size is 10.
+----
+
+(The section keeps its ID under any title.
+The anchors sit on the most specific defining parts: the section for the pool, the word for the lease, the statement for the default size.)
+====
+
+[#internal-references-with-xref]
+=== Internal References with `xref`
+
+A part of the text that refers to a concept defined in another part of the text links to the definition.
+The link is written with the `xref` macro against the definition's explicit anchor.
+The default form is `+xref:#connection-pool[]+` with empty brackets, which renders the target's title and stays correct when the title changes.
+Custom link text is supplied only when the title doesn't fit the grammar of the sentence.
+When a reference points to a section and the rendered title alone would leave the grammar or the meaning of the sentence unclear, the reference is preceded by a qualifier such as _the section_ or _the chapter_. xref:#cross-references[] governs the wording around the reference.
+This rule governs when a reference is due and the markup that carries it.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+Each handler holds a lease on a pooled connection. Pool sizing is described in the section "Connection Pool" above. Defaults are listed in xref:#connection-pool[].
+----
+
+(The term _lease_ is defined elsewhere in the document but isn't linked to its definition.
+The first section reference is plain text: it doesn't link, and it breaks when the section moves or is retitled.
+The last reference links, but it renders as "listed in Connection Pool" - without a qualifier the meaning of the sentence is unclear.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+Each handler holds a xref:#lease[lease] on a pooled connection. Pool sizing is described in the section xref:#connection-pool[]. Size the pool according to the xref:#connection-pool[sizing rules].
+----
+
+(The defined term links to its definition.
+The empty-bracket form inherits the target's title, and the qualifier _the section_ keeps the meaning of the sentence clear.
+The last reference supplies custom text because the sentence needs a different inflection.)
+====
+
+[#link-text-carries-the-claim]
+=== Link Text Carries the Claim
+
+An external link wraps the phrase that the linked source substantiates, so the sentence keeps its meaning when the markup is stripped.
+Link text such as _here_ or _this page_, and a bare URL pasted mid-sentence, carries no information about the target.
+A link that leads the reader away from the document ends with `^`, which opens the target in a new tab.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The upload limit is documented here: https://docs.example.com/assets/limits.
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The service https://docs.example.com/assets/limits[accepts uploads of up to 5 GB per file^].
+----
+
+(The linked phrase is the claim the source substantiates.
+The sentence keeps its meaning without the markup.)
+====
+
+[#inline-formatting-semantics]
+=== Inline Formatting Semantics
+
+Each inline mark has one role.
+A monospaced span marks technical literals - paths, domains, IP addresses, file extensions, configuration keys, HTTP headers, identifiers - as xref:#code-markup[] prescribes.
+Italics mark a term of art, a foreign-language term, the proper name of a product or interface element, and a word that carries emphasis.
+Bold appears only in headings, where the renderer applies it.
+Bold isn't written in body text - a word that needs emphasis in a paragraph is italicized.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The *connection string* is stored in _config.yaml_ under the key *db.url*.
+----
+
+(Bold in body text - twice - and italics for a path.
+Emphasis belongs to italics, and paths belong to monospaced spans.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+A _connection string_ is a URL-shaped value that names the database host, port, and schema. The connection string is stored in `config.yaml` under the key `db.url`. The value follows the _JDBC_ URL convention.
 ----
 ====
 
