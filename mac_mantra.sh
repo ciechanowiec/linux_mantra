@@ -1251,6 +1251,37 @@ promptOnContinuation
 ###############################################################################
 #                                                                             #
 #                                                                             #
+#                               12. PANDOC                                    #
+#                                                                             #
+#                                                                             #
+###############################################################################
+procedureId="pandoc"
+# DOCUMENTATION:
+#   n/a
+# NOTES:
+#   1. General markup converter, i.a. for .doc -> .adoc conversions
+#   2. Don't install from brew, because it comes with no autocompletion by default
+
+informAboutProcedureStart
+
+echo "1. Downloading the Pandoc installation package..."
+curl -s https://api.github.com/repos/jgm/pandoc/releases/latest \
+  | grep "browser_download_url.*pandoc.*arm64-macOS.pkg" \
+  | cut -d : -f 2,3 \
+  | tr -d \" \
+  | wget -i -
+
+echo "2. Installing Pandoc..."
+pandocInstallationFile=$(ls -1 pandoc*arm64-macOS.pkg | head -n 1)
+sudo installer -pkg "$pandocInstallationFile" -target /
+
+informAboutProcedureEnd
+
+promptOnContinuation
+
+###############################################################################
+#                                                                             #
+#                                                                             #
 #                                12. ALTTAB                                   #
 #                                                                             #
 #                                                                             #
