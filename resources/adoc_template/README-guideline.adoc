@@ -133,6 +133,7 @@ The connection is established when the handshake completes, and a request is sen
 The connection is established when the handshake completes. A request is sent as a sequence of frames. The receiver reassembles the frames in the order their stream identifiers appear.
 ====
 
+[#one-paragraph-one-topic]
 ==== One Paragraph, One Topic
 
 A paragraph develops one thought: a claim followed by its elaboration, qualifications, and consequences. When the topic shifts, the paragraph ends. A paragraph that introduces a second, parallel topic must be split, even when the two topics are related.
@@ -936,6 +937,7 @@ As discussed earlier, the resolver follows specific rules.
 The resolver follows the rules defined in §5.3.
 ====
 
+[#lists-for-enumerable-content]
 ==== Lists for Enumerable Content
 
 Lists are used for content whose items are genuinely parallel and enumerable: a fixed set of states, a finite set of options, a sequence of steps. Prose is used for arguments, derivations, and connected reasoning. Don't bullet a paragraph. Don't write a list as a single run-on sentence.
@@ -1540,6 +1542,232 @@ The cache stores recently used entries. Each entry has a key and a value. An ent
 ----
 ====
 
+[#numbered-paragraphs]
+=== Numbered Paragraphs
+
+A _numbered paragraph_ is a paragraph written as an item of an AsciiDoc list, so that the renderer prefixes it with a number, a letter, or - at the deepest levels - a bullet. Numbering makes each paragraph an addressable unit: a review comment or a cross-reference names item 2.3 instead of "the second sentence of the fourth paragraph". A numbered paragraph is still a paragraph - full sentences developing one topic, as xref:#one-paragraph-one-topic[] requires. Numbering addresses paragraphs. It doesn't license the fragment-style bullets that xref:#lists-for-enumerable-content[] forbids.
+
+[#number-every-paragraph]
+==== Number Every Paragraph of a Multi-Paragraph Section
+
+When the body of a section contains two or more paragraphs, every paragraph of that body is a numbered paragraph. A section whose body is a single paragraph is written as plain prose. The numbering enforces xref:#one-paragraph-one-topic[] at the markup level: each number marks the start of one topic, so a paragraph that drifts into a second topic is exposed - the second topic sits under a number that promised the first.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+== Eviction
+
+A cache entry is evicted when its TTL expires. Eviction runs synchronously on each insertion.
+
+The eviction order is least-recently-used. The order is tracked per shard.
+
+Evicted entries are counted in the `cache_evictions_total` metric.
+----
+
+(Three paragraphs, none addressable. A reviewer pointing at the second one has to describe its position.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Eviction
+
+. A cache entry is evicted when its TTL expires. Eviction runs synchronously on each insertion.
+. The eviction order is least-recently-used. The order is tracked per shard.
+. Evicted entries are counted in the `cache_evictions_total` metric.
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Eviction
+
+A cache entry is evicted when its TTL expires. The eviction order is least-recently-used.
+----
+
+(A single-paragraph body stays plain prose. A lone number would have nothing to be ordered against.)
+====
+
+[#numbering-depth]
+==== Numbering Depth
+
+Numbered paragraphs nest at most six levels. The first four levels are ordered-list markers written with dots - `.`, `..`, `++...++`, `++....++`. The fifth and sixth levels are unordered-list markers - `++*++`, `++**++`. The renderer shows the fifth and sixth levels as bullets instead of numbers, and the other rules of this section apply to them all the same. Nothing nests below `++**++`:
+
+[source,asciidoc]
+----
+. 1
+.. 2
+... 3
+.... 4
+* 5
+** 6
+----
+
+Material that seems to need a seventh level doesn't get one. The subtree is restructured instead: the top of the subtree is promoted to a subsection heading per xref:#section-nesting[], or intermediate levels that don't carry real hierarchy are flattened.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+.... The client retries a failed request.
+..... The retry delay doubles on each attempt.
+*** The delay is capped at 30 seconds.
+----
+
+(Five dots exceed the four-dot ladder, and `++***++` exceeds the two-asterisk ladder. After `++....++` come `++*++` and `++**++`, and nothing comes after `++**++`.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+.... The client retries a failed request.
+* The retry delay doubles on each attempt.
+* The delay is capped at 30 seconds.
+----
+====
+
+[#no-lone-numbered-paragraph]
+==== No Lone Numbered Paragraph
+
+At every nesting level, a numbered paragraph has at least one sibling at the same level under the same parent. A level holds zero items or two or more. A lone item means the numbering does no work: there is nothing at that level to order the item against, so its content belongs in the parent paragraph's own text or in a continuation per xref:#continuation-content[] - or a sibling is missing. The rule mirrors xref:#section-nesting[], which forbids a lone subsection for the same reason.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+. The pool validates a connection before lending it.
+.. The validation query is `SELECT 1`.
+. The pool replaces a connection that fails validation.
+----
+
+(The `..` item has no sibling. It elaborates its parent rather than enumerating anything.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. The pool validates a connection before lending it. The validation query is `SELECT 1`.
+. The pool replaces a connection that fails validation.
+----
+
+(The lone item is folded into its parent.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. The pool validates a connection before lending it.
+.. The validation query is `SELECT 1`.
+.. A validation that exceeds 250 ms counts as a failure.
+. The pool replaces a connection that fails validation.
+----
+
+(The missing sibling is supplied, so the nested level now enumerates two facts about validation.)
+====
+
+[#paragraph-headers]
+==== Paragraph Headers
+
+A numbered paragraph may open with a _paragraph header_ - a bold phrase that names the paragraph's topic. The header stands alone on the item's line. The paragraph's text follows as a continuation per xref:#continuation-content[] or as nested numbered paragraphs. A header is due when it helps the reader scan: the paragraph is long and holds several sentences, or the item heads a group of nested items whose shared topic needs a name. A header is omitted when it adds nothing: a paragraph of one or two sentences whose topic is already stated by the section heading doesn't restate that topic in bold. A paragraph header is the one place where bold appears in body text - see xref:#inline-formatting-semantics[].
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Dispatcher
+
+. The dispatcher is an Apache HTTP module placed in front of the rendering instances.
+. *Security*
++
+The dispatcher filters incoming requests and forwards only those that match the configured allowlist of paths and methods. A request outside the allowlist is rejected with status `404`. The allowlist is defined in `dispatcher/filters.any` and is deployed with the application code.
+. *Caching*
++
+The dispatcher stores rendered pages on disk. On a cache miss, the request is forwarded to a rendering instance and the response is stored before being returned. A publish event invalidates the affected paths.
+----
+
+(The first paragraph is short and needs no header. The other two are long, and the headers let the reader locate the security and caching material without reading both paragraphs.)
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+== Defaults
+
+. *Default pool size* The default pool size is 10.
+. *Default timeout* The default timeout is 30 seconds.
+----
+
+(Each header restates the one sentence it precedes, under a heading that already names the topic. The headers add bold without adding information.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Defaults
+
+. The default pool size is 10.
+. The default timeout is 30 seconds.
+----
+====
+
+[#continuation-content]
+==== Continuation Content
+
+Content whose meaning is strongly bound to the preceding numbered paragraph is attached to that paragraph with a list continuation - a line holding a single `+` - instead of being numbered. The attached block can be a paragraph that elaborates the item, a code listing, an image, a table, or an admonition. The continuation signals that the item's topic continues. Content that starts a new topic isn't attached - it takes its own number.
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+------
+. The pool is configured via `pool.size`:
++
+[source,yaml]
+----
+pool:
+  size: 25
+----
++
+The value is read once at startup. A change requires a restart.
+. A connection that fails validation is evicted and replaced.
+------
+
+(The listing and the follow-up paragraph elaborate the configuration item, so both attach to it with `+`. The eviction fact starts a new topic and takes its own number.)
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+. The pool is configured via `pool.size`.
++
+The cache is configured via `cache.ttl`.
+----
+
+(The attached paragraph starts a new topic. The cache isn't an elaboration of the pool's configuration, so the paragraph takes its own number.)
+====
+
 [#explicit-anchors]
 === Explicit Anchors
 
@@ -1633,7 +1861,7 @@ The service https://docs.example.com/assets/limits[accepts uploads of up to 5 GB
 [#inline-formatting-semantics]
 === Inline Formatting Semantics
 
-Each inline mark has one role. A monospaced span marks technical literals - paths, domains, IP addresses, file extensions, configuration keys, HTTP headers, identifiers - as xref:#code-markup[] prescribes. Italics mark a term of art, a foreign-language term, the proper name of a product or interface element, a word mentioned as a word, and a word that carries emphasis. Bold appears only in headings, where the renderer applies it. Bold isn't written in body text - a word that needs emphasis in a paragraph is italicized.
+Each inline mark has one role. A monospaced span marks technical literals - paths, domains, IP addresses, file extensions, configuration keys, HTTP headers, identifiers - as xref:#code-markup[] prescribes. Italics mark a term of art, a foreign-language term, the proper name of a product or interface element, a word mentioned as a word, and a word that carries emphasis. Bold appears in headings, where the renderer applies it, and in the paragraph headers prescribed by xref:#paragraph-headers[]. Elsewhere, bold isn't written in body text - a word that needs emphasis in a paragraph is italicized.
 
 [.bad-example]
 .{bad-icon} Bad example
