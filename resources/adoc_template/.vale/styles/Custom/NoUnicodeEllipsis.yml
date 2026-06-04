@@ -1,0 +1,6 @@
+extends: substitution
+message: "Use three separate dots (...) instead of the ellipsis character."
+level: error
+nonword: true
+swap:
+  '…': '...'
