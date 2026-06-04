@@ -36,20 +36,24 @@ ifndef::backend-docbook5[]
 endif::[]
 endif::[]
 
-[cols=">.^1,<.^1"]
+[cols=">.^1h,<.^1"]
 |===
-| *Document last modified:* | {docdatetime}
-| *Document generated:* | {localdatetime}
+| Document last modified: | {docdatetime}
+| Document generated: | {localdatetime}
 |===
 
 This guideline governs how written documents are produced. Its purpose is to make documents precise, complete, easy to follow, and consistent across authors and over time.
 
 The guideline applies to non-fiction prose - reference documentation, design documents, runbooks, README files, protocol descriptions, and prose memos. It doesn't apply to fiction, marketing copy, or transient chat.
 
-The document is organized in four parts. xref:#part-1[Part 1] states rules that apply to any non-fiction document - any text that describes what exists or has existed, prescribes what should or must be done, performs an act by being written or spoken ("This policy is hereby adopted"), projects intended or possible futures, or aims to persuade the reader. These five purposes often appear together in a single document, and the rules apply to each. xref:#part-2[Part 2] adds rules for technical texts - specifications, reference documentation, architecture documents, design documents, protocol descriptions, and runbooks. xref:#part-3[Part 3] adds rules that apply when the author is an AI system. xref:#part-4[Part 4] adds rules for the AsciiDoc markup that carries the document.
+The guideline is written for authors of such prose, whether human or AI. It assumes the ability to write standard English and familiarity with the subject the author writes about. After reading, an author should be able to apply each rule while writing and to verify a finished document against the rules.
+
+The guideline is organized in four parts. xref:#part-1[Part 1] states rules that apply to any non-fiction document. xref:#part-2[Part 2] adds rules for technical texts - documents whose subject is a technical system. xref:#part-3[Part 3] adds rules that apply when the author is an AI system. xref:#part-4[Part 4] adds rules for the AsciiDoc markup that carries the document.
 
 [[part-1]]
 == General Rules
+
+This part states rules that apply to any non-fiction document, whatever its subject and markup. The parts that follow add rules for narrower contexts without overriding the rules stated here.
 
 === Audience, Purpose, and Scope
 
@@ -95,7 +99,7 @@ A document, and each major section, opens with a statement of what it covers. Th
 [.bad-example]
 .{bad-icon} Bad example
 ====
-(Document titled "The Order Service Reference" opens directly with: "An order is a record of a customer's intent to purchase one or more items…") (No scope statement. The reader doesn't know whether the document covers the wire protocol, the storage format, the administrative interface, or all three.)
+(Document titled "The Order Service Reference" opens directly with: "An order is a record of a customer's intent to purchase one or more items...".) (No scope statement. The reader doesn't know whether the document covers the wire protocol, the storage format, the administrative interface, or all three.)
 ====
 
 [.bad-example]
@@ -170,7 +174,7 @@ ifdef::backend-html5[]
 <!-- vale Google.We = NO -->
 ++++
 endif::[]
-Every sentence does work that no other sentence in the document does. If a sentence can be deleted without losing information, delete it. The usual offenders are sentences that announce upcoming material ("In this section, we will discuss…"), sentences that summarize what was just said, and sentences that exist only to introduce a list ("There are several ways to do this:" can usually be removed along with its colon).
+Every sentence does work that no other sentence in the document does. If a sentence can be deleted without losing information, delete it. The usual offenders are sentences that announce upcoming material, sentences that summarize what was just said, and sentences that exist only to introduce a list. "In this section, we will discuss..." announces upcoming material. "There are several ways to do this:" introduces a list and can be deleted along with its colon.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -272,7 +276,7 @@ A record is inserted into the table by `INSERT INTO`. The change becomes durable
 [#defined-terms]
 ==== Defined Terms
 
-A term that has a specific meaning in the document is defined the first time it's used in a normative sense. The definition takes the form _X is Y that Z_, where _Y_ is the genus (the broader category) and _Z_ is the differentia (what distinguishes _X_ from other members of _Y_). After the definition, the term is used without redefinition.
+A term that has a specific meaning in the document is defined the first time it's used in a normative sense. The definition takes the form _X is Y that Z_. _Y_ is the genus - the broader category. _Z_ is the differentia - what distinguishes _X_ from other members of _Y_. After the definition, the term is used without redefinition.
 
 ifdef::backend-html5[]
 ++++
@@ -474,7 +478,7 @@ endif::[]
 
 ==== Active Voice and Named Actor
 
-A sentence names the actor that performs the action. Passive voice is reserved for cases where the actor is genuinely unknown, irrelevant, or the topic of the sentence ("The request is rejected" is acceptable when the topic is the request, not the rejecter).
+A sentence names the actor that performs the action. Passive voice is reserved for cases where the actor is genuinely unknown, irrelevant, or the topic of the sentence. "The request is rejected" is acceptable when the topic is the request, not the rejecter.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -538,7 +542,7 @@ ifdef::backend-html5[]
 <!-- vale Google.We = NO -->
 ++++
 endif::[]
-Write the way an experienced practitioner would write a careful internal document. Avoid phrases - _herein_, _aforementioned_, _leverage_, _utilize_, _whilst_, _thereof_ - that a practitioner would not say aloud. Avoid phrases - _super easy_, _just_, _simply_, _merely_ - that minimize the reader's task.
+Write the way an experienced practitioner would write a careful internal document. Avoid phrases - _herein_, _aforementioned_, _leverage_, _utilize_, _whilst_, _thereof_, etc. - that a practitioner would not say aloud. Avoid phrases - _super easy_, _just_, _simply_, _merely_, etc. - that minimize the reader's task.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -639,7 +643,7 @@ To customize resolution, implement the `ResolutionHook` interface and register t
 
 ==== Tense and Mood
 
-Use the present tense for behavior that holds whenever the system is in the relevant state ("The framework calls the start method…"). Use the future tense only for actions that genuinely lie in the future from the reader's reference point - for instance, behavior of a planned but not yet released version. Use the imperative for instructions to the reader ("Register the listener before…").
+Use the present tense for behavior that holds whenever the system is in the relevant state: "The framework calls the start method...". Use the future tense only for actions that genuinely lie in the future from the reader's reference point - for instance, behavior of a planned but not yet released version. Use the imperative for instructions to the reader: "Register the listener before...".
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -682,7 +686,7 @@ Register the handler during initialization and store the returned registration. 
 [#pronoun-antecedents]
 ==== Pronoun Antecedents
 
-Every pronoun (_it_, _this_, _they_, _that_) has a single, unambiguous antecedent in the same sentence or the immediately preceding sentence. When the candidate antecedents are two or more, replace the pronoun with the name. _This_ and _that_ at the start of a sentence are followed by the noun they refer to (_this change_, _that release_) when the antecedent isn't a single noun.
+Every pronoun - _it_, _this_, _they_, _that_ - has a single, unambiguous antecedent in the same sentence or the immediately preceding sentence. When the candidate antecedents are two or more, replace the pronoun with the name. _This_ and _that_ at the start of a sentence are followed by the noun they refer to - _this change_, _that release_ - when the antecedent isn't a single noun.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -696,6 +700,7 @@ The handler calls the resolver, which logs the request, and it returns the resul
 The handler calls the resolver. The resolver logs the request and returns the result to the handler.
 ====
 
+[#inclusive-language]
 ==== Inclusive Language
 
 Name actors and examples without invoking gender, ethnicity, or other identity attributes unless they're part of the topic. Use _they_ as a singular pronoun for a person of unspecified gender. Use names from a variety of traditions in examples, not from a single naming convention. Avoid metaphors that depend on culturally specific knowledge for a reader who may not share it. Replace terms whose origin demeans a group. The established replacements - _allowlist_ / _blocklist_, _primary_ / _replica_, _main_ branch, etc. - communicate at least as well.
@@ -717,7 +722,7 @@ When the user clicks Submit, the receipt is shown. If the card is declined, the 
 [#no-marketing]
 ==== No Marketing
 
-Documentation doesn't sell. Remove claims of being _cutting-edge_, _next-generation_, _industry-leading_, _world-class_, _blazing fast_, _rock-solid_, or _battle-tested_. Replace them with what they were trying to claim, in concrete terms, or remove the sentence entirely. When a document does argue for a position, it advances claims supported by evidence, not by superlatives.
+Documentation doesn't sell. Remove claims of being _cutting-edge_, _next-generation_, _industry-leading_, _world-class_, _blazing fast_, _rock-solid_, _battle-tested_, etc. Replace them with what they were trying to claim, in concrete terms, or remove the sentence entirely. When a document does argue for a position, it advances claims supported by evidence, not by superlatives.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -789,7 +794,7 @@ ifdef::backend-html5[]
 <!-- vale Google.We = NO -->
 ++++
 endif::[]
-Sections, paragraphs, and sentences begin with content. They don't begin with announcements that content is about to follow ("Now let us turn our attention to…"), with apologies ("This is a complex topic, but…"), or with restatements of the heading.
+Sections, paragraphs, and sentences begin with content. They don't begin with announcements that content is about to follow ("Now let us turn our attention to..."), with apologies ("This is a complex topic, but..."), or with restatements of the heading.
 
 ifdef::backend-html5[]
 ++++
@@ -799,7 +804,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-Section 4.2: Connection Pooling. In this section, we will now turn our attention to the topic of connection pooling, which is a complex but important subject. Connection pooling is the pooling of connections…
+Section 4.2: Connection Pooling. In this section, we will now turn our attention to the topic of connection pooling, which is a complex but important subject. Connection pooling is the pooling of connections...
 ====
 
 [.good-example]
@@ -859,7 +864,7 @@ The plan for the service must be revised.
 [#section-nesting]
 ==== Section Nesting
 
-A section can have any number of subsections, and a subsection can nest further subsections when the material requires it. Two limits bound this nesting.
+A section can have any number of subsections. A subsection can nest further subsections when the material requires it. Two limits bound this nesting.
 
 First, subsections nest at most four levels below a top-level section, so a heading is at most five levels deep counting the top-level section. In xref:#part-4[AsciiDoc], a top-level section is written `==` and each deeper level adds one `=`, making `======` the deepest permitted heading:
 
@@ -872,7 +877,7 @@ First, subsections nest at most four levels below a top-level section, so a head
 ====== 5
 ----
 
-Second, a section has zero subsections, or two or more. A section never has exactly one subsection. A lone subsection means either that its content belongs in the parent section's prose or that a sibling subsection is missing.
+Second, a section has zero subsections, or two or more. A lone subsection means either that its content belongs in the parent section's prose or that a sibling subsection is missing.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -966,7 +971,7 @@ A request is in exactly one of the following states:
 [#exhaustive-lists]
 ==== Exhaustive Lists
 
-A list is either complete or explicitly marked as incomplete. When the list enumerates the members of a set, all members appear. When the list is a sample, it opens or closes with a phrase that names the omission - _among others_, _the most common are…_, _see §X for the full list_. A list that looks complete but omits members is a defect: a reader who acts on the listed items as the full set acts on a false premise.
+A list is either complete or explicitly marked as incomplete. When the list enumerates the members of a set, all members appear. When the list is a sample, it opens or closes with a phrase that names the omission - _among others_, _the most common are..._, _see §X for the full list_. A list that looks complete but omits members is a defect: a reader who acts on the listed items as the full set acts on a false premise.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1007,7 +1012,19 @@ A table is used when each item has the same set of attributes and the reader wil
 [#capitalization-of-defined-terms]
 ==== Capitalization of Defined Terms
 
-A defined term is capitalized consistently with its definition. When the term is defined as _Connection Pool_, it's written _Connection Pool_ throughout, not _connection pool_ or _ConnectionPool_ (unless `ConnectionPool` is also a separate identifier referring to the type, in which case both forms appear and the document distinguishes them).
+A defined term is capitalized consistently with its definition. When the term is defined as _Connection Pool_, it's written _Connection Pool_ throughout, not _connection pool_ or _ConnectionPool_. When `ConnectionPool` is also a separate identifier referring to the type, both forms appear and the document distinguishes them.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A _Connection Pool_ is a fixed-size set of pre-established connections. Each worker borrows a connection from the connection pool. (The term is defined as _Connection Pool_ and later written _connection pool_.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+A _Connection Pool_ is a fixed-size set of pre-established connections. Each worker borrows a connection from the Connection Pool.
+====
 
 [#dates-and-times]
 ==== Dates and Times
@@ -1017,7 +1034,7 @@ ifdef::backend-html5[]
 <!-- vale Google.Acronyms = NO -->
 ++++
 endif::[]
-Dates are written in ISO 8601 (YYYY-MM-DD). Times include a timezone offset or the timezone name. Durations use ISO 8601 (`P30D`) or are written with explicit units (_30 calendar days_). Relative references - _yesterday_, _next week_, _Q3_ - are avoided unless the reference point is the document's effective date and that date is stated.
+Dates are written in the ISO 8601 form `YYYY-MM-DD`. Times include a timezone offset or the timezone name. Durations are written in the ISO 8601 form `P30D` or with explicit units such as _30 calendar days_. Relative references - _yesterday_, _next week_, _Q3_, etc. - are avoided unless the reference point is the document's effective date and that date is stated.
 ifdef::backend-html5[]
 ++++
 <!-- vale Google.Acronyms = YES -->
@@ -1102,16 +1119,14 @@ ifdef::backend-html5[]
 <!-- vale proselint.Cliches = NO -->
 <!-- vale write-good.Cliches = NO -->
 <!-- vale proselint.CorporateSpeak = NO -->
-<!-- vale Google.Semicolons = NO -->
 ++++
 endif::[]
-A document that may be translated avoids idioms, puns, and culture-specific references. _Cut to the chase_, _hit the ground running_, _the elephant in the room_, and _moving the needle_ rarely survive translation. Sports metaphors and political metaphors are avoided. Examples use names from a variety of traditions; currency, units, and date formats are written in forms that don't presuppose a single locale.
+A document that may be translated avoids idioms, puns, and culture-specific references. _Cut to the chase_, _hit the ground running_, _the elephant in the room_, and _moving the needle_ rarely survive translation. Sports metaphors and political metaphors are avoided. Currency, units, and date formats are written in forms that don't presuppose a single locale. Example names are governed by the section xref:#inclusive-language[].
 ifdef::backend-html5[]
 ++++
 <!-- vale proselint.Cliches = YES -->
 <!-- vale write-good.Cliches = YES -->
 <!-- vale proselint.CorporateSpeak = YES -->
-<!-- vale Google.Semicolons = YES -->
 ++++
 endif::[]
 
@@ -1221,7 +1236,7 @@ A component diagram showing the client, gateway, order service, and payment serv
 
 === ASCII Diagrams
 
-When xref:#diagrams-and-prose[the rule above] calls for a diagram, render it as an inline ASCII diagram if the structure fits. An ASCII diagram travels with the text - it survives copy-paste, renders in plain-text contexts, and doesn't depend on an asset pipeline. Use one when the topology genuinely earns a picture: a fan-out, a layered stack, a tree, a state machine with a small number of states. Skip it when one or two sentences of prose convey the same relationship, and when the structure is too large or too irregular to render legibly in characters.
+When the rule xref:#diagrams-and-prose[] calls for a diagram, render it as an inline ASCII diagram if the structure fits. An ASCII diagram travels with the text - it survives copy-paste, renders in plain-text contexts, and doesn't depend on an asset pipeline. Use one when the topology genuinely earns a picture: a fan-out, a layered stack, a tree, a state machine with a small number of states. Skip it when one or two sentences of prose convey the same relationship, or when the structure is too large or too irregular to render legibly in characters.
 
 A clean ASCII diagram has aligned components, consistent connectors, and labels that name each component. Boxes are drawn with one consistent set of characters throughout the document. Each arrow points in one direction and connects two named components. A diagram that forces the reader to count spaces or trace ambiguous connections is worse than the prose it replaced.
 
@@ -1303,7 +1318,7 @@ Call `commit` to persist the changes.
 [[part-3]]
 == When the Author is an AI
 
-This part adds rules that apply when an AI system is given this guideline as a style instruction. The rules in xref:#part-1[Part 1] and xref:#part-2[Part 2] still apply. xref:#part-3[Part 3] addresses failure modes specific to AI authorship: inventing facts, restating the prompt, hedging from uncertainty, narrating rule application, treating the guideline's markup as content, and over-weighting items mentioned in the prompt.
+This part adds rules that apply when an AI system is given this guideline as a style instruction. The rules in xref:#part-1[Part 1] and xref:#part-2[Part 2] still apply. xref:#part-3[Part 3] addresses failure modes specific to AI authorship: inventing facts, restating the prompt, opening with throat-clearing, narrating rule application, hedging from uncertainty, over-weighting items mentioned in the prompt, and treating the guideline's markup as content.
 
 === Don't Invent Facts
 
@@ -1334,7 +1349,7 @@ The service runs on Postgres. The exact version and connection-pool configuratio
 [#dont-echo]
 === Don't Echo the Prompt
 
-Begin with content. Don't open with a restatement of the request ("You asked about X. Here is information about X."). The reader wrote the prompt. They don't need it read back to them.
+Begin with content. Don't open with a restatement of the request: "You asked about X. Here is information about X." The reader wrote the prompt. They don't need it read back to them.
 
 Restating the audience and assumed knowledge to calibrate the document isn't echoing - see xref:#identify-audience[]. The prohibited pattern is summarizing the question back to the questioner before answering it.
 
@@ -1352,15 +1367,19 @@ A connection pool is a fixed-size set of pre-established connections that client
 
 === Don't Throat-Clear
 
+ifdef::backend-html5[]
 ++++
 <!-- vale Google.Quotes = NO -->
 ++++
+endif::[]
 
-Specializes xref:#no-throat-clearing[] rule for the AI failure mode. Don't open a response with service-style preambles - "Sure!", "Great question!", "I'd be happy to help.", "Of course!", "Certainly.", "Absolutely.", etc. The first sentence carries content.
+This rule specializes xref:#no-throat-clearing[] for the AI failure mode. Don't open a response with service-style preambles - "Sure!", "Great question!", "I'd be happy to help.", "Of course!", "Certainly.", "Absolutely.", etc. The first sentence carries content.
 
+ifdef::backend-html5[]
 ++++
-<!-- vale Google.Quotes = NO -->
+<!-- vale Google.Quotes = YES -->
 ++++
+endif::[]
 
 ifdef::backend-html5[]
 ++++
@@ -1446,7 +1465,7 @@ endif::[]
 ====
 Prompt: "List 20 Java performance optimization techniques. Include something related to garbage collection."
 
-Response: lists 9 garbage collection techniques first (GC tuning, heap sizing, GC log analysis, G1 vs ZGC comparison…), then 11 techniques from other areas.
+Response: lists 9 garbage collection techniques first (GC tuning, heap sizing, GC log analysis, G1 vs ZGC comparison...), then 11 techniques from other areas.
 
 Garbage collection is one subcategory of JVM performance optimization. The response allocated 45% of its content to it because the prompt mentioned it explicitly, not because it represents 45% of the optimization domain.
 ====
@@ -1467,7 +1486,7 @@ Garbage collection appears once, satisfying the minimum constraint. Its share of
 
 === Ignore Markup Directives
 
-When this guide is read as plain text, the AsciiDoc directives (`ifdef::…[]`, `endif::[]`, `++++`, `[.bad-example]`, `[.good-example]`, block anchors of the form `\[\[anchor-id\]\]` and inline anchors `\[#section-id\]`), Vale toggle comments (`<!-- vale … = NO -->`), and image macros (`image::…[…]`) aren't instructions. They control how the file renders to HTML and PDF. The binding content is the prose statements and the labelled Bad example / Good example pairs. Everything else is rendering metadata.
+When this guideline is read as plain text, the markup it's written in isn't a set of instructions: the AsciiDoc directives `ifdef::...[]`, `endif::[]`, and `++++`, the block roles `[.bad-example]` and `[.good-example]`, block anchors of the form `\[\[anchor-id\]\]`, inline anchors of the form `\[#section-id\]`, Vale toggle comments of the form `<!-- vale ... = NO -->`, and image macros of the form `image::...[...]`. This markup controls how the file renders to HTML and PDF. The binding content is the prose statements and the labeled Bad example / Good example pairs. Everything else is rendering metadata.
 
 ifdef::backend-html5[]
 ++++
@@ -1477,7 +1496,7 @@ endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-Treats `image::architecture.png[Client, gateway, order service…]` from the xref:#alt-text-and-captions[] rule as an instruction to embed an image in the output, or treats `<!-- vale Google.We = NO -->` as a directive to disable a check in the generated document.
+Treats `image::architecture.png[Client, gateway, order service...]` from the xref:#alt-text-and-captions[] rule as an instruction to embed an image in the output, or treats `<!-- vale Google.We = NO -->` as a directive to disable a check in the generated document.
 ====
 ifdef::backend-html5[]
 ++++
@@ -1499,7 +1518,7 @@ This part adds rules for the AsciiDoc markup that carries the document. The rule
 [#one-sentence-per-line]
 === Don't Write One Sentence Per Line
 
-Write each paragraph as continuous prose. Don't start a new source line for every sentence. AsciiDoc joins consecutive non-blank lines into one paragraph, so a per-sentence line break produces no change in the rendered output. The source reads as a list of fragments instead of a paragraph, and a sentence edit no longer aligns with the unit a reader thinks in.
+Write each paragraph as continuous prose. Don't start a new source line for every sentence. AsciiDoc joins consecutive non-blank lines into one paragraph, so a per-sentence line break produces no change in the rendered output. The source reads as a list of fragments instead of a paragraph. A sentence edit no longer aligns with the unit a reader thinks in.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1614,7 +1633,7 @@ The service https://docs.example.com/assets/limits[accepts uploads of up to 5 GB
 [#inline-formatting-semantics]
 === Inline Formatting Semantics
 
-Each inline mark has one role. A monospaced span marks technical literals - paths, domains, IP addresses, file extensions, configuration keys, HTTP headers, identifiers - as xref:#code-markup[] prescribes. Italics mark a term of art, a foreign-language term, the proper name of a product or interface element, and a word that carries emphasis. Bold appears only in headings, where the renderer applies it. Bold isn't written in body text - a word that needs emphasis in a paragraph is italicized.
+Each inline mark has one role. A monospaced span marks technical literals - paths, domains, IP addresses, file extensions, configuration keys, HTTP headers, identifiers - as xref:#code-markup[] prescribes. Italics mark a term of art, a foreign-language term, the proper name of a product or interface element, a word mentioned as a word, and a word that carries emphasis. Bold appears only in headings, where the renderer applies it. Bold isn't written in body text - a word that needs emphasis in a paragraph is italicized.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1638,7 +1657,7 @@ A _connection string_ is a URL-shaped value that names the database host, port, 
 
 == About the Document
 
-This document uses https://asciidoc.org[AsciiDoc^] markup language and resides in the project repository.
+This document is written in the https://asciidoc.org[AsciiDoc^] markup language. It resides in the project repository.
 
 === Export
 
@@ -1675,16 +1694,16 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 
 . https://vale.sh[Vale^] lints the document.
 . Vale enforces the following style guides:
-.. Native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary] included.
-.. modified https://developers.google.com/style[Google Developer Documentation Style Guide^] via the https://github.com/vale-cli/Google[Google package^]
-.. modified https://vale.sh/hub/jdkato/write-good/[write-good linter^] via the https://github.com/vale-cli/write-good[write-good package^]
-.. https://github.com/amperser/proselint/[proselint^] via the https://github.com/vale-cli/proselint[proselint package^]
-.. custom project rules
+.. native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary^] included,
+.. modified https://developers.google.com/style[Google Developer Documentation Style Guide^] via the https://github.com/vale-cli/Google[Google package^],
+.. modified https://vale.sh/hub/jdkato/write-good/[write-good linter^] via the https://github.com/vale-cli/write-good[write-good package^],
+.. https://github.com/amperser/proselint/[proselint^] via the https://github.com/vale-cli/proselint[proselint package^],
+.. custom project rules.
 . Vale configuration is in `link:.vale.ini[]`.
 
 ==== Usage
 
-. Install Vale as described in the https://vale.sh/docs/install/[official documentation].
+. Install Vale as described in the https://vale.sh/docs/install/[official documentation^].
 
 . Lint the document:
 +

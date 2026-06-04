@@ -30,7 +30,7 @@
 
 == About the Document
 
-This document uses https://asciidoc.org[AsciiDoc^] markup language and resides in the project repository.
+This document is written in the https://asciidoc.org[AsciiDoc^] markup language. It resides in the project repository.
 
 === Guideline
 
@@ -71,17 +71,16 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 
 . https://vale.sh[Vale^] lints the document.
 . Vale enforces the following style guides:
-.. Native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary] included.
-.. modified https://developers.google.com/style[Google Developer Documentation Style Guide^] via the https://github.com/vale-cli/Google[Google package^]
-.. modified https://vale.sh/hub/jdkato/write-good/[write-good linter^] via the https://github.com/vale-cli/write-good[write-good package^]
-.. https://github.com/amperser/proselint/[proselint^] via the https://github.com/vale-cli/proselint[proselint package^]
-.. custom project rules
-.. Polish spelling dictionary for `*.pl.adoc` files
+.. native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary^] included,
+.. modified https://developers.google.com/style[Google Developer Documentation Style Guide^] via the https://github.com/vale-cli/Google[Google package^],
+.. modified https://vale.sh/hub/jdkato/write-good/[write-good linter^] via the https://github.com/vale-cli/write-good[write-good package^],
+.. https://github.com/amperser/proselint/[proselint^] via the https://github.com/vale-cli/proselint[proselint package^],
+.. custom project rules.
 . Vale configuration is in `link:.vale.ini[]`.
 
 ==== Usage
 
-. Install Vale as described in the https://vale.sh/docs/install/[official documentation].
+. Install Vale as described in the https://vale.sh/docs/install/[official documentation^].
 
 . Lint the document:
 +
