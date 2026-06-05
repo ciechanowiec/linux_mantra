@@ -1692,7 +1692,7 @@ procedureId="docker"
 
 informAboutProcedureStart
 
-zsh < "$resourcesDir/mac/install_docker_on_mac.sh"
+zsh < "$resourcesDir/mac/install_docker_on_mac.sh" || exit 1
 
 informAboutProcedureEnd
 

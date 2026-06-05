@@ -549,7 +549,7 @@ echo ""
 echo "==========================="
 echo "|     DOCKER BUILDX       |"
 echo "==========================="
-echo "Ensuring Docker Builx..."
+echo "Ensuring Docker Buildx..."
 if [ -f "$HOME/.docker/cli-plugins/docker-buildx" ]; then
     echo "Docker Buildx already installed at ~/.docker/cli-plugins/docker-buildx. Skipping installation."
 else
@@ -589,7 +589,7 @@ else
 fi
 
 echo "Docker Buildx version installed:"
-docker buildx version
+docker buildx version || exit 1
 
 echo ""
 echo "==========================="
