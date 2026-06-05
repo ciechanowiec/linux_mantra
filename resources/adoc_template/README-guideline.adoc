@@ -1768,6 +1768,37 @@ The cache is configured via `cache.ttl`.
 (The attached paragraph starts a new topic. The cache isn't an elaboration of the pool's configuration, so the paragraph takes its own number.)
 ====
 
+A continuation paragraph followed by deeper-level numbered paragraphs needs one more `{plus}` line between the paragraph and the first deeper item. That `{plus}` ends the continuation paragraph and attaches the deeper items to the same parent. Without it, the renderer doesn't recognize the deeper item's marker: it joins the marker and the item's text into the continuation paragraph as plain text and renders the item's own `{plus}` lines literally. A following item at the same level needs no such `{plus}` - its marker ends the continuation paragraph on its own.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+. The pool validates a connection before lending it:
++
+Validation runs on every lease, not only on creation.
+.. The validation query is `SELECT 1`.
+.. A validation that exceeds 250 ms counts as a failure.
+----
+
+(The `..` markers directly follow the continuation paragraph. The renderer outputs one paragraph reading "Validation runs on every lease, not only on creation. .. The validation query is `SELECT 1`. .. A validation that exceeds 250 ms counts as a failure.")
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. The pool validates a connection before lending it:
++
+Validation runs on every lease, not only on creation.
++
+.. The validation query is `SELECT 1`.
+.. A validation that exceeds 250 ms counts as a failure.
+----
+====
+
 [#explicit-anchors]
 === Explicit Anchors
 
