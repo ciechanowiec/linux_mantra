@@ -335,6 +335,9 @@ echo "Installing pdfminer.six (Python PDF text extraction; provides pdf2txt.py a
 # PEP 668 blocks system-wide `pip3 install`, so use pipx (configured earlier in this block)
 pipx install pdfminer.six
 
+echo "Installing Pillow (Python imaging library)"
+sudo apt install python3-pil -y
+
 echo "Installing go (programming language)"
 sudo apt install golang-go -y
 
