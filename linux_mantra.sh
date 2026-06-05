@@ -779,6 +779,7 @@ cat >> "$shellFile" << EOF
 # UNIX ALIASES:
 alias aem_init_archetype_65='~/scripts/aem_init_archetype.sh 65'
 alias aem_init_archetype_cloud='~/scripts/aem_init_archetype.sh cloud'
+alias cc='mkdir -p ~/claude && cd ~/claude && claude' # Claude-based chat in CLI; shadows the C compiler in interactive shells (use 'command cc' if needed)
 alias docker_clean='~/scripts/docker_clean.sh'
 alias docker_clean_containers='~/scripts/docker_clean_containers.sh'
 alias docker_clean_images='~/scripts/docker_clean_images.sh'
