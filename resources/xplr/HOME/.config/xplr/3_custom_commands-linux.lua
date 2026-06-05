@@ -143,6 +143,23 @@ local nvim = commandMode.cmd("nvim", "Open a focused text file in NeoVim") (
   ]===]
 )
 
+local pdf = commandMode.cmd("pdf", "Open a focused pdf file in Firefox") (
+        commandMode.BashExecSilently [===[
+  baseName=$(basename -- "$XPLR_FOCUS_PATH")
+  fileType=$(file --brief "$XPLR_FOCUS_PATH")
+  fileTypeLowerCase=$(echo "$fileType" | tr '[:upper:]' '[:lower:]')
+
+  if [[ "$fileTypeLowerCase" == *"pdf"* ]];
+    then
+      nohup firefox "$XPLR_FOCUS_PATH" > /dev/null 2>&1 &
+      echo LogSuccess: "Opened '${baseName}' in Firefox" >> "${XPLR_PIPE_MSG_IN:?}"
+  else
+      echo LogError: "Is not a valid pdf file∶ $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
+      exit 0 # This code must be 0. Otherwise, the above error will not be logged by xplr
+  fi
+  ]===]
+)
+
 local props = commandMode.cmd("props", "Show size and recursive number of items for a focused directory") (
         commandMode.BashExecSilently [===[
   baseName=$(basename -- "$XPLR_FOCUS_PATH")

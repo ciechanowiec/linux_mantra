@@ -165,18 +165,23 @@ local nvim = commandMode.cmd("nvim", "Open a focused text file in NeoVim") (
   ]===]
 )
 
-local pdf = commandMode.cmd("pdf", "Open a focused pdf file in Microsoft Edge") (
+local pdf = commandMode.cmd("pdf", "Open a focused pdf file in Firefox") (
         commandMode.BashExecSilently [===[
-  # TODO: change to Edge
   baseName=$(basename -- "$XPLR_FOCUS_PATH")
   fileType=$(file --brief "$XPLR_FOCUS_PATH")
   fileTypeLowerCase=$(echo "$fileType" | tr '[:upper:]' '[:lower:]')
-  edgeLauncher="/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+  firefoxApp="/Applications/Firefox.app"
+
+  if [ ! -d "$firefoxApp" ]
+    then
+      echo LogError: "The Firefox application ${firefoxApp} hasn't been detected" >> "${XPLR_PIPE_MSG_IN:?}"
+      exit 0 # This code must be 0. Otherwise, the above error will not be logged by xplr
+  fi
 
   if [[ "$fileTypeLowerCase" == *"pdf"* ]];
     then
-      "$edgeLauncher" "$XPLR_FOCUS_PATH" &> /dev/null
-      echo LogSuccess: "Opened '${baseName}' in Google Chrome" >> "${XPLR_PIPE_MSG_IN:?}"
+      open -a "$firefoxApp" "$XPLR_FOCUS_PATH"
+      echo LogSuccess: "Opened '${baseName}' in Firefox" >> "${XPLR_PIPE_MSG_IN:?}"
   else
       echo LogError: "Is not a valid pdf file∶ $baseName" >> "${XPLR_PIPE_MSG_IN:?}"
       exit 0 # This code must be 0. Otherwise, the above error will not be logged by xplr
