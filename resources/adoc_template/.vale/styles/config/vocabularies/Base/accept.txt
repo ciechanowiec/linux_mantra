@@ -167,3 +167,6 @@ repoinit
 Crypto
 plaintext
 [Kk]eystores?
+clamd
+freshclam
+ClamAV
