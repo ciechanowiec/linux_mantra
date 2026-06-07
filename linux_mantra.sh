@@ -335,6 +335,10 @@ echo "Installing pdfminer.six (Python PDF text extraction; provides pdf2txt.py a
 # PEP 668 blocks system-wide `pip3 install`, so use pipx (configured earlier in this block)
 pipx install pdfminer.six
 
+echo "Installing markitdown (converts files like .pptx/.docx/.pdf to Markdown)"
+# The `pptx` extra pulls in python-pptx for PowerPoint support
+pipx install "markitdown[pptx]"
+
 echo "Installing Pillow (Python imaging library)"
 sudo apt install python3-pil -y
 

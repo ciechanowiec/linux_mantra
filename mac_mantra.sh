@@ -785,6 +785,9 @@ brew install vale
 echo "Installing asciidoctor (asciidoc processor with extensions)..."
 brew install asciidoctor
 
+echo "Installing libreoffice (word processor)..."
+brew install --cask libreoffice
+
 echo "Installing exiftool (read and write meta information in files)"
 brew install exiftool
 
@@ -806,6 +809,9 @@ brew install qpdf
 echo "Installing pdfminer.six (Python PDF text extraction; provides pdf2txt.py and dumppdf.py)"
 # PEP 668 blocks system-wide `pip3 install`, so use pipx (configured earlier in this block)
 pipx install pdfminer.six
+
+echo "Installing markitdown (converts files like .pptx/.docx/.pdf to Markdown)"
+pipx install "markitdown[pptx]"
 
 echo "Installing Pillow (Python imaging library)"
 brew install pillow
