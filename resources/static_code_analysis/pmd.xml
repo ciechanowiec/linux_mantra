@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ruleset name="Basic Java PMD Rules"
-         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
     <description>Basic Java PMD Rules</description>
 
     <!--
@@ -48,7 +48,7 @@
     </rule>
     <rule ref="category/java/codestyle.xml/TypeParameterNamingConventions">
         <properties>
-            <property name="typeParameterNamePattern" value="([A-Z]|AdapterType)" />
+            <property name="typeParameterNamePattern" value="([A-Z]|AdapterType)"/>
         </properties>
     </rule>
     <rule ref="category/java/codestyle.xml">
@@ -126,7 +126,7 @@
     <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
         <properties>
             <property name="ignoreMagicNumbers"
-                      value="-0,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-50,-100,-1000,0,1,2,3,4,5,6,7,8,9,10,50,100,1000"/>
+                value="-0,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-50,-100,-1000,0,1,2,3,4,5,6,7,8,9,10,50,100,1000"/>
             <property name="ignoreExpressions" value="false"/>
         </properties>
     </rule>
@@ -143,6 +143,7 @@
         <exclude name="MissingSerialVersionUID"/> <!-- Disablement justification: https://github.com/projectlombok/lombok/wiki/WHY-NOT:-serialVersionUID -->
         <exclude name="NonSerializableClass"/>
         <exclude name="NonStaticInitializer"/>
+        <exclude name="ReplaceJavaUtilCalendar"/>
         <exclude name="UseProperClassLoader"/>
     </rule>
 
@@ -162,5 +163,27 @@
     SECURITY
     -->
     <rule ref="category/java/security.xml"/>
+
+    <!--
+    CUSTOM
+    -->
+    <rule name="UninitializedLocalVariable"
+        language="java"
+        message="Don't declare a local variable without an initializer in order to assign it later, e.g. in the branches of a 'try/catch' or 'if/else' statement. Initialize the variable at the declaration or return directly from every branch. Suppress this rule explicitly in the rare cases where the deferred assignment is genuinely the most reasonable approach."
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Locals declared without an initializer and assigned later (typically once per branch) add indirection that
+            hides the fact that every branch fully determines the value. Initialize at the declaration or return
+            directly from every branch instead.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+//LocalVariableDeclaration[not(parent::ForeachStatement)]/VariableDeclarator[count(*) = 1]
+                ]]></value>
+            </property>
+        </properties>
+    </rule>
 
 </ruleset>
