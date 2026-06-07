@@ -60,3 +60,5 @@ repo.xml
 # Local Claude config
 claude/settings.local.json
 .claude/settings.local.json
+claude/scheduled_tasks.lock
+.claude/scheduled_tasks.lock
