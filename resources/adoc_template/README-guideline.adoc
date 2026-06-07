@@ -616,6 +616,23 @@ endif::[]
 The operation completes in under 10 ms for inputs of fewer than 1 million elements. For larger inputs, runtime grows linearly with input size. See §7.4 for benchmarks.
 ====
 
+[#no-false-universals]
+==== No False Universals
+
+A claim in the form _X is Y_ or _X does Z_ asserts that the claim holds in every case. Write that form only when no case is excluded. When the behavior is a possibility, a permission, or one case among several, write the modality that holds: _can_, _may_, or the condition under which the claim is true. The rule mirrors xref:#no-hedging[]: a hedge understates a certain claim, and a false universal overstates an uncertain one.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A query uses an index. The response is served from the cache. (Both sentences state one possibility as the rule. A query may run without an index. The response comes from the cache only on a hit.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+A query can use an index. The response is served from the cache on a hit and from the database on a miss.
+====
+
 ==== No Patronizing
 
 ifdef::backend-html5[]
