@@ -302,6 +302,11 @@ sudo apt install ruby -y
 echo "Installing asciidoctor (asciidoc processor)..."
 sudo apt install asciidoctor -y
 
+echo "Installing kramdoc (markdown to asciidoc converter)..."
+# kramdoc is shipped by the kramdown-asciidoc gem, which has no Ubuntu package,
+# so it is installed system-wide via RubyGems (executable lands in /usr/local/bin)
+sudo gem install kramdown-asciidoc
+
 echo "Installing wavemon (Wi-Fi connection monitor)..."
 sudo apt install wavemon -y
 
@@ -510,6 +515,7 @@ jq '. * {
     "Bash(grep *)",
     "Bash(head *)",
     "Bash(jq *)",
+    "Bash(kramdoc *)",
     "Bash(ls *)",
     "Bash(ls)",
     "Bash(npm view *)",

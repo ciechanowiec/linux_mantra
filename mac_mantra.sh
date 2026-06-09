@@ -785,6 +785,12 @@ brew install vale
 echo "Installing asciidoctor (asciidoc processor with extensions)..."
 brew install asciidoctor
 
+echo "Installing kramdoc (markdown to asciidoc converter)..."
+# kramdoc is shipped by the kramdown-asciidoc gem, which has no Homebrew
+# formula, so it is installed via RubyGems against the system Ruby; -n is
+# required because the default executable dir (/usr/bin) is SIP-protected
+sudo gem install kramdown-asciidoc -n /usr/local/bin
+
 echo "Installing libreoffice (word processor)..."
 # Unlike on Linux (where linux_mantra.sh installs hunspell-pl, mythes-pl and
 # hyphen-pl separately), the macOS cask ships the full upstream build with the
@@ -967,6 +973,7 @@ jq '. * {
     "Bash(grep *)",
     "Bash(head *)",
     "Bash(jq *)",
+    "Bash(kramdoc *)",
     "Bash(ls *)",
     "Bash(ls)",
     "Bash(npm view *)",
