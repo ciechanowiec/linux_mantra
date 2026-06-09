@@ -942,6 +942,8 @@ jq '. * {
     "Bash(brew list)",
     "Bash(brew search *)",
     "Bash(cat *)",
+    "Bash(cd *)",
+    "Bash(cd)",
     "Bash(cut *)",
     "Bash(df *)",
     "Bash(df)",
