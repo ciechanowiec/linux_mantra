@@ -860,6 +860,9 @@ EOF
 echo "Installing postman (app for building and using APIs)..."
 brew install postman
 
+echo "Installing drawio (diagramming app)..."
+brew install --cask drawio
+
 echo "installing node (server environment)..."
 brew install node
 # Point npm's global prefix at a stable, user-owned directory.
