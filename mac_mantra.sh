@@ -786,6 +786,9 @@ echo "Installing asciidoctor (asciidoc processor with extensions)..."
 brew install asciidoctor
 
 echo "Installing libreoffice (word processor)..."
+# Unlike on Linux (where linux_mantra.sh installs hunspell-pl, mythes-pl and
+# hyphen-pl separately), the macOS cask ships the full upstream build with the
+# Polish (pl_PL) dictionary, thesaurus and hyphenation patterns already bundled
 brew install --cask libreoffice
 # Homebrew reports a cask "installed" from its own Caskroom metadata even when
 # the linked .app was later deleted, which leaves a dangling 'soffice' symlink

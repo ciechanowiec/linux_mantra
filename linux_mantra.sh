@@ -310,6 +310,10 @@ sudo apt install inkscape -y
 
 echo "Installing libreoffice (word processor)..."
 sudo apt install libreoffice -y
+# Polish language support: spellchecking dictionary, thesaurus and hyphenation
+# patterns. LibreOffice picks them up automatically from /usr/share/hunspell
+# and friends; no in-app configuration is required
+sudo apt install hunspell-pl mythes-pl hyphen-pl -y
 
 echo "Installing exiftool (read and write meta information in files)"
 sudo apt install exiftool -y
