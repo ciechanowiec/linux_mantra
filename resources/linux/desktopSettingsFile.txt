@@ -26,6 +26,8 @@ shortcut-find=['<Control>f']
 shortcut-next-tab=['<Alt>Right']
 shortcut-page-close=['<Primary>w']
 shortcut-prev-tab=['<Alt>Left']
+shortcut-terminal-copy=['<Primary>c', 'Copy']
+shortcut-terminal-paste=['<Primary>v', 'Paste']
 shortcut-win-new-tab=['<Primary>t']
 shortcuts-enabled=true
 show-animation-duration=0.080000000000000002
@@ -178,9 +180,11 @@ palette='dracula'
 
 [org/gnome/Ptyxis/Shortcuts]
 close-tab='<ctrl>w'
+copy-clipboard='<ctrl>c'
 move-next-tab='<alt>Right'
 move-previous-tab='<alt>Left'
 new-tab='<ctrl>t'
+paste-clipboard='<ctrl>v'
 search='<ctrl>f'
 
 [org/gnome/nautilus/icon-view]
