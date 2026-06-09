@@ -787,6 +787,14 @@ brew install asciidoctor
 
 echo "Installing libreoffice (word processor)..."
 brew install --cask libreoffice
+# Homebrew reports a cask "installed" from its own Caskroom metadata even when
+# the linked .app was later deleted, which leaves a dangling 'soffice' symlink
+# and makes a plain re-run of this script a no-op. Verify soffice actually
+# resolves to a working binary and force a reinstall if it does not.
+if ! soffice --version >/dev/null 2>&1; then
+  echo "soffice is missing or broken (dangling cask); reinstalling libreoffice..."
+  brew reinstall --cask libreoffice
+fi
 
 echo "Installing exiftool (read and write meta information in files)"
 brew install exiftool
