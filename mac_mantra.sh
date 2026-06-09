@@ -903,6 +903,44 @@ echo "Installing Claude Code CLI (Anthropic's terminal-based AI coding agent)...
 #   due to permission issues and security risks.
 curl -fsSL https://claude.ai/install.sh | bash
 
+echo "Configuring Claude Code settings..."
+claudeSettingsFile="$HOME/.claude/settings.json"
+mkdir -p "$HOME/.claude"
+if [ ! -f "$claudeSettingsFile" ]; then
+    echo '{}' > "$claudeSettingsFile"
+fi
+jq '. * {
+  "theme": "auto",
+  "attribution": { "commit": "", "pr": "" },
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": { "source": { "source": "github", "repo": "anthropics/skills" } }
+  },
+  "enabledPlugins": {
+    "document-skills@anthropic-agent-skills": true,
+    "jdtls-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "figma@claude-plugins-official": true,
+    "explanatory-output-style@claude-plugins-official": true
+  }
+}' "$claudeSettingsFile" > "$claudeSettingsFile.tmp" \
+    && mv "$claudeSettingsFile.tmp" "$claudeSettingsFile"
+
+echo "Registering the draw.io MCP server (lets Claude Code generate editable .drawio diagrams)..."
+# The official @drawio/mcp stdio server opens diagrams in the browser-based
+# draw.io editor (no extension needed) and keeps diagram data in URL fragments,
+# so nothing is sent to draw.io servers. The guard keeps re-runs idempotent.
+if ! claude mcp get drawio >/dev/null 2>&1; then
+    claude mcp add drawio --scope user -- npx -y @drawio/mcp
+fi
+
 echo "Installing Mermaid CLI (diagramming tool)..."
 npm install -g @mermaid-js/mermaid-cli
 
