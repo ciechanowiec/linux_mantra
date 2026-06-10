@@ -9,6 +9,7 @@
 Thumbs.db
 ~$*.docx
 *.docx.tmp
+.~lock.*#
 
 # Logs
 *.log*
