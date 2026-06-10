@@ -302,6 +302,9 @@ sudo apt install ruby -y
 echo "Installing asciidoctor (asciidoc processor)..."
 sudo apt install asciidoctor -y
 
+echo "Installing asciidoctor-pdf (asciidoc to PDF converter)..."
+sudo apt install ruby-asciidoctor-pdf -y
+
 echo "Installing kramdoc (markdown to asciidoc converter)..."
 # kramdoc is shipped by the kramdown-asciidoc gem, which has no Ubuntu package,
 # so it is installed system-wide via RubyGems (executable lands in /usr/local/bin)
@@ -488,6 +491,7 @@ jq '. * {
     "Bash(apt show *)",
     "Bash(apt-cache *)",
     "Bash(asciidoctor *)",
+    "Bash(asciidoctor-pdf *)",
     "Bash(brew info *)",
     "Bash(brew list *)",
     "Bash(brew list)",
