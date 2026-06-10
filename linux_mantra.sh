@@ -503,6 +503,8 @@ jq '. * {
     "Bash(dpkg -l *)",
     "Bash(du *)",
     "Bash(du)",
+    "Bash(echo *)",
+    "Bash(echo)",
     "Bash(file *)",
     "Bash(git blame *)",
     "Bash(git branch)",
