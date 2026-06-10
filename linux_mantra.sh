@@ -303,7 +303,7 @@ echo "Installing asciidoctor (asciidoc processor)..."
 sudo apt install asciidoctor -y
 
 echo "Installing asciidoctor-pdf (asciidoc to PDF converter)..."
-sudo apt install ruby-asciidoctor-pdf -y
+sudo apt install asciidoctor-pdf -y
 
 echo "Installing kramdoc (markdown to asciidoc converter)..."
 # kramdoc is shipped by the kramdown-asciidoc gem, which has no Ubuntu package,
