@@ -225,6 +225,137 @@ def _left_align_source_code(styles_xml: str) -> str:
 
 
 # ============================================================================
+# styles.xml — footnote size and paragraph spacing
+# ============================================================================
+#
+# FootnoteText in the reference DOCX carries no overrides, so footnotes
+# inherit the document defaults: 12 pt runs and 200 twips of space after
+# every paragraph (each footnote is one FootnoteText paragraph, so that
+# space shows up between footnotes). Pin the style to 10 pt with zero
+# before/after spacing so the distance between footnote paragraphs equals
+# the distance between lines, and give it a hanging indent so the footnote
+# number dangles left of the vertical line that all text lines share.
+#
+# The hanging amount is deliberately the natural width of "superscript
+# digit + one word space" so that the layout needs NO tab character: a
+# footnote that simply reads "number, space, text" self-aligns, including
+# footnotes inserted later in a word processor with no post-processing
+# (Word/LibreOffice add the number automatically; the author types the
+# space as part of normal writing). A style cannot inject content, so any
+# design needing a tab would silently break hand-added footnotes; w:fitText
+# and style-bound list numbering were tried as automatic alternatives and
+# LibreOffice ignores both inside the footnote area. The value below was
+# measured from LibreOffice's rendering of the reference theme font at
+# 10 pt (digit 65 + space 51 twips); remeasure if the document font or the
+# footnote font size changes. Known sub-millimetre drift: 2-digit numbers
+# (one extra digit width) and fully-justified first lines (the separator
+# space stretches with justification).
+#
+# FootnoteBlockText (block content inside a footnote) starts with no
+# number, so it gets a plain left indent on the same vertical line instead
+# of a hanging one, and its own 100-twip margins are zeroed too.
+
+FOOTNOTE_HANGING_DXA = 116  # superscript digit (65) + word space (51) at 10 pt
+
+FOOTNOTE_PPR_BY_STYLE = {
+    'FootnoteText': (
+        '<w:spacing w:before="0" w:after="0" />'
+        f'<w:ind w:left="{FOOTNOTE_HANGING_DXA}" '
+        f'w:hanging="{FOOTNOTE_HANGING_DXA}" />'
+    ),
+    'FootnoteBlockText': (
+        '<w:spacing w:before="0" w:after="0" />'
+        f'<w:ind w:left="{FOOTNOTE_HANGING_DXA}" w:firstLine="0" />'
+    ),
+}
+FOOTNOTE_STYLE_RE = re.compile(
+    r'(<w:style\b[^>]*w:styleId="(FootnoteText|FootnoteBlockText)"[^>]*>)'
+    r'(.*?)(</w:style>)',
+    re.DOTALL,
+)
+FOOTNOTE_RPR_TAG = '<w:rPr><w:sz w:val="20" /><w:szCs w:val="20" /></w:rPr>'
+STYLE_SPACING_RE = re.compile(r'<w:spacing\b[^/]*/>')
+STYLE_IND_RE = re.compile(r'<w:ind\b[^/]*/>')
+
+
+def _compact_footnotes(styles_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        open_tag, style_id = match.group(1), match.group(2)
+        body, close_tag = match.group(3), match.group(4)
+        ppr_tags = FOOTNOTE_PPR_BY_STYLE[style_id]
+        ppr_match = SOURCECODE_PPR_RE.search(body)
+        if ppr_match:
+            ppr = ppr_match.group(0)
+            ppr = STYLE_SPACING_RE.sub('', ppr)
+            ppr = STYLE_IND_RE.sub('', ppr)
+            ppr = ppr.rsplit('</w:pPr>', 1)[0] + ppr_tags + '</w:pPr>'
+            body = body[:ppr_match.start()] + ppr + body[ppr_match.end():]
+        else:
+            body = body + '<w:pPr>' + ppr_tags + '</w:pPr>'
+        if '<w:sz ' not in body:
+            body = body + FOOTNOTE_RPR_TAG
+        return open_tag + body + close_tag
+    return FOOTNOTE_STYLE_RE.sub(fix, styles_xml)
+
+
+# ============================================================================
+# footnotes.xml — exactly one space after the footnote number
+# ============================================================================
+#
+# The hanging indent of FootnoteText equals the natural width of
+# "superscript number + one word space" (see the styles transform above),
+# so the generated footnotes must read exactly "number, space, text" to
+# sit on the vertical line — same as a footnote typed by hand later.
+# Pandoc already separates the number from the text with a space run;
+# normalize the other shapes to it (a legacy tab run from earlier versions
+# of this script is dropped, a leading space inside the first text run is
+# folded into the separator run). Continuation paragraphs of a
+# multi-paragraph footnote carry no number; cancel their inherited hanging
+# indent so their first line sits on the same vertical line as everything
+# else.
+
+_RPR = r'(?:<w:rPr>(?:(?!</w:rPr>).)*?</w:rPr>)?'
+FOOTNOTE_SEPARATOR_RUN = '<w:r><w:t xml:space="preserve"> </w:t></w:r>'
+FOOTNOTE_NUMBER_RE = re.compile(
+    # the run holding the footnote number
+    r'(<w:r\b[^>]*>(?:(?!</w:r>).)*?<w:footnoteRef\s*/>\s*</w:r>)'
+    # an existing separator space run (re-emitted in canonical form)
+    rf'(?:<w:r\b[^>]*>{_RPR}<w:t(?: [^>]*)?> </w:t></w:r>)?'
+    # a legacy tab run (dropped)
+    rf'(?:<w:r\b[^>]*>{_RPR}\s*<w:tab\s*/>\s*</w:r>)?'
+    # the opening of the following text run, incl. a leading space (Word)
+    rf'((?:<w:r\b[^>]*>{_RPR}<w:t(?: [^>]*)?> ?)?)',
+    re.DOTALL,
+)
+FOOTNOTE_PSTYLE_RE = re.compile(r'<w:pStyle w:val="FootnoteText"\s*/?>')
+
+
+def _space_after_footnote_number(footnotes_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        text_open = match.group(2)
+        if text_open.endswith(' '):
+            text_open = text_open[:-1]
+        return match.group(1) + FOOTNOTE_SEPARATOR_RUN + text_open
+    return FOOTNOTE_NUMBER_RE.sub(fix, footnotes_xml)
+
+
+def _align_footnote_continuations(footnotes_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        para = match.group(0)
+        if '<w:footnoteRef' in para or '<w:ind ' in para:
+            return para
+        if not FOOTNOTE_PSTYLE_RE.search(para):
+            return para
+        return FOOTNOTE_PSTYLE_RE.sub(
+            '<w:pStyle w:val="FootnoteText" />'
+            f'<w:ind w:left="{FOOTNOTE_HANGING_DXA}" w:hanging="0" />',
+            para,
+            count=1,
+        )
+    return PARAGRAPH_RE.sub(fix, footnotes_xml)
+
+
+# ============================================================================
 # document.xml — author/email separator
 # ============================================================================
 #
@@ -490,6 +621,11 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
     ],
     'word/styles.xml': [
         _left_align_source_code,
+        _compact_footnotes,
+    ],
+    'word/footnotes.xml': [
+        _space_after_footnote_number,
+        _align_footnote_continuations,
     ],
     'word/document.xml': [
         _separate_author_email,
@@ -502,6 +638,8 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
 
 def _patch_part(tmp_root: str, rel_path: str, transforms: List[XmlTransform]) -> None:
     path = os.path.join(tmp_root, *rel_path.split('/'))
+    if not os.path.exists(path):  # e.g. footnotes.xml in a footnote-free doc
+        return
     with open(path, encoding='utf-8') as f:
         xml = f.read()
     for transform in transforms:
