@@ -407,6 +407,53 @@ def _strip_empty_headings(document_xml: str) -> str:
 
 
 # ============================================================================
+# document.xml — section-title bookmarks
+# ============================================================================
+#
+# Asciidoctor assigns every section an anchor id and Pandoc materializes
+# each one as a bookmark around the heading, which Word and LibreOffice
+# then display as bookmark markers next to the section titles and as
+# X<sha1> entries in the bookmarks list. Drop every bookmark that nothing
+# references; bookmarks targeted by an internal hyperlink or a REF-style
+# field (AsciiDoc cross-references) are kept so those links keep working.
+
+BOOKMARK_START_RE = re.compile(r'<w:bookmarkStart w:id="(\d+)" w:name="([^"]*)"\s*/>\s*')
+BOOKMARK_END_RE = re.compile(r'<w:bookmarkEnd w:id="(\d+)"\s*/>\s*')
+ANCHOR_REF_RE = re.compile(r'w:anchor="([^"]+)"')
+INSTR_TEXT_RE = re.compile(r'<w:instrText[^>]*>([^<]*)</w:instrText>')
+FIELD_REF_RE = re.compile(r'(?:PAGEREF|REF|HYPERLINK\s+\\l)\s+"?([^"\s\\]+)')
+
+
+def _collect_referenced_anchors(part_xmls: List[str]) -> set:
+    referenced = set()
+    for xml in part_xmls:
+        referenced.update(ANCHOR_REF_RE.findall(xml))
+        for instr in INSTR_TEXT_RE.findall(xml):
+            referenced.update(FIELD_REF_RE.findall(instr))
+    return referenced
+
+
+def _make_strip_bookmarks(referenced: set) -> XmlTransform:
+    def _strip_bookmarks(document_xml: str) -> str:
+        dropped_ids = set()
+
+        def drop_start(match: 're.Match[str]') -> str:
+            if match.group(2) in referenced:
+                return match.group(0)
+            dropped_ids.add(match.group(1))
+            return ''
+
+        document_xml = BOOKMARK_START_RE.sub(drop_start, document_xml)
+        if dropped_ids:
+            document_xml = BOOKMARK_END_RE.sub(
+                lambda m: '' if m.group(1) in dropped_ids else m.group(0),
+                document_xml,
+            )
+        return document_xml
+    return _strip_bookmarks
+
+
+# ============================================================================
 # document.xml — A4 page size and margins
 # ============================================================================
 #
@@ -657,11 +704,22 @@ def main(docx_path: str) -> None:
         _patch_part(tmp, 'word/numbering.xml', TRANSFORMS['word/numbering.xml'])
         with open(os.path.join(tmp, 'word', 'numbering.xml'), encoding='utf-8') as f:
             numbering_index = _build_numbering_index(f.read())
+        # Collect anchors referenced anywhere so unreferenced bookmarks can
+        # be dropped while cross-reference targets survive.
+        part_xmls = []
+        for rel_path in ('word/document.xml', 'word/footnotes.xml',
+                         'word/endnotes.xml'):
+            path = os.path.join(tmp, *rel_path.split('/'))
+            if os.path.exists(path):
+                with open(path, encoding='utf-8') as f:
+                    part_xmls.append(f.read())
+        referenced_anchors = _collect_referenced_anchors(part_xmls)
         for rel_path, transforms in TRANSFORMS.items():
             if rel_path == 'word/numbering.xml':
                 continue
             extra = (
-                [_make_resize_images(numbering_index)]
+                [_make_resize_images(numbering_index),
+                 _make_strip_bookmarks(referenced_anchors)]
                 if rel_path == 'word/document.xml' else []
             )
             _patch_part(tmp, rel_path, transforms + extra)
