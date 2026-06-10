@@ -64,4 +64,10 @@
         <!--  Nonsense check  -->
         <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
     </Match>
+    <Match>
+        <!--  Flags every constructor that validates its arguments and throws; the
+              finalizer-attack vector it guards against is obsolete since finalization
+              has been deprecated for removal (JEP 421):  -->
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
 </FindBugsFilter>
