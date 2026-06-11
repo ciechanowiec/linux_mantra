@@ -171,3 +171,4 @@ plaintext
 clamd
 freshclam
 ClamAV
+bnd
