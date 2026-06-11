@@ -165,6 +165,7 @@ Netcentric
 ACLs
 repoinit
 Crypto
+Thymeleaf
 plaintext
 [Kk]eystores?
 clamd
