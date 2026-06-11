@@ -44,6 +44,7 @@ exceptions:
   - GUI
   - HDD
   - HTML
+  - HTL
   - HTTP
   - HTTPS
   - IAM
