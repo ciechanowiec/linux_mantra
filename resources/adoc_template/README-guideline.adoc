@@ -1881,6 +1881,34 @@ Each handler holds a xref:#lease[lease] on a pooled connection. Pool sizing is d
 (The defined term links to its definition. The empty-bracket form inherits the target's title, and the qualifier _the section_ keeps the meaning of the sentence clear. The last reference supplies custom text because the sentence needs a different inflection.)
 ====
 
+The empty-bracket form takes its text from the target's reference text. A section supplies its title. Any other anchor - on a paragraph, a list item, or a word - supplies a reference text only when the anchor declares one, in the form `+[[anchor-id,reference text]]+`. An empty-bracket reference against an anchor without a reference text renders the raw anchor ID, which is a defect. When the target isn't a section, either declare the reference text on the anchor or supply custom link text in the reference.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+[[retention-schedule]]The retention schedule keeps records for 90 days.
+
+The purge job applies xref:#retention-schedule[].
+----
+
+(The anchor sits on a paragraph and declares no reference text, so the reference renders as the raw ID: "The purge job applies [retention-schedule].")
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+[[retention-schedule,the retention schedule]]The retention schedule keeps records for 90 days.
+
+The purge job applies xref:#retention-schedule[].
+----
+
+(The anchor declares a reference text, so the reference renders as "The purge job applies the retention schedule.")
+====
+
 [#link-text-carries-the-claim]
 === Link Text Carries the Claim
 
