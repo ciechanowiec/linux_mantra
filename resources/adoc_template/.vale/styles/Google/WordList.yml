@@ -9,7 +9,8 @@ swap:
   "(?:API Console|dev|developer) key": API key
   "(?:cell ?phone|smart ?phone)": phone|mobile phone
   "(?:dev|developer|APIs) console": API console
-  "(?:e-mail|Email|E-mail)": email
+  "(?:e-mail)": email
+  "(?:E-mail)": Email
   "(?:file ?path|path ?name)": path
   "(?:kill|terminate|abort)": stop|exit|cancel|end
   "(?:OAuth ?2|Oauth)": OAuth 2.0
@@ -38,7 +39,6 @@ swap:
   check box: checkbox
   CLI: command-line tool
   click on: click|click in
-  Cloud: Google Cloud Platform|GCP
   Container Engine: Kubernetes Engine
   content type: media type
   curated roles: predefined roles
@@ -66,7 +66,7 @@ swap:
   regex: regular expression
   SHA1: SHA-1|HAS-SHA1
   sign into: sign in to
-  sign-?on: single sign-on
+  "(?:signon|sign on)": single sign-on
   static IP address: static external IP address
   stylesheet: style sheet
   synch: sync
