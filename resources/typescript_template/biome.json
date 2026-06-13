@@ -52,6 +52,7 @@
                 }
             },
             "style": {
+                "noImplicitBoolean": "error",
                 "noNegationElse": "error",
                 "noNonNullAssertion": "error",
                 "noParameterAssign": "error",
