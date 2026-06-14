@@ -357,6 +357,9 @@ sudo apt install python3-pil -y
 echo "Installing go (programming language)"
 sudo apt install golang-go -y
 
+echo "Installing PHP, Composer and the Laravel installer (via php.new / Herd Lite)"
+/bin/bash -c "$(curl -fsSL https://php.new/install/linux)"
+
 echo "Installing fuse (enables filesystems in userspace)"
 sudo apt install fuse -y
 

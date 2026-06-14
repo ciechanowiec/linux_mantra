@@ -848,6 +848,9 @@ cat >> "$shellFile" << EOF
 export PATH=\$PATH:\$(go env GOPATH)/bin
 EOF
 
+echo "Installing PHP, Composer and the Laravel installer (via php.new / Herd Lite)..."
+/bin/bash -c "$(curl -fsSL https://php.new/install/mac)"
+
 echo "Installing yt-dlp (YouTube downloader)..."
 # 1. Do not perform installation via other package managers - the program might not work correctly then
 # 2. Do not perform installation with sudo - it might not - the program might not work correctly then
