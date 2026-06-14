@@ -898,6 +898,27 @@ cat >> "$shellFile" << EOF
 export PATH="\$HOME/.npm-global/bin:\$PATH"
 EOF
 
+echo "Installing nvm (Node Version Manager)..."
+# Installation docs: https://github.com/nvm-sh/nvm#install--update-script
+# NOTES:
+#   nvm manages per-project Node versions alongside the system-wide Homebrew
+#   node above (brew node stays the default on PATH; `nvm use` switches versions
+#   within a shell). The installer normally appends its sourcing block to a
+#   detected profile file; piping it to `PROFILE=/dev/null bash` suppresses that
+#   so we own the shell-file edit ourselves, grep-guarded, keeping re-runs
+#   idempotent. The installer is pinned to a release tag rather than `master` so
+#   re-runs stay reproducible.
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.5/install.sh | PROFILE=/dev/null bash
+if ! grep -qF 'NVM_DIR' "$shellFile"; then
+    cat >> "$shellFile" << 'EOF'
+
+# LOADING NVM (NODE VERSION MANAGER):
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+EOF
+fi
+
 echo "Installing TypeScript..."
 # Installation docs:
 #   bad: https://www.typescriptlang.org/download
