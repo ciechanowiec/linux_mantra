@@ -354,6 +354,28 @@ pipx install "markitdown[pptx]"
 echo "Installing Pillow (Python imaging library)"
 sudo apt install python3-pil -y
 
+echo "Installing Python document-processing libraries for Claude Code's skills"
+# Claude Code's docx/pptx/pdf/xlsx skills run helper scripts under the system
+# `python3` and `import` these packages directly, so - unlike the CLI apps above
+# (yt-dlp, markitdown, pdfminer.six) - they must be importable by a bare
+# `python3`, not isolated in per-app pipx venvs (markitdown[pptx] bundles
+# python-pptx, but only inside its own venv). Ubuntu 23.04+ marks the system
+# interpreter externally-managed (PEP 668), so install into the per-user site
+# with `--user --break-system-packages`: no sudo, and ~/.local is on python3's
+# default import path. Map of distribution name -> import name:
+#   python-docx -> docx        (.docx read/write)
+#   python-pptx -> pptx        (.pptx read/write)
+#   pdfplumber  -> pdfplumber  (PDF text/table extraction)
+#   pymupdf     -> fitz        (fast PDF rendering/extraction)
+#   pyxlsb      -> pyxlsb      (legacy binary .xlsb spreadsheets)
+#   pytesseract -> pytesseract (Python wrapper over the tesseract-ocr engine
+#                               installed above)
+#   pdf2image   -> pdf2image   (rasterizes PDF pages for the pytesseract OCR
+#                               path; relies on poppler-utils installed above)
+#   pandas      -> pandas      (spreadsheet data analysis for the xlsx skill)
+python3 -m pip install --user --break-system-packages \
+    python-docx python-pptx pdfplumber pymupdf pyxlsb pytesseract pdf2image pandas
+
 echo "Installing go (programming language)"
 sudo apt install golang-go -y
 
@@ -464,6 +486,15 @@ sudo npm install -g typescript # `npm` comes from node, so node must be preinsta
 
 echo "Installing pnpm (Node.js package manager)..."
 curl -fsSL https://get.pnpm.io/install.sh | sh -
+
+echo "Installing ollama (local LLM runtime)..."
+# ollama ships in neither apt nor snap, so use the official installer (same
+# `curl ... | sh` pattern as pnpm/deno/Claude Code). On a systemd host it
+# creates the `ollama` system user, writes /etc/systemd/system/ollama.service
+# (WantedBy=default.target), then runs `systemctl daemon-reload`,
+# `systemctl enable ollama` and starts it - so the server is always running and
+# comes back on boot, no extra `systemctl enable` needed here.
+curl -fsSL https://ollama.com/install.sh | sh
 
 echo "Installing Claude Code CLI (Anthropic's terminal-based AI coding agent)..."
 # Installation docs: https://docs.claude.com/en/docs/claude-code/setup
@@ -701,6 +732,28 @@ eval "$(/opt/homebrew/bin/brew shellenv)" # For the current shell
     echo "Unexpected error occurred. The requested action wasn't preformed correctly"
     exit 1
 fi
+
+# Homebrew 6.0 made "ask mode" the default, so every `brew install`/`brew tap`
+# below would otherwise stop at a "Do you want to proceed? [y/n]" prompt and hang
+# this run (the mantra is interactive only at the per-procedure level, not per
+# command). HOMEBREW_NO_ASK=1 restores the old install-without-confirmation
+# behavior. Persist it in Homebrew's env file - not just an `export` - because
+# the mantra may be run step-by-step across separate terminal sessions, where a
+# shell export would not carry over, whereas every `brew` invocation reads
+# brew.env. The user-specific path is $XDG_CONFIG_HOME/homebrew/brew.env when
+# that is set, else ~/.homebrew/brew.env; brew.env does no shell expansion, so
+# the path is resolved here rather than written into the file.
+if [ -n "$XDG_CONFIG_HOME" ]; then
+    brewEnvFile="$XDG_CONFIG_HOME/homebrew/brew.env"
+else
+    brewEnvFile="$HOME/.homebrew/brew.env"
+fi
+mkdir -p "$(dirname "$brewEnvFile")"
+touch "$brewEnvFile"
+if ! grep -qxF 'HOMEBREW_NO_ASK=1' "$brewEnvFile"; then
+    echo 'HOMEBREW_NO_ASK=1' >> "$brewEnvFile"
+fi
+export HOMEBREW_NO_ASK=1 # also covers brew calls earlier in this same session
 
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
@@ -1012,6 +1065,9 @@ procedureId="terraform"
 
 echo "1. Installing Terraform..."
 brew tap hashicorp/tap
+# Homebrew 6.0 refuses to install formulae from non-official taps unless trusted
+# (HOMEBREW_REQUIRE_TAP_TRUST is on by default); trust the one formula we install.
+brew trust --formula hashicorp/tap/terraform
 brew install hashicorp/tap/terraform
 brew upgrade hashicorp/tap/terraform
 touch "$shellFile"
@@ -1597,6 +1653,9 @@ informAboutProcedureStart
 
 echo "Installing a repo tool for AEM..."
 brew tap adobe-marketing-cloud/brews
+# Trust this non-official tap's formula so Homebrew 6.0 will install it (see the
+# note at the hashicorp/tap install above).
+brew trust --formula adobe-marketing-cloud/brews/repo
 brew install adobe-marketing-cloud/brews/repo
 
 informAboutProcedureEnd

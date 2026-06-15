@@ -419,6 +419,28 @@ eval "$(/opt/homebrew/bin/brew shellenv)" # For the current shell
     exit 1
 fi
 
+# Homebrew 6.0 made "ask mode" the default, so every `brew install`/`brew tap`
+# below would otherwise stop at a "Do you want to proceed? [y/n]" prompt and hang
+# this run (the mantra is interactive only at the per-procedure level, not per
+# command). HOMEBREW_NO_ASK=1 restores the old install-without-confirmation
+# behavior. Persist it in Homebrew's env file - not just an `export` - because
+# the mantra may be run step-by-step across separate terminal sessions, where a
+# shell export would not carry over, whereas every `brew` invocation reads
+# brew.env. The user-specific path is $XDG_CONFIG_HOME/homebrew/brew.env when
+# that is set, else ~/.homebrew/brew.env; brew.env does no shell expansion, so
+# the path is resolved here rather than written into the file.
+if [ -n "$XDG_CONFIG_HOME" ]; then
+    brewEnvFile="$XDG_CONFIG_HOME/homebrew/brew.env"
+else
+    brewEnvFile="$HOME/.homebrew/brew.env"
+fi
+mkdir -p "$(dirname "$brewEnvFile")"
+touch "$brewEnvFile"
+if ! grep -qxF 'HOMEBREW_NO_ASK=1' "$brewEnvFile"; then
+    echo 'HOMEBREW_NO_ASK=1' >> "$brewEnvFile"
+fi
+export HOMEBREW_NO_ASK=1 # also covers brew calls earlier in this same session
+
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
     echo "4. Evaluating the shell..."
@@ -470,6 +492,9 @@ procedureId="terraform"
 
 echo "1. Installing Terraform..."
 brew tap hashicorp/tap
+# Homebrew 6.0 refuses to install formulae from non-official taps unless trusted
+# (HOMEBREW_REQUIRE_TAP_TRUST is on by default); trust the one formula we install.
+brew trust --formula hashicorp/tap/terraform
 brew install hashicorp/tap/terraform
 brew upgrade hashicorp/tap/terraform
 touch "$shellFile"
@@ -839,6 +864,30 @@ pipx install "markitdown[pptx]"
 echo "Installing Pillow (Python imaging library)"
 brew install pillow
 
+echo "Installing Python document-processing libraries for Claude Code's skills"
+# Claude Code's docx/pptx/pdf/xlsx skills run helper scripts under the system
+# `python3` and `import` these packages directly, so - unlike the CLI apps above
+# (yt-dlp, markitdown, pdfminer.six) - they must be importable by a bare
+# `python3`, not isolated in per-app pipx venvs (markitdown[pptx] bundles
+# python-pptx, but only inside its own venv). Install into the per-user site
+# with `--user --break-system-packages`: no sudo, ENABLE_USER_SITE is on for
+# Homebrew's python3 so the per-user site is on its default import path, and
+# --break-system-packages is a harmless no-op now but keeps working if a future
+# Homebrew python re-adds the PEP 668 externally-managed marker. Map of
+# distribution name -> import name:
+#   python-docx -> docx        (.docx read/write)
+#   python-pptx -> pptx        (.pptx read/write)
+#   pdfplumber  -> pdfplumber  (PDF text/table extraction)
+#   pymupdf     -> fitz        (fast PDF rendering/extraction)
+#   pyxlsb      -> pyxlsb      (legacy binary .xlsb spreadsheets)
+#   pytesseract -> pytesseract (Python wrapper over the tesseract-ocr engine
+#                               installed above)
+#   pdf2image   -> pdf2image   (rasterizes PDF pages for the pytesseract OCR
+#                               path; relies on the poppler installed above)
+#   pandas      -> pandas      (spreadsheet data analysis for the xlsx skill)
+python3 -m pip install --user --break-system-packages \
+    python-docx python-pptx pdfplumber pymupdf pyxlsb pytesseract pdf2image pandas
+
 echo "Installing go (programming language)"
 brew install go
 # ADDING GO BINARIES TO PATH (so tools installed via `go install` are available):
@@ -932,6 +981,14 @@ echo "Installing pnpm (Node.js package manager)..."
 #   (darwin-x64). Homebrew is the officially recommended fallback on macOS
 #   and works on both Apple Silicon and Intel.
 brew install pnpm
+
+echo "Installing ollama (local LLM runtime)..."
+# Use the Homebrew formula (the server/CLI), not the desktop-app cask. Its own
+# caveats document `brew services start ollama` as the way to start it now and
+# restart it at login, which registers a launchd agent - so the server is always
+# running and comes back after a reboot.
+brew install ollama
+brew services start ollama
 
 echo "Installing Claude Code CLI (Anthropic's terminal-based AI coding agent)..."
 # Installation docs: https://docs.claude.com/en/docs/claude-code/setup
@@ -2148,6 +2205,9 @@ informAboutProcedureStart
 
 echo "Installing a repo tool..."
 brew tap adobe-marketing-cloud/brews
+# Trust this non-official tap's formula so Homebrew 6.0 will install it (see the
+# note at the hashicorp/tap install above).
+brew trust --formula adobe-marketing-cloud/brews/repo
 brew install adobe-marketing-cloud/brews/repo
 
 informAboutProcedureEnd
