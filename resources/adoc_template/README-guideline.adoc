@@ -242,6 +242,22 @@ Heading: "Connection Pooling." Body: discusses pooling, then transaction isolati
 Heading: "Connection Pooling." Body: pool sizing, acquisition, release, leak detection, and the lifecycle of a pooled connection. Transaction isolation is documented in a separate section, with a cross-reference where pool behavior interacts with isolation.
 ====
 
+==== Self-Contained Prose
+
+A heading is a navigational label, not part of the prose. The body reads correctly when every heading is removed: no sentence depends on its heading for a subject, a referent, or a qualifier. A reader who lands mid-section, or who reads the text with the headings stripped, loses no meaning. The body carries its meaning through its own content. It neither leans on the heading nor restates it.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+Heading: "Off by Default." Body: "Email and phone also ship off." With the heading removed, "off" has no referent: the reader can't tell what's off, or from what.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Heading: "Off by Default." Body: "Email and phone detection is off by default. To turn a rule on, set `enabled = true`." The state and the action stand without the title.
+====
+
 === Terminology and Precision
 
 ==== Strict Nomenclature
@@ -533,6 +549,22 @@ endif::[]
 .{good-icon} Good example
 ====
 The connection pool is configured via `pool.size`. The default size is 10. The value is read at startup.
+====
+
+==== Colon Before an Enumeration Only
+
+A paragraph ends with a colon only when a pure enumeration follows, a list whose items are single terms or short phrases. When the items are prose, full sentences or paragraphs even when numbered or lettered, the introducing paragraph ends with a period, and its last sentence is phrased so that no colon is wanted. That sentence still points the reader forward to the list, so the enumeration is expected and the reader never asks where it went. A locating word such as _below_ or _in this section_ does this, as does a phrase such as _the following_, or a stated count that the list then delivers. A colon promises a tight list, and prose that follows breaks the promise. A colon that introduces a single example, such as a command or a code block, is a separate convention and is unaffected.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+"The rules fall into three groups:" followed by three multi-sentence, labeled items. The colon promises a list, but each item is a paragraph.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+"The rules fall into three groups, described below." followed by the same three labeled paragraphs. The period replaces the colon, and "below" still points the reader to the list. A colon is right only before a pure enumeration of bare terms, such as red, green, and blue.
 ====
 
 ==== Natural Phrasing
@@ -1562,7 +1594,7 @@ The cache stores recently used entries. Each entry has a key and a value. An ent
 [#numbered-paragraphs]
 === Numbered Paragraphs
 
-A _numbered paragraph_ is a paragraph written as an item of an AsciiDoc list, so that the renderer prefixes it with a number, a letter, or - at the deepest levels - a bullet. Numbering makes each paragraph an addressable unit: a review comment or a cross-reference names item 2.3 instead of "the second sentence of the fourth paragraph". A numbered paragraph is still a paragraph - full sentences developing one topic, as xref:#one-paragraph-one-topic[] requires. Numbering addresses paragraphs. It doesn't license the fragment-style bullets that xref:#lists-for-enumerable-content[] forbids.
+A _numbered paragraph_ is a paragraph written as an item of an AsciiDoc list, so that the renderer prefixes it with a number, a letter, or - at the deepest levels - a bullet. Numbering makes each paragraph an addressable unit: a review comment or a cross-reference names item 2.3 instead of "the second sentence of the fourth paragraph." A numbered paragraph is still a paragraph - full sentences developing one topic, as xref:#one-paragraph-one-topic[] requires. Numbering addresses paragraphs. It doesn't license the fragment-style bullets that xref:#lists-for-enumerable-content[] forbids.
 
 [#number-every-paragraph]
 ==== Number Every Paragraph of a Multi-Paragraph Section
