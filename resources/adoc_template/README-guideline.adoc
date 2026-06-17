@@ -172,7 +172,7 @@ The cache entry for a record is invalidated when the record's `last++_++modified
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.We = NO -->
+<!-- vale English.We = NO -->
 ++++
 endif::[]
 Every sentence does work that no other sentence in the document does. If a sentence can be deleted without losing information, delete it. The usual offenders are sentences that announce upcoming material, sentences that summarize what was just said, and sentences that exist only to introduce a list. "In this section, we will discuss..." announces upcoming material. "There are several ways to do this:" introduces a list and can be deleted along with its colon.
@@ -184,7 +184,7 @@ There are several important things to consider when configuring the load balance
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.We = YES -->
+<!-- vale English.We = YES -->
 ++++
 endif::[]
 
@@ -297,7 +297,7 @@ A term that has a specific meaning in the document is defined the first time it'
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Contractions = NO -->
+<!-- vale English.Contractions = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -307,7 +307,7 @@ A token is something the client sends to prove who it is.
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Contractions = YES -->
+<!-- vale English.Contractions = YES -->
 ++++
 endif::[]
 
@@ -363,7 +363,7 @@ An acronym is expanded the first time it appears in the document and the first t
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = NO -->
+<!-- vale English.Acronyms = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -373,7 +373,7 @@ The CRDT replica synchronizes via the SWIM protocol over QUIC. (Three acronyms. 
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = YES -->
+<!-- vale English.Acronyms = YES -->
 ++++
 endif::[]
 
@@ -477,7 +477,7 @@ Acme Corp. agrees to provide widgets to Beta Ltd. on a date in the future.
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = NO -->
+<!-- vale English.Acronyms = NO -->
 ++++
 endif::[]
 [.good-example]
@@ -487,7 +487,7 @@ Supplier (Acme Corp., a Delaware corporation, EIN 99-1234567) shall deliver 1,20
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = YES -->
+<!-- vale English.Acronyms = YES -->
 ++++
 endif::[]
 
@@ -531,7 +531,7 @@ A parenthetical buries content the reader still has to process. When the content
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Semicolons = NO -->
+<!-- vale English.Semicolons = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -541,7 +541,7 @@ The connection pool (default size 10) is configured via `pool.size`; the value i
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Semicolons = YES -->
+<!-- vale English.Semicolons = YES -->
 ++++
 endif::[]
 
@@ -571,8 +571,8 @@ A paragraph ends with a colon only when a pure enumeration follows, a list whose
 
 ifdef::backend-html5[]
 ++++
-<!-- vale write-good.TooWordy = NO -->
-<!-- vale Google.We = NO -->
+<!-- vale English.TooWordy = NO -->
+<!-- vale English.We = NO -->
 ++++
 endif::[]
 Write the way an experienced practitioner would write a careful internal document. Avoid phrases - _herein_, _aforementioned_, _leverage_, _utilize_, _whilst_, _thereof_, etc. - that a practitioner would not say aloud. Avoid phrases - _super easy_, _just_, _simply_, _merely_, etc. - that minimize the reader's task.
@@ -584,8 +584,8 @@ Herein, the aforementioned mechanism shall be utilized to leverage the synergies
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale write-good.TooWordy = YES -->
-<!-- vale Google.We = YES -->
+<!-- vale English.TooWordy = YES -->
+<!-- vale English.We = YES -->
 ++++
 endif::[]
 
@@ -607,7 +607,7 @@ The cache holds many entries and evicts old ones quickly.
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.LyHyphens = NO -->
+<!-- vale English.LyHyphens = NO -->
 ++++
 endif::[]
 [.good-example]
@@ -617,7 +617,7 @@ The cache holds up to 10,000 entries by default. When the cache is full, the lea
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.LyHyphens = YES -->
+<!-- vale English.LyHyphens = YES -->
 ++++
 endif::[]
 
@@ -626,7 +626,7 @@ endif::[]
 
 ifdef::backend-html5[]
 ++++
-<!-- vale write-good.Weasel = NO -->
+<!-- vale English.Weasel = NO -->
 ++++
 endif::[]
 Avoid hedges that weaken claims without adding information: _somewhat_, _fairly_, _quite_, _rather_, _generally_, _usually_ (unless followed by the exception), _kind of_, _a bit_, etc. When a claim has exceptions, state them. When a claim is uncertain, say what the uncertainty is.
@@ -638,7 +638,7 @@ The operation is generally pretty fast and usually completes fairly quickly.
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale write-good.Weasel = YES -->
+<!-- vale English.Weasel = YES -->
 ++++
 endif::[]
 
@@ -669,13 +669,13 @@ A query can use an index. The response is served from the cache on a hit and fro
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Contractions = NO -->
+<!-- vale English.Contractions = NO -->
 ++++
 endif::[]
 Don't tell the reader that something is _easy_, _simple_, _straightforward_, _obvious_, or _trivial_. When it is, the reader can see for themselves. When it isn't, the label rings false. State the steps. Let the reader judge the difficulty.
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Contractions = YES -->
+<!-- vale English.Contractions = YES -->
 ++++
 endif::[]
 
@@ -711,7 +711,7 @@ When the connection is established, the server sends a greeting frame containing
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.We = NO -->
+<!-- vale English.We = NO -->
 ++++
 endif::[]
 Use the third person for descriptions of the system. Use the second person ("you") for instructions directed at the reader. Avoid the first-person plural ("we") except in introductions or rationale, where it refers to the document's authors. Don't switch among _you_, _we_, _the user_, and _one_ within a section.
@@ -723,7 +723,7 @@ We register the handler. The user can then look it up. One must be careful to un
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.We = YES -->
+<!-- vale English.We = YES -->
 ++++
 endif::[]
 
@@ -790,11 +790,11 @@ The database sustains 50,000 reads per second and 8,000 writes per second on the
 
 ifdef::backend-html5[]
 ++++
-<!-- vale proselint.CorporateSpeak = NO -->
-<!-- vale proselint.Cliches = NO -->
-<!-- vale write-good.TooWordy = NO -->
-<!-- vale Google.Colons = NO -->
-<!-- vale Google.We = NO -->
+<!-- vale English.Jargon = NO -->
+<!-- vale English.Cliches = NO -->
+<!-- vale English.TooWordy = NO -->
+<!-- vale English.Colons = NO -->
+<!-- vale English.We = NO -->
 ++++
 endif::[]
 Delete phrases that announce structure rather than provide content: _It's important to note that_, _It should be mentioned that_, _As we will see_, _In other words_, _Basically_, _Essentially_, _At the end of the day_, etc. The sentence following the filler is usually fine on its own.
@@ -806,11 +806,11 @@ It's important to note that, basically, the connection is, at the end of the day
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale proselint.CorporateSpeak = YES -->
-<!-- vale proselint.Cliches = YES -->
-<!-- vale write-good.TooWordy = YES -->
-<!-- vale Google.Colons = YES -->
-<!-- vale Google.We = YES -->
+<!-- vale English.Jargon = YES -->
+<!-- vale English.Cliches = YES -->
+<!-- vale English.TooWordy = YES -->
+<!-- vale English.Colons = YES -->
+<!-- vale English.We = YES -->
 ++++
 endif::[]
 
@@ -841,14 +841,14 @@ A session is created by `login`. The session is bound to one workspace and one u
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.We = NO -->
+<!-- vale English.We = NO -->
 ++++
 endif::[]
 Sections, paragraphs, and sentences begin with content. They don't begin with announcements that content is about to follow ("Now let us turn our attention to..."), with apologies ("This is a complex topic, but..."), or with restatements of the heading.
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Colons = NO -->
+<!-- vale English.Colons = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -864,8 +864,8 @@ Section 4.2: Connection Pooling. A _connection pool_ is a fixed-size set of pre-
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Colons = YES -->
-<!-- vale Google.We = YES -->
+<!-- vale English.Colons = YES -->
+<!-- vale English.We = YES -->
 ++++
 endif::[]
 
@@ -873,23 +873,23 @@ endif::[]
 
 ifdef::backend-html5[]
 ++++
-<!-- vale proselint.Very = NO -->
-<!-- vale write-good.TooWordy = NO -->
-<!-- vale write-good.Weasel = NO -->
+<!-- vale English.Weasel = NO -->
+<!-- vale English.TooWordy = NO -->
+<!-- vale English.Weasel = NO -->
 ++++
 endif::[]
 Drop qualifiers that don't narrow the claim: _very_, _really_, _actually_, _literally_, _quite_, _truly_, etc. Drop pleonasms: _end result_, _final outcome_, _advance planning_, _future plans_, _added bonus_, _past history_, etc. The shorter form means the same thing.
 ifdef::backend-html5[]
 ++++
-<!-- vale proselint.Very = YES -->
-<!-- vale write-good.TooWordy = YES -->
-<!-- vale write-good.Weasel = YES -->
+<!-- vale English.Weasel = YES -->
+<!-- vale English.TooWordy = YES -->
+<!-- vale English.Weasel = YES -->
 ++++
 endif::[]
 
 ifdef::backend-html5[]
 ++++
-<!-- vale write-good.TooWordy = NO -->
+<!-- vale English.TooWordy = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -899,7 +899,7 @@ The actual end result is that the future plans for the service will literally ha
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale write-good.TooWordy = YES -->
+<!-- vale English.TooWordy = YES -->
 ++++
 endif::[]
 
@@ -1082,21 +1082,21 @@ A _Connection Pool_ is a fixed-size set of pre-established connections. Each wor
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = NO -->
+<!-- vale English.Acronyms = NO -->
 ++++
 endif::[]
 Dates are written in the ISO 8601 form `YYYY-MM-DD`. Times include a timezone offset or the timezone name. Durations are written in the ISO 8601 form `P30D` or with explicit units such as _30 calendar days_. Relative references - _yesterday_, _next week_, _Q3_, etc. - are avoided unless the reference point is the document's effective date and that date is stated.
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = YES -->
+<!-- vale English.Acronyms = YES -->
 ++++
 endif::[]
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.AMPM = NO -->
-<!-- vale proselint.DateCase = NO -->
-<!-- vale proselint.DateSpacing = NO -->
+<!-- vale English.AMPM = NO -->
+<!-- vale English.DateCase = NO -->
+<!-- vale English.DateSpacing = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -1106,9 +1106,9 @@ The migration completes next Tuesday at 5pm.
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.AMPM = YES -->
-<!-- vale proselint.DateCase = YES -->
-<!-- vale proselint.DateSpacing = YES -->
+<!-- vale English.AMPM = YES -->
+<!-- vale English.DateCase = YES -->
+<!-- vale English.DateSpacing = YES -->
 ++++
 endif::[]
 
@@ -1167,24 +1167,24 @@ Every figure has a caption that states what the figure shows. Every figure also 
 
 ifdef::backend-html5[]
 ++++
-<!-- vale proselint.Cliches = NO -->
-<!-- vale write-good.Cliches = NO -->
-<!-- vale proselint.CorporateSpeak = NO -->
+<!-- vale English.Cliches = NO -->
+<!-- vale English.Cliches = NO -->
+<!-- vale English.Jargon = NO -->
 ++++
 endif::[]
 A document that may be translated avoids idioms, puns, and culture-specific references. _Cut to the chase_, _hit the ground running_, _the elephant in the room_, and _moving the needle_ rarely survive translation. Sports metaphors and political metaphors are avoided. Currency, units, and date formats are written in forms that don't presuppose a single locale. Example names are governed by the section xref:#inclusive-language[].
 ifdef::backend-html5[]
 ++++
-<!-- vale proselint.Cliches = YES -->
-<!-- vale write-good.Cliches = YES -->
-<!-- vale proselint.CorporateSpeak = YES -->
+<!-- vale English.Cliches = YES -->
+<!-- vale English.Cliches = YES -->
+<!-- vale English.Jargon = YES -->
 ++++
 endif::[]
 
 ifdef::backend-html5[]
 ++++
-<!-- vale proselint.CorporateSpeak = NO -->
-<!-- vale write-good.Cliches = NO -->
+<!-- vale English.Jargon = NO -->
+<!-- vale English.Cliches = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -1194,8 +1194,8 @@ The new compaction strategy is a game changer that moves the needle on tail late
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale write-good.Cliches = YES -->
-<!-- vale proselint.CorporateSpeak = YES -->
+<!-- vale English.Cliches = YES -->
+<!-- vale English.Jargon = YES -->
 ++++
 endif::[]
 
@@ -1377,7 +1377,7 @@ When you don't have a fact - an identifier, a path, a version number, a quotatio
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = NO -->
+<!-- vale English.Acronyms = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -1387,7 +1387,7 @@ The service runs on Postgres 16.4 with `max_connections=300` and exposes a `/hea
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = YES -->
+<!-- vale English.Acronyms = YES -->
 ++++
 endif::[]
 
@@ -1420,7 +1420,7 @@ A connection pool is a fixed-size set of pre-established connections that client
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Quotes = NO -->
+<!-- vale English.Quotes = NO -->
 ++++
 endif::[]
 
@@ -1428,14 +1428,14 @@ This rule specializes xref:#no-throat-clearing[] for the AI failure mode. Don't 
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Quotes = YES -->
+<!-- vale English.Quotes = YES -->
 ++++
 endif::[]
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Exclamation = NO -->
-<!-- vale Google.FirstPerson = NO -->
+<!-- vale English.Exclamation = NO -->
+<!-- vale English.FirstPerson = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -1447,8 +1447,8 @@ HTTP connection pooling is...
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Exclamation = YES -->
-<!-- vale Google.FirstPerson = YES -->
+<!-- vale English.Exclamation = YES -->
+<!-- vale English.FirstPerson = YES -->
 ++++
 endif::[]
 
@@ -1480,7 +1480,7 @@ The xref:#no-hedging[] rule forbids softening claims with _usually_, _generally_
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = NO -->
+<!-- vale English.Acronyms = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -1490,7 +1490,7 @@ The cache is generally pretty fast, and the eviction policy is usually some form
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = YES -->
+<!-- vale English.Acronyms = YES -->
 ++++
 endif::[]
 
@@ -1508,7 +1508,7 @@ The response is written as if the author chose the content independently, using 
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = NO -->
+<!-- vale English.Acronyms = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -1522,7 +1522,7 @@ Garbage collection is one subcategory of JVM performance optimization. The respo
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.Acronyms = YES -->
+<!-- vale English.Acronyms = YES -->
 ++++
 endif::[]
 [.good-example]
@@ -1541,17 +1541,17 @@ When this guideline is read as plain text, the markup it's written in isn't a se
 
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.WordList = NO -->
+<!-- vale English.WordList = NO -->
 ++++
 endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
-Treats `image::architecture.png[Client, gateway, order service...]` from the xref:#alt-text-and-captions[] rule as an instruction to embed an image in the output, or treats `<!-- vale Google.We = NO -->` as a directive to disable a check in the generated document.
+Treats `image::architecture.png[Client, gateway, order service...]` from the xref:#alt-text-and-captions[] rule as an instruction to embed an image in the output, or treats `<!-- vale English.We = NO -->` as a directive to disable a check in the generated document.
 ====
 ifdef::backend-html5[]
 ++++
-<!-- vale Google.WordList = YES -->
+<!-- vale English.WordList = YES -->
 ++++
 endif::[]
 
@@ -2031,10 +2031,8 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 . https://vale.sh[Vale^] lints the document.
 . Vale enforces the following style guides:
 .. native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary^] included,
-.. modified https://developers.google.com/style[Google Developer Documentation Style Guide^] via the https://github.com/vale-cli/Google[Google package^],
-.. modified https://vale.sh/hub/jdkato/write-good/[write-good linter^] via the https://github.com/vale-cli/write-good[write-good package^],
-.. https://github.com/amperser/proselint/[proselint^] via the https://github.com/vale-cli/proselint[proselint package^],
-.. custom project rules.
+.. a curated `English` style, inspired by the https://developers.google.com/style[Google Developer Documentation Style Guide^], the https://vale.sh/hub/jdkato/write-good/[write-good^] linter, and https://github.com/amperser/proselint/[proselint^],
+.. language-neutral typography rules, applied to every language.
 . Vale configuration is in `link:.vale.ini[]`.
 
 ==== Usage

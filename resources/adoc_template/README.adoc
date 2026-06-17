@@ -72,10 +72,8 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 . https://vale.sh[Vale^] lints the document.
 . Vale enforces the following style guides:
 .. native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary^] included,
-.. modified https://developers.google.com/style[Google Developer Documentation Style Guide^] via the https://github.com/vale-cli/Google[Google package^],
-.. modified https://vale.sh/hub/jdkato/write-good/[write-good linter^] via the https://github.com/vale-cli/write-good[write-good package^],
-.. https://github.com/amperser/proselint/[proselint^] via the https://github.com/vale-cli/proselint[proselint package^],
-.. custom project rules.
+.. a curated `English` style, inspired by the https://developers.google.com/style[Google Developer Documentation Style Guide^], the https://vale.sh/hub/jdkato/write-good/[write-good^] linter, and https://github.com/amperser/proselint/[proselint^],
+.. language-neutral typography rules, applied to every language.
 . Vale configuration is in `link:.vale.ini[]`.
 
 ==== Usage

@@ -72,10 +72,8 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 . Narzędzie https://vale.sh[Vale^] sprawdza dokument.
 . Vale stosuje następujące przewodniki stylu:
 .. natywny https://vale.sh/docs/styles#vale[styl Vale^] wraz z dołączonym https://github.com/vale-cli/en_US-web/tree/master[słownikiem angielskim],
-.. zmodyfikowany https://developers.google.com/style[przewodnik Google Developer Documentation Style Guide^] poprzez pakiet https://github.com/vale-cli/Google[Google^],
-.. zmodyfikowany https://vale.sh/hub/jdkato/write-good/[linter write-good^] poprzez pakiet https://github.com/vale-cli/write-good[write-good^],
-.. https://github.com/amperser/proselint/[proselint^] poprzez pakiet https://github.com/vale-cli/proselint[proselint^],
-.. własne reguły projektu,
+.. wyselekcjonowany styl `English`, zainspirowany przewodnikiem https://developers.google.com/style[Google Developer Documentation Style Guide^], linterem https://vale.sh/hub/jdkato/write-good/[write-good^] oraz https://github.com/amperser/proselint/[proselint^],
+.. niezależne od języka reguły typograficzne, stosowane do każdego języka,
 .. polski słownik ortograficzny dla plików `*.pl.adoc`.
 . Konfiguracja Vale znajduje się w pliku `link:.vale.ini[]`.
 

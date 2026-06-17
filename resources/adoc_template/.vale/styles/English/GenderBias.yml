@@ -1,7 +1,6 @@
 extends: substitution
 message: "Consider using '%s' instead of '%s'."
 ignorecase: true
-link: "https://developers.google.com/style/inclusive-documentation"
 level: error
 action:
   name: replace
@@ -41,3 +40,7 @@ swap:
   woman doctor: doctor
   woman scientist[s]?: scientist(s)
   work(?:m[ae]n|wom[ae]n): worker(s)
+  chair(?:m[ae]n|wom[ae]n):    chair(s)
+  congress(?:m[ae]n|wom[ae]n): member(s) of congress
+  landlord:                    building manager
+  men and girls:               men and women
