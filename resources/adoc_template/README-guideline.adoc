@@ -1851,7 +1851,14 @@ Validation runs on every lease, not only on creation.
 [#explicit-anchors]
 === Explicit Anchors
 
-A part of the text that a cross-reference targets carries an explicit anchor: a block anchor `+[[kebab-case-id]]+` on the line directly above a heading, or an inline anchor of the same form placed directly on text inside a block. The anchor sits on the most specific part of the text that defines the referenced concept - the section when the section as a whole defines it, the paragraph or list item when that alone defines it, or the single defining word. An anchor ID is a lowercase kebab-case name in the document's language, and it names the content, not the content's position. An explicit ID survives retitling. An auto-generated ID is derived from the heading text, so renaming the heading silently breaks every reference to it.
+A part of the text that a cross-reference targets carries an explicit anchor: a block anchor `+[[kebab-case-id]]+` on the line directly above a heading, or an inline anchor of the same form placed directly on text inside a block. The anchor sits on the narrowest span that alone defines the referenced concept. To choose that span, apply the following tests from narrowest to broadest and stop at the first that holds.
+
+. A single word defines the concept. Anchor that word.
+. One sentence or one list item defines it. Anchor that sentence or item.
+. One paragraph defines it. Anchor that paragraph.
+. Only the section as a whole defines it. Anchor the section with a block anchor on the line above its heading.
+
+An anchor ID is a lowercase kebab-case name in the document's language, and it names the content, not the content's position. An explicit ID survives retitling. An auto-generated ID is derived from the heading text, so renaming the heading silently breaks every reference to it.
 
 [.bad-example]
 .{bad-icon} Bad example
