@@ -798,6 +798,9 @@ brew install xclip
 echo "Installing icdiff (tool for comparing files/directories)..."
 brew install icdiff
 
+echo "Installing cloc (tool for counting lines of code)..."
+brew install cloc
+
 echo "Installing jq (CLI JSON processor)..."
 brew install jq
 

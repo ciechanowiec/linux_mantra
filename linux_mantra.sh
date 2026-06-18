@@ -282,6 +282,9 @@ sudo apt install xdotool -y
 echo "Installing icdiff (tool for comparing files/directories)..."
 sudo apt install icdiff -y
 
+echo "Installing cloc (tool for counting lines of code)..."
+sudo apt install cloc -y
+
 echo "Installing flameshot (tool for taking screenshots)..."
 sudo apt install flameshot -y
 mkdir -p "$HOME/.config/flameshot"
