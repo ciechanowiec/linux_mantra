@@ -54,3 +54,7 @@ Maven
 Cookiebot
 Usercentrics
 Metabase
+Figma
+HTMLRewriter
+Dockerfile
+Dockerfiles
