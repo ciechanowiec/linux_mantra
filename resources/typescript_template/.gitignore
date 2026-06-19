@@ -1,7 +1,16 @@
 # IDE
 *.iml
-.idea/
+.idea/*
+# Share only the project-level config that aligns every dev's IDE with the build:
+# the Eclipse Code Formatter binding (engine + EclipseCodeStyle.xml), the code style /
+# import layout, and the required-plugins declaration. Everything else under .idea/ stays ignored.
+!.idea/eclipseCodeFormatter.xml
+!.idea/externalDependencies.xml
+!.idea/codeStyles/
+!.idea/codeStyles/Project.xml
+!.idea/codeStyles/codeStyleConfig.xml
 .vscode/
+.fleet/
 
 # OS
 .DS_Store
