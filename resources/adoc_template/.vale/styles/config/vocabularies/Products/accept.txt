@@ -51,3 +51,6 @@ SpotBugs
 picocli
 tinylog
 Maven
+Cookiebot
+Usercentrics
+Metabase

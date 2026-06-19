@@ -157,3 +157,8 @@ deobfuscation
 [Cc]odename
 [Cc]odenames
 [Ss]ubstring
+[Rr]etarget
+cacheable
+[Tt]emplated
+[Bb]ackfill
+[Bb]ackfills
