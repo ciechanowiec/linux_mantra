@@ -71,6 +71,7 @@ exceptions:
   - MIT
   - MQTT
   - MVC
+  - MVP
   - NAT
   - NET
   - NOTE
