@@ -977,6 +977,11 @@ echo "Installing TypeScript..."
 #   good: https://lindevs.com/install-typescript-on-ubuntu
 npm install -g typescript # `npm` comes from node, so node must be preinstalled
 
+echo "Installing Wrangler (Cloudflare CLI)..."
+# Installation docs: https://developers.cloudflare.com/workers/wrangler/install-and-update/
+# Wrangler is Cloudflare's CLI for developing and deploying Workers/Pages.
+npm install -g wrangler
+
 echo "Installing pnpm (Node.js package manager)..."
 # Installation docs: https://pnpm.io/installation
 # NOTES:
