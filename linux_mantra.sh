@@ -956,6 +956,38 @@ cat >> "$nvimInitFile" << EOF
 vim.cmd('source ~/.vimrc')
 EOF
 
+echo "13. Soft-wrapping and disabling completion for text files..."
+# Text files (.txt -> filetype "text") read better soft-wrapped, and the
+# buffer-word completion popup is just noise when writing prose.
+cat >> "$HOME/.config/nvim/lua/config/autocmds.lua" << EOF
+
+-- Soft-wrap long lines in text files
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  pattern = "text",
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+  end,
+})
+EOF
+# Disable blink.cmp completion for text files (keeps blink's default guards).
+nvimBlinkConfigFile="$HOME/.config/nvim/lua/plugins/blink.lua"
+touch "$nvimBlinkConfigFile"
+cat > "$nvimBlinkConfigFile" << EOF
+return {
+  {
+    "saghen/blink.cmp",
+    opts = {
+      enabled = function()
+        return vim.bo.filetype ~= "text"
+          and vim.bo.buftype ~= "prompt"
+          and vim.b.completion ~= false
+      end,
+    },
+  },
+}
+EOF
+
 informAboutProcedureEnd
 
 promptOnContinuation
