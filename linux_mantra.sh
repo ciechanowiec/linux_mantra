@@ -526,6 +526,11 @@ mkdir -p "$HOME/.claude"
 if [ ! -f "$claudeSettingsFile" ]; then
     echo '{}' > "$claudeSettingsFile"
 fi
+# `find` and `rg` are allowlisted for prompt-free read-only searching, but both
+# can be coaxed into running arbitrary code (`find -exec`/`-delete`/`-fprint`,
+# `rg --pre`/`--search-zip`). The deny list below blocks exactly those flags;
+# deny takes precedence over allow in Claude Code, so ordinary searches stay
+# prompt-free while the code-execution escape hatches still require approval.
 jq '. * {
   "theme": "auto",
   "attribution": { "commit": "", "pr": "" },
@@ -622,6 +627,16 @@ jq '. * {
     "Bash(which *)",
     "Bash(yt-dlp --version)",
     "WebSearch"
+  ]) | unique)
+| .permissions.deny = (((.permissions.deny // []) + [
+    "Bash(find * -exec *)",
+    "Bash(find * -execdir *)",
+    "Bash(find * -delete*)",
+    "Bash(find * -fprint*)",
+    "Bash(rg * --pre *)",
+    "Bash(rg * --pre-glob *)",
+    "Bash(rg * --search-zip*)",
+    "Bash(rg * -z*)"
   ]) | unique)
 ' "$claudeSettingsFile" > "$claudeSettingsFile.tmp" \
     && mv "$claudeSettingsFile.tmp" "$claudeSettingsFile"
