@@ -1418,7 +1418,11 @@ EOF
 echo "12. Soft-wrapping and disabling completion for text files..."
 # Text files (.txt -> filetype "text") read better soft-wrapped, and the
 # buffer-word completion popup is just noise when writing prose.
-cat >> "$HOME/.config/nvim/lua/config/autocmds.lua" << EOF
+# The wrap autocmd goes in options.lua (loaded eagerly, before lazy.nvim
+# startup) rather than autocmds.lua (loaded on the VeryLazy event): nvim.sh
+# opens the scratch note with "-c :e ...txt" during startup, which runs before
+# VeryLazy fires, so an autocmd in autocmds.lua would register too late.
+cat >> "$HOME/.config/nvim/lua/config/options.lua" << EOF
 
 -- Soft-wrap long lines in text files
 vim.api.nvim_create_autocmd({ "FileType" }, {
