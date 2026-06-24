@@ -58,3 +58,5 @@ Figma
 HTMLRewriter
 Dockerfile
 Dockerfiles
+ESLint
+pgAdmin

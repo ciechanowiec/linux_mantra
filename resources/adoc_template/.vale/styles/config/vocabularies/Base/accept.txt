@@ -173,3 +173,5 @@ serverless
 [Ss]ubresource
 [Ss]ubresources
 ISC
+[Aa]gentic
+gzipped
