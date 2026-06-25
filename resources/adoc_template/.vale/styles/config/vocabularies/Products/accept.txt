@@ -60,3 +60,6 @@ Dockerfile
 Dockerfiles
 ESLint
 pgAdmin
+[Ss]hadcn
+shadcn/ui
+Tailwind

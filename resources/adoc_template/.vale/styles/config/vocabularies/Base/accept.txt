@@ -175,3 +175,7 @@ serverless
 ISC
 [Aa]gentic
 gzipped
+[Mm]ockups?
+[Vv]iewports?
+[Hh]ardcod\w*
+[Dd]ialogs?
