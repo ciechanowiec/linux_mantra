@@ -179,3 +179,11 @@ gzipped
 [Vv]iewports?
 [Hh]ardcod\w*
 [Dd]ialogs?
+[Pp]ackshots?
+[Ww]ebshop
+[Pp]asswordless
+[Rr]ollout
+tiering
+commoditized
+influencers
+KPIs
