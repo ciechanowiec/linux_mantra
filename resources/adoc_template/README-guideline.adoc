@@ -491,6 +491,23 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 
+[#mark-illustrative-cases]
+==== Mark Illustrative Cases
+
+An illustrative value, figure, or scenario is marked as illustrative. When a single number or case stands in for a range of possibilities the author hasn't enumerated, a phrase such as _for example_, _for instance_, _say_, or _one such case_ signals that it illustrates the rule rather than stating it. An unmarked illustration reads as a categorical rule, so the reader takes the one value as the fixed policy and acts on it. State the rule first, then mark the example that follows. This rule complements xref:#no-false-universals[]. A false universal overstates an uncertain claim, and an unmarked example overstates the reach of a single case.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A tool that replaces a €5,000 consulting engagement is priced at €1,200 to €3,600 per year. (One illustrative mapping, phrased as the pricing rule. The reader takes €1,200 to €3,600 as the fixed price.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The price is anchored to the value the tool delivers. For example, a tool that replaces a €5,000 consulting engagement might be priced at €1,200 to €3,600 per year.
+====
+
 === Language and Style
 
 ==== Active Voice and Named Actor
