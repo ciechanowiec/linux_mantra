@@ -30,7 +30,7 @@
 
 == About the Document
 
-This document is written in the https://asciidoc.org[AsciiDoc^] markup language. It resides in the project repository.
+The source text of this document is written in the https://asciidoc.org[AsciiDoc^] markup language.
 
 === Guideline
 

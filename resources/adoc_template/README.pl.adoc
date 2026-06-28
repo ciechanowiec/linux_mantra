@@ -30,7 +30,7 @@
 
 == O dokumencie
 
-Niniejszy dokument wykorzystuje język znaczników https://asciidoc.org[AsciiDoc^] i znajduje się w repozytorium projektu.
+Tekst źródłowy niniejszego dokument wykorzystuje język znaczników https://asciidoc.org[AsciiDoc^].
 
 === Wytyczne
 
