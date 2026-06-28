@@ -1,0 +1,13 @@
+extends: existence
+message: "Don't tell the reader something is '%s'; state the steps and let them judge."
+ignorecase: true
+level: error
+tokens:
+  - easy
+  - easily
+  - simple
+  - straightforward
+  - trivial
+  - trivially
+  - effortless
+  - painless

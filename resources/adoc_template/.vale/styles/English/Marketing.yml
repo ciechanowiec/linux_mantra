@@ -1,0 +1,23 @@
+extends: existence
+message: "'%s' is marketing language; state the concrete property instead."
+ignorecase: true
+level: error
+nonword: true
+tokens:
+  - cutting[- ]edge
+  - bleeding[- ]edge
+  - next[- ]generation
+  - industry[- ]leading
+  - world[- ]class
+  - best[- ]in[- ]class
+  - state[- ]of[- ]the[- ]art
+  - blazing[- ]fast
+  - lightning[- ]fast
+  - rock[- ]solid
+  - battle[- ]tested
+  - game[- ]changer
+  - turnkey
+  - military[- ]grade
+  - seamless
+  - seamlessly
+  - enterprise[- ]grade

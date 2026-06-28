@@ -1,0 +1,14 @@
+extends: substitution
+message: "Use '%s' instead of '%s' - write the way a practitioner would speak."
+ignorecase: true
+level: error
+swap:
+  whilst: while
+  leverages?: use
+  leveraged: used
+  leveraging: using
+  thereof: of it
+  thereto: to it
+  herewith: with this
+  hereinafter: from here on
+  heretofore: until now

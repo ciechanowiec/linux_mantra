@@ -1,0 +1,10 @@
+extends: existence
+message: "'%s' is a service-style preamble; the first sentence carries content."
+ignorecase: true
+level: error
+tokens:
+  - great question
+  - happy to help
+  - let me walk you through
+  - let us turn our attention
+  - I hope this helps

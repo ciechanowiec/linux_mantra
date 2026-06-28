@@ -42,7 +42,17 @@ endif::[]
 | Document generated: | {localdatetime}
 |===
 
+ifdef::backend-html5[]
+++++
+<!-- vale English.Patronizing = NO -->
+++++
+endif::[]
 This guideline governs how written documents are produced. Its purpose is to make documents precise, complete, easy to follow, and consistent across authors and over time.
+ifdef::backend-html5[]
+++++
+<!-- vale English.Patronizing = YES -->
+++++
+endif::[]
 
 The guideline applies to non-fiction prose - reference documentation, design documents, runbooks, README files, protocol descriptions, and prose memos. It doesn't apply to fiction, marketing copy, or transient chat.
 
@@ -319,6 +329,11 @@ A _token_ is an opaque string issued by the authentication server that the clien
 
 ==== Concrete Vocabulary
 
+ifdef::backend-html5[]
+++++
+<!-- vale English.Marketing = NO -->
+++++
+endif::[]
 Use words that two competent practitioners would interpret the same way. When two reasonable readers would disagree on what a word means in context, the word is too vague. Replace abstract qualifiers - _flexible_, _robust_, _scalable_, _modern_, _enterprise-grade_, _seamless_, _intelligent_, etc. - with the specific properties they hide.
 
 [.bad-example]
@@ -326,6 +341,11 @@ Use words that two competent practitioners would interpret the same way. When tw
 ====
 The platform is flexible and supports seamless integration with modern enterprise systems.
 ====
+ifdef::backend-html5[]
+++++
+<!-- vale English.Marketing = YES -->
+++++
+endif::[]
 
 [.good-example]
 .{good-icon} Good example
@@ -337,11 +357,21 @@ A new data source is added by implementing the `DataSource` interface and regist
 
 Prefer the older, well-understood term over a newer marketing-laden one when both denote the same thing. Use the fancier term only when it carries information the plain term lacks. The test is whether replacing the fancier term with the plain one would lose meaning. When it would not, the fancier term was decoration.
 
+ifdef::backend-html5[]
+++++
+<!-- vale English.Formal = NO -->
+++++
+endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
 The system leverages a cloud-native, distributed compute fabric to deliver intelligent responses.
 ====
+ifdef::backend-html5[]
+++++
+<!-- vale English.Formal = YES -->
+++++
+endif::[]
 
 [.good-example]
 .{good-icon} Good example
@@ -594,6 +624,8 @@ ifdef::backend-html5[]
 ++++
 <!-- vale English.TooWordy = NO -->
 <!-- vale English.We = NO -->
+<!-- vale English.Formal = NO -->
+<!-- vale English.Patronizing = NO -->
 ++++
 endif::[]
 Write the way an experienced practitioner would write a careful internal document. Avoid phrases - _herein_, _aforementioned_, _leverage_, _utilize_, _whilst_, _thereof_, etc. - that a practitioner would not say aloud. Avoid phrases - _super easy_, _just_, _simply_, _merely_, etc. - that minimize the reader's task.
@@ -607,6 +639,8 @@ ifdef::backend-html5[]
 ++++
 <!-- vale English.TooWordy = YES -->
 <!-- vale English.We = YES -->
+<!-- vale English.Formal = YES -->
+<!-- vale English.Patronizing = YES -->
 ++++
 endif::[]
 
@@ -691,20 +725,32 @@ A query can use an index. The response is served from the cache on a hit and fro
 ifdef::backend-html5[]
 ++++
 <!-- vale English.Contractions = NO -->
+<!-- vale English.Patronizing = NO -->
 ++++
 endif::[]
 Don't tell the reader that something is _easy_, _simple_, _straightforward_, _obvious_, or _trivial_. When it is, the reader can see for themselves. When it isn't, the label rings false. State the steps. Let the reader judge the difficulty.
 ifdef::backend-html5[]
 ++++
 <!-- vale English.Contractions = YES -->
+<!-- vale English.Patronizing = YES -->
 ++++
 endif::[]
 
+ifdef::backend-html5[]
+++++
+<!-- vale English.Patronizing = NO -->
+++++
+endif::[]
 [.bad-example]
 .{bad-icon} Bad example
 ====
 Configuring the resolver is straightforward - just provide a simple hook implementation.
 ====
+ifdef::backend-html5[]
+++++
+<!-- vale English.Patronizing = YES -->
+++++
+endif::[]
 
 [.good-example]
 .{good-icon} Good example
@@ -793,6 +839,11 @@ When the user clicks Submit, the receipt is shown. If the card is declined, the 
 [#no-marketing]
 ==== No Marketing
 
+ifdef::backend-html5[]
+++++
+<!-- vale English.Marketing = NO -->
+++++
+endif::[]
 Documentation doesn't sell. Remove claims of being _cutting-edge_, _next-generation_, _industry-leading_, _world-class_, _blazing fast_, _rock-solid_, _battle-tested_, etc. Replace them with what they were trying to claim, in concrete terms, or remove the sentence entirely. When a document does argue for a position, it advances claims supported by evidence, not by superlatives.
 
 [.bad-example]
@@ -800,6 +851,11 @@ Documentation doesn't sell. Remove claims of being _cutting-edge_, _next-generat
 ====
 The blazing-fast, industry-leading database delivers world-class performance for the most demanding workloads.
 ====
+ifdef::backend-html5[]
+++++
+<!-- vale English.Marketing = YES -->
+++++
+endif::[]
 
 [.good-example]
 .{good-icon} Good example
@@ -816,6 +872,7 @@ ifdef::backend-html5[]
 <!-- vale English.TooWordy = NO -->
 <!-- vale English.Colons = NO -->
 <!-- vale English.We = NO -->
+<!-- vale English.FillerPhrases = NO -->
 ++++
 endif::[]
 Delete phrases that announce structure rather than provide content: _It's important to note that_, _It should be mentioned that_, _As we will see_, _In other words_, _Basically_, _Essentially_, _At the end of the day_, etc. The sentence following the filler is usually fine on its own.
@@ -832,6 +889,7 @@ ifdef::backend-html5[]
 <!-- vale English.TooWordy = YES -->
 <!-- vale English.Colons = YES -->
 <!-- vale English.We = YES -->
+<!-- vale English.FillerPhrases = YES -->
 ++++
 endif::[]
 
@@ -863,6 +921,7 @@ A session is created by `login`. The session is bound to one workspace and one u
 ifdef::backend-html5[]
 ++++
 <!-- vale English.We = NO -->
+<!-- vale English.Preamble = NO -->
 ++++
 endif::[]
 Sections, paragraphs, and sentences begin with content. They don't begin with announcements that content is about to follow ("Now let us turn our attention to..."), with apologies ("This is a complex topic, but..."), or with restatements of the heading.
@@ -887,6 +946,7 @@ ifdef::backend-html5[]
 ++++
 <!-- vale English.Colons = YES -->
 <!-- vale English.We = YES -->
+<!-- vale English.Preamble = YES -->
 ++++
 endif::[]
 
@@ -897,6 +957,7 @@ ifdef::backend-html5[]
 <!-- vale English.Weasel = NO -->
 <!-- vale English.TooWordy = NO -->
 <!-- vale English.Weasel = NO -->
+<!-- vale English.RedundantQualifiers = NO -->
 ++++
 endif::[]
 Drop qualifiers that don't narrow the claim: _very_, _really_, _actually_, _literally_, _quite_, _truly_, etc. Drop pleonasms: _end result_, _final outcome_, _advance planning_, _future plans_, _added bonus_, _past history_, etc. The shorter form means the same thing.
@@ -905,12 +966,14 @@ ifdef::backend-html5[]
 <!-- vale English.Weasel = YES -->
 <!-- vale English.TooWordy = YES -->
 <!-- vale English.Weasel = YES -->
+<!-- vale English.RedundantQualifiers = YES -->
 ++++
 endif::[]
 
 ifdef::backend-html5[]
 ++++
 <!-- vale English.TooWordy = NO -->
+<!-- vale English.RedundantQualifiers = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -921,6 +984,7 @@ The actual end result is that the future plans for the service will literally ha
 ifdef::backend-html5[]
 ++++
 <!-- vale English.TooWordy = YES -->
+<!-- vale English.RedundantQualifiers = YES -->
 ++++
 endif::[]
 
@@ -1206,6 +1270,7 @@ ifdef::backend-html5[]
 ++++
 <!-- vale English.Jargon = NO -->
 <!-- vale English.Cliches = NO -->
+<!-- vale English.Marketing = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -1217,6 +1282,7 @@ ifdef::backend-html5[]
 ++++
 <!-- vale English.Cliches = YES -->
 <!-- vale English.Jargon = YES -->
+<!-- vale English.Marketing = YES -->
 ++++
 endif::[]
 
@@ -1442,6 +1508,7 @@ A connection pool is a fixed-size set of pre-established connections that client
 ifdef::backend-html5[]
 ++++
 <!-- vale English.Quotes = NO -->
+<!-- vale English.Preamble = NO -->
 ++++
 endif::[]
 
@@ -1450,6 +1517,7 @@ This rule specializes xref:#no-throat-clearing[] for the AI failure mode. Don't 
 ifdef::backend-html5[]
 ++++
 <!-- vale English.Quotes = YES -->
+<!-- vale English.Preamble = YES -->
 ++++
 endif::[]
 
@@ -1457,6 +1525,7 @@ ifdef::backend-html5[]
 ++++
 <!-- vale English.Exclamation = NO -->
 <!-- vale English.FirstPerson = NO -->
+<!-- vale English.Preamble = NO -->
 ++++
 endif::[]
 [.bad-example]
@@ -1470,6 +1539,7 @@ ifdef::backend-html5[]
 ++++
 <!-- vale English.Exclamation = YES -->
 <!-- vale English.FirstPerson = YES -->
+<!-- vale English.Preamble = YES -->
 ++++
 endif::[]
 
@@ -1838,7 +1908,17 @@ The cache is configured via `cache.ttl`.
 (The attached paragraph starts a new topic. The cache isn't an elaboration of the pool's configuration, so the paragraph takes its own number.)
 ====
 
+ifdef::backend-html5[]
+++++
+<!-- vale English.RedundantQualifiers = NO -->
+++++
+endif::[]
 A continuation paragraph followed by deeper-level numbered paragraphs needs one more `{plus}` line between the paragraph and the first deeper item. That `{plus}` ends the continuation paragraph and attaches the deeper items to the same parent. Without it, the renderer doesn't recognize the deeper item's marker: it joins the marker and the item's text into the continuation paragraph as plain text and renders the item's own `{plus}` lines literally. A following item at the same level needs no such `{plus}` - its marker ends the continuation paragraph on its own.
+ifdef::backend-html5[]
+++++
+<!-- vale English.RedundantQualifiers = YES -->
+++++
+endif::[]
 
 [.bad-example]
 .{bad-icon} Bad example

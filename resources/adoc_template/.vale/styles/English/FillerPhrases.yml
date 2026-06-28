@@ -1,0 +1,15 @@
+extends: existence
+message: "'%s' is a filler phrase; delete it and keep the sentence."
+ignorecase: true
+level: error
+tokens:
+  - it is important to note that
+  - it's important to note that
+  - it should be mentioned that
+  - it is worth noting that
+  - it's worth noting that
+  - as we will see
+  - needless to say
+  - in other words
+  - basically
+  - essentially
