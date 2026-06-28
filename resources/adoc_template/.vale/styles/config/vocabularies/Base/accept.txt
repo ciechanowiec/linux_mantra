@@ -192,3 +192,5 @@ PPTX
 [Tt]imebox
 Operationalization
 omnichannel
+deduplicated
+namespaced
