@@ -478,6 +478,8 @@ Acme Corp. agrees to provide widgets to Beta Ltd. on a date in the future.
 ifdef::backend-html5[]
 ++++
 <!-- vale English.Acronyms = NO -->
+<!-- vale Vale.Spelling = NO -->
+<!-- vale English.OxfordComma = NO -->
 ++++
 endif::[]
 [.good-example]
@@ -488,6 +490,8 @@ Supplier (Acme Corp., a Delaware corporation, EIN 99-1234567) shall deliver 1,20
 ifdef::backend-html5[]
 ++++
 <!-- vale English.Acronyms = YES -->
+<!-- vale Vale.Spelling = YES -->
+<!-- vale English.OxfordComma = YES -->
 ++++
 endif::[]
 
