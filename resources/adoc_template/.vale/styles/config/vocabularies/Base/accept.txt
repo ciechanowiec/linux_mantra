@@ -19,7 +19,7 @@ onboarding
 [Rr]unbooks
 OAuth
 interoperate
-[Aa]llowlist
+[Aa]llowlists?
 [Bb]locklist
 [Ii]dempotency
 [Ss]everability
@@ -194,3 +194,11 @@ Operationalization
 omnichannel
 deduplicated
 namespaced
+[Ff]rontend
+frontend's
+[Gg]lobals?
+[Cc]onfigs?
+[Pp]arams?
+[Mm]iddleware
+rethrow
+dev
