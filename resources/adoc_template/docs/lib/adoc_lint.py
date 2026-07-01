@@ -39,7 +39,7 @@ import subprocess
 import sys
 from collections import Counter
 from dataclasses import dataclass
-from typing import Callable, Iterator, List, Tuple
+from typing import Callable, Dict, Iterator, List, Tuple
 
 Finding = Tuple[int, int, str]  # (line, col, message) yielded by a rule
 RuleFunc = Callable[["Document"], Iterator[Finding]]
@@ -164,8 +164,8 @@ def rule_heading_depth(doc: Document) -> Iterator[Finding]:
     for line_num, level in doc.headings:
         if level > 6:
             yield (line_num, 1,
-                   f"heading is {level - 1} levels deep; the guideline allows "
-                   f"at most 5 (§section-nesting)")
+                   f"Heading is {level - 1} levels deep, exceeding the guideline "
+                   f"maximum of 5 (§section-nesting)")
 
 
 def rule_lone_subsection(doc: Document) -> Iterator[Finding]:
@@ -182,8 +182,8 @@ def rule_lone_subsection(doc: Document) -> Iterator[Finding]:
             j += 1
         if children == 1 and first_child is not None:
             yield (first_child, 1,
-                   "lone subsection; a section has zero subsections or two or "
-                   "more (§section-nesting)")
+                   "Lone subsection where a section needs zero subsections or "
+                   "two or more (§section-nesting)")
 
 
 # ============================================================================
@@ -205,14 +205,14 @@ def rule_numbering_depth(doc: Document) -> Iterator[Finding]:
         om = ORDERED_MARKER_RE.match(line.text)
         if om and len(om.group(1)) > 4:
             yield (line.num, 1,
-                   f"ordered list nested {len(om.group(1))} levels; the dot "
-                   f"ladder stops at `....` (§numbering-depth)")
+                   f"Ordered list nested {len(om.group(1))} levels, beyond the "
+                   f"dot ladder limit of `....` (§numbering-depth)")
             continue
         um = UNORDERED_MARKER_RE.match(line.text)
         if um and len(um.group(1)) > 2:
             yield (line.num, 1,
-                   f"unordered list nested {len(um.group(1))} levels; the star "
-                   f"ladder stops at `**` (§numbering-depth)")
+                   f"Unordered list nested {len(um.group(1))} levels, beyond the "
+                   f"star ladder limit of `**` (§numbering-depth)")
 
 
 # ============================================================================
@@ -233,7 +233,7 @@ def rule_image_alt_text(doc: Document) -> Iterator[Finding]:
             first_positional = m.group(1).split(",", 1)[0].strip()
             if not first_positional:
                 yield (line.num, m.start() + 1,
-                       "image has no alt text; state what the figure shows "
+                       "Image has no alt text stating what the figure shows "
                        "(§alt-text-and-captions)")
 
 
@@ -260,8 +260,8 @@ def rule_link_text(doc: Document) -> Iterator[Finding]:
             text = m.group(1).rstrip("^").strip().lower()
             if text in NONDESCRIPTIVE:
                 yield (line.num, m.start() + 1,
-                       f"non-descriptive link text {m.group(1)!r}; wrap the "
-                       f"phrase the source substantiates "
+                       f"Non-descriptive link text {m.group(1)!r} that should "
+                       f"wrap the phrase the source substantiates "
                        f"(§link-text-carries-the-claim)")
 
 
@@ -285,8 +285,8 @@ def rule_auto_anchor(doc: Document) -> Iterator[Finding]:
     for line in _prose(doc):
         for m in AUTO_ANCHOR_RE.finditer(_mask_code(line.text)):
             yield (line.num, m.start() + 1,
-                   "reference to an auto-generated id; target an explicit "
-                   "anchor instead (§explicit-anchors)")
+                   "Reference to an auto-generated id instead of an explicit "
+                   "anchor (§explicit-anchors)")
 
 
 def rule_anchor_format(doc: Document) -> Iterator[Finding]:
@@ -322,8 +322,8 @@ def rule_diagram_tabs(doc: Document) -> Iterator[Finding]:
     for line in doc.lines:
         if line.block == "literal" and "\t" in line.text:
             yield (line.num, line.text.index("\t") + 1,
-                   "tab in an ASCII diagram shifts alignment; use spaces "
-                   "(§ascii-diagrams)")
+                   "Tab in an ASCII diagram shifts alignment and must be "
+                   "spaces (§ascii-diagrams)")
 
 
 def rule_diagram_trailing_space(doc: Document) -> Iterator[Finding]:
@@ -344,8 +344,8 @@ def rule_diagram_charset(doc: Document) -> Iterator[Finding]:
             m = ASCII_BOX_RE.search(ln.text)
             if m:
                 yield (ln.num, m.start() + 1,
-                       "ASCII and Unicode box-drawing mixed in one diagram; use "
-                       "one consistent set (§ascii-diagrams)")
+                       "ASCII and Unicode box-drawing mixed in one diagram "
+                       "instead of one consistent set (§ascii-diagrams)")
                 return
 
     block: List[Line] = []
@@ -358,6 +358,148 @@ def rule_diagram_charset(doc: Document) -> Iterator[Finding]:
             block = []
     if block:
         yield from report(block)
+
+
+# Serves ascii-diagrams (§ascii-diagrams): a box whose side drifts off its
+# corners is an alignment defect a whole-block width check can't flag without
+# false positives. This rule pairs each border line with the next and takes the
+# columns their `+` corners share -- the box's outer corners, plus any junction
+# that lines up top to bottom. Every line between the two borders that is a wall
+# (a `|` or `+` at the left or right shared column) must carry a `|` or `+` at
+# *every* shared column, so a side that slips off its corners is caught even when
+# the two borders differ, as in a junction box (`+-----+` over `+--+--+`). A line
+# with a wall at neither outer column is a connector, not a box side, and is
+# skipped -- which keeps arrows and lifelines between stacked boxes from being
+# flagged.
+
+
+def _is_border_drawing(text: str) -> bool:
+    return (text.strip() != "" and all(c in "+- " for c in text)
+            and "+" in text and "-" in text)
+
+
+def _plus_columns(text: str) -> List[int]:
+    return [i for i, char in enumerate(text) if char == "+"]
+
+
+def rule_diagram_box_alignment(doc: Document) -> Iterator[Finding]:
+    def check(block: List[Line]) -> Iterator[Finding]:
+        borders = [i for i, ln in enumerate(block) if _is_border_drawing(ln.text)]
+        for top_i, bottom_i in zip(borders, borders[1:]):
+            shared = sorted(set(_plus_columns(block[top_i].text))
+                            & set(_plus_columns(block[bottom_i].text)))
+            if not shared:
+                continue
+            left, right = shared[0], shared[-1]
+            for ln in block[top_i + 1:bottom_i]:
+                text = ln.text
+                left_wall = left < len(text) and text[left] in "|+"
+                right_wall = right < len(text) and text[right] in "|+"
+                if not (left_wall or right_wall):
+                    continue
+                for col in shared:
+                    if not (col < len(text) and text[col] in "|+"):
+                        yield (ln.num, col + 1,
+                               "Box wall is missing at its border "
+                               f"column {col + 1} (§ascii-diagrams)")
+
+    block: List[Line] = []
+    for line in doc.lines:
+        if line.block == "literal":
+            block.append(line)
+            continue
+        if block:
+            yield from check(block)
+            block = []
+    if block:
+        yield from check(block)
+
+
+# Serves ascii-diagrams (§ascii-diagrams): the dual of the box-alignment rule
+# above. That rule checks walls against the columns two borders share; this one
+# checks a border against the walls around it. A box corner is where a horizontal
+# border meets a vertical wall, so every `+` on a border line must connect to a
+# `|` or `+` directly above or directly below it. A border shifted off its walls
+# leaves its corners hanging over empty space, which this flags even when the two
+# borders share no column (so the alignment rule finds nothing to compare). The
+# check runs only on "border-drawing" lines (made of `+`, `-`, and spaces), so a
+# `+` inside literal text -- a `postgres+index` query in a `....` block -- is
+# never mistaken for a corner.
+
+
+def rule_diagram_corner_support(doc: Document) -> Iterator[Finding]:
+    def check(block: List[Line]) -> Iterator[Finding]:
+        for i, ln in enumerate(block):
+            if not _is_border_drawing(ln.text):
+                continue
+            above = block[i - 1].text if i > 0 else ""
+            below = block[i + 1].text if i + 1 < len(block) else ""
+            for col, char in enumerate(ln.text):
+                if char != "+":
+                    continue
+                up = above[col] if col < len(above) else " "
+                down = below[col] if col < len(below) else " "
+                if up in "|+" or down in "|+":
+                    continue
+                yield (ln.num, col + 1,
+                       "Box corner has no wall directly above or below it "
+                       "(§ascii-diagrams)")
+
+    block: List[Line] = []
+    for line in doc.lines:
+        if line.block == "literal":
+            block.append(line)
+            continue
+        if block:
+            yield from check(block)
+            block = []
+    if block:
+        yield from check(block)
+
+
+# Serves ascii-diagrams (§ascii-diagrams): a sequence diagram has no boxes, so
+# the box rules above never look at it. Its invariant is that each participant's
+# lifeline holds one fixed column down the whole diagram. This rule takes the
+# lifeline columns -- those carrying a `|` on at least half the rows that have
+# any `|` -- and flags a `|` in any other column, which is a lifeline that has
+# drifted, usually because an arrow on that row was drawn a character too long or
+# too short. It runs only on `|`-heavy blocks with no `+`, so box diagrams
+# (handled above) and an incidental `|` in prose or a piped command are left
+# alone.
+
+
+def rule_diagram_lifeline_alignment(doc: Document) -> Iterator[Finding]:
+    def check(block: List[Line]) -> Iterator[Finding]:
+        if any("+" in ln.text for ln in block):
+            return
+        rows = [ln for ln in block if "|" in ln.text]
+        if len(rows) < 5:
+            return
+        counts: Dict[int, int] = {}
+        for ln in rows:
+            for col, char in enumerate(ln.text):
+                if char == "|":
+                    counts[col] = counts.get(col, 0) + 1
+        lifelines = {col for col, n in counts.items() if n >= len(rows) / 2}
+        if len(lifelines) < 2:
+            return
+        for ln in rows:
+            for col, char in enumerate(ln.text):
+                if char == "|" and col not in lifelines:
+                    yield (ln.num, col + 1,
+                           "Lifeline is not aligned with the fixed column its "
+                           "participant keeps (§ascii-diagrams)")
+
+    block: List[Line] = []
+    for line in doc.lines:
+        if line.block == "literal":
+            block.append(line)
+            continue
+        if block:
+            yield from check(block)
+            block = []
+    if block:
+        yield from check(block)
 
 
 # ============================================================================
@@ -409,12 +551,12 @@ def rule_one_sentence_per_line(doc: Document) -> Iterator[Finding]:
         else:
             if run_len >= 2:
                 yield (run_start, 1,
-                       "consecutive lines each end a sentence; write the "
+                       "Consecutive lines each end a sentence, so write the "
                        "paragraph as continuous prose (§one-sentence-per-line)")
             run_start, run_len = None, 0
     if run_len >= 2:
         yield (run_start, 1,
-               "consecutive lines each end a sentence; write the paragraph as "
+               "Consecutive lines each end a sentence, so write the paragraph as "
                "continuous prose (§one-sentence-per-line)")
 
 
@@ -429,8 +571,8 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
             continue
         for m in BOLD_IN_BODY_RE.finditer(_mask_code(line.text)):
             yield (line.num, m.start() + 1,
-                   "bold in body text; italicize a word that carries emphasis "
-                   "(§inline-formatting-semantics)")
+                   "Bold in body text where a word carrying emphasis should be "
+                   "italic (§inline-formatting-semantics)")
 
 
 # ============================================================================
@@ -460,6 +602,9 @@ RULES: List[Rule] = [
     Rule("diagram-tabs", "error", rule_diagram_tabs),
     Rule("diagram-trailing-space", "error", rule_diagram_trailing_space),
     Rule("diagram-charset", "error", rule_diagram_charset),
+    Rule("diagram-box-alignment", "error", rule_diagram_box_alignment),
+    Rule("diagram-corner-support", "error", rule_diagram_corner_support),
+    Rule("diagram-lifeline-alignment", "error", rule_diagram_lifeline_alignment),
     Rule("one-sentence-per-line", "error", rule_one_sentence_per_line),
     Rule("inline-formatting", "error", rule_bold_in_body),
 ]
@@ -492,7 +637,7 @@ def run_vale(path: str) -> List[tuple]:
     try:
         data = json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
-        sys.stderr.write("adoc_lint: could not parse Vale output; "
+        sys.stderr.write("adoc_lint: could not parse Vale output, "
                          "skipping prose checks\n")
         return []
     findings = []
