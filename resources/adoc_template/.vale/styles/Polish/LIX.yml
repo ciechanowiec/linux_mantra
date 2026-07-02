@@ -1,0 +1,7 @@
+extends: metric
+message: "Wynik czytelności LIX wynosi %s; utrzymuj go na poziomie 65 lub niższym."
+link: https://en.wikipedia.org/wiki/Lix_(readability_test)
+level: error
+formula: |
+  (words / sentences) + ((long_words * 100) / words)
+condition: "> 65"

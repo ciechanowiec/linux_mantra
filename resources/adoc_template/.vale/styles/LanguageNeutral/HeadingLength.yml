@@ -1,0 +1,6 @@
+extends: occurrence
+message: "Heading is longer than 8 words. A heading is a label, not a sentence."
+level: error
+scope: heading
+max: 8
+token: \p{L}+

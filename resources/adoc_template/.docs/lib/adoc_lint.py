@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Lint an AsciiDoc document against the deterministic rules of the guideline.
 
-The linter runs two engines and merges their findings into one stream:
+The linter runs three engines and merges their findings into one stream:
 
   1. Vale (an external binary) for prose tokens and typography. Its config
      lives at the project root in `.vale.ini` + `.vale/styles/`. Vale is
@@ -10,6 +10,11 @@ The linter runs two engines and merges their findings into one stream:
   2. The structural engine in this file for the markup, tree, and ASCII-diagram
      rules that Vale cannot see, because Vale lints rendered prose and loses the
      markup layer (heading depth, list nesting, anchor syntax, box-drawing).
+  3. Asciidoctor (an external binary) as a render pass: the document is
+     converted to a discarded output file and every WARNING-or-worse message
+     (missing includes, malformed markup) is mapped onto the finding stream.
+     Asciidoctor does NOT validate internal cross-references, so the
+     structural rule `xref-targets` covers that gap.
 
 Only the mechanically-checkable slice of `README-guideline.adoc` is enforced
 here. Rules of prose judgement (nomenclature drift, false universals, "don't
@@ -301,6 +306,40 @@ def rule_anchor_format(doc: Document) -> Iterator[Finding]:
                            f"kebab-case (§explicit-anchors)")
 
 
+# Serves explicit-anchors (§explicit-anchors) from the other side: a reference
+# is only as good as its target. Asciidoctor's render pass does not validate
+# internal cross-references (verified empirically: an `xref` to a missing id
+# converts silently), so a retitled or deleted anchor leaves dangling links
+# that nothing catches. This rule collects every explicit anchor id and flags
+# any same-document reference whose target isn't among them. References to
+# `_`-prefixed ids are skipped here because `rule_auto_anchor` already flags
+# them. External-file references (`xref:other.adoc#...`) don't match the
+# same-document patterns and are out of scope.
+
+XREF_TARGET_RE = re.compile(r"xref:#([A-Za-z0-9_-]+)")
+ANGLE_REF_RE = re.compile(r"<<([A-Za-z0-9_-]+)")
+
+
+def rule_xref_targets(doc: Document) -> Iterator[Finding]:
+    anchors = set()
+    for line in _prose(doc):
+        masked = _mask_code(line.text)
+        for m in BLOCK_ANCHOR_RE.finditer(masked):
+            anchors.add(m.group(1).strip())
+        for m in INLINE_ANCHOR_RE.finditer(masked):
+            anchors.add(m.group(1))
+    for line in _prose(doc):
+        masked = _mask_code(line.text)
+        for rx in (XREF_TARGET_RE, ANGLE_REF_RE):
+            for m in rx.finditer(masked):
+                target = m.group(1)
+                if target.startswith("_") or target in anchors:
+                    continue
+                yield (line.num, m.start() + 1,
+                       f"Cross-reference targets anchor {target!r}, which "
+                       f"doesn't exist in the document (§explicit-anchors)")
+
+
 # ============================================================================
 # ASCII diagrams — character hygiene
 # ============================================================================
@@ -576,6 +615,120 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
+# Paragraph and section size — sentence caps, body caps, opener monotony
+# ============================================================================
+#
+# These rules exploit the one-line-per-paragraph convention: a paragraph IS a
+# source line, so paragraph-level counting is exact. Sentence boundaries are
+# terminal punctuation followed by whitespace, after masking code spans,
+# resolving xref/link macros to their text, and dropping common abbreviations
+# (e.g., i.e., etc.) that would inflate the count.
+#
+# one-paragraph-one-topic (§one-paragraph-one-topic): a paragraph develops one
+# topic. Topic drift isn't mechanically checkable, but its gross signature is:
+# a paragraph holding more sentences than one topic plausibly needs.
+#
+# section-body-length (§section-nesting): the dual of `lone-subsection` --
+# that rule catches over-splitting, this catches under-splitting. The body is
+# the prose between a heading and the next heading of any level; a body over
+# the cap needs subsections.
+#
+# sentence-opener-runs: a long run of consecutive sentences opening with the
+# same word is monotony, not parallelism. The threshold leaves room for a
+# short deliberate parallel enumeration.
+
+ABBREV_RE = re.compile(r"\b(?:e\.g|i\.e|etc|vs|cf)\.", re.IGNORECASE)
+SENTENCE_END_RE = re.compile(r"[.!?]+[\"')\]]*(?:\s+|$)")
+PROSE_WORD_RE = re.compile(r"[^\W\d_]+")
+XREF_TEXT_RE = re.compile(r"xref:[^\[\]\s]*\[([^\]]*)\]")
+BLOCK_ANCHOR_FULL_RE = re.compile(r"\[\[[^\]]*\]\]")
+
+MAX_SENTENCES_PER_PARAGRAPH = 8
+MAX_SECTION_BODY_WORDS = 1000
+MAX_OPENER_RUN = 4
+
+
+def _rendered(text: str) -> str:
+    """Approximate the rendered prose of a source line: code spans masked,
+    macros replaced by their display text, anchors dropped."""
+    t = _mask_code(text)
+    t = XREF_TEXT_RE.sub(r"\1", t)
+    t = LINK_RE.sub(r"\1", t)
+    t = BLOCK_ANCHOR_FULL_RE.sub(" ", t)
+    return t
+
+
+def _paragraphs(doc: Document) -> Iterator[Line]:
+    """Prose content lines: paragraphs and list items, without headings,
+    block titles, metadata, tables, or macros standing alone."""
+    for line in doc.lines:
+        if line.block != "none" or line.in_table:
+            continue
+        s = line.text.strip()
+        if not s or HEADING_RE.match(line.text):
+            continue
+        if s[0] in "=[:|/<+" or s.startswith("image:"):
+            continue
+        if s[0] == "." and not ORDERED_MARKER_RE.match(s):
+            continue
+        yield line
+
+
+def _sentence_source(text: str) -> str:
+    return ABBREV_RE.sub(" ", _rendered(text))
+
+
+def rule_paragraph_sentences(doc: Document) -> Iterator[Finding]:
+    for line in _paragraphs(doc):
+        n = len(SENTENCE_END_RE.findall(_sentence_source(line.text)))
+        if n > MAX_SENTENCES_PER_PARAGRAPH:
+            yield (line.num, 1,
+                   f"Paragraph holds {n} sentences, exceeding the cap of "
+                   f"{MAX_SENTENCES_PER_PARAGRAPH}; split it "
+                   f"(§one-paragraph-one-topic)")
+
+
+def rule_section_body_words(doc: Document) -> Iterator[Finding]:
+    heading_nums = {num for num, _ in doc.headings}
+    paragraph_nums = {ln.num for ln in _paragraphs(doc)}
+    bodies: List[Tuple[int, int]] = []  # (heading_line, body_words)
+    current, words = None, 0
+    for line in doc.lines:
+        if line.num in heading_nums:
+            if current is not None:
+                bodies.append((current, words))
+            current, words = line.num, 0
+        elif line.num in paragraph_nums:
+            words += len(PROSE_WORD_RE.findall(_rendered(line.text)))
+    if current is not None:
+        bodies.append((current, words))
+    for heading_line, body_words in bodies:
+        if body_words > MAX_SECTION_BODY_WORDS:
+            yield (heading_line, 1,
+                   f"Section body holds {body_words} words before the next "
+                   f"heading, exceeding the cap of {MAX_SECTION_BODY_WORDS}; "
+                   f"split it into subsections (§section-nesting)")
+
+
+def rule_sentence_opener_runs(doc: Document) -> Iterator[Finding]:
+    for line in _paragraphs(doc):
+        parts = [p for p in SENTENCE_END_RE.split(_sentence_source(line.text))
+                 if p.strip()]
+        openers = []
+        for part in parts:
+            m = PROSE_WORD_RE.search(part)
+            openers.append(m.group(0).lower() if m else "")
+        run = 1
+        for prev, cur in zip(openers, openers[1:]):
+            run = run + 1 if cur and cur == prev else 1
+            if run == MAX_OPENER_RUN + 1:
+                yield (line.num, 1,
+                       f"{run} consecutive sentences open with the word "
+                       f"{cur!r}; vary the sentence openers")
+                break
+
+
+# ============================================================================
 # Rule registry
 # ============================================================================
 #
@@ -607,6 +760,10 @@ RULES: List[Rule] = [
     Rule("diagram-lifeline-alignment", "error", rule_diagram_lifeline_alignment),
     Rule("one-sentence-per-line", "error", rule_one_sentence_per_line),
     Rule("inline-formatting", "error", rule_bold_in_body),
+    Rule("xref-targets", "error", rule_xref_targets),
+    Rule("one-paragraph-one-topic", "error", rule_paragraph_sentences),
+    Rule("section-body-length", "error", rule_section_body_words),
+    Rule("sentence-opener-runs", "error", rule_sentence_opener_runs),
 ]
 
 
@@ -655,6 +812,47 @@ def run_vale(path: str) -> List[tuple]:
 
 
 # ============================================================================
+# Asciidoctor engine — render integrity
+# ============================================================================
+#
+# A document that doesn't render cleanly is broken regardless of its prose:
+# a missing include drops content silently, and malformed markup renders as
+# literal text. Asciidoctor is run as a render pass with the output discarded,
+# and every WARNING-or-worse message it logs becomes an error finding. Like
+# Vale, Asciidoctor is a hard dependency that fails loudly when absent.
+# Asciidoctor does not validate internal cross-references (an `xref` to a
+# missing id converts silently); the structural rule `xref-targets` owns that.
+
+ASCIIDOCTOR_MSG_RE = re.compile(
+    r"^asciidoctor: ([A-Z]+): (?:(.*?): line (\d+): )?(.*)$")
+ASCIIDOCTOR_GATING = {"WARNING", "ERROR", "FAILED", "FATAL"}
+
+
+def require_asciidoctor() -> None:
+    if shutil.which("asciidoctor") is None:
+        sys.stderr.write(
+            "adoc_lint: `asciidoctor` is required but was not found on PATH. "
+            "Install Asciidoctor (see README, Linting).\n")
+        sys.exit(2)
+
+
+def run_asciidoctor(path: str) -> List[tuple]:
+    proc = subprocess.run(
+        ["asciidoctor", "--out-file", os.devnull, path],
+        capture_output=True, text=True,
+    )
+    findings = []
+    for raw in proc.stderr.splitlines():
+        m = ASCIIDOCTOR_MSG_RE.match(raw.strip())
+        if not m or m.group(1) not in ASCIIDOCTOR_GATING:
+            continue
+        line = int(m.group(3)) if m.group(3) else 1
+        findings.append((line, 1, "asciidoctor", "error",
+                         f"Asciidoctor {m.group(1).lower()}: {m.group(4)}"))
+    return findings
+
+
+# ============================================================================
 # Driver
 # ============================================================================
 
@@ -669,6 +867,7 @@ def lint_file(path: str) -> List[tuple]:
             findings.append((line, col, rule.id, rule.severity, message))
 
     findings.extend(run_vale(path))
+    findings.extend(run_asciidoctor(path))
     findings.sort(key=lambda f: (f[0], f[1], f[2]))
     return findings
 
@@ -719,7 +918,8 @@ def render_text(file_results: List[tuple], style: Style, n_rules: int) -> str:
     n_files = len(file_results)
     counts = Counter(f[3] for _, f in findings)
     scope = style.paint("2", f"{_plural(n_files, 'file')} · "
-                             f"{n_rules} structural rules + Vale")
+                             f"{n_rules} structural rules + Vale "
+                             f"+ Asciidoctor")
     if findings:
         parts = ", ".join(
             _plural(counts[s], s) for s in
@@ -759,6 +959,7 @@ def main(argv: List[str]) -> int:
         return 2
 
     require_vale()
+    require_asciidoctor()
 
     file_results = [(path, lint_file(path)) for path in paths]
     has_error = any(f[3] == "error" for _, fs in file_results for f in fs)
