@@ -1,0 +1,14 @@
+extends: existence
+message: "'%s' opens a question-style heading. Name the topic with a noun phrase or a declarative statement."
+level: error
+scope: heading
+nonword: true
+tokens:
+  - '(?i)^how\b'
+  - "(?i)^what('s)?\\b"
+  - '(?i)^why\b'
+  - '(?i)^when\b'
+  - '(?i)^where\b'
+  - "(?i)^who(m|se|'s)?\\b"
+  - '(?i)^which\b'
+  - '(?i)^(do|does|did|is|are|was|were|can|could|should|shall|will|would|am)\b'

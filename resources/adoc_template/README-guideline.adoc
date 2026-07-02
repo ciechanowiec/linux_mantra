@@ -252,6 +252,23 @@ Heading: "Connection Pooling." Body: discusses pooling, then transaction isolati
 Heading: "Connection Pooling." Body: pool sizing, acquisition, release, leak detection, and the lifecycle of a pooled connection. Transaction isolation is documented in a separate section, with a cross-reference where pool behavior interacts with isolation.
 ====
 
+[#declarative-headings]
+==== Declarative Headings
+
+A heading names its section's topic as a noun phrase or a declarative statement, such as "Connection Pooling" or "Off by Default." A heading isn't a question ("How Does Eviction Work?") and doesn't open with an interrogative lead-in ("How to Size the Pool"). A question in a heading withholds the information the heading exists to give, and it reads as a teaser in a table of contents. The material a question-style heading gestures at belongs in the body. The heading states the topic outright.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The sections of a document on connection pooling are titled "Why Use Connection Pooling?" "How Does Eviction Work?" "How to Size the Pool," and "What Happens on Overflow."
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The sections are titled "Connection Pooling Rationale," "Eviction Mechanics," "Pool Sizing," and "Overflow Behavior."
+====
+
 ==== Self-Contained Prose
 
 A heading is a navigational label, not part of the prose. The body reads correctly when every heading is removed: no sentence depends on its heading for a subject, a referent, or a qualifier. A reader who lands mid-section, or who reads the text with the headings stripped, loses no meaning. The body carries its meaning through its own content. It neither leans on the heading nor restates it.
@@ -449,9 +466,9 @@ A section on rate limiting that opens with five paragraphs explaining what HTTP 
 Rate limiting is the mechanism by which an HTTP server protects itself from excessive requests by a single client. When a client exceeds its quota, the server responds with status `429 Too Many Requests` and a `Retry-After` header indicating when the client may try again. The full semantics of HTTP status codes and headers are defined in RFC 9110.
 ====
 
-==== Why Before How
+==== Purpose Before Mechanism
 
-Before describing a mechanism, state what the mechanism is for. The reader needs the purpose to evaluate the mechanism. _Why_ takes one or two sentences. It doesn't become a sales pitch.
+Before describing a mechanism, state what the mechanism is for. The reader needs the purpose to evaluate the mechanism. The purpose statement takes one or two sentences. It doesn't become a sales pitch.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1454,7 +1471,7 @@ Call `commit` to persist the changes.
 ====
 
 [[part-3]]
-== When the Author is an AI
+== AI Authorship
 
 This part adds rules that apply when an AI system is given this guideline as a style instruction. The rules in xref:#part-1[Part 1] and xref:#part-2[Part 2] still apply. xref:#part-3[Part 3] addresses failure modes specific to AI authorship: inventing facts, restating the prompt, opening with throat-clearing, narrating rule application, hedging from uncertainty, over-weighting items mentioned in the prompt, and treating the guideline's markup as content.
 

@@ -1,0 +1,22 @@
+extends: existence
+message: "'%s' otwiera nagłówek w formie pytania. Nazwij temat frazą rzeczownikową lub stwierdzeniem."
+level: error
+scope: heading
+nonword: true
+tokens:
+  - '(?i)^czy\b'
+  - '(?i)^jak(i|a|ie)?\b'
+  - '(?i)^dlaczego\b'
+  - '(?i)^czemu\b'
+  - '(?i)^po co\b'
+  - '(?i)^w jaki sposób\b'
+  - '(?i)^gdzie\b'
+  - '(?i)^ile\b'
+  - '(?i)^co\b'
+  - '(?i)^kiedy\b'
+  - '(?i)^kto\b'
+  - '(?i)^kogo\b'
+  - '(?i)^komu\b'
+  - '(?i)^czego\b'
+  - '(?i)^czym\b'
+  - '(?i)^któr'

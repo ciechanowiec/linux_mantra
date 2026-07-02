@@ -1,0 +1,7 @@
+extends: existence
+message: "A heading isn't a question. Name the topic with a noun phrase or a declarative statement."
+level: error
+scope: heading
+nonword: true
+tokens:
+  - '\?\s*$'
