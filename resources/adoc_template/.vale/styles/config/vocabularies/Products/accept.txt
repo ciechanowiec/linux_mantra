@@ -79,3 +79,12 @@ Pimcore
 Razuna
 Sitecore
 [Vv]ercel
+pnpm
+Redis
+PostgreSQL
+Biome
+Stryker
+Knip
+Vitest
+Playwright
+Renovate

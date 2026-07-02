@@ -197,9 +197,11 @@ namespaced
 [Ff]rontend
 frontend's
 [Gg]lobals?
-[Cc]onfigs?
-[Pp]arams?
 [Mm]iddleware
 [Vv]endored
 rethrow
-dev
+[Tt]oolchain
+[Dd]otfiles
+[Ll]ockfile
+READMEs
+[Bb]ilingual
