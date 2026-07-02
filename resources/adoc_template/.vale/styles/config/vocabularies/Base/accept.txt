@@ -200,5 +200,6 @@ frontend's
 [Cc]onfigs?
 [Pp]arams?
 [Mm]iddleware
+[Vv]endored
 rethrow
 dev
