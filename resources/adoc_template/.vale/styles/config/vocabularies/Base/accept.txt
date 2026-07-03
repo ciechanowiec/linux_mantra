@@ -205,3 +205,5 @@ rethrow
 [Ll]ockfile
 READMEs
 [Bb]ilingual
+[Cc]yclomatic
+[Ss]uppressions?
