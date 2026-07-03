@@ -16,7 +16,7 @@ The linter runs three engines and merges their findings into one stream:
      Asciidoctor does NOT validate internal cross-references, so the
      structural rule `xref-targets` covers that gap.
 
-Only the mechanically-checkable slice of `README-guideline.adoc` is enforced
+Only the mechanically-checkable slice of `README-guideline-writing.adoc` is enforced
 here. Rules of prose judgement (nomenclature drift, false universals, "don't
 invent facts") need a reader of the guideline, not a linter, and are out of
 scope by design.
@@ -159,7 +159,7 @@ def _mask_code(text: str) -> str:
 # Heading tree — depth and lone subsections
 # ============================================================================
 #
-# Serves section-nesting (README-guideline §section-nesting): a heading nests
+# Serves section-nesting (README-guideline-writing §section-nesting): a heading nests
 # at most five levels below the title, so `==`..`======` are the only section
 # headings and `=======` is too deep. A section also has zero subsections or
 # two or more -- a lone subsection means its content belongs in the parent's

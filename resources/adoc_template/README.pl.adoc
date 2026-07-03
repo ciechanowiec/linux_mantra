@@ -34,7 +34,7 @@ Tekst źródłowy niniejszego dokument wykorzystuje język znaczników https://a
 
 === Wytyczne
 
-Dokument powinien być zgodny z link:README-guideline.adoc[wytycznymi pisania].
+Dokument powinien być zgodny z link:README-guideline-writing.adoc[wytycznymi pisania].
 
 === Eksport
 

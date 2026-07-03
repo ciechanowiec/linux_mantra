@@ -2123,7 +2123,7 @@ The source text of this document is written in the https://asciidoc.org[AsciiDoc
 
 === Guideline
 
-This document should follow the link:README-guideline.adoc[Writing Guideline].
+This document should follow the link:README-guideline-writing.adoc[Writing Guideline].
 
 === Export
 

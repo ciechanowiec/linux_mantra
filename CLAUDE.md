@@ -60,5 +60,5 @@ Other conventions:
 ## Documentation files
 
 - `README.adoc` — user-facing description and run instructions.
-- `resources/adoc_template/README-guideline.adoc` — an AsciiDoc style/structure guideline. Per the user's memory, this document is fed almost exclusively to AI as style instructions, so when editing it, optimize for clarity-to-an-LLM rather than human prose polish.
+- `resources/adoc_template/README-guideline-writing.adoc` — an AsciiDoc style/structure guideline. Per the user's memory, this document is fed almost exclusively to AI as style instructions, so when editing it, optimize for clarity-to-an-LLM rather than human prose polish.
 - `docs/` and the root `docinfo*.html` files are AsciiDoc styling assets, not project documentation.
