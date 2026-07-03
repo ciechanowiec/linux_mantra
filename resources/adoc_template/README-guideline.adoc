@@ -344,6 +344,7 @@ endif::[]
 A _token_ is an opaque string issued by the authentication server that the client presents to prove its identity to a resource server. A token has an issuer, a subject, an expiration time, and a set of scopes that constrain the operations the bearer may perform.
 ====
 
+[#concrete-vocabulary]
 ==== Concrete Vocabulary
 
 ifdef::backend-html5[]

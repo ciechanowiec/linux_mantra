@@ -688,10 +688,12 @@ def rule_paragraph_sentences(doc: Document) -> Iterator[Finding]:
                    f"(§one-paragraph-one-topic)")
 
 
-def rule_section_body_words(doc: Document) -> Iterator[Finding]:
+def _section_bodies(doc: Document) -> List[Tuple[int, int]]:
+    """(heading_line, body_words) for every heading: the prose word count
+    between the heading and the next heading of any level."""
     heading_nums = {num for num, _ in doc.headings}
     paragraph_nums = {ln.num for ln in _paragraphs(doc)}
-    bodies: List[Tuple[int, int]] = []  # (heading_line, body_words)
+    bodies: List[Tuple[int, int]] = []
     current, words = None, 0
     for line in doc.lines:
         if line.num in heading_nums:
@@ -702,7 +704,11 @@ def rule_section_body_words(doc: Document) -> Iterator[Finding]:
             words += len(PROSE_WORD_RE.findall(_rendered(line.text)))
     if current is not None:
         bodies.append((current, words))
-    for heading_line, body_words in bodies:
+    return bodies
+
+
+def rule_section_body_words(doc: Document) -> Iterator[Finding]:
+    for heading_line, body_words in _section_bodies(doc):
         if body_words > MAX_SECTION_BODY_WORDS:
             yield (heading_line, 1,
                    f"Section body holds {body_words} words before the next "
@@ -710,22 +716,315 @@ def rule_section_body_words(doc: Document) -> Iterator[Finding]:
                    f"split it into subsections (§section-nesting)")
 
 
+def _sentence_openers(text: str) -> List[str]:
+    openers = []
+    for part in SENTENCE_END_RE.split(_sentence_source(text)):
+        if not part.strip():
+            continue
+        m = PROSE_WORD_RE.search(part)
+        openers.append(m.group(0).lower() if m else "")
+    return openers
+
+
+def _max_opener_run(openers: List[str]) -> Tuple[int, str]:
+    run = best = 1
+    word = openers[0] if openers else ""
+    for prev, cur in zip(openers, openers[1:]):
+        run = run + 1 if cur and cur == prev else 1
+        if run > best:
+            best, word = run, cur
+    return best, word
+
+
 def rule_sentence_opener_runs(doc: Document) -> Iterator[Finding]:
     for line in _paragraphs(doc):
-        parts = [p for p in SENTENCE_END_RE.split(_sentence_source(line.text))
-                 if p.strip()]
-        openers = []
-        for part in parts:
-            m = PROSE_WORD_RE.search(part)
-            openers.append(m.group(0).lower() if m else "")
-        run = 1
-        for prev, cur in zip(openers, openers[1:]):
-            run = run + 1 if cur and cur == prev else 1
-            if run == MAX_OPENER_RUN + 1:
+        run, word = _max_opener_run(_sentence_openers(line.text))
+        if run > MAX_OPENER_RUN:
+            yield (line.num, 1,
+                   f"{run} consecutive sentences open with the word "
+                   f"{word!r}; vary the sentence openers")
+
+
+# ============================================================================
+# Abstractness — graded-lexicon vocabulary check (English)
+# ============================================================================
+#
+# Serves concrete-vocabulary (§concrete-vocabulary): prose stays anchored in
+# things the reader can picture. Each English word carries an abstractness
+# grade (0 fully concrete .. 100 fully abstract) taken from the human-rated
+# concreteness norms of Brysbaert, Warriner & Kuperman (2014), shipped as
+# `abstractness_en.tsv` next to this file. `abstractness_extra_en.tsv`, when
+# present, adds or overrides grades for curated project vocabulary in the
+# same format. A sentence is flagged when the MEAN grade of its graded
+# content words crosses the cap -- abstraction stacked on abstraction with no
+# concrete anchor.
+#
+# Three deliberate scoring policies keep the check fail-safe:
+#   - Ungraded words (domain terms, product names, coinages) are omitted, not
+#     guessed, so correct technical jargon never pushes a sentence over the
+#     cap. The suffix-based English.Nominalizations Vale rule is the
+#     open-world backstop for vocabulary this closed lexicon misses.
+#   - Function words are excluded via the stopword set below: the norms grade
+#     them (e.g. "the" rates highly abstract), and including them would let
+#     syntax swamp the vocabulary signal the rule exists to measure.
+#   - Italic spans are masked before scoring. Per inline-formatting-semantics
+#     (§inline-formatting-semantics), italics mark terms of art and words
+#     mentioned as words -- vocabulary the sentence names rather than uses,
+#     which shouldn't count as the author's own word choice.
+#   - Sentences with fewer graded words than the coverage floor are skipped
+#     as statistically meaningless.
+# English-only: `.pl.adoc` files are excluded.
+
+ABSTRACTNESS_LEXICON_FILE = "abstractness_en.tsv"
+ABSTRACTNESS_EXTRA_FILE = "abstractness_extra_en.tsv"
+MAX_MEAN_ABSTRACTNESS = 70
+MIN_GRADED_WORDS = 5
+
+STOPWORDS = frozenset("""
+the a an this that these those such same own other another each every either
+neither both all any some few many much more most several no only
+i you he she it we they me him her us them my your his its our their mine
+yours hers ours theirs myself yourself himself herself itself ourselves
+yourselves themselves who whom whose which what
+am is are was were be been being do does did done have has had having
+will would shall should can could may might must ought
+of in on at by for with about against between into through during before
+after above below to from up down out off over under again further
+and but or nor so yet if then else when while where why how because although
+though unless until as than too very just also not once here there
+""".split())
+
+_abstractness_cache: Dict[str, int] = {}
+_abstractness_loaded = False
+
+
+def _abstractness_lexicon() -> Dict[str, int]:
+    global _abstractness_loaded
+    if _abstractness_loaded:
+        return _abstractness_cache
+    lib_dir = os.path.dirname(os.path.abspath(__file__))
+    base = os.path.join(lib_dir, ABSTRACTNESS_LEXICON_FILE)
+    if not os.path.exists(base):
+        sys.stderr.write(
+            f"adoc_lint: {ABSTRACTNESS_LEXICON_FILE} is required next to "
+            "adoc_lint.py but was not found.\n")
+        sys.exit(2)
+    for path in (base, os.path.join(lib_dir, ABSTRACTNESS_EXTRA_FILE)):
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            for raw in f:
+                raw = raw.strip()
+                if not raw or raw.startswith("#"):
+                    continue
+                word, _, grade = raw.partition("\t")
+                if grade.strip().isdigit():
+                    _abstractness_cache[word.strip().lower()] = int(grade)
+    _abstractness_loaded = True
+    return _abstractness_cache
+
+
+def _abstractness_of(word: str, lexicon: Dict[str, int]):
+    """Grade of a word, matching the surface form first and then the
+    deterministic singular fallbacks (-ies -> -y, -es, -s)."""
+    if word in lexicon:
+        return lexicon[word]
+    if word.endswith("ies") and word[:-3] + "y" in lexicon:
+        return lexicon[word[:-3] + "y"]
+    for suffix in ("es", "s"):
+        if word.endswith(suffix) and word[:-len(suffix)] in lexicon:
+            return lexicon[word[:-len(suffix)]]
+    return None
+
+
+ITALIC_SPAN_RE = re.compile(r"(?<!\w)_([^_\n]+)_(?!\w)")
+
+
+def _sentence_abstractness(part: str,
+                           lexicon: Dict[str, int]) -> Tuple[float, int]:
+    """Mean abstractness of a sentence's graded content words and their
+    count. Returns (0.0, 0) when nothing is graded."""
+    grades = []
+    for token in PROSE_WORD_RE.findall(part):
+        word = token.lower()
+        if word in STOPWORDS:
+            continue
+        grade = _abstractness_of(word, lexicon)
+        if grade is not None:
+            grades.append(grade)
+    if not grades:
+        return (0.0, 0)
+    return (sum(grades) / len(grades), len(grades))
+
+
+def rule_abstract_vocabulary(doc: Document) -> Iterator[Finding]:
+    if doc.path.endswith(".pl.adoc"):
+        return
+    lexicon = _abstractness_lexicon()
+    for line in _paragraphs(doc):
+        source = ITALIC_SPAN_RE.sub(" ", _sentence_source(line.text))
+        for part in SENTENCE_END_RE.split(source):
+            mean, count = _sentence_abstractness(part, lexicon)
+            if count < MIN_GRADED_WORDS:
+                continue
+            if mean > MAX_MEAN_ABSTRACTNESS:
                 yield (line.num, 1,
-                       f"{run} consecutive sentences open with the word "
-                       f"{cur!r}; vary the sentence openers")
-                break
+                       f"Sentence averages {mean:.0f}/100 abstractness over "
+                       f"{count} graded words, exceeding the cap of "
+                       f"{MAX_MEAN_ABSTRACTNESS}; anchor it in concrete "
+                       f"terms (§concrete-vocabulary)")
+
+
+# ============================================================================
+# Diagnostics — per-file metrics panel
+# ============================================================================
+#
+# The text report shows, for every linted file, the measured value behind
+# each threshold-backed structural check: the threshold, the observed
+# extreme, its location, and for the abstractness check the constituent
+# words with their grades. A passing run thereby shows how much headroom
+# each metric has left instead of a bare green summary. Metrics enforced by
+# Vale (LIX, average paragraph length, sentence and heading length) are
+# recomputed here approximately for orientation and prefixed "~"; their caps
+# are read from the .vale/styles files at runtime rather than restated here,
+# so the .yml files stay the single source of truth.
+
+_VALE_CAP_CACHE: Dict[str, str] = {}
+_VALE_CAP_RE = re.compile(
+    r'^(?:condition:\s*"?[><]=?\s*|max:\s*)(\d+(?:\.\d+)?)\s*"?\s*$',
+    re.MULTILINE)
+
+
+def _vale_cap(style_rel_path: str) -> str:
+    """The threshold a Vale style file declares (its `max:` or numeric
+    `condition:` line), read from disk so the .yml stays authoritative.
+    Empty string when the file or the threshold can't be found."""
+    if style_rel_path in _VALE_CAP_CACHE:
+        return _VALE_CAP_CACHE[style_rel_path]
+    styles_dir = ".vale/styles"
+    ini = os.path.join(os.getcwd(), ".vale.ini")
+    if os.path.exists(ini):
+        with open(ini, encoding="utf-8") as f:
+            m = re.search(r"^StylesPath\s*=\s*(\S+)", f.read(), re.MULTILINE)
+        if m:
+            styles_dir = m.group(1)
+    cap = ""
+    path = os.path.join(os.getcwd(), styles_dir, style_rel_path)
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            m = _VALE_CAP_RE.search(f.read())
+        if m:
+            cap = m.group(1)
+    _VALE_CAP_CACHE[style_rel_path] = cap
+    return cap
+
+
+def _capped(style_rel_path: str, text: str) -> str:
+    cap = _vale_cap(style_rel_path)
+    return f"cap {cap} · {text}" if cap else text
+
+def _top_abstract_words(part: str, lexicon: Dict[str, int],
+                        k: int = 5) -> str:
+    graded = []
+    for token in PROSE_WORD_RE.findall(part):
+        word = token.lower()
+        if word in STOPWORDS:
+            continue
+        grade = _abstractness_of(word, lexicon)
+        if grade is not None:
+            graded.append((grade, word))
+    graded.sort(reverse=True)
+    return " ".join(f"{w}={g}" for g, w in graded[:k])
+
+
+def file_diagnostics(doc: Document) -> List[Tuple[str, str]]:
+    paragraphs = list(_paragraphs(doc))
+    total_words = total_sentences = total_long = 0
+    max_sentence = (0, 0)        # (words, line)
+    max_paragraph = (0, 0)       # (sentences, line)
+    max_run = (1, "", 0)         # (run, word, line)
+    max_abstract = (0.0, 0, 0, "")  # (mean, graded words, line, sentence)
+    is_english = not doc.path.endswith(".pl.adoc")
+    lexicon = _abstractness_lexicon() if is_english else {}
+
+    for line in paragraphs:
+        source = _sentence_source(line.text)
+        tokens = PROSE_WORD_RE.findall(source)
+        total_words += len(tokens)
+        total_long += sum(1 for t in tokens if len(t) > 6)
+        n_sentences = len(SENTENCE_END_RE.findall(source))
+        total_sentences += n_sentences
+        if n_sentences > max_paragraph[0]:
+            max_paragraph = (n_sentences, line.num)
+        run, word = _max_opener_run(_sentence_openers(line.text))
+        if run > max_run[0]:
+            max_run = (run, word, line.num)
+        italic_masked = ITALIC_SPAN_RE.sub(" ", source)
+        for part in SENTENCE_END_RE.split(italic_masked):
+            n_part_words = len(PROSE_WORD_RE.findall(part))
+            if n_part_words > max_sentence[0]:
+                max_sentence = (n_part_words, line.num)
+            if is_english:
+                mean, count = _sentence_abstractness(part, lexicon)
+                if count >= MIN_GRADED_WORDS and mean > max_abstract[0]:
+                    max_abstract = (mean, count, line.num, part)
+
+    max_heading = (0, 0)
+    for num, _level in doc.headings:
+        text = doc.lines[num - 1].text.lstrip("=").strip()
+        n = len(PROSE_WORD_RE.findall(_rendered(text)))
+        if n > max_heading[0]:
+            max_heading = (n, num)
+    max_body = max(_section_bodies(doc), key=lambda b: b[1],
+                   default=(0, 0))
+
+    rows: List[Tuple[str, str]] = [
+        ("prose", f"{total_words} words · {total_sentences} sentences · "
+                  f"{len(paragraphs)} paragraphs · "
+                  f"{len(doc.headings)} headings"),
+    ]
+    lix_style = "English/LIX.yml" if is_english else "Polish/LIX.yml"
+    if total_words and total_sentences:
+        asl = total_words / total_sentences
+        plw = 100 * total_long / total_words
+        rows.append(("~lix", _capped(
+            lix_style,
+            f"{asl + plw:.1f} = {asl:.1f} words/sentence "
+            f"+ {plw:.1f}% long words")))
+    if paragraphs:
+        rows.append(("~words/paragraph", _capped(
+            "LanguageNeutral/AvgParagraphLength.yml",
+            f"{total_words / len(paragraphs):.1f} average")))
+    rows.append(("~longest sentence", _capped(
+        "LanguageNeutral/SentenceLength.yml",
+        f"{max_sentence[0]} words (line {max_sentence[1]})")))
+    rows.append(("~longest heading", _capped(
+        "LanguageNeutral/HeadingLength.yml",
+        f"{max_heading[0]} words (line {max_heading[1]})")))
+    rows.append(("section body",
+                 f"cap {MAX_SECTION_BODY_WORDS} · max {max_body[1]} words "
+                 f"(line {max_body[0]})"))
+    rows.append(("sentences/paragraph",
+                 f"cap {MAX_SENTENCES_PER_PARAGRAPH} · max "
+                 f"{max_paragraph[0]} (line {max_paragraph[1]})"))
+    if max_run[0] > 1:
+        rows.append(("same-opener sentences",
+                     f"cap {MAX_OPENER_RUN} · max {max_run[0]} consecutive "
+                     f"sentences open with {max_run[1]!r} "
+                     f"(line {max_run[2]})"))
+    else:
+        rows.append(("same-opener sentences",
+                     f"cap {MAX_OPENER_RUN} · no two consecutive sentences "
+                     f"open with the same word"))
+    if is_english and max_abstract[1]:
+        mean, count, line_num, part = max_abstract
+        rows.append(("abstractness",
+                     f"cap {MAX_MEAN_ABSTRACTNESS} · max {mean:.1f} over "
+                     f"{count} graded words (line {line_num}): "
+                     f"{_top_abstract_words(part, lexicon)}"))
+    elif not is_english:
+        rows.append(("abstractness", "skipped (Polish document)"))
+    return rows
 
 
 # ============================================================================
@@ -764,6 +1063,7 @@ RULES: List[Rule] = [
     Rule("one-paragraph-one-topic", "error", rule_paragraph_sentences),
     Rule("section-body-length", "error", rule_section_body_words),
     Rule("sentence-opener-runs", "error", rule_sentence_opener_runs),
+    Rule("concrete-vocabulary", "error", rule_abstract_vocabulary),
 ]
 
 
@@ -856,7 +1156,7 @@ def run_asciidoctor(path: str) -> List[tuple]:
 # Driver
 # ============================================================================
 
-def lint_file(path: str) -> List[tuple]:
+def lint_file(path: str) -> Tuple[List[tuple], List[Tuple[str, str]]]:
     doc = scan(path)
     findings: List[tuple] = []
 
@@ -869,7 +1169,7 @@ def lint_file(path: str) -> List[tuple]:
     findings.extend(run_vale(path))
     findings.extend(run_asciidoctor(path))
     findings.sort(key=lambda f: (f[0], f[1], f[2]))
-    return findings
+    return findings, file_diagnostics(doc)
 
 
 # ============================================================================
@@ -898,16 +1198,18 @@ def _plural(n: int, noun: str) -> str:
 
 
 def render_text(file_results: List[tuple], style: Style, n_rules: int) -> str:
-    findings = [(p, f) for p, fs in file_results for f in fs]
+    findings = [(p, f) for p, fs, _ in file_results for f in fs]
     loc_w = max((len(f"{f[0]}:{f[1]}") for _, f in findings), default=0)
     sev_w = max((len(f[3]) for _, f in findings), default=0)
 
     out: List[str] = []
-    for path, fs in file_results:
-        if not fs:
-            continue
+    for path, fs, diagnostics in file_results:
         out.append("")
         out.append(" " + style.paint("1;4", path))
+        label_w = max((len(label) for label, _ in diagnostics), default=0)
+        for label, text in diagnostics:
+            out.append("   " + style.paint("2", f"{label.ljust(label_w)}  "
+                                                f"{text}"))
         for line, col, rule_id, severity, message in fs:
             loc = f"{line}:{col}".rjust(loc_w)
             sev = style.paint(SEVERITY_COLOR.get(severity, "31"),
@@ -924,7 +1226,7 @@ def render_text(file_results: List[tuple], style: Style, n_rules: int) -> str:
         parts = ", ".join(
             _plural(counts[s], s) for s in
             sorted(counts, key=lambda s: SEVERITY_ORDER.get(s, 9)))
-        files_hit = sum(1 for _, fs in file_results if fs)
+        files_hit = sum(1 for _, fs, _ in file_results if fs)
         out.append("")
         out.append(" " + style.paint("1;31", f"✗ {parts}")
                    + style.paint("2", f"  in {_plural(files_hit, 'file')}"))
@@ -961,14 +1263,14 @@ def main(argv: List[str]) -> int:
     require_vale()
     require_asciidoctor()
 
-    file_results = [(path, lint_file(path)) for path in paths]
-    has_error = any(f[3] == "error" for _, fs in file_results for f in fs)
+    file_results = [(path, *lint_file(path)) for path in paths]
+    has_error = any(f[3] == "error" for _, fs, _ in file_results for f in fs)
 
     if fmt == "json":
         sys.stdout.write(json.dumps([
             {"path": p, "line": f[0], "col": f[1],
              "rule": f[2], "severity": f[3], "message": f[4]}
-            for p, fs in file_results for f in fs
+            for p, fs, _ in file_results for f in fs
         ], indent=2) + "\n")
     else:
         enabled = (not no_color and sys.stdout.isatty()
