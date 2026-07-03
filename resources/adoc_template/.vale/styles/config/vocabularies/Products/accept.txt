@@ -88,3 +88,14 @@ Knip
 Vitest
 Playwright
 Renovate
+Comarch
+Sovos
+Edicom
+Tradeshift
+Avalara
+efsta
+osapiens
+Vanta
+dilisense
+Whistlelink
+VERSO

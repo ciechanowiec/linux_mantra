@@ -207,3 +207,11 @@ READMEs
 [Bb]ilingual
 [Cc]yclomatic
 [Ss]uppressions?
+[Uu]nderserved
+[Uu]nserved
+[Bb]uildable
+[Cc]yber
+[Cc]ybersecurity
+[Ww]histleblowing
+[Ww]histleblowers?
+[Ww]atchlists?

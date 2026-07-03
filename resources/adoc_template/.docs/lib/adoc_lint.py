@@ -644,7 +644,7 @@ XREF_TEXT_RE = re.compile(r"xref:[^\[\]\s]*\[([^\]]*)\]")
 BLOCK_ANCHOR_FULL_RE = re.compile(r"\[\[[^\]]*\]\]")
 
 MAX_SENTENCES_PER_PARAGRAPH = 8
-MAX_SECTION_BODY_WORDS = 1000
+MAX_SECTION_BODY_WORDS = 600
 MAX_OPENER_RUN = 4
 
 
@@ -743,6 +743,33 @@ def rule_sentence_opener_runs(doc: Document) -> Iterator[Finding]:
             yield (line.num, 1,
                    f"{run} consecutive sentences open with the word "
                    f"{word!r}; vary the sentence openers")
+
+
+# sentence-length: one sentence stays under the word cap. Vale's own
+# SentenceLength rule (scope `sentence`) cannot own this metric: its AsciiDoc
+# path classifies the direct text of a list item as the `list` scope, so
+# sentences written straight on a `. item` or `* item` line were never
+# measured, and closing the gap with a second, Python-side rule left one
+# threshold owned by two engines that count words slightly differently --
+# a report the reader can't trust without knowing Vale's scope model. This
+# rule therefore owns the metric alone, over every prose line `_paragraphs`
+# yields, and the Vale rule is deleted. Word counting reuses the shared
+# sentence pipeline (code spans and italics masked, macros rendered), so the
+# `longest sentence` diagnostics row and this rule can never disagree.
+
+MAX_SENTENCE_WORDS = 45
+
+
+def rule_sentence_length(doc: Document) -> Iterator[Finding]:
+    for line in _paragraphs(doc):
+        source = ITALIC_SPAN_RE.sub(" ", _sentence_source(line.text))
+        for part in SENTENCE_END_RE.split(source):
+            n = len(PROSE_WORD_RE.findall(part))
+            if n > MAX_SENTENCE_WORDS:
+                yield (line.num, 1,
+                       f"Sentence runs {n} words, exceeding the cap of "
+                       f"{MAX_SENTENCE_WORDS}. Split it: one sentence, "
+                       f"one thought.")
 
 
 # ============================================================================
@@ -884,7 +911,7 @@ def rule_abstract_vocabulary(doc: Document) -> Iterator[Finding]:
 # extreme, its location, and for the abstractness check the constituent
 # words with their grades. A passing run thereby shows how much headroom
 # each metric has left instead of a bare green summary. Metrics enforced by
-# Vale (LIX, average paragraph length, sentence and heading length) are
+# Vale (LIX, average paragraph length, heading length) are
 # recomputed here approximately for orientation and prefixed "~"; their caps
 # are read from the .vale/styles files at runtime rather than restated here,
 # so the .yml files stay the single source of truth.
@@ -995,9 +1022,9 @@ def file_diagnostics(doc: Document) -> List[Tuple[str, str]]:
         rows.append(("~words/paragraph", _capped(
             "LanguageNeutral/AvgParagraphLength.yml",
             f"{total_words / len(paragraphs):.1f} average")))
-    rows.append(("~longest sentence", _capped(
-        "LanguageNeutral/SentenceLength.yml",
-        f"{max_sentence[0]} words (line {max_sentence[1]})")))
+    rows.append(("longest sentence",
+                 f"cap {MAX_SENTENCE_WORDS} · {max_sentence[0]} words "
+                 f"(line {max_sentence[1]})"))
     rows.append(("~longest heading", _capped(
         "LanguageNeutral/HeadingLength.yml",
         f"{max_heading[0]} words (line {max_heading[1]})")))
@@ -1063,6 +1090,7 @@ RULES: List[Rule] = [
     Rule("one-paragraph-one-topic", "error", rule_paragraph_sentences),
     Rule("section-body-length", "error", rule_section_body_words),
     Rule("sentence-opener-runs", "error", rule_sentence_opener_runs),
+    Rule("sentence-length", "error", rule_sentence_length),
     Rule("concrete-vocabulary", "error", rule_abstract_vocabulary),
 ]
 

@@ -1,6 +1,0 @@
-extends: occurrence
-message: "Sentence is longer than 45 words. Split it: one sentence, one thought."
-level: error
-scope: sentence
-max: 45
-token: \p{L}+
