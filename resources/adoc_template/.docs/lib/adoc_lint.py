@@ -221,6 +221,117 @@ def rule_numbering_depth(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
+# List structure — continuations and starts that render as literal text
+# ============================================================================
+#
+# A render-integrity pair. AsciiDoc's list markup fails silently in two ways
+# that Asciidoctor's own render pass does NOT report (verified empirically: both
+# convert with exit 0 and no warning), so the literal markers reach the reader
+# as body text. These two rules are the deterministic, precisely-located
+# backstop the render pass can't give:
+#
+#   * orphan-continuation (Mode A): a list continuation is a lone `+` line that
+#     attaches the block below it to the list item above it. With no list open
+#     above it, the `+` has nothing to attach to and renders as a literal `+`.
+#     Scanning upward past blank lines, continuation paragraphs, and already-
+#     attached verbatim blocks, this rule finds a heading, a block delimiter, or
+#     the document start before any list marker.
+#
+#   * glued-list-item (Mode B): a list's FIRST item must be separated from the
+#     paragraph above it by a blank line (or sit under a heading, delimiter,
+#     block title, or attribute line). An item glued directly onto a preceding
+#     paragraph opens no clean list, and every `+` continuation under it renders
+#     literally. This rule flags such a first item -- but skips an item whose
+#     preceding line already belongs to an open list (a wrapped item line), so a
+#     legitimate multi-line list is never touched.
+#
+# Both run in prose (`none`) blocks only, so markers shown inside a `[source]`
+# example, or a `+` standing in a table cell (a legal cell continuation), are
+# left alone. Each flags only the single line that breaks the structure -- the
+# stray `+` or the glued first item -- since fixing it repairs the cascade below.
+
+LABELED_MARKER_RE = re.compile(r"^\s*\S.*?::(\s|$)")
+BLOCK_TITLE_RE = re.compile(r"^\.\S")
+
+
+def _opens_list(line: Line) -> bool:
+    return bool(ORDERED_MARKER_RE.match(line.text)
+                or UNORDERED_MARKER_RE.match(line.text)
+                or LABELED_MARKER_RE.match(line.text))
+
+
+def rule_orphan_continuation(doc: Document) -> Iterator[Finding]:
+    for i, line in enumerate(doc.lines):
+        if line.block != "none" or line.in_table or line.text.strip() != "+":
+            continue
+        list_open = False
+        for j in range(i - 1, -1, -1):
+            prev = doc.lines[j]
+            if prev.block != "none":
+                continue  # skip an attached verbatim block (listing, literal, …)
+            token = prev.text.strip()
+            if token == "" or token == "+":
+                continue  # a blank line, or another link in the same chain
+            if HEADING_RE.match(prev.text) or OTHER_DELIM_RE.match(token):
+                break  # list scope boundary reached with no item above it
+            if _opens_list(prev):
+                list_open = True
+                break
+            # a plain paragraph, block title, or attribute line: keep scanning up
+        if not list_open:
+            yield (line.num, 1,
+                   "List continuation `+` with no list item open above it, so "
+                   "it renders as a literal `+` instead of attaching a block")
+
+
+def _marker_in_run_above(doc: Document, idx: int) -> bool:
+    """True if the line at `idx` is text belonging to an already-open list item.
+    Scanning up the contiguous non-blank run it sits in, that is signalled by a
+    list marker, or by a `+` continuation -- which only exists inside an open
+    list, so it attaches its run to the list even across the blank line above."""
+    for j in range(idx, -1, -1):
+        prev = doc.lines[j]
+        if prev.block != "none":
+            continue  # a verbatim line inside the run; the run continues above it
+        token = prev.text.strip()
+        if token == "+":
+            return True  # a continuation marker: the run is attached to a list
+        if token == "":
+            return False  # a blank line ends the run with no marker found
+        if HEADING_RE.match(prev.text) or OTHER_DELIM_RE.match(token):
+            return False
+        if _opens_list(prev):
+            return True
+    return False
+
+
+def rule_glued_list_item(doc: Document) -> Iterator[Finding]:
+    for i, line in enumerate(doc.lines):
+        if line.block != "none" or line.in_table or i == 0:
+            continue
+        if not _opens_list(line):
+            continue
+        prev = doc.lines[i - 1]
+        if prev.block != "none":
+            continue
+        token = prev.text.strip()
+        # A blank line, or any non-prose line that legally opens a list below it,
+        # means the item starts cleanly.
+        if (token in ("", "+") or HEADING_RE.match(prev.text)
+                or OTHER_DELIM_RE.match(token) or _opens_list(prev)
+                or BLOCK_TITLE_RE.match(token) or token.startswith(("[", "//"))):
+            continue
+        # `prev` is a prose line. If it already belongs to an open list (a
+        # wrapped item line), this marker is a sibling item, not a glued start.
+        if _marker_in_run_above(doc, i - 1):
+            continue
+        yield (line.num, 1,
+               "List item is glued to the paragraph above it with no blank line "
+               "between them, so the list opens no continuations and any `+` "
+               "under it renders as literal text")
+
+
+# ============================================================================
 # Images — alt text
 # ============================================================================
 #
@@ -1081,6 +1192,8 @@ RULES: List[Rule] = [
     Rule("section-nesting", "error", rule_heading_depth),
     Rule("lone-subsection", "error", rule_lone_subsection),
     Rule("numbering-depth", "error", rule_numbering_depth),
+    Rule("orphan-continuation", "error", rule_orphan_continuation),
+    Rule("glued-list-item", "error", rule_glued_list_item),
     Rule("alt-text", "error", rule_image_alt_text),
     Rule("link-text", "error", rule_link_text),
     Rule("explicit-anchors", "error", rule_auto_anchor),
