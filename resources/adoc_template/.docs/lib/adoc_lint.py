@@ -260,19 +260,42 @@ def _opens_list(line: Line) -> bool:
                 or LABELED_MARKER_RE.match(line.text))
 
 
+def _lines_above(doc: Document, start_idx: int) -> Iterator[Tuple[Line, str]]:
+    """Yield (line, stripped-text) for the source lines above `start_idx`,
+    nearest first, stepping over the interiors AND delimiters of blocks so an
+    attached block between a list item and its `+` continuation is skipped
+    rather than mistaken for a scope boundary. Verbatim blocks (listing,
+    literal, comment, pass) are already marked with a non-`none` block by the
+    scanner and skipped here; the other delimited blocks (table `|===`, example
+    `====`, sidebar `****`, quote `____`, open `--`) are stepped over with a
+    token-matched depth counter, since a list item's attached content routinely
+    holds a table or nested block."""
+    depth: List[str] = []
+    for j in range(start_idx, -1, -1):
+        prev = doc.lines[j]
+        if prev.block != "none":
+            continue  # inside a verbatim block (interior or its own delimiters)
+        token = prev.text.strip()
+        if OTHER_DELIM_RE.match(token):
+            if depth and depth[-1] == token:
+                depth.pop()   # reached this block's opening delimiter
+            else:
+                depth.append(token)  # entered from a closing delimiter, going up
+            continue
+        if depth:
+            continue  # inside an attached delimited block; step over its content
+        yield prev, token
+
+
 def rule_orphan_continuation(doc: Document) -> Iterator[Finding]:
     for i, line in enumerate(doc.lines):
         if line.block != "none" or line.in_table or line.text.strip() != "+":
             continue
         list_open = False
-        for j in range(i - 1, -1, -1):
-            prev = doc.lines[j]
-            if prev.block != "none":
-                continue  # skip an attached verbatim block (listing, literal, …)
-            token = prev.text.strip()
+        for prev, token in _lines_above(doc, i - 1):
             if token == "" or token == "+":
                 continue  # a blank line, or another link in the same chain
-            if HEADING_RE.match(prev.text) or OTHER_DELIM_RE.match(token):
+            if HEADING_RE.match(prev.text):
                 break  # list scope boundary reached with no item above it
             if _opens_list(prev):
                 list_open = True
@@ -289,16 +312,12 @@ def _marker_in_run_above(doc: Document, idx: int) -> bool:
     Scanning up the contiguous non-blank run it sits in, that is signalled by a
     list marker, or by a `+` continuation -- which only exists inside an open
     list, so it attaches its run to the list even across the blank line above."""
-    for j in range(idx, -1, -1):
-        prev = doc.lines[j]
-        if prev.block != "none":
-            continue  # a verbatim line inside the run; the run continues above it
-        token = prev.text.strip()
+    for prev, token in _lines_above(doc, idx):
         if token == "+":
             return True  # a continuation marker: the run is attached to a list
         if token == "":
             return False  # a blank line ends the run with no marker found
-        if HEADING_RE.match(prev.text) or OTHER_DELIM_RE.match(token):
+        if HEADING_RE.match(prev.text):
             return False
         if _opens_list(prev):
             return True

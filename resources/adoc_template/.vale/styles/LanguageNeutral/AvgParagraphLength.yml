@@ -1,6 +1,6 @@
 extends: metric
-message: "Average paragraph length is %s words; keep it at 28 or below."
+message: "Average paragraph length is %s words; keep it at 40 or below."
 level: error
 formula: |
   words / paragraphs
-condition: "> 28"
+condition: "> 40"
