@@ -7,6 +7,8 @@ Asciidoctor::Extensions.register do
       styles = ['upperalpha', 'upperroman', 'lowergreek', 'lowerroman']
       walk = lambda do |node, depth|
         node.blocks.each do |block|
+          # A dlist's blocks are [terms, description] Array pairs, not nodes.
+          next unless block.respond_to?(:context)
           if block.context == :olist
             block.style = styles[depth] || styles.last
             block.set_attr('style', styles[depth] || styles.last)
