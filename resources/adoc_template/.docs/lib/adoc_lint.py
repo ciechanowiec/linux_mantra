@@ -751,6 +751,65 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
                    "italic (§inline-formatting-semantics)")
 
 
+# A render-integrity check. A constrained monospace span (`` `text` ``) still
+# runs inline substitutions on its content, so a word-boundary `*` inside it is
+# parsed as a bold delimiter. Two facts, both verified empirically (Asciidoctor
+# exits 0 with no warning either way), define the exact defect:
+#
+#   * Only a BOLDING asterisk counts. A `*` wedged between two word characters
+#     (`` `co*de` ``, `` `2*3` ``) is never an emphasis delimiter and never
+#     leaks; a `*` touching a boundary (span edge, space, `-`, `.`, `/`, …) is.
+#   * Only an ODD number of bolding asterisks is the bug. An even number closes
+#     its own pairs inside the span -- deliberate bold like `` `pre-*x*-post` ``
+#     is allowed. An odd number leaves a dangling delimiter. Alone it renders
+#     literal, but it is NON-LOCAL: the moment another span carries a dangling
+#     delimiter the two pair into a bold run that swallows the text between them
+#     AND breaks both spans (their backticks render as literal text).
+#
+# So this rule flags a code span holding an odd count of bolding asterisks. The
+# robust fix is a passthrough -- `` `++*++` `` for the character, or a whole-span
+# `` `+…+` `` -- the form the guideline itself uses (`` `++*++` ``/`` `++**++` ``),
+# which is why those never trip. Asterisks inside a `++…++` passthrough, behind a
+# `\*` escape, or in a whole-span `+…+` passthrough are not counted. Runs on
+# prose lines only; a `*` inside a `[source]` listing or `....` block is literal
+# source and never reaches here.
+
+PASSTHROUGH_INNER_RE = re.compile(r"\+\+.*?\+\+")
+
+
+def _bolding_asterisk_count(inner: str) -> int:
+    """Number of emphasis-eligible `*` in a code span's inner text: raw `*`
+    touching a non-word boundary on at least one side, excluding those inside a
+    `++…++` passthrough or behind a `\\*` escape."""
+    escaped = set()
+    for m in PASSTHROUGH_INNER_RE.finditer(inner):
+        escaped.update(range(m.start(), m.end()))
+    count = 0
+    for k, ch in enumerate(inner):
+        if ch != "*" or k in escaped or (k > 0 and inner[k - 1] == "\\"):
+            continue
+        before = inner[k - 1] if k > 0 else None
+        after = inner[k + 1] if k + 1 < len(inner) else None
+        if not ((before is not None and before.isalnum())
+                and (after is not None and after.isalnum())):
+            count += 1
+    return count
+
+
+def rule_asterisk_in_code(doc: Document) -> Iterator[Finding]:
+    for line in _prose(doc):
+        for m in CODE_SPAN_RE.finditer(line.text):
+            inner = m.group(0).strip("`")
+            if len(inner) >= 2 and inner.startswith("+") and inner.endswith("+"):
+                continue  # a whole-span `+…+` passthrough: contents are literal
+            if _bolding_asterisk_count(inner) % 2 == 1:
+                yield (line.num, m.start() + 1,
+                       "Code span has an odd, unbalanced bolding `*` that "
+                       "renders as bold and can bleed across the line, breaking "
+                       "this span and others; balance it or write the literal "
+                       "`*` as a passthrough, e.g. `++*++`")
+
+
 # ============================================================================
 # Paragraph and section size — sentence caps, body caps, opener monotony
 # ============================================================================
@@ -1225,6 +1284,7 @@ RULES: List[Rule] = [
     Rule("diagram-lifeline-alignment", "error", rule_diagram_lifeline_alignment),
     Rule("one-sentence-per-line", "error", rule_one_sentence_per_line),
     Rule("inline-formatting", "error", rule_bold_in_body),
+    Rule("asterisk-in-code", "error", rule_asterisk_in_code),
     Rule("xref-targets", "error", rule_xref_targets),
     Rule("one-paragraph-one-topic", "error", rule_paragraph_sentences),
     Rule("section-body-length", "error", rule_section_body_words),

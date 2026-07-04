@@ -74,7 +74,7 @@ asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{
 .. natywny https://vale.sh/docs/styles#vale[styl Vale^] wraz z dołączonym https://github.com/vale-cli/en_US-web/tree/master[słownikiem angielskim],
 .. wyselekcjonowany styl `English`, zainspirowany przewodnikiem https://developers.google.com/style[Google Developer Documentation Style Guide^], linterem https://vale.sh/hub/jdkato/write-good/[write-good^] oraz https://github.com/amperser/proselint/[proselint^],
 .. niezależne od języka reguły typograficzne, stosowane do każdego języka,
-.. polski słownik ortograficzny dla plików `*.pl.adoc`.
+.. polski słownik ortograficzny dla plików `++*++.pl.adoc`.
 . Drugi silnik, linter strukturalny, sprawdza składnię, strukturę dokumentu oraz diagramy ASCII, których Vale nie widzi, zdefiniowane w pliku `link:.docs/lib/adoc_lint.py[]`.
 . Trzeci silnik, https://asciidoctor.org[Asciidoctor^], renderuje dokument do odrzucanego pliku wyjściowego i zgłasza każde zarejestrowane ostrzeżenie lub błąd, na przykład brakujący plik dołączany dyrektywą `include::`.
 
