@@ -463,7 +463,14 @@ def rule_diagram_box_alignment(doc: Document) -> Iterator[Finding]:
 # borders share no column (so the alignment rule finds nothing to compare). The
 # check runs only on "border-drawing" lines (made of `+`, `-`, and spaces), so a
 # `+` inside literal text -- a `postgres+index` query in a `....` block -- is
-# never mistaken for a corner.
+# never mistaken for a corner. A vertical stroke that meets a corner may be a
+# wall (`|`, `+`) or a vertical arrowhead (`^`, `v`): a loop that returns up
+# into a box draws its corner under a `^`, and that arrowhead IS the connector.
+# Without this, the rule fired only when a return edge happened to be unlabelled
+# (a labelled edge like `+-- correct --+` carries letters, so it isn't a
+# border-drawing line and is skipped) -- an inconsistency, not a real defect.
+
+VERTICAL_CONNECTORS = "|+^v"
 
 
 def rule_diagram_corner_support(doc: Document) -> Iterator[Finding]:
@@ -478,7 +485,7 @@ def rule_diagram_corner_support(doc: Document) -> Iterator[Finding]:
                     continue
                 up = above[col] if col < len(above) else " "
                 down = below[col] if col < len(below) else " "
-                if up in "|+" or down in "|+":
+                if up in VERTICAL_CONNECTORS or down in VERTICAL_CONNECTORS:
                     continue
                 yield (ln.num, col + 1,
                        "Box corner has no wall directly above or below it "
