@@ -1,3 +1,28 @@
+// Autofit wide verbatim blocks: shrink each <pre> whose content overflows its
+// box just enough to fit, so wide ASCII diagrams and code render whole instead
+// of wrapping. Mirrors the autofit applied on the PDF side. Below MIN_SCALE
+// the text would be unreadable, so such a block (a prose-like line of several
+// hundred characters) keeps its normal size and wraps as before.
+(function () {
+    var MIN_SCALE = 0.55;
+    var autofitPre = function () {
+        var pres = document.querySelectorAll('.literalblock pre, .listingblock pre');
+        pres.forEach(function (pre) {
+            pre.style.fontSize = '';
+            pre.style.whiteSpace = 'pre';   // unwrap to measure the true width
+            var scale = pre.clientWidth / pre.scrollWidth;
+            if (scale >= 1 || scale < MIN_SCALE) {
+                pre.style.whiteSpace = '';  // fits, or too wide: keep default wrap
+                return;
+            }
+            var base = parseFloat(window.getComputedStyle(pre).fontSize);
+            pre.style.fontSize = (base * scale * 0.98) + 'px';
+        });
+    };
+    window.addEventListener('resize', autofitPre);
+    autofitPre();
+})();
+
 var oldtoc = document.getElementById('toctitle').nextElementSibling;
 var newtoc = document.createElement('div');
 newtoc.setAttribute('id', 'tocbot');

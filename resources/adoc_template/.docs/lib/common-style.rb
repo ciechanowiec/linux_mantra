@@ -9,6 +9,14 @@ Asciidoctor::Extensions.register do
         node.blocks.each do |block|
           # A dlist's blocks are [terms, description] Array pairs, not nodes.
           next unless block.respond_to?(:context)
+          # Shrink each wide verbatim block (diagram or code) just enough to
+          # fit the page width. A block whose longest line would fall below the
+          # theme's minimum font size anyway -- a prose-like prompt line -- is
+          # left alone, so it keeps its normal size and wraps instead.
+          if [:literal, :listing].include?(block.context)
+            longest = Array(block.lines).map(&:length).max.to_i
+            block.set_attr('autofit-option', '') if longest.between?(1, 125)
+          end
           if block.context == :olist
             block.style = styles[depth] || styles.last
             block.set_attr('style', styles[depth] || styles.last)

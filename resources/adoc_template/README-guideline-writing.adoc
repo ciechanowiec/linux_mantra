@@ -464,7 +464,7 @@ A section on rate limiting that opens with five paragraphs explaining what HTTP 
 [.good-example]
 .{good-icon} Good example
 ====
-Rate limiting is the mechanism by which an HTTP server protects itself from excessive requests by a single client. When a client exceeds its quota, the server responds with status `429 Too Many Requests` and a `Retry-After` header indicating when the client may try again. The full semantics of HTTP status codes and headers are defined in RFC 9110.
+Rate limiting is the mechanism by which an HTTP server protects itself from excessive requests by a single client. When a client exceeds its quota, the server responds with status `429 Too Many Requests` and a `Retry-After` header indicating when the client may try again. The full semantics of HTTP status codes and headers are defined in the HTTP specification.
 ====
 
 ==== Purpose Before Mechanism
@@ -1394,7 +1394,7 @@ A component diagram showing the client, gateway, order service, and payment serv
 
 When the rule xref:#diagrams-and-prose[] calls for a diagram, render it as an inline ASCII diagram if the structure fits. An ASCII diagram travels with the text - it survives copy-paste, renders in plain-text contexts, and doesn't depend on an asset pipeline. Use one when the topology genuinely earns a picture: a fan-out, a layered stack, a tree, a state machine with a small number of states. Skip it when one or two sentences of prose convey the same relationship, or when the structure is too large or too irregular to render legibly in characters.
 
-A clean ASCII diagram has aligned components, consistent connectors, and labels that name each component. Boxes are drawn with one consistent set of characters throughout the document. Each arrow points in one direction and connects two named components. A diagram that forces the reader to count spaces or trace ambiguous connections is worse than the prose it replaced.
+A clean ASCII diagram has aligned components, consistent connectors, and labels that name each component. Boxes are drawn with one consistent set of characters throughout the document. Each arrow points in one direction and connects two named components. A diagram that forces the reader to count spaces or trace ambiguous connections is worse than the prose it replaced. Verbatim content, whether a diagram or a code listing, starts at the first column: the block supplies its own left inset, and a shared indent baked into the content doubles it.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1408,21 +1408,21 @@ The gateway dispatches each incoming request to one of three downstream services
 .{good-icon} Good example
 ====
 ....
-                    +-----------+
-                    |  gateway  |
-                    +-----+-----+
-                          |
-          +---------------+---------------+
-          |               |               |
-          v               v               v
-    +-----------+   +-----------+   +-----------+
-    |  search   |   |  catalog  |   |   cart    |
-    +-----+-----+   +-----+-----+   +-----+-----+
-          |               |               |
-          v               v               v
-    +-----------+   +-----------+   +-----------+
-    |   index   |   |    db     |   |   redis   |
-    +-----------+   +-----------+   +-----------+
+                +-----------+
+                |  gateway  |
+                +-----+-----+
+                      |
+      +---------------+---------------+
+      |               |               |
+      v               v               v
++-----------+   +-----------+   +-----------+
+|  search   |   |  catalog  |   |   cart    |
++-----+-----+   +-----+-----+   +-----+-----+
+      |               |               |
+      v               v               v
++-----------+   +-----------+   +-----------+
+|   index   |   |    db     |   |   redis   |
++-----------+   +-----------+   +-----------+
 ....
 
 Each arrow is a synchronous call. The gateway routes by request path. Downstream services don't call each other.

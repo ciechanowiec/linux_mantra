@@ -502,6 +502,39 @@ def rule_diagram_trailing_space(doc: Document) -> Iterator[Finding]:
                    "trailing whitespace in an ASCII diagram (§ascii-diagrams)")
 
 
+def rule_verbatim_flush_left(doc: Document) -> Iterator[Finding]:
+    # A verbatim block whose every content line is indented renders with a
+    # blank first column inside the block's own padding, so the content sits
+    # visibly off-center. The left inset belongs to the theme and stylesheet,
+    # not to spaces baked into the content: the shallowest line of a listing
+    # (`----`) or literal (`....`) block must start at column 1.
+    def report(block: List[Line]) -> Iterator[Finding]:
+        content = [ln for ln in block[1:-1] if ln.text.strip()]
+        if not content:
+            return
+        indent = min(len(ln.text) - len(ln.text.lstrip(" ")) for ln in content)
+        if indent >= 1:
+            first = min(content, key=lambda ln: ln.num)
+            yield (first.num, 1,
+                   f"verbatim block content is indented {indent} column(s); "
+                   f"dedent it so the shallowest line starts at column 1 "
+                   f"(§ascii-diagrams)")
+
+    run: List[Line] = []
+    for line in doc.lines:
+        if line.block in ("listing", "literal") and \
+                (not run or run[-1].block == line.block):
+            run.append(line)
+            continue
+        if run:
+            yield from report(run)
+            run = []
+        if line.block in ("listing", "literal"):
+            run.append(line)
+    if run:
+        yield from report(run)
+
+
 def rule_diagram_charset(doc: Document) -> Iterator[Finding]:
     # Group each contiguous literal block (one diagram) and flag it only when it
     # mixes the two box-drawing sets; a diagram drawn wholly in ASCII or wholly
@@ -1278,6 +1311,7 @@ RULES: List[Rule] = [
     Rule("anchor-format", "error", rule_anchor_format),
     Rule("diagram-tabs", "error", rule_diagram_tabs),
     Rule("diagram-trailing-space", "error", rule_diagram_trailing_space),
+    Rule("verbatim-flush-left", "error", rule_verbatim_flush_left),
     Rule("diagram-charset", "error", rule_diagram_charset),
     Rule("diagram-box-alignment", "error", rule_diagram_box_alignment),
     Rule("diagram-corner-support", "error", rule_diagram_corner_support),
