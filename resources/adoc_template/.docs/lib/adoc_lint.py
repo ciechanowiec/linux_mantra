@@ -871,6 +871,13 @@ SENTENCE_END_RE = re.compile(r"[.!?]+[\"')\]]*(?:\s+|$)")
 PROSE_WORD_RE = re.compile(r"[^\W\d_]+")
 XREF_TEXT_RE = re.compile(r"xref:[^\[\]\s]*\[([^\]]*)\]")
 BLOCK_ANCHOR_FULL_RE = re.compile(r"\[\[[^\]]*\]\]")
+# A footnote is an aside attached to a word, not part of the sentence that
+# carries it. Its text must not inflate the sentence-length, paragraph, and
+# section-body word counts, and its markup must not glue the two prose
+# sentences it sits between. Dropping the whole `footnote:id[...]` macro (named
+# or anonymous) before those rules run restores the sentence boundary the
+# attaching period marks.
+FOOTNOTE_RE = re.compile(r"footnote:[\w-]*\[[^\]]*\]")
 
 MAX_SENTENCES_PER_PARAGRAPH = 8
 MAX_SECTION_BODY_WORDS = 600
@@ -881,6 +888,7 @@ def _rendered(text: str) -> str:
     """Approximate the rendered prose of a source line: code spans masked,
     macros replaced by their display text, anchors dropped."""
     t = _mask_code(text)
+    t = FOOTNOTE_RE.sub(" ", t)
     t = XREF_TEXT_RE.sub(r"\1", t)
     t = LINK_RE.sub(r"\1", t)
     t = BLOCK_ANCHOR_FULL_RE.sub(" ", t)
