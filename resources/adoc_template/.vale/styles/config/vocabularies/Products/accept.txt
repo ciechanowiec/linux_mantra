@@ -100,3 +100,7 @@ dilisense
 Whistlelink
 VERSO
 JMeter
+Confluence
+Jira
+OneDrive
+SharePoint
