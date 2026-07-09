@@ -52,8 +52,8 @@ Other conventions:
 ## Resources layout (what each subtree is for)
 
 - `resources/linux/`, `resources/mac/` — OS-specific config payloads dropped onto the target system.
-- `resources/scripts/` — standalone helper scripts the mantra installs into the user's PATH (e.g. `mantra_java.sh`, `mantra_ts.sh`, `idea.sh`, `xplr.sh`, the `colima_*` and `docker_clean*` family).
-- `resources/adoc_template/`, `resources/typescript_template/`, `resources/demoproject/`, `resources/payload/` — project skeletons used by the `mantra_*` generator scripts.
+- `resources/scripts/` — standalone helper scripts the mantra installs into the user's PATH (e.g. `mantra_java.sh`, `idea.sh`, `xplr.sh`, the `colima_*` and `docker_clean*` family).
+- `resources/adoc_template/`, `resources/demoproject/`, `resources/payload/` — project skeletons used by the `mantra_*` generator scripts.
 - `resources/fernflower/` — bundled `fernflower.jar` (the script mounts it instead of installing a separate decompiler; CFR was tried and rejected — see comments in the FERNFLOWER block).
 - `resources/font/`, `resources/xplr/`, `resources/static_code_analysis/`, `resources/intellij-idea-*-settings-export.zip` — assets the script copies into place.
 
