@@ -574,6 +574,8 @@ jq '. * {
     "Bash(diff *)",
     "Bash(docker compose config)",
     "Bash(docker compose ps)",
+    "Bash(docker info *)",
+    "Bash(docker info)",
     "Bash(dpkg -L *)",
     "Bash(dpkg -l *)",
     "Bash(du *)",
