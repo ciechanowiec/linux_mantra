@@ -1403,6 +1403,7 @@ RULES: List[Rule] = [
     Rule("numbering-depth", "error", rule_numbering_depth),
     Rule("orphan-continuation", "error", rule_orphan_continuation),
     Rule("glued-list-item", "error", rule_glued_list_item),
+    Rule("single-item-list", "error", rule_single_item_list),
     Rule("alt-text", "error", rule_image_alt_text),
     Rule("link-text", "error", rule_link_text),
     Rule("explicit-anchors", "error", rule_auto_anchor),
