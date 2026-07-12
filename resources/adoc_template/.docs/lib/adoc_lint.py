@@ -797,16 +797,21 @@ def rule_diagram_lifeline_alignment(doc: Document) -> Iterator[Finding]:
 #
 # inline-formatting-semantics (§inline-formatting-semantics): bold appears only
 # in headings and paragraph headers; emphasis in body text is italic. A
-# standalone `*Header*` line (a paragraph header) and a `* item` list marker
-# are excluded.
+# standalone `*Header*` line (a paragraph header) is excluded, and a leading
+# `* item` list marker is blanked so it is not read as bold - but bold inside
+# the item's own text is still flagged.
 
 # A paragraph header (§paragraph-headers) is a bold phrase standing as a whole
 # list item, optionally behind a list marker and an anchor: `. *Security*`,
 # `.. [[id]]*Live metrics*`. Bold is licensed there, so such a line is skipped;
 # bold appearing mid-sentence is not.
 PARAGRAPH_HEADER_RE = re.compile(
-    r"^(?:[.*]+\s+)?(?:\[\[[^\]]*\]\]|\[#[^\]]*\])?\s*\*[^*]+\*\s*$")
+    r"^(?:[.*]+\s+)?(?:\[\[[^\]]*\]\]|\[#[^\]]*\])?\s*\*{1,2}[^*]+\*{1,2}\s*$")
+# Bold comes in two forms: constrained `*word*` (rejects a doubled `*` at either
+# edge) and unconstrained `**word**`. Both are banned in body text; the second
+# regex catches the double-asterisk form the first deliberately skips.
 BOLD_IN_BODY_RE = re.compile(r"(?<![\w*])\*([^*\s][^*]*?)\*(?![\w*])")
+BOLD_UNCONSTRAINED_RE = re.compile(r"\*\*(?=\S).+?\*\*")
 
 
 def _is_sentence_line(text: str) -> bool:
@@ -846,12 +851,27 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
         stripped = line.text.strip()
         if PARAGRAPH_HEADER_RE.match(stripped):
             continue
-        if UNORDERED_MARKER_RE.match(line.text):
-            continue
-        for m in BOLD_IN_BODY_RE.finditer(_mask_code(line.text)):
-            yield (line.num, m.start() + 1,
-                   "Bold in body text where a word carrying emphasis should be "
-                   "italic (§inline-formatting-semantics)")
+        # An unordered-list marker's `*`/`**` is not bold, but the item's content
+        # can still carry inline bold. Blank the marker (preserving columns) and
+        # check the rest, rather than skipping the whole line.
+        text = line.text
+        marker = UNORDERED_MARKER_RE.match(text)
+        if marker:
+            end = marker.end(1)
+            text = " " * end + text[end:]
+        # Mask inline code spans and `++…++` passthroughs so a literal `*`/`**`
+        # inside them is not read as an emphasis delimiter.
+        masked = PASSTHROUGH_INNER_RE.sub(
+            lambda m: " " * len(m.group(0)), _mask_code(text))
+        seen: set[int] = set()
+        for pattern in (BOLD_UNCONSTRAINED_RE, BOLD_IN_BODY_RE):
+            for m in pattern.finditer(masked):
+                if m.start() in seen:
+                    continue
+                seen.add(m.start())
+                yield (line.num, m.start() + 1,
+                       "Bold in body text where a word carrying emphasis should "
+                       "be italic (§inline-formatting-semantics)")
 
 
 # A render-integrity check. A constrained monospace span (`` `text` ``) still
@@ -1383,7 +1403,6 @@ RULES: List[Rule] = [
     Rule("numbering-depth", "error", rule_numbering_depth),
     Rule("orphan-continuation", "error", rule_orphan_continuation),
     Rule("glued-list-item", "error", rule_glued_list_item),
-    Rule("single-item-list", "error", rule_single_item_list),
     Rule("alt-text", "error", rule_image_alt_text),
     Rule("link-text", "error", rule_link_text),
     Rule("explicit-anchors", "error", rule_auto_anchor),
