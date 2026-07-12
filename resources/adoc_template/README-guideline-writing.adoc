@@ -1092,7 +1092,7 @@ The resolver follows the rules defined in §5.3.
 [#lists-for-enumerable-content]
 ==== Lists for Enumerable Content
 
-Lists are used for content whose items are genuinely parallel and enumerable: a fixed set of states, a finite set of options, a sequence of steps. Prose is used for arguments, derivations, and connected reasoning. Don't bullet a paragraph. Don't write a list as a single run-on sentence.
+Lists are used for content whose items are genuinely parallel and enumerable: a fixed set of states, a finite set of options, a sequence of steps. Prose is used for arguments, derivations, and connected reasoning. Don't bullet a paragraph. Don't write a list as a single run-on sentence. A list has two or more items at every level, or it isn't a list: a lone item is a bulleted paragraph and is written as prose, the way xref:#section-nesting[] forbids a lone subsection.
 
 [.bad-example]
 .{bad-icon} Bad example

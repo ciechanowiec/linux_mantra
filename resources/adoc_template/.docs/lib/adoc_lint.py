@@ -351,6 +351,76 @@ def rule_glued_list_item(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
+# List structure — a list has two or more items
+# ============================================================================
+#
+# Serves lists-for-enumerable-content (§lists-for-enumerable-content): a list
+# enumerates parallel items, so a list of one item is a bulleted paragraph that
+# renders as an orphaned "A." (or "1.", "*") with no sibling. This is the list
+# analogue of lone-subsection, which forbids a lone *subsection*; the same "zero,
+# or two or more" rule is enforced here for list items at EVERY nesting level of
+# BOTH ladders (`.` `..` and `*` `**`).
+#
+# Lists are grouped with a marker stack. An item whose marker isn't open pushes a
+# new (nested) list; an item at an already-open marker closes the deeper levels
+# above it and increments its own count. A heading or a fresh, unattached prose
+# paragraph closes every open list. Verbatim blocks, table cells, block
+# delimiters, continuations (`+`), attribute lines, block titles, comments, and
+# wrapped item text are attached or inert and never close a list, so an item
+# carrying an attached table or diagram keeps its siblings. Each list is checked
+# as it closes: a count of one flags the item's line.
+
+def _ends_list(line: Line, idx: int, doc: Document) -> bool:
+    if line.block != "none" or line.in_table:
+        return False
+    if HEADING_RE.match(line.text):
+        return True
+    token = line.text.strip()
+    if token in ("", "+"):
+        return False
+    if (_opens_list(line) or OTHER_DELIM_RE.match(token)
+            or BLOCK_TITLE_RE.match(token) or token.startswith(("[", "//"))):
+        return False
+    # A plain prose line closes the list only when it starts a fresh paragraph,
+    # not when it is the wrapped or `+`-attached continuation of the item above.
+    return not _marker_in_run_above(doc, idx)
+
+
+def rule_single_item_list(doc: Document) -> Iterator[Finding]:
+    findings: List[Finding] = []
+    stack: List[List] = []  # each entry: [marker, count, first_line_num]
+
+    def close_top() -> None:
+        marker, count, line_num = stack.pop()
+        if count == 1:
+            findings.append((line_num, 1,
+                f"Single-item list: the `{marker}` list has one item where a "
+                f"list needs two or more, so write the item as prose "
+                f"(§lists-for-enumerable-content)"))
+
+    for idx, line in enumerate(doc.lines):
+        if line.block != "none" or line.in_table:
+            continue
+        m = (ORDERED_MARKER_RE.match(line.text)
+             or UNORDERED_MARKER_RE.match(line.text))
+        if m:
+            marker = m.group(1)
+            if any(entry[0] == marker for entry in stack):
+                while stack[-1][0] != marker:
+                    close_top()
+                stack[-1][1] += 1
+            else:
+                stack.append([marker, 1, line.num])
+        elif _ends_list(line, idx, doc):
+            while stack:
+                close_top()
+
+    while stack:
+        close_top()
+    yield from findings
+
+
+# ============================================================================
 # Images — alt text
 # ============================================================================
 #
@@ -1313,6 +1383,7 @@ RULES: List[Rule] = [
     Rule("numbering-depth", "error", rule_numbering_depth),
     Rule("orphan-continuation", "error", rule_orphan_continuation),
     Rule("glued-list-item", "error", rule_glued_list_item),
+    Rule("single-item-list", "error", rule_single_item_list),
     Rule("alt-text", "error", rule_image_alt_text),
     Rule("link-text", "error", rule_link_text),
     Rule("explicit-anchors", "error", rule_auto_anchor),
