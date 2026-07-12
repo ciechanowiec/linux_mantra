@@ -540,6 +540,49 @@ def rule_xref_targets(doc: Document) -> Iterator[Finding]:
                        f"doesn't exist in the document (§explicit-anchors)")
 
 
+# Serves internal-references-with-xref (§internal-references-with-xref): an
+# empty-bracket reference `xref:#id[]` inherits its visible text from the
+# target's reference text. A section supplies its title, and a block-leading
+# `[[id,reftext]]` anchor supplies its reftext, but an anchor sitting mid-text
+# supplies nothing to the empty-bracket form and a bare `[[id]]` never does.
+# Asciidoctor then prints the raw id in brackets -- a link that reads
+# `[break-even-threshold]` -- and its render pass does NOT warn (verified
+# empirically: converts with exit 0 and no message). This rule renders the
+# document and flags every reference whose visible text is exactly its bracketed
+# id, the signature of that defect, at the source `xref:#id[]` or `<<id>>` that
+# produced it. The fix is explicit link text: `xref:#id[the term]`.
+
+BARE_ID_LINK_RE = re.compile(
+    r'<a href="#([A-Za-z0-9_-]+)"[^>]*>\[([A-Za-z0-9_-]+)\]</a>')
+EMPTY_XREF_RE = re.compile(r"xref:#([A-Za-z0-9_-]+)\[\]")
+BARE_ANGLE_RE = re.compile(r"<<([A-Za-z0-9_-]+)>>")
+
+
+def rule_bare_id_xref(doc: Document) -> Iterator[Finding]:
+    try:
+        proc = subprocess.run(
+            ["asciidoctor", "--out-file", "-", doc.path],
+            capture_output=True, text=True,
+        )
+    except OSError:
+        return
+    bare = {m.group(1) for m in BARE_ID_LINK_RE.finditer(proc.stdout)
+            if m.group(1) == m.group(2)}
+    if not bare:
+        return
+    for line in _prose(doc):
+        masked = _mask_code(line.text)
+        for rx in (EMPTY_XREF_RE, BARE_ANGLE_RE):
+            for m in rx.finditer(masked):
+                if m.group(1) in bare:
+                    yield (line.num, m.start() + 1,
+                           f"Cross-reference to {m.group(1)!r} renders as the raw "
+                           f"id '[{m.group(1)}]': its anchor gives the empty-bracket "
+                           f"form no reference text. Supply explicit link text, such "
+                           f"as xref:#{m.group(1)}[the term] "
+                           f"(§internal-references-with-xref)")
+
+
 # ============================================================================
 # ASCII diagrams — character hygiene
 # ============================================================================
@@ -1419,6 +1462,7 @@ RULES: List[Rule] = [
     Rule("inline-formatting", "error", rule_bold_in_body),
     Rule("asterisk-in-code", "error", rule_asterisk_in_code),
     Rule("xref-targets", "error", rule_xref_targets),
+    Rule("internal-references-with-xref", "error", rule_bare_id_xref),
     Rule("one-paragraph-one-topic", "error", rule_paragraph_sentences),
     Rule("section-body-length", "error", rule_section_body_words),
     Rule("sentence-opener-runs", "error", rule_sentence_opener_runs),
