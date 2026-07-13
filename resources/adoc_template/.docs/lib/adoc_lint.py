@@ -6,7 +6,11 @@ The linter runs three engines and merges their findings into one stream:
   1. Vale (an external binary) for prose tokens and typography. Its config
      lives at the project root in `.vale.ini` + `.vale/styles/`. Vale is
      required: when the `vale` binary is not on PATH, the linter exits with an
-     error rather than silently skipping the prose checks.
+     error rather than silently skipping the prose checks. Vale runs twice: on
+     the document as-is, then (`run_vale_tables`) on the prose lifted out of
+     `|===` table cells, because Vale's AsciiDoc parser never gives cell text a
+     `sentence`/`paragraph` scope and so skips those rules inside tables -- the
+     second pass makes a rule that applies to body prose apply to cell prose.
   2. The structural engine in this file for the markup, tree, and ASCII-diagram
      rules that Vale cannot see, because Vale lints rendered prose and loses the
      markup layer (heading depth, list nesting, anchor syntax, box-drawing).
@@ -42,6 +46,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections import Counter
 from dataclasses import dataclass
 from typing import Callable, Dict, Iterator, List, Tuple
@@ -1515,6 +1520,101 @@ def run_vale(path: str) -> List[tuple]:
     return findings
 
 
+# A table cell holds ordinary prose, but Vale's AsciiDoc parser never segments
+# cell text into `sentence`/`paragraph` scopes -- so every style scoped to one
+# of those (Semicolons, Colons, OxfordComma, Nominalizations, But) silently
+# skips inside a `|===` table, while the same rule fires in body text. Only
+# `text`-scoped styles reach a cell in `run_vale` above. The invariant the
+# guideline wants is that a rule applied to body prose applies to cell prose
+# too. Closing the gap by rewriting the table in place is a dead end: Vale's
+# block tracking is stateful, and dropping the `|===` delimiters desyncs it so
+# it leaks findings out of the code blocks it should skip. Instead, lift each
+# cell's prose into a throwaway file of blank-line-separated paragraphs -- a
+# clean prose document Vale segments normally -- lint THAT, and keep only the
+# findings the body pass structurally cannot produce for a cell: the ones from
+# non-`text`, non-`heading` styles (a cell is never a heading). The source line
+# is exact; the column is mapped back to the cell's offset in its row.
+
+def _vale_scope(check: str) -> str:
+    """The `scope:` a Vale style declares, read from its style file at runtime
+    (like `_vale_cap`), or 'text' when it declares none or has no file. Reading
+    it here means the table pass tracks the styles on disk, not a list restated
+    in code that would drift as styles are added."""
+    style, _, rule = check.partition(".")
+    path = os.path.join(".vale/styles", style, rule + ".yml")
+    try:
+        with open(path, encoding="utf-8") as f:
+            m = re.search(r"^scope:\s*(\S+)", f.read(), re.M)
+    except OSError:
+        return "text"
+    return m.group(1) if m else "text"
+
+
+def run_vale_tables(doc: Document) -> List[tuple]:
+    cells: List[Tuple[str, int, int]] = []  # (prose, source_line, source_col)
+    for line in doc.lines:
+        if not line.in_table or line.block != "none":
+            continue
+        stripped = line.text.strip()
+        if not stripped.startswith("|") or set(stripped) <= set("|="):
+            continue  # a `|===` delimiter or a cell-continuation line, not a row
+        col = 0
+        for piece in line.text.split("|"):
+            cell = piece.strip()
+            if cell:
+                lead = len(piece) - len(piece.lstrip())
+                cells.append((cell, line.num, col + lead + 1))
+            col += len(piece) + 1  # +1 for the '|' that split() consumed
+    if not cells:
+        return []
+
+    body: List[str] = []
+    para_src: Dict[int, Tuple[int, int]] = {}  # temp line -> (src line, src col)
+    for prose, src_line, src_col in cells:
+        para_src[len(body) + 1] = (src_line, src_col)
+        body.append(prose)
+        body.append("")  # a blank line keeps each cell its own paragraph
+
+    # Write the temp file beside the source so Vale discovers the same
+    # `.vale.ini` it would for the real document (config lookup walks up from
+    # the file), and give it the `.adoc` suffix the config's glob matches.
+    src_dir = os.path.dirname(doc.path) or "."
+    with tempfile.NamedTemporaryFile(
+            "w", suffix=".adoc", dir=src_dir, delete=False,
+            encoding="utf-8") as tf:
+        tf.write("\n".join(body) + "\n")
+        tmp = tf.name
+    try:
+        proc = subprocess.run(
+            ["vale", "--output=JSON", tmp], capture_output=True, text=True)
+    finally:
+        os.unlink(tmp)
+    try:
+        data = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return []
+
+    findings = []
+    for alerts in data.values():
+        for alert in alerts:
+            check = alert.get("Check", "Vale")
+            scope = _vale_scope(check)
+            if scope in ("text", "summary") or scope.startswith("head"):
+                continue  # body pass covers text; a cell is never a heading
+            src = para_src.get(alert.get("Line", 0))
+            if src is None:
+                continue
+            span = alert.get("Span") or [1]
+            findings.append((
+                src[0],
+                src[1] + max(span[0] - 1, 0),
+                check,
+                alert.get("Severity", "error"),
+                alert.get("Message", ""),
+            ))
+    return findings
+
+
 # ============================================================================
 # Asciidoctor engine — render integrity
 # ============================================================================
@@ -1571,6 +1671,7 @@ def lint_file(path: str) -> Tuple[List[tuple], List[Tuple[str, str]]]:
             findings.append((line, col, rule.id, rule.severity, message))
 
     findings.extend(run_vale(path))
+    findings.extend(run_vale_tables(doc))
     findings.extend(run_asciidoctor(path))
     findings.sort(key=lambda f: (f[0], f[1], f[2]))
     return findings, file_diagnostics(doc)
