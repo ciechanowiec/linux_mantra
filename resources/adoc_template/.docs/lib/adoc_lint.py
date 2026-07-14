@@ -545,6 +545,49 @@ def rule_xref_targets(doc: Document) -> Iterator[Finding]:
                        f"doesn't exist in the document (§explicit-anchors)")
 
 
+# ============================================================================
+# Footnote text — no bare bracket
+# ============================================================================
+#
+# Asciidoctor ends a footnote's text at the first `]` that doesn't close a nested
+# inline macro, so a bare bracket inside the text -- `[sic]`, `[1]` -- silently
+# truncates the footnote and spills the remainder onto the page. Its render pass
+# does NOT warn (verified empirically: converts with exit 0, and the footnote just
+# ends early). A macro's own `[` always follows its target (`xref:#id[`), never
+# whitespace, so a whitespace-preceded `[` inside a footnote is that defect. Write
+# the bracket as `{startsb}` and `{endsb}`, which render literally.
+
+def rule_footnote_bare_bracket(doc: Document) -> Iterator[Finding]:
+    for line in _prose(doc):
+        text: str = line.text
+        for opening in re.finditer(r"footnote:[\w-]*\[", text):
+            i: int = opening.end()
+            while i < len(text):
+                char: str = text[i]
+                if char == "\\":
+                    i += 2
+                    continue
+                if char == "]":
+                    break  # the footnote closes here
+                if char == "[":
+                    if not text[i - 1].isspace():
+                        # a nested inline macro (`xref:#id[...]`): skip past its own close
+                        depth: int = 1
+                        i += 1
+                        while i < len(text) and depth > 0:
+                            depth += (text[i] == "[") - (text[i] == "]")
+                            i += 1
+                        continue
+                    close: int = text.find("]", i)
+                    if close != -1 and text[close - 1] != "\\":
+                        yield (line.num, i + 1,
+                               "bare '[' inside a footnote truncates it: Asciidoctor ends "
+                               "the footnote text at the first unescaped ']'. Escape the "
+                               "closing bracket, as in '[sic\\]'")
+                    break
+                i += 1
+
+
 # Serves internal-references-with-xref (§internal-references-with-xref): an
 # empty-bracket reference `xref:#id[]` inherits its visible text from the
 # target's reference text. A section supplies its title, and a block-leading
@@ -1015,7 +1058,7 @@ BLOCK_ANCHOR_FULL_RE = re.compile(r"\[\[[^\]]*\]\]")
 # sentences it sits between. Dropping the whole `footnote:id[...]` macro (named
 # or anonymous) before those rules run restores the sentence boundary the
 # attaching period marks.
-FOOTNOTE_RE = re.compile(r"footnote:[\w-]*\[[^\]]*\]")
+FOOTNOTE_RE = re.compile(r"footnote:[\w-]*\[(?:[^\[\]]|\[[^\[\]]*\])*\]")
 
 MAX_SENTENCES_PER_PARAGRAPH = 8
 MAX_SECTION_BODY_WORDS = 600
@@ -1467,6 +1510,7 @@ RULES: List[Rule] = [
     Rule("inline-formatting", "error", rule_bold_in_body),
     Rule("asterisk-in-code", "error", rule_asterisk_in_code),
     Rule("xref-targets", "error", rule_xref_targets),
+    Rule("footnote-bare-bracket", "error", rule_footnote_bare_bracket),
     Rule("internal-references-with-xref", "error", rule_bare_id_xref),
     Rule("one-paragraph-one-topic", "error", rule_paragraph_sentences),
     Rule("section-body-length", "error", rule_section_body_words),

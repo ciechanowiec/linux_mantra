@@ -32,6 +32,89 @@
     autofitPre();
 })();
 
+// Footnote hover preview: a footnote carries the citation for the statement it hangs off,
+// so following one otherwise costs a jump to the foot of the page and the reader's place.
+// Show the note's own content beside the reference on hover or keyboard focus, and keep it
+// open while the pointer rests on it so any links inside stay reachable. HTML only: the PDF
+// renders real footnotes at the foot of the page, and the DOCX export loads no docinfo.
+(function () {
+    var HIDE_DELAY_MS = 180;
+    var popover;
+    var hideTimer;
+
+    var element = function () {
+        if (!popover) {
+            popover = document.createElement('div');
+            popover.className = 'fn-pop';
+            popover.setAttribute('role', 'tooltip');
+            popover.addEventListener('mouseenter', function () { window.clearTimeout(hideTimer); });
+            popover.addEventListener('mouseleave', scheduleHide);
+            document.body.appendChild(popover);
+        }
+        return popover;
+    };
+
+    // The definition opens with a back-reference link and an "N." label. The popover repeats
+    // neither, because the reader is already standing on that reference.
+    var contentOf = function (link) {
+        var definition = document.getElementById((link.getAttribute('href') || '').slice(1));
+        if (!definition) {
+            return '';
+        }
+        var clone = definition.cloneNode(true);
+        var back = clone.querySelector('a[href^="#_footnoteref_"]');
+        if (back) {
+            back.parentNode.removeChild(back);
+        }
+        return clone.innerHTML.replace(/^\s*\.\s*/, '').trim();
+    };
+
+    var show = function (link) {
+        window.clearTimeout(hideTimer);
+        var html = contentOf(link);
+        if (!html) {
+            return;
+        }
+        var pop = element();
+        pop.innerHTML = html;
+        pop.style.visibility = 'hidden';   // measure before placing, so it never flashes
+        pop.style.display = 'block';
+
+        var anchor = link.getBoundingClientRect();
+        var left = Math.min(Math.max(8, anchor.left), Math.max(8, window.innerWidth - pop.offsetWidth - 8));
+        var fitsAbove = anchor.top > pop.offsetHeight + 12;
+        var top = fitsAbove ? anchor.top - pop.offsetHeight - 8 : anchor.bottom + 8;
+
+        pop.style.left = (left + window.pageXOffset) + 'px';
+        pop.style.top = (top + window.pageYOffset) + 'px';
+        pop.style.visibility = 'visible';
+    };
+
+    var hide = function () {
+        if (popover) {
+            popover.style.display = 'none';
+        }
+    };
+
+    function scheduleHide() {
+        hideTimer = window.setTimeout(hide, HIDE_DELAY_MS);
+    }
+
+    document.querySelectorAll('a.footnote[href^="#_footnotedef_"]').forEach(function (link) {
+        link.removeAttribute('title');   // the native "View footnote." tooltip would fight the popover
+        link.addEventListener('mouseenter', function () { show(link); });
+        link.addEventListener('mouseleave', scheduleHide);
+        link.addEventListener('focus', function () { show(link); });
+        link.addEventListener('blur', hide);
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            hide();
+        }
+    });
+})();
+
 var oldtoc = document.getElementById('toctitle').nextElementSibling;
 var newtoc = document.createElement('div');
 newtoc.setAttribute('id', 'tocbot');

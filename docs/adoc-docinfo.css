@@ -99,3 +99,36 @@
 .exampleblock.good-example + .exampleblock.bad-example {
     margin-top: 2em;
 }
+
+/* Footnote hover preview (behaviour in adoc-docinfo-footer.js). A footnote carries the
+   citation for the statement it hangs off, so reading one otherwise costs a jump to the
+   foot of the page and the reader's place. */
+.fn-pop {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    max-width: min(46rem, 90vw);
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #c8c8c8;
+    border-radius: 4px;
+    background: #fffdf5;
+    color: #222222;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    text-align: left;
+}
+
+@media (prefers-color-scheme: dark) {
+    .fn-pop {
+        border-color: #44464f;
+        background: #22232a;
+        color: #dddddd;
+    }
+}
+
+@media print {
+    .fn-pop {
+        display: none !important;
+    }
+}
