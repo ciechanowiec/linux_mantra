@@ -1,6 +1,0 @@
-extends: occurrence
-message: "Sentence stacks too many abstract nominalizations (-tion, -ment, -ity, ...); prefer verbs and concrete nouns."
-level: error
-scope: sentence
-max: 7
-token: '\b[A-Za-z]+(?:tions?|sions?|ments?|ances?|ences?|ities|ity|ness(?:es)?)\b'

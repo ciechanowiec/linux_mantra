@@ -1207,7 +1207,7 @@ def rule_sentence_length(doc: Document) -> Iterator[Finding]:
 # Three deliberate scoring policies keep the check fail-safe:
 #   - Ungraded words (domain terms, product names, coinages) are omitted, not
 #     guessed, so correct technical jargon never pushes a sentence over the
-#     cap. The suffix-based English.Nominalizations Vale rule is the
+#     cap. The suffix-based nominalization-density rule below is the
 #     open-world backstop for vocabulary this closed lexicon misses.
 #   - Function words are excluded via the stopword set below: the norms grade
 #     them (e.g. "the" rates highly abstract), and including them would let
@@ -1321,6 +1321,45 @@ def rule_abstract_vocabulary(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
+# Nominalization density — direct verbs over stacked abstract nouns
+# ============================================================================
+#
+# Serves direct-verbs (§direct-verbs): one sentence doesn't bury its actions
+# under a pile of abstract nouns. Every extra -tion/-ment/-ity noun is an
+# action or quality nominalized instead of stated as a verb, and a sentence
+# that stacks too many of them reads as fog. Where the graded-lexicon
+# concrete-vocabulary check above is closed-world -- it scores only words it
+# has a grade for -- this open-world suffix count is its backstop: it needs no
+# lexicon entry to catch an unfamiliar nominalization.
+#
+# This owned Vale's `English.Nominalizations` (`scope: sentence`), but Vale's
+# AsciiDoc position mapping drifts across accumulated block elements, so in a
+# structurally dense document it reported the sentence tens or hundreds of
+# lines from where it actually sits. Re-homing the metric onto the shared
+# sentence pipeline (`_paragraphs` + `_sentence_source`: code spans and
+# footnotes masked, macros rendered to their display text) makes the reported
+# line exact and keeps the count consistent with the other sentence rules. The
+# Vale rule is deleted; like the other re-homed sentence rules it measures
+# every prose line `_paragraphs` yields, not `|===` cells.
+
+NOMINALIZATION_RE = re.compile(
+    r"\b[A-Za-z]+(?:tions?|sions?|ments?|ances?|ences?|ities|ity|ness(?:es)?)\b")
+MAX_NOMINALIZATIONS = 7
+
+
+def rule_nominalization_density(doc: Document) -> Iterator[Finding]:
+    for line in _paragraphs(doc):
+        for part in SENTENCE_END_RE.split(_sentence_source(line.text)):
+            n = len(NOMINALIZATION_RE.findall(part))
+            if n > MAX_NOMINALIZATIONS:
+                yield (line.num, 1,
+                       f"Sentence stacks {n} abstract nominalizations "
+                       f"(-tion, -ment, -ity, ...), exceeding the cap of "
+                       f"{MAX_NOMINALIZATIONS}; prefer direct verbs and "
+                       f"concrete nouns (§direct-verbs)")
+
+
+# ============================================================================
 # Diagnostics — per-file metrics panel
 # ============================================================================
 #
@@ -1389,6 +1428,7 @@ def file_diagnostics(doc: Document) -> List[Tuple[str, str]]:
     max_paragraph = (0, 0)       # (sentences, line)
     max_run = (1, "", 0)         # (run, word, line)
     max_abstract = (0.0, 0, 0, "")  # (mean, graded words, line, sentence)
+    max_nominal = (0, 0)         # (count, line)
     is_english = not doc.path.endswith(".pl.adoc")
     lexicon = _abstractness_lexicon() if is_english else {}
 
@@ -1413,6 +1453,10 @@ def file_diagnostics(doc: Document) -> List[Tuple[str, str]]:
                 mean, count = _sentence_abstractness(part, lexicon)
                 if count >= MIN_GRADED_WORDS and mean > max_abstract[0]:
                     max_abstract = (mean, count, line.num, part)
+        for part in SENTENCE_END_RE.split(source):
+            n_nom = len(NOMINALIZATION_RE.findall(part))
+            if n_nom > max_nominal[0]:
+                max_nominal = (n_nom, line.num)
 
     max_heading = (0, 0)
     for num, _level in doc.headings:
@@ -1461,6 +1505,9 @@ def file_diagnostics(doc: Document) -> List[Tuple[str, str]]:
         rows.append(("same-opener sentences",
                      f"cap {MAX_OPENER_RUN} · no two consecutive sentences "
                      f"open with the same word"))
+    rows.append(("nominalizations",
+                 f"cap {MAX_NOMINALIZATIONS} · max {max_nominal[0]} "
+                 f"(line {max_nominal[1]})"))
     if is_english and max_abstract[1]:
         mean, count, line_num, part = max_abstract
         rows.append(("abstractness",
@@ -1517,6 +1564,7 @@ RULES: List[Rule] = [
     Rule("sentence-opener-runs", "error", rule_sentence_opener_runs),
     Rule("sentence-length", "error", rule_sentence_length),
     Rule("concrete-vocabulary", "error", rule_abstract_vocabulary),
+    Rule("nominalization-density", "error", rule_nominalization_density),
 ]
 
 
@@ -1566,7 +1614,7 @@ def run_vale(path: str) -> List[tuple]:
 
 # A table cell holds ordinary prose, but Vale's AsciiDoc parser never segments
 # cell text into `sentence`/`paragraph` scopes -- so every style scoped to one
-# of those (Semicolons, Colons, OxfordComma, Nominalizations, But) silently
+# of those (Semicolons, Colons, OxfordComma, But) silently
 # skips inside a `|===` table, while the same rule fires in body text. Only
 # `text`-scoped styles reach a cell in `run_vale` above. The invariant the
 # guideline wants is that a rule applied to body prose applies to cell prose
