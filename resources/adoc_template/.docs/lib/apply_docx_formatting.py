@@ -95,27 +95,44 @@ def _inject_heading_numbering(numbering_xml: str) -> str:
 # single-format abstract (one for decimal, one for lowerLetter, etc.), so
 # Word treats them as disconnected lists. When the author edits a list
 # manually, Word picks its own scheme for the new level. This transform
-# defines one 9-level multilevel ordered-list abstract matching
-# Asciidoctor's default (decimal, lowerLetter, lowerRoman, upperLetter,
-# upperRoman, then cycle) and remaps every ordered-list <w:num> to point
-# at it. Each <w:num> keeps its own startOverride entries, so independent
-# lists still restart at 1 / a / i / A / I.
+# defines one 9-level multilevel ordered-list abstract matching the
+# HTML/PDF exports (upperalpha, upperroman, lowergreek, lowerroman, then
+# lowerroman repeated -- see adoc-css-style.css and common-style.rb) and
+# remaps every ordered-list <w:num> to point at it. Each <w:num> keeps its
+# own startOverride entries, so independent lists still restart at
+# A / I / α / i.
+#
+# ST_NumberFormat has no Greek value, so the lowergreek level rides the
+# w14 `custom` format inside an mc:AlternateContent, the same markup Word
+# itself writes for non-enum formats. Word 2010+ and LibreOffice take the
+# w14 branch; anything older takes the lowerLetter fallback. The mc/w14
+# namespaces this needs are declared by _declare_compat_namespaces below.
 
 ORDERED_ABSTRACT_NUM_ID = "9992"
 ORDERED_NSID = "170cd2e0"  # distinctive marker for idempotency check
 
-ORDERED_FORMATS = [
-    "decimal", "lowerLetter", "lowerRoman", "upperLetter", "upperRoman",
-    "decimal", "lowerLetter", "lowerRoman", "upperLetter",
-]
+LOWER_GREEK_NUMFMT = (
+    '<mc:AlternateContent>'
+    '<mc:Choice Requires="w14">'
+    '<w:numFmt w:val="custom" w:format="α, β, γ, ..." />'
+    '</mc:Choice>'
+    '<mc:Fallback><w:numFmt w:val="lowerLetter" /></mc:Fallback>'
+    '</mc:AlternateContent>'
+)
+
+ORDERED_NUMFMT_TAGS = [
+    '<w:numFmt w:val="upperLetter" />',
+    '<w:numFmt w:val="upperRoman" />',
+    LOWER_GREEK_NUMFMT,
+] + ['<w:numFmt w:val="lowerRoman" />'] * 6
 
 _ordered_levels = []
-for i, fmt in enumerate(ORDERED_FORMATS):
+for i, numfmt_tag in enumerate(ORDERED_NUMFMT_TAGS):
     ind_left = (i + 1) * 720
     _ordered_levels.append(
         f'<w:lvl w:ilvl="{i}">'
         f'<w:start w:val="1" />'
-        f'<w:numFmt w:val="{fmt}" />'
+        f'{numfmt_tag}'
         f'<w:suff w:val="tab" />'
         f'<w:lvlText w:val="%{i+1}." />'
         f'<w:lvlJc w:val="left" />'
@@ -136,6 +153,36 @@ ORDERED_FMT_RE = re.compile(
     r'<w:numFmt w:val="(decimal|decimalZero|lowerLetter|lowerRoman'
     r'|upperLetter|upperRoman)"'
 )
+
+# Pandoc's numbering.xml declares only the main wordprocessingml namespace,
+# but the lowergreek level above needs mc:AlternateContent and a
+# Requires="w14" reference. Declare both namespaces on the root element and
+# list w14 as mc:Ignorable so a consumer without the extension skips it
+# cleanly instead of rejecting the part.
+
+NUMBERING_ROOT_RE = re.compile(r'<w:numbering\b[^>]*>')
+MC_IGNORABLE_RE = re.compile(r'mc:Ignorable="([^"]*)"')
+MC_XMLNS = 'xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"'
+W14_XMLNS = 'xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"'
+
+
+def _declare_compat_namespaces(numbering_xml: str) -> str:
+    root_match = NUMBERING_ROOT_RE.search(numbering_xml)
+    if not root_match:
+        return numbering_xml
+    tag = new_tag = root_match.group(0)
+    if 'xmlns:mc=' not in new_tag:
+        new_tag = new_tag[:-1] + f' {MC_XMLNS}>'
+    if 'xmlns:w14=' not in new_tag:
+        new_tag = new_tag[:-1] + f' {W14_XMLNS}>'
+    ignorable = MC_IGNORABLE_RE.search(new_tag)
+    if not ignorable:
+        new_tag = new_tag[:-1] + ' mc:Ignorable="w14">'
+    elif 'w14' not in ignorable.group(1).split():
+        new_tag = new_tag.replace(
+            ignorable.group(0), f'mc:Ignorable="{ignorable.group(1)} w14"', 1,
+        )
+    return numbering_xml.replace(tag, new_tag, 1)
 
 
 def _unify_ordered_lists(numbering_xml: str) -> str:
@@ -663,6 +710,7 @@ def _make_resize_images(numbering: NumberingIndex) -> XmlTransform:
 
 TRANSFORMS: Dict[str, List[XmlTransform]] = {
     'word/numbering.xml': [
+        _declare_compat_namespaces,
         _inject_heading_numbering,
         _unify_ordered_lists,
     ],
