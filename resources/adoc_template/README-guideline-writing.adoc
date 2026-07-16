@@ -54,16 +54,16 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 
-The guideline applies to non-fiction prose - reference documentation, design documents, runbooks, README files, protocol descriptions, and prose memos. It doesn't apply to fiction, marketing copy, or transient chat.
+The guideline applies to _utilitarian non-fiction_ - prose written to transfer accurate information from author to reader. Utilitarian non-fiction includes reference documentation, design documents, runbooks, README files, protocol descriptions, specifications, prose memos, and style guides, this guideline among them. The guideline doesn't apply to fiction, essays, memoirs, marketing copy, or transient chat.
 
 The guideline is written for authors of such prose, whether human or AI. It assumes the ability to write standard English and familiarity with the subject the author writes about. After reading, an author should be able to apply each rule while writing and to verify a finished document against the rules.
 
-The guideline is organized in four parts. xref:#part-1[Part 1] states rules that apply to any non-fiction document. xref:#part-2[Part 2] adds rules for technical texts - documents whose subject is a technical system. xref:#part-3[Part 3] adds rules that apply when the author is an AI system. xref:#part-4[Part 4] adds rules for the AsciiDoc markup that carries the document.
+The guideline is organized in four parts. xref:#part-1[Part 1] states rules that apply to any utilitarian non-fiction document. xref:#part-2[Part 2] adds rules for technical texts - documents whose subject is a technical system. xref:#part-3[Part 3] adds rules that apply when the author is an AI system. xref:#part-4[Part 4] adds rules for the AsciiDoc markup that carries the document.
 
 [[part-1]]
 == General Rules
 
-This part states rules that apply to any non-fiction document, whatever its subject and markup. The parts that follow add rules for narrower contexts without overriding the rules stated here.
+This part states rules that apply to any utilitarian non-fiction document, whatever its subject and markup. The parts that follow add rules for narrower contexts without overriding the rules stated here.
 
 === Audience, Purpose, and Scope
 
