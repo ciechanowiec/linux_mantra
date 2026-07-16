@@ -104,3 +104,5 @@ Confluence
 Jira
 OneDrive
 SharePoint
+Contentful
+WordPress
