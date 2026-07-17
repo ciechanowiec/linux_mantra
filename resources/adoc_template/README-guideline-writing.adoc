@@ -1264,6 +1264,117 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 
+[#sources-and-attribution]
+=== Sources and Attribution
+
+A _source_ is a document consulted during writing: provided with the request, or found and read while researching it.
+
+[#claim-classes]
+==== Claim Classes
+
+A statement that draws on xref:#sources-and-attribution[sources] belongs to exactly one of three classes, and the class fixes its citation duty. A [[reported-claim,reported claim]]_reported claim_ is a statement that restates what a source says. An [[inferred-claim,inferred claim]]_inferred claim_ is a conclusion that the author derives from one or more sources. An [[author-supplied-claim,author-supplied claim]]_author-supplied claim_ is a statement the author makes on their own authority, without a source: own expertise or common knowledge.
+
+A xref:#reported-claim[reported claim] cites every source it restates. An xref:#inferred-claim[inferred claim] cites every source it draws on and is marked as an inference. A claim that rests on three sources, for example, cites all three. An xref:#author-supplied-claim[author-supplied claim] carries no citation. The classes close the text in both directions: every statement derived from a source carries a citation, and every statement without a citation must stand as author-supplied. A document whose every statement is author-supplied - a style guide written from expertise, for example - carries no citations and no source list.
+
+The xref:#request-source[request] that commissioned the text falls on both sides of the citation duty. A statement that reports what the request says is a xref:#reported-claim[reported claim] and cites the request. An instruction the author merely follows - a length cap, a topic to emphasize - shapes the text without being asserted in it, so there is nothing to cite. The test is origin, not confidence: a particular that exists only because the request states it - a date, a volume, a constraint specific to the requester - is reported and cites the request. A statement that any competent author could make without the request is xref:#author-supplied-claim[author-supplied].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The customer requires delivery by 2026-11-30 and an availability of 99.9%. Splitting the rollout into two phases would reduce the delivery risk. (The first sentence reports the customer's request for proposal and the second is an inference from it, but neither is cited, so the reader can't tell reported facts and derived conclusions from the author's own claims.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The customer requires delivery by 2026-11-30 and an availability of 99.9%. Both facts cite the request for proposal. The recommendation to split the rollout into two phases cites the same document and is marked as an inference. The remark that a phased delivery is established practice carries no citation, because it rests on the author's expertise.
+====
+
+[#closed-source-list]
+==== Closed Source List
+
+A document that cites sources ends with a list of them - in AsciiDoc, the bibliography that a xref:#bibliography-markup[dedicated section] defines. The list is closed in both directions. Every citation in the text resolves to a listed source. Every listed source is cited at least once, so a source that no statement rests on is removed from the list. The xref:#request-source[request] that commissioned the text - the brief from the requester - is a citable source like any other.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A footnote cites "the vendor's pricing sheet," but the document lists its sources nowhere, so the reader can't tell which file, which version, or which vendor. A closing "Further reading" section names three reports that no statement cites.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Every footnote points into the document's source list. The source list holds exactly the five sources the footnotes use: the request for proposal, the pricing workbook, a product screenshot, one web page, and the brief from the requester.
+====
+
+[#source-identity]
+==== Source Identity
+
+Every listed source is identified precisely enough that the reader can obtain the exact artifact the author used - not a similar one, not a later revision. A source takes one of four identity forms. The form follows how the reader can reach the source, not the kind of artifact behind it.
+
+. An [[archived-file,archived file]]_archived file_ is any source that exists as a file or was captured as one. The class spans documents, workbooks, presentations, email files, images, and code, among others, wherever they came from. It also spans content with no file form of its own - a database extract, a retrieval from an external tool, a page behind a login - saved to a file when it was consulted. The file is copied under `.docs/sources/` beside the document. Its entry lists the title, the format, the version or date, the origin, the archive path, and the digest of its bytes after the marker `SHA-256:`. The origin names who supplied the file, where it was found, or what retrieval produced it, and when.
+. A [[web-source,web source]]_web source_ is content that stays reachable at a URL. Its entry gives the URL and the date after the marker `accessed`. A page that needs credentials or a subscription is still a web source, and the entry then names the access requirement.
+. A [[request-source,request]]_request_ - the brief that commissioned the text - is listed with the marker `Request of`, its date, and the channel it arrived through. It stays outside the archive and carries no digest. Material pasted into or attached to the request - a screenshot of a conversation, an interface, code, or an error, a photograph of an object, a file - is saved and listed as an xref:#archived-file[archived file] whose origin is the request.
+. A source that can't or must not be copied is declared with the marker `Not archived:` and the best identity available for the canonical copy. A paper book gives the author, the title, the publisher, and the year, plus the International Standard Book Number (ISBN) and the edition where they exist. A purchased electronic book whose license bars copying also gives the store and the product. Confidential material gives its canonical location.
+
+A document committed to version control pins its sources: the xref:#archived-file[archived files] are committed to the same repository, so the recorded digest names bytes that no later edit can silently change.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The numbers come from the pricing spreadsheet the customer sent. (Which file, which version, sent when, stored where? The claim can't be re-checked against the artifact the author used.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The source list entry reads: 2026 Pricing Sheet. Excel workbook, 4 sheets. Received from the customer's procurement lead by email on 2026-05-20. Archived as `.docs/sources/pricing/pricing_2026.xlsx`. `SHA-256:` followed by the digest of the archived bytes.
+====
+
+[#citation-scope]
+==== Citation Scope
+
+The unit of citation is the sentence. A citation marker at the end of a sentence covers exactly that sentence. A marker placed inside a sentence covers the text from the previous marker in the same sentence - or from the sentence start - up to itself. The marker sits on exactly the text its source supports. When the fragments of one sentence rest on different sources, each fragment carries its own marker. When one sentence rests on several sources jointly, one marker cites them all. A paragraph derived from a single source repeats one shared citation on every sentence - in AsciiDoc, through the footnote reuse of xref:#citation-footnotes[] - and a sentence that lacks a citation therefore stays visibly bare.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+One footnote at the end of a paragraph covers all four of its sentences. The third sentence is the author's own transition, but nothing distinguishes it, so the source appears to back a claim it never made.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The delivery sentence lists three modules: the ingestion module rests on the request for proposal, the reporting module on the vendor's product sheet, and the export module on the pricing workbook. Each fragment carries its own marker, so every module's origin stays checkable.
+====
+
+[#quote-and-locator]
+==== Quote and Locator
+
+Every source cited by a claim carries a verbatim quote and a locator. The quote is the source's exact wording that the claim rests on. It binds the two directions of support: the quote must entail the claim, and the claim must not assert more than the quote and its context support. The locator is the most specific address the source's format offers. The most common forms are the following:
+
+* a page for a fixed layout - a PDF or a printed book,
+* a section name or number for an editable document,
+* a sheet and row for a workbook,
+* a file and line for code,
+* a sender and timestamp for a message in a thread,
+* a timestamp for a recording,
+* a described region for an image.
+
+The quote is omitted only where no wording exists to quote - a visual fact cited from an image. The locator then carries the reference alone. When a claim cites several sources, each source keeps its own quote and locator.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The footnote names the storage specification and nothing else. To check one claim, the reader must re-read a 214-page document. Verification that costs that much doesn't happen.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The footnote cites the storage specification, page 12, and quotes: records are retained for 90 calendar days. The reader opens one page and compares one sentence against one claim.
+====
+
 === Accessibility and Translatability
 
 [[alt-text-and-captions]]
@@ -1625,6 +1736,37 @@ endif::[]
 .{good-icon} Good example
 ====
 The cache's latency and eviction policy aren't stated in the input. Both would have to be specified to answer the question.
+====
+
+[#verify-citations]
+=== Verify Every Citation
+
+. Verification runs after the text is written and before delivery. Each xref:#citation-scope[citation] receives exactly one of the three verdicts defined below, and a repaired claim or citation re-enters verification. The pass ends when every citation holds _supported_ and every statement without a citation stands as xref:#author-supplied-claim[author-supplied] after the sweep below.
+. Verify each citation against its xref:#sources-and-attribution[source], never against a memory of the source. Judge the quote before the claim: reading the claim first and asking whether the source agrees biases the judgment toward agreement. For every cited source, the check runs three steps in order.
+.. Open the source at the xref:#quote-and-locator[locator].
+.. Find the xref:#quote-and-locator[quote] verbatim at that place.
+.. Re-read the claim and judge the support: the quote must entail the claim, and the claim must not assert more than the quote and its context support.
+. Assign the verdict and act on it at once.
+.. _Supported_ - the quote entails the claim and the claim stays within what the quote and its context support. No action follows.
+.. _Unsupported_ - the quote is present but doesn't entail the claim: the claim asserts more than the quote and its context support, or reports something different. Narrow or correct the claim until the quote entails it, or point the citation at a source that entails it. When no source entails the claim, xref:#dont-invent-facts[] governs it: state the gap or delete the claim.
+.. _Not found_ - the quote or the locator doesn't exist in the source. Search the source for the intended support. When the source holds it elsewhere, repair the quote and the locator. When it doesn't, treat the citation as _unsupported_ with no entailing source.
+. An xref:#inferred-claim[inferred claim] takes one more step. Verify every cited premise with the steps above, then judge whether the conclusion follows from the premises taken together. A conclusion that doesn't follow is _unsupported_ by its premises: narrow the conclusion until it follows, or delete it.
+. After every citation holds _supported_, classify each statement that carries no citation by the origin test of xref:#claim-classes[]. A statement that derives from a source gets its citation and enters verification. Whatever remains stands as xref:#author-supplied-claim[author-supplied].
+. Knowledge from training is the author's expertise. It yields xref:#author-supplied-claim[author-supplied claims], never citations, and a xref:#closed-source-list[source list] assembled from memory to look rigorous is fabrication. When the request requires sourced statements, consult sources and cite what was consulted.
+. Never fabricate a xref:#quote-and-locator[quote], a xref:#quote-and-locator[locator], a xref:#source-identity[digest], or an entry of the xref:#closed-source-list[source list]. A fabricated citation is worse than a missing one, because it lends a claim the authority of a source that doesn't back it. The prohibition extends xref:#dont-invent-facts[] from values to support.
+. A source that can't be opened again - deleted, expired, out of reach - makes its citations unverifiable. Mark each affected citation as unverifiable, tell the requester, and weaken or delete the claim that the requester can't confirm. Don't paraphrase the remembered source instead.
+. A citation of the xref:#request-source[request] is verified against the request's text as it stands in the conversation.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The draft cites page 41 for the retention period. The author remembers the specification well, finds the claim plausible, and ships. Page 41 covers backup schedules. Retention sits on page 12 and reads 30 days, not 90.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The author reopens the specification at the cited page and reads the quoted sentence before re-reading the claim. The claim says 90 days. The quote says 90 calendar days for standard tenants. The verdict is unsupported, and the claim is narrowed to standard tenants.
 ====
 
 === Distribute by Domain, Not by Prompt
