@@ -54,7 +54,7 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 
-The guideline applies to _utilitarian non-fiction_ - prose written to transfer accurate information from author to reader. Utilitarian non-fiction includes reference documentation, design documents, runbooks, README files, protocol descriptions, specifications, prose memos, and style guides, this guideline among them. The guideline doesn't apply to fiction, essays, memoirs, marketing copy, or transient chat.
+The guideline applies to [[utilitarian-non-fiction,utilitarian non-fiction]]_utilitarian non-fiction_ - prose written to transfer accurate information from author to reader. Utilitarian non-fiction includes reference documentation, design documents, runbooks, README files, protocol descriptions, specifications, prose memos, and style guides, this guideline among them. The guideline doesn't apply to fiction, essays, memoirs, marketing copy, or transient chat.
 
 The guideline is written for authors of such prose, whether human or AI. It assumes the ability to write standard English and familiarity with the subject the author writes about. After reading, an author should be able to apply each rule while writing and to verify a finished document against the rules.
 
@@ -63,7 +63,7 @@ The guideline is organized in four parts. xref:#part-1[Part 1] states rules that
 [[part-1]]
 == General Rules
 
-This part states rules that apply to any utilitarian non-fiction document, whatever its subject and markup. The parts that follow add rules for narrower contexts without overriding the rules stated here.
+This part states rules that apply to any xref:#utilitarian-non-fiction[utilitarian non-fiction] document, whatever its subject and markup. The parts that follow add rules for narrower contexts without overriding the rules stated here.
 
 === Audience, Purpose, and Scope
 
@@ -291,7 +291,7 @@ Heading: "Off by Default." Body: "Email and phone detection is off by default. T
 
 A concept is named once and the name is used everywhere. The name isn't varied for stylistic relief. Treat terms like identifiers in source code: renaming them mid-document is a defect that breaks the reader's ability to track the same thing across sentences.
 
-This applies with equal force to operations. _Create_, _insert_, _add_, _register_, _publish_, and _submit_ aren't synonyms. Each names a specific operation in most systems. When the system distinguishes them, the document distinguishes them. When the system doesn't, pick one and use only that one.
+The naming rule applies with equal force to operations. _Create_, _insert_, _add_, _register_, _publish_, and _submit_ aren't synonyms. Each names a specific operation in most systems. When the system distinguishes them, the document distinguishes them. When the system doesn't, pick one and use only that one.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -835,6 +835,23 @@ The handler calls the resolver, which logs the request, and it returns the resul
 The handler calls the resolver. The resolver logs the request and returns the result to the handler.
 ====
 
+[#references-across-paragraphs]
+==== References Across Paragraphs
+
+A concept introduced in an earlier paragraph enters a later paragraph by name. A demonstrative shorthand - _this split_, _that mechanism_, a bare _This_ - doesn't reach across the paragraph boundary: the new paragraph offers no antecedent, so the reader guesses among every candidate of the previous one. The first mention in the new paragraph is specific. It uses the xref:#defined-terms[defined term] where one exists, or a noun phrase that identifies the concept with no rival reading. Later mentions inside the same paragraph may then shorten to pronouns within the limits of xref:#pronoun-antecedents[].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+(A paragraph describes an eviction policy and a refresh schedule. The next paragraph opens with: "This mechanism also covers the session cache.") (Two candidate mechanisms precede. The demonstrative picks neither.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+(The next paragraph opens with: "The eviction policy also covers the session cache.") (The referent is named, so the reader resolves it without rereading the previous paragraph.)
+====
+
 [#inclusive-language]
 ==== Inclusive Language
 
@@ -1166,7 +1183,7 @@ A table is used when each item has the same set of attributes and the reader wil
 [#capitalization-of-defined-terms]
 ==== Capitalization of Defined Terms
 
-A defined term is capitalized consistently with its definition. When the term is defined as _Connection Pool_, it's written _Connection Pool_ throughout, not _connection pool_ or _ConnectionPool_. When `ConnectionPool` is also a separate identifier referring to the type, both forms appear and the document distinguishes them.
+A xref:#defined-terms[defined term] is capitalized consistently with its definition. When the term is defined as _Connection Pool_, it's written _Connection Pool_ throughout, not _connection pool_ or _ConnectionPool_. When `ConnectionPool` is also a separate identifier referring to the type, both forms appear and the document distinguishes them.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1476,6 +1493,7 @@ Call `commit` to persist the changes.
 
 This part adds rules that apply when an AI system is given this guideline as a style instruction. The rules in xref:#part-1[Part 1] and xref:#part-2[Part 2] still apply. xref:#part-3[Part 3] addresses failure modes specific to AI authorship: inventing facts, restating the prompt, opening with throat-clearing, narrating rule application, hedging from uncertainty, over-weighting items mentioned in the prompt, and treating the guideline's markup as content.
 
+[#dont-invent-facts]
 === Don't Invent Facts
 
 When you don't have a fact - an identifier, a path, a version number, a quotation, a citation, a metric, a date - state that you don't have it. Don't fabricate plausible-looking values. A reader uses the fact, and a fabricated fact becomes a defect that compounds with every downstream use.
@@ -1708,7 +1726,7 @@ A _numbered paragraph_ is a paragraph written as an item of an AsciiDoc list, so
 [#number-every-paragraph]
 ==== Number Every Paragraph of a Multi-Paragraph Section
 
-When the body of a section contains two or more paragraphs, every paragraph of that body is a numbered paragraph. A section whose body is a single paragraph is written as plain prose. The numbering enforces xref:#one-paragraph-one-topic[] at the markup level: each number marks the start of one topic, so a paragraph that drifts into a second topic is exposed - the second topic sits under a number that promised the first.
+When the body of a section contains two or more paragraphs, every paragraph of that body is a xref:#numbered-paragraphs[numbered paragraph]. A section whose body is a single paragraph is written as plain prose. The numbering enforces xref:#one-paragraph-one-topic[] at the markup level: each number marks the start of one topic, so a paragraph that drifts into a second topic is exposed - the second topic sits under a number that promised the first.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1756,7 +1774,7 @@ A cache entry is evicted when its TTL expires. The eviction order is least-recen
 [#numbering-depth]
 ==== Numbering Depth
 
-Numbered paragraphs nest at most six levels. The first four levels are ordered-list markers written with dots - `.`, `..`, `++...++`, `++....++`. The fifth and sixth levels are unordered-list markers - `++*++`, `++**++`. The renderer shows the fifth and sixth levels as bullets instead of numbers, and the other rules of this section apply to them all the same. Nothing nests below `++**++`:
+xref:#numbered-paragraphs[Numbered paragraphs] nest at most six levels. The first four levels are ordered-list markers written with dots - `.`, `..`, `++...++`, `++....++`. The fifth and sixth levels are unordered-list markers - `++*++`, `++**++`. The renderer shows the fifth and sixth levels as bullets instead of numbers, and the other rules of this section apply to them all the same. Nothing nests below `++**++`:
 
 [source,asciidoc]
 ----
@@ -1797,7 +1815,7 @@ Material that seems to need a seventh level doesn't get one. The subtree is rest
 [#no-lone-numbered-paragraph]
 ==== No Lone Numbered Paragraph
 
-At every nesting level, a numbered paragraph has at least one sibling at the same level under the same parent. A level holds zero items or two or more. A lone item means the numbering does no work: there is nothing at that level to order the item against, so its content belongs in the parent paragraph's own text or in a continuation per xref:#continuation-content[] - or a sibling is missing. The rule mirrors xref:#section-nesting[], which forbids a lone subsection for the same reason.
+At every nesting level, a xref:#numbered-paragraphs[numbered paragraph] has at least one sibling at the same level under the same parent. A level holds zero items or two or more. A lone item means the numbering does no work: there is nothing at that level to order the item against, so its content belongs in the parent paragraph's own text or in a continuation per xref:#continuation-content[] - or a sibling is missing. The rule mirrors xref:#section-nesting[], which forbids a lone subsection for the same reason.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1841,7 +1859,7 @@ At every nesting level, a numbered paragraph has at least one sibling at the sam
 [#paragraph-headers]
 ==== Paragraph Headers
 
-A numbered paragraph may open with a _paragraph header_ - a bold phrase that names the paragraph's topic. The header stands alone on the item's line. The paragraph's text follows as a continuation per xref:#continuation-content[] or as nested numbered paragraphs. A header is due when it helps the reader scan: the paragraph is long and holds several sentences, or the item heads a group of nested items whose shared topic needs a name. A header is omitted when it adds nothing: a paragraph of one or two sentences whose topic is already stated by the section heading doesn't restate that topic in bold. A paragraph header is the one place where bold appears in body text - see xref:#inline-formatting-semantics[].
+A xref:#numbered-paragraphs[numbered paragraph] may open with a _paragraph header_ - a bold phrase that names the paragraph's topic. The header stands alone on the item's line. The paragraph's text follows as a continuation per xref:#continuation-content[] or as nested numbered paragraphs. A header is due when it helps the reader scan: the paragraph is long and holds several sentences, or the item heads a group of nested items whose shared topic needs a name. A header is omitted when it adds nothing: a paragraph of one or two sentences whose topic is already stated by the section heading doesn't restate that topic in bold. A paragraph header is the one place where bold appears in body text - see xref:#inline-formatting-semantics[].
 
 [.good-example]
 .{good-icon} Good example
@@ -1891,7 +1909,7 @@ The dispatcher stores rendered pages on disk. On a cache miss, the request is fo
 [#continuation-content]
 ==== Continuation Content
 
-Content whose meaning is strongly bound to the preceding numbered paragraph is attached to that paragraph with a list continuation - a line holding a single `+` - instead of being numbered. The attached block can be a paragraph that elaborates the item, a code listing, an image, a table, or an admonition. The continuation signals that the item's topic continues. Content that starts a new topic isn't attached - it takes its own number.
+Content whose meaning is strongly bound to the preceding xref:#numbered-paragraphs[numbered paragraph] is attached to that paragraph with a list continuation - a line holding a single `+` - instead of being numbered. The attached block can be a paragraph that elaborates the item, a code listing, an image, a table, or an admonition. The continuation signals that the item's topic continues. Content that starts a new topic isn't attached - it takes its own number.
 
 [.good-example]
 .{good-icon} Good example
@@ -1931,7 +1949,7 @@ ifdef::backend-html5[]
 <!-- vale English.RedundantQualifiers = NO -->
 ++++
 endif::[]
-A continuation paragraph followed by deeper-level numbered paragraphs needs one more `{plus}` line between the paragraph and the first deeper item. That `{plus}` ends the continuation paragraph and attaches the deeper items to the same parent. Without it, the renderer doesn't recognize the deeper item's marker: it joins the marker and the item's text into the continuation paragraph as plain text and renders the item's own `{plus}` lines literally. A following item at the same level needs no such `{plus}` - its marker ends the continuation paragraph on its own.
+A continuation paragraph followed by deeper-level xref:#numbered-paragraphs[numbered paragraphs] needs one more `{plus}` line between the paragraph and the first deeper item. That `{plus}` ends the continuation paragraph and attaches the deeper items to the same parent. Without it, the renderer doesn't recognize the deeper item's marker: it joins the marker and the item's text into the continuation paragraph as plain text and renders the item's own `{plus}` lines literally. A following item at the same level needs no such `{plus}` - its marker ends the continuation paragraph on its own.
 ifdef::backend-html5[]
 ++++
 <!-- vale English.RedundantQualifiers = YES -->
@@ -2015,7 +2033,7 @@ A [[lease]]_lease_ is the exclusive right to use one pooled connection for the d
 [#internal-references-with-xref]
 === Internal References with `xref`
 
-A part of the text that refers to a concept defined in another part of the text links to the definition. The link is written with the `xref` macro against the definition's explicit anchor. The default form is `+xref:#connection-pool[]+` with empty brackets, which renders the target's title and stays correct when the title changes. Custom link text is supplied only when the title doesn't fit the grammar of the sentence. When a reference points to a section and the rendered title alone would leave the grammar or the meaning of the sentence unclear, the reference is preceded by a qualifier such as _the section_ or _the chapter_. xref:#cross-references[] governs the wording around the reference. This rule governs when a reference is due and the markup that carries it.
+In each paragraph that uses a concept defined elsewhere in the document, at least the first use links to the definition. Later uses in the same paragraph may stay plain. The link is written with the `xref` macro against the definition's explicit anchor. The default form is `+xref:#connection-pool[]+` with empty brackets, which renders the target's title and stays correct when the title changes. Custom link text is supplied only when the title doesn't fit the grammar of the sentence. When a reference points to a section and the rendered title alone would leave the grammar or the meaning of the sentence unclear, the reference is preceded by a qualifier such as _the section_ or _the chapter_. xref:#cross-references[] governs the wording around the reference. This rule governs when a reference is due and the markup that carries it.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -2125,6 +2143,7 @@ The source text of this document is written in the https://asciidoc.org[AsciiDoc
 
 The source text should follow the link:README-guideline-writing.adoc[Writing Guideline], stored beside it in the repository.
 
+[#export]
 === Export
 
 . To export the source text to the supported output formats, install the following tools:
