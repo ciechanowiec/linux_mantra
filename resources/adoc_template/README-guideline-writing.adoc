@@ -1290,6 +1290,20 @@ The customer requires delivery by 2026-11-30 and an availability of 99.9%. Split
 The customer requires delivery by 2026-11-30 and an availability of 99.9%. Both facts cite the request for proposal. The recommendation to split the rollout into two phases cites the same document and is marked as an inference. The remark that a phased delivery is established practice carries no citation, because it rests on the author's expertise.
 ====
 
+A xref:#reported-claim[reported claim] asserts no more than its quote states in the source's own words. A count, a total, an aggregate over several items, or a second fact composed into the same sentence is content the author synthesized, not content the source reported in that form. Such a statement is an xref:#inferred-claim[inferred claim] that cites the items it rests on, or an xref:#author-supplied-claim[author-supplied claim] - never a reported claim backed by a quote of one item, because the quote of one item can't support a claim about the whole set.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The specification defines eight endpoints. (The citation quotes the definition of one endpoint. The quote names that endpoint and says nothing about how many exist, so it can't support the count of eight.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The count is written as an inference: _eight endpoints_ carries the _Inferred from_ prefix and cites the endpoint list it rests on. When the source states the count in its own words, the claim reports it and quotes that sentence instead.
+====
+
 [#closed-source-list]
 ==== Closed Source List
 
@@ -1339,7 +1353,7 @@ The numbers come from the pricing spreadsheet the customer sent. (Which file, wh
 [.good-example]
 .{good-icon} Good example
 ====
-The entry's fields read: `Title` - 2026 Pricing Sheet. `Type` - Workbook. `Owner` - the customer's procurement office. `Date` - 2026-05-20. `From` - the procurement lead, by email, 2026-05-20. `Archived as` - the repository path. `SHA-256` - the digest of the archived bytes.
+The entry's fields read: `Title` - 2026 Pricing Sheet. `Type` - Workbook. `Owner` - the customer's procurement office. `Date` - 2026-05-20. `Archived as` - the repository path. `SHA-256` - the digest of the archived bytes.
 ====
 
 [#source-class]
@@ -1347,9 +1361,9 @@ The entry's fields read: `Title` - 2026 Pricing Sheet. `Type` - Workbook. `Owner
 
 A _class_ states how the reader can reach a source, in one of four forms.
 
-. An [[archived-file,archived file]]_archived file_ is any source that exists as a file or was captured as one. The class spans documents, workbooks, presentations, email files, images, and code, among others, wherever they came from. It also spans content with no file form of its own - a database extract, a retrieval from an external tool, a page behind a login - saved to a file when it was consulted. The file is copied under `.docs/sources/` beside the document. Its fields name the origin (`From`), the archive path (`Archived as`), and the digest of the archived bytes (`SHA-256`). The origin names who supplied the file, where it was found, or what retrieval produced it, and when.
+. An [[archived-file,archived file]]_archived file_ is any source that exists as a file or was captured as one. The class spans documents, workbooks, presentations, email files, images, and code, among others, wherever they came from. It also spans content with no file form of its own - a database extract, a retrieval from an external tool, a page behind a login - saved to a file when it was consulted. The file is copied under `.docs/sources/` beside the document. Its fields name the archive path (`Archived as`) and the digest of the archived bytes (`SHA-256`).
 . A [[web-source,web source]]_web source_ is content that stays reachable at a URL. Its fields give the address (`URL`) and the access date (`Accessed`). A page that needs credentials or a subscription is still a web source, and the `Access` field then names the requirement.
-. A [[request-source,request]]_request_ - the brief that commissioned the text - carries the fields `Request of` (its date) and `By` (the channel it arrived through). It stays outside the archive, carries no digest, and takes no type. Material pasted into or attached to the request - a screenshot of a conversation, an interface, code, or an error, a photograph of an object, a file - is saved and listed as an xref:#archived-file[archived file] whose origin is the request.
+. A [[request-source,request]]_request_ - the brief that commissioned the text - carries the fields `Request of` (its date) and `By` (the channel it arrived through). It stays outside the archive, carries no digest, and takes no type. Material pasted into or attached to the request - a screenshot of a conversation, an interface, code, or an error, a photograph of an object, a file - is saved and listed as an xref:#archived-file[archived file].
 . A source that can't or must not be copied is declared with the field `Not archived`. Its value states the form of the canonical copy. Common forms are a paper book, a licensed standard, a confidential case file, and a live production system.
 
 When the document is committed to version control, its xref:#archived-file[archived files] are committed with it. A committed file can't change without a trace, so the entry's digest keeps matching the file the author cited.
@@ -1369,7 +1383,7 @@ A field is required only when it's constitutional for its type - every artifact 
 |Official record |`Register` |`Entry number`
 |Financial record |`Issuer` |`Kind`, `Number`, `Date`, `Amount`
 |Correspondence |`Participants` |`Platform`, `Sender`, `Addressee`, `Sent on`, `Time range`, `Subject`
-|Email |`Sender` |`Recipients`, `Sent on`, `Subject`, `Time range`
+|Email |`Sender`, `Sent on` |`Recipients`, `Subject`, `Time range`
 |Minutes |`Held on` |`Participants`, `Recorder`
 |Report | |`Author`, `Date`, `Period covered`
 |Specification |`System` |`Author`, `Date`, `Version`
@@ -1385,6 +1399,8 @@ A field is required only when it's constitutional for its type - every artifact 
 |Recording |`Medium` |`Date`, `Participants`, `Duration`
 |Other |`Description` |`Date`, `Version`
 |===
+
+An `Email` entry names its `Sender` by address, and prefixes a display name when the source carries one. Its `Sent on` field records the date and the exact time the message was sent, so two messages of the same day stay distinguishable.
 
 An _Other_ entry describes the source in `Description` and gives the best available date or version, so the fallback can't produce an identity-free entry.
 
@@ -1459,6 +1475,23 @@ The footnote names the storage specification and nothing else. To check one clai
 .{good-icon} Good example
 ====
 The footnote cites the storage specification, page 12, and quotes: records are retained for 90 calendar days. The reader opens one page and compares one sentence against one claim.
+====
+
+[#attribution-in-citation]
+==== Attribution Lives in the Citation
+
+A cited claim carries its attribution in the citation itself, so the prose states the fact and doesn't also name the source. Phrases such as _the specification says_, _the report lists_, or _the contract requires_ repeat what the citation already records, and they make the reader pass through the source's identity before reaching the claim. A source is named in the prose only when its identity is the point. The cases are a fact new or changed relative to another source, a reconciliation of two sources that disagree, a claim marked as one source's opinion rather than settled fact, or a xref:#cross-references[cross-reference] to a fuller treatment.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The specification says the retention period is 90 days, and the vendor's report lists three supported formats. (Both clauses narrate their source. The citations already attribute the claims, so naming the sources is redundant and delays each fact.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The retention period is 90 days. Three formats are supported. (Each sentence states its fact and lets its citation carry the source. Naming a source in the prose is reserved for where its identity is the point, such as flagging that the 90-day period is new in version 3 of the specification.)
 ====
 
 === Accessibility and Translatability
@@ -1823,6 +1856,12 @@ endif::[]
 ====
 The cache's latency and eviction policy aren't stated in the input. Both would have to be specified to answer the question.
 ====
+
+[#independent-verification]
+=== Independent Verification
+
+. Verification is strongest when the reviewer didn't write the text. An author who verifies their own citations reads each claim already believing it, and that belief survives a sympathetic re-reading, so a real defect slips past. A reviewer who never saw the draft, or a check that receives only the claim, the quote, and the source, holds no such belief and catches what the author overlooks. An independent reviewer, whether a second person or an AI subagent, runs the verification where one is available. Otherwise the author runs it, because a self-check, though weaker, beats none.
+. A program such as a linter can check the citations, but its check isn't verification. It reaches only mechanical facts - whether a marker is well-formed, whether a xref:#quote[] appears in its source, and the like. Whether the quote entails the claim is a judgment, and no program makes it. A passing check therefore settles nothing about support, so the procedure of xref:#verify-citations[] still runs in full. The defect a check misses is the claim that asserts more than its quote carries - a count, an aggregate, or a second fact.
 
 [#verify-citations]
 === Verify Every Citation
@@ -2342,7 +2381,6 @@ Type:: Specification
 System:: order storage of the Compass platform
 Author:: Harbor Retail
 Date:: 2026-06
-From:: the customer, by email, 2026-06-01
 Archived as:: `.docs/sources/rfp/storage-spec.pdf`
 SHA-256:: `+9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08+`
 

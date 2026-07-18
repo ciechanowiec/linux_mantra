@@ -56,6 +56,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import Counter
@@ -229,6 +230,15 @@ SHAPES = {
     "url": (re.compile(r"^https?://\S+$"), "an http or https URL"),
     "status": (re.compile(r"^(?:draft|final)\b"),
                "draft or final, with optional elaboration"),
+    "email": (re.compile(r"^(?:[^<>]+<[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+>"
+                         r"|[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+)$"),
+              "an email address, optionally prefixed with a name as "
+              "'Name <address>'"),
+    "datetime": (re.compile(r"^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?"
+                            r"(?:[ ]?(?:Z|UTC|[+-]\d{2}:?\d{2}"
+                            r"|[A-Za-z_]+/[A-Za-z_]+))?$"),
+                 "an ISO date and exact time YYYY-MM-DD HH:MM, timezone "
+                 "optional"),
 }
 
 # type -> ([required (key, shape)...], [optional (key, shape)...]); the tuple
@@ -249,8 +259,8 @@ TYPE_SCHEMA = {
                        [("Platform", "text"), ("Sender", "text"),
                         ("Addressee", "text"), ("Sent on", "date"),
                         ("Time range", "text"), ("Subject", "text")]),
-    "Email": ([("Sender", "text")],
-              [("Recipients", "text"), ("Sent on", "date"),
+    "Email": ([("Sender", "email"), ("Sent on", "datetime")],
+              [("Recipients", "text"),
                ("Subject", "text"), ("Time range", "text")]),
     "Minutes": ([("Held on", "date")],
                 [("Participants", "text"), ("Recorder", "text")]),
@@ -293,7 +303,7 @@ STATUS_KEYS = [("Status", "status")]
 STATUS_REQUIRED_TYPES = {"Contract"}
 
 CLASS_SCHEMA = {
-    "archived-file": ([("From", "text"), ("Archived as", "path"),
+    "archived-file": ([("Archived as", "path"),
                        ("SHA-256", "digest")], []),
     "web": ([("URL", "url"), ("Accessed", "date")], [("Access", "text")]),
     "request": ([("Request of", "date"), ("By", "text")], []),
@@ -1298,8 +1308,8 @@ def rule_bibliography_format(doc: Document) -> Iterator[Finding]:
         if entry.cls == "none":
             yield (entry.line, 1,
                    "Entry declares no reachability class: state the fields "
-                   "of exactly one class - archived file (From, Archived "
-                   "as, SHA-256), web (URL, Accessed), request (Request "
+                   "of exactly one class - archived file (Archived as, "
+                   "SHA-256), web (URL, Accessed), request (Request "
                    "of, By), or not archived (Not archived) "
                    "(§source-identity)")
             continue
@@ -1570,6 +1580,39 @@ IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".gif",
               ".webp")
 
 
+# tesseract OCR requests every preferred language that the local install
+# actually carries, so image sources that hold non-English text (for example
+# a Polish call summary) are read with the matching language pack. A
+# preferred language whose trained data is absent is dropped, which downgrades
+# an affected quote to a warning instead of failing the OCR pass outright.
+#
+# DEPLOYMENT NOTE: this script is meant to move into the dockerized
+# environment where ALL tesseract language packs are preinstalled. There
+# `_ocr_langs()` resolves to the full preferred set; run locally it falls back
+# to whatever language data happens to be installed.
+_OCR_PREFERRED = ("eng", "pol")
+_ocr_langs_value: Optional[str] = None
+
+
+def _ocr_langs() -> str:
+    """The `-l` value for tesseract: the preferred languages the local install
+    carries, joined with '+', or 'eng' as a last resort."""
+    global _ocr_langs_value
+    if _ocr_langs_value is None:
+        installed: set = set()
+        try:
+            proc = subprocess.run(["tesseract", "--list-langs"],
+                                  capture_output=True, text=True)
+            if proc.returncode == 0:
+                installed = {ln.strip() for ln in proc.stdout.splitlines()
+                             if ln.strip() and " " not in ln.strip()}
+        except OSError:
+            pass
+        chosen = [lang for lang in _OCR_PREFERRED if lang in installed]
+        _ocr_langs_value = "+".join(chosen) if chosen else "eng"
+    return _ocr_langs_value
+
+
 def _extract_source_text(path: str) -> Tuple[Optional[str], str]:
     """(text, "") when text is extractable from the archived source, else
     (None, why-not). Stdlib-only except PDF, which uses the required
@@ -1637,7 +1680,7 @@ def _extract_source_text(path: str) -> Tuple[Optional[str], str]:
                     chunks.append(" ".join(parser.parts))
             return " ".join(chunks), ""
         if ext in IMAGE_EXTS:
-            proc = subprocess.run(["tesseract", path, "-"],
+            proc = subprocess.run(["tesseract", path, "-", "-l", _ocr_langs()],
                                   capture_output=True, text=True)
             if proc.returncode != 0:
                 return None, "tesseract failed on the image"
@@ -1721,6 +1764,93 @@ def rule_source_quote(doc: Document) -> Iterator[Finding]:
 def rule_source_quote_unverifiable(doc: Document) -> Iterator[Finding]:
     yield from (f for f, kind in _quote_results(doc)
                 if kind == "unverifiable")
+
+
+# A deterministic tripwire for the overreach class the quote check can't see:
+# a reported claim that asserts a count, a universal, an aggregate, or a
+# superlative that none of its quotes state. It compares the "assertive" words
+# of the claim against those of its cited quotes and warns on a claim word no
+# quote carries. It doesn't judge entailment -- that is the verification pass
+# of §verify-citations -- it points that pass at the sentences most likely to
+# overstate their source. Two exclusions keep the signal generic and quiet:
+# digits are ignored, so a date or a budget figure never trips it, and an
+# inferred claim is ignored, because an inference is allowed to synthesize
+# beyond any single premise (§claim-classes). The word set carries no project
+# vocabulary, so the rule travels unchanged to any document.
+_ASSERTIVE_WORDS = frozenset("""
+two three four five six seven eight nine ten eleven twelve thirteen fourteen
+fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty
+seventy eighty ninety hundred thousand million billion dozen
+all every each both most only
+mean average total aggregate combined overall sum
+best worst largest smallest highest lowest greatest fewest maximum minimum least
+""".split())
+_OVERREACH_QUOTE_RE = re.compile(r'"\+(.*?)\+"')
+_OVERREACH_WORD_RE = re.compile(r"[a-z]+")
+
+
+def _assertive_words(text: str) -> set:
+    return {w for w in _OVERREACH_WORD_RE.findall(text.lower())
+            if w in _ASSERTIVE_WORDS}
+
+
+def _footnote_quote_words(body: str) -> set:
+    words: set = set()
+    for qm in _OVERREACH_QUOTE_RE.finditer(body):
+        words |= _assertive_words(qm.group(1))
+    return words
+
+
+def rule_citation_overreach(doc: Document) -> Iterator[Finding]:
+    # An inline-code span holds illustrative markup, not a live citation: a
+    # '`+footnote:id[]+`' shown as an example must not be read as a real
+    # footnote. Code spans are blanked first, as the other macro rules do. A
+    # citation quote '"+...+"' is not a backtick span, so it survives the
+    # blanking and its words stay readable.
+    def blanked(text: str) -> str:
+        return CODE_SPAN_RE.sub(lambda mm: " " * len(mm.group(0)), text)
+    # A reuse 'footnote:id[]' shares the quotes of its definition, so the
+    # defining quote words and the inferred flag are indexed by id first.
+    def_words: Dict[str, set] = {}
+    def_inferred: Dict[str, bool] = {}
+    for line in _prose(doc):
+        text = blanked(line.text)
+        for m in FOOTNOTE_OPEN_RE.finditer(text):
+            close = _macro_end(text, m.end())
+            if close == -1:
+                continue
+            body = text[m.end():close]
+            if not body.strip():
+                continue  # a reuse; its quotes live in the definition
+            fid = m.group(1)
+            def_words.setdefault(fid, set()).update(_footnote_quote_words(body))
+            if body.lstrip().startswith(CITE_INFER_PREFIX):
+                def_inferred[fid] = True
+    for line in _prose(doc):
+        text = blanked(line.text)
+        prev_end = -1
+        for m in FOOTNOTE_OPEN_RE.finditer(text):
+            close = _macro_end(text, m.end())
+            if close == -1:
+                continue
+            claim = text[prev_end + 1:m.start()]
+            claim_start = prev_end + 1
+            prev_end = close
+            fid = m.group(1)
+            body = text[m.end():close]
+            if (body.lstrip().startswith(CITE_INFER_PREFIX)
+                    or def_inferred.get(fid, False)):
+                continue  # an inference may synthesize beyond its premises
+            quote_words = (_footnote_quote_words(body) if body.strip()
+                           else def_words.get(fid, set()))
+            for word in sorted(_assertive_words(claim) - quote_words):
+                wm = re.search(rf"\b{re.escape(word)}\b", claim, re.IGNORECASE)
+                col = claim_start + (wm.start() if wm else 0) + 1
+                yield (line.num, col,
+                       f"claim asserts {word!r} but no quote cited here "
+                       f"contains it: confirm the source states it, or mark "
+                       f"the claim inferred or author-supplied "
+                       f"(§verify-citations)")
 
 
 # ============================================================================
@@ -2690,6 +2820,7 @@ RULES: List[Rule] = [
     Rule("source-quote", "error", rule_source_quote),
     Rule("source-quote-unverifiable", "warning",
          rule_source_quote_unverifiable),
+    Rule("citation-overreach", "warning", rule_citation_overreach),
 ]
 
 
@@ -3009,7 +3140,8 @@ def _plural(n: int, noun: str) -> str:
     return f"{n} {noun}" + ("" if n == 1 else "s")
 
 
-def render_text(file_results: List[tuple], style: Style, n_rules: int) -> str:
+def render_text(file_results: List[tuple], style: Style, n_rules: int,
+                elapsed: float) -> str:
     findings = [(p, f) for p, fs, _ in file_results for f in fs]
     loc_w = max((len(f"{f[0]}:{f[1]}") for _, f in findings), default=0)
     sev_w = max((len(f[3]) for _, f in findings), default=0)
@@ -3034,6 +3166,7 @@ def render_text(file_results: List[tuple], style: Style, n_rules: int) -> str:
     scope = style.paint("2", f"{_plural(n_files, 'file')} · "
                              f"{n_rules} structural rules + Vale "
                              f"+ Asciidoctor")
+    timing = style.paint("2", f" · {elapsed:.2f}s")
     if findings:
         parts = ", ".join(
             _plural(counts[s], s) for s in
@@ -3045,19 +3178,22 @@ def render_text(file_results: List[tuple], style: Style, n_rules: int) -> str:
         if counts.get("error"):
             out.append(" " + style.paint("1;31", f"✗ {parts}")
                        + style.paint("2",
-                                     f"  in {_plural(files_hit, 'file')}"))
+                                     f"  in {_plural(files_hit, 'file')}")
+                       + timing)
         else:
             out.append(" " + style.paint("1;32", "✓ Passed")
                        + " " + style.paint("1;33", f"with {parts}")
                        + style.paint("2",
-                                     f"  in {_plural(files_hit, 'file')}"))
+                                     f"  in {_plural(files_hit, 'file')}")
+                       + timing)
     else:
         out.append(" " + style.paint("1;32", "✓ No problems found")
-                   + "  " + scope)
+                   + "  " + scope + timing)
     return "\n".join(out) + "\n"
 
 
 def main(argv: List[str]) -> int:
+    start = time.perf_counter()
     fmt = "text"
     no_color = False
     paths: List[str] = []
@@ -3087,6 +3223,7 @@ def main(argv: List[str]) -> int:
     require_tesseract()
 
     file_results = [(path, *lint_file(path)) for path in paths]
+    elapsed = time.perf_counter() - start
     has_error = any(f[3] == "error" for _, fs, _ in file_results for f in fs)
 
     if fmt == "json":
@@ -3098,7 +3235,8 @@ def main(argv: List[str]) -> int:
     else:
         enabled = (not no_color and sys.stdout.isatty()
                    and os.environ.get("NO_COLOR") is None)
-        sys.stdout.write(render_text(file_results, Style(enabled), len(RULES)))
+        sys.stdout.write(render_text(file_results, Style(enabled), len(RULES),
+                                     elapsed))
 
     return 1 if has_error else 0
 
