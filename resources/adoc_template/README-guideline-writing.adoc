@@ -1267,16 +1267,16 @@ endif::[]
 [#sources-and-attribution]
 === Sources and Attribution
 
-A _source_ is a document consulted during writing: provided with the request, or found and read while researching it.
+A [[source,source]]_source_ is a document consulted during writing: provided with the request, or found and read while researching it.
 
 [#claim-classes]
 ==== Claim Classes
 
-A statement that draws on xref:#sources-and-attribution[sources] belongs to exactly one of three classes, and the class fixes its citation duty. A [[reported-claim,reported claim]]_reported claim_ is a statement that restates what a source says. An [[inferred-claim,inferred claim]]_inferred claim_ is a conclusion that the author derives from one or more sources. An [[author-supplied-claim,author-supplied claim]]_author-supplied claim_ is a statement the author makes on their own authority, without a source: own expertise or common knowledge.
+A statement that draws on xref:#source[sources] belongs to exactly one of three classes, and the class fixes its citation duty. A [[reported-claim,reported claim]]_reported claim_ is a statement that restates what a source says. An [[inferred-claim,inferred claim]]_inferred claim_ is a conclusion that the author derives from one or more sources. An [[author-supplied-claim,author-supplied claim]]_author-supplied claim_ is a statement the author makes on their own authority, without a source: own expertise or common knowledge.
 
 A xref:#reported-claim[reported claim] cites every source it restates. An xref:#inferred-claim[inferred claim] cites every source it draws on and is marked as an inference. A claim that rests on three sources, for example, cites all three. An xref:#author-supplied-claim[author-supplied claim] carries no citation. The classes close the text in both directions: every statement derived from a source carries a citation, and every statement without a citation must stand as author-supplied. A document whose every statement is author-supplied - a style guide written from expertise, for example - carries no citations and no source list.
 
-The xref:#request-source[request] that commissioned the text falls on both sides of the citation duty. A statement that reports what the request says is a xref:#reported-claim[reported claim] and cites the request. An instruction the author merely follows - a length cap, a topic to emphasize - shapes the text without being asserted in it, so there is nothing to cite. The test is origin, not confidence: a particular that exists only because the request states it - a date, a volume, a constraint specific to the requester - is reported and cites the request. A statement that any competent author could make without the request is xref:#author-supplied-claim[author-supplied].
+The xref:#request-source[request] that commissioned the text falls on both sides of the citation duty. A statement that reports what the request says is a xref:#reported-claim[reported claim] and cites the request. An instruction the author merely follows - a length cap, a topic to emphasize - shapes the text without being asserted in it, so there is nothing to cite. [[origin-test,the origin test]]The test is origin, not confidence: a particular that exists only because the request states it - a date, a volume, a constraint specific to the requester - is reported and cites the request. A statement that any competent author could make without the request is xref:#author-supplied-claim[author-supplied].
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1403,7 +1403,7 @@ The boundaries that recur resolve as follows:
 
 A _status_ states the standing of the artifact in the `Status` field: `draft` for work in progress, or `final` for the released form - executed, published, sent, in force. Free elaboration follows the word - _draft v3 of 2026-07-15_, _final, executed 2026-07-30_. An entry of the xref:#source-types[Contract type] states its status always. Other entries state it whenever the standing is contestable.
 
-Status bounds support. The standing is part of the context in the support test of xref:#quote-and-locator[], so a claim that asserts more standing than its source has takes the _unsupported_ verdict of xref:#verify-citations[]. A draft supports claims about the draft. The final instrument supports claims about what was agreed, released, or enacted.
+Status bounds support. The standing is part of the context in the support test of xref:#quote-and-locator[], so a claim that asserts more standing than its source has takes xref:#unsupported-verdict[]. A draft supports claims about the draft. The final instrument supports claims about what was agreed, released, or enacted.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1420,7 +1420,7 @@ The entry for the signed PDF carries `Status` - final, executed 2026-07-30. The 
 [#citation-scope]
 ==== Citation Scope
 
-The unit of citation is the sentence. A citation marker at the end of a sentence covers exactly that sentence. A marker placed inside a sentence covers the text from the previous marker in the same sentence - or from the sentence start - up to itself. The marker sits on exactly the text its source supports. When the fragments of one sentence rest on different sources, each fragment carries its own marker. When one sentence rests on several sources jointly, one marker cites them all. A paragraph derived from a single source repeats one shared citation on every sentence - in AsciiDoc, through the footnote reuse of xref:#citation-footnotes[] - and a sentence that lacks a citation therefore stays visibly bare.
+The unit of citation is the sentence. A citation marker at the end of a sentence covers exactly that sentence. A marker placed inside a sentence covers the text from the previous marker in the same sentence - or from the sentence start - up to itself. The marker sits on exactly the text its source supports. When the fragments of one sentence rest on different sources, each fragment carries its own marker. When one sentence rests on several sources jointly, one marker cites them all. A paragraph derived from a single source repeats one shared citation on every sentence - in AsciiDoc, through xref:#footnote-reuse[] - and a sentence that lacks a citation therefore stays visibly bare.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1437,7 +1437,7 @@ The delivery sentence lists three modules: the ingestion module rests on the req
 [#quote-and-locator]
 ==== Quote and Locator
 
-Every source cited by a claim carries a verbatim quote and a locator. The quote is the source's exact wording that the claim rests on. It binds the two directions of support: the quote must entail the claim, and the claim must not assert more than the quote and its context support. The locator is the most specific address the source's format offers. The most common forms are the following:
+Every source cited by a claim carries a verbatim quote and a locator. The [[quote,quote]]_quote_ is the source's exact wording that the claim rests on. It binds the two directions of support: the quote must entail the claim, and the claim must not assert more than the quote and its context support. The [[locator,locator]]_locator_ is the most specific address the source's format offers. The most common forms are the following:
 
 * a page for a fixed layout - a PDF or a printed book,
 * a section name or number for an editable document,
@@ -1828,18 +1828,18 @@ The cache's latency and eviction policy aren't stated in the input. Both would h
 === Verify Every Citation
 
 . Verification runs after the text is written and before delivery. Each xref:#citation-scope[citation] receives exactly one of the three verdicts defined below, and a repaired claim or citation re-enters verification. The pass ends when every citation holds _supported_ and every statement without a citation stands as xref:#author-supplied-claim[author-supplied] after the sweep below.
-. Verify each citation against its xref:#sources-and-attribution[source], never against a memory of the source. Judge the quote before the claim: reading the claim first and asking whether the source agrees biases the judgment toward agreement. For every cited source, the check runs three steps in order.
-.. Open the source at the xref:#quote-and-locator[locator].
-.. Find the xref:#quote-and-locator[quote] verbatim at that place.
+. Verify each citation against its xref:#source[], never against a memory of the source. Judge the quote before the claim: reading the claim first and asking whether the source agrees biases the judgment toward agreement. For every cited source, the check runs three steps in order.
+.. Open the source at the xref:#locator[].
+.. Find the xref:#quote[] verbatim at that place.
 .. Re-read the claim and judge the support: the quote must entail the claim, and the claim must not assert more than the quote and its context support.
 . Assign the verdict and act on it at once.
 .. _Supported_ - the quote entails the claim and the claim stays within what the quote and its context support. No action follows.
-.. _Unsupported_ - the quote is present but doesn't entail the claim: the claim asserts more than the quote and its context support, or reports something different. Narrow or correct the claim until the quote entails it, or point the citation at a source that entails it. When no source entails the claim, xref:#dont-invent-facts[] governs it: state the gap or delete the claim.
+.. [[unsupported-verdict,the unsupported verdict]]_Unsupported_ - the quote is present but doesn't entail the claim: the claim asserts more than the quote and its context support, or reports something different. Narrow or correct the claim until the quote entails it, or point the citation at a source that entails it. When no source entails the claim, xref:#dont-invent-facts[] governs it: state the gap or delete the claim.
 .. _Not found_ - the quote or the locator doesn't exist in the source. Search the source for the intended support. When the source holds it elsewhere, repair the quote and the locator. When it doesn't, treat the citation as _unsupported_ with no entailing source.
 . An xref:#inferred-claim[inferred claim] takes one more step. Verify every cited premise with the steps above, then judge whether the conclusion follows from the premises taken together. A conclusion that doesn't follow is _unsupported_ by its premises: narrow the conclusion until it follows, or delete it.
-. After every citation holds _supported_, classify each statement that carries no citation by the origin test of xref:#claim-classes[]. A statement that derives from a source gets its citation and enters verification. Whatever remains stands as xref:#author-supplied-claim[author-supplied].
+. After every citation holds _supported_, classify each statement that carries no citation by xref:#origin-test[]. A statement that derives from a source gets its citation and enters verification. Whatever remains stands as xref:#author-supplied-claim[author-supplied].
 . Knowledge from training is the author's expertise. It yields xref:#author-supplied-claim[author-supplied claims], never citations, and a xref:#closed-source-list[source list] assembled from memory to look rigorous is fabrication. When the request requires sourced statements, consult sources and cite what was consulted.
-. Never fabricate a xref:#quote-and-locator[quote], a xref:#quote-and-locator[locator], a xref:#source-identity[digest], or an entry of the xref:#closed-source-list[source list]. A fabricated citation is worse than a missing one, because it lends a claim the authority of a source that doesn't back it. The prohibition extends xref:#dont-invent-facts[] from values to support.
+. Never fabricate a xref:#quote[], a xref:#locator[], a xref:#source-identity[digest], or an entry of the xref:#closed-source-list[source list]. A fabricated citation is worse than a missing one, because it lends a claim the authority of a source that doesn't back it. The prohibition extends xref:#dont-invent-facts[] from values to support.
 . A source that can't be opened again - deleted, expired, out of reach - makes its citations unverifiable. Mark each affected citation as unverifiable, tell the requester, and weaken or delete the claim that the requester can't confirm. Don't paraphrase the remembered source instead.
 . A citation of the xref:#request-source[request] is verified against the request's text as it stands in the conversation.
 
@@ -2285,7 +2285,7 @@ Each handler holds a xref:#lease[lease] on a pooled connection. Pool sizing is d
 (The defined term links to its definition. The empty-bracket form inherits the target's title, and the qualifier _the section_ keeps the meaning of the sentence clear. The last reference supplies custom text because the sentence needs a different inflection.)
 ====
 
-The empty-bracket form takes its text from the target's reference text. A section supplies its title. Any other anchor - on a paragraph, a list item, or a word - supplies a reference text only when the anchor declares one, in the form `+[[anchor-id,reference text]]+`. An empty-bracket reference against an anchor without a reference text renders the raw anchor ID, which is a defect. When the target isn't a section, either declare the reference text on the anchor or supply custom link text in the reference.
+[[anchor-reference-text,an anchor that declares a reference text]]The empty-bracket form takes its text from the target's reference text. A section supplies its title. Any other anchor - on a paragraph, a list item, or a word - supplies a reference text only when the anchor declares one, in the form `+[[anchor-id,reference text]]+`. An empty-bracket reference against an anchor without a reference text renders the raw anchor ID, which is a defect. When the target isn't a section, either declare the reference text on the anchor or supply custom link text in the reference.
 
 [.bad-example]
 .{bad-icon} Bad example
