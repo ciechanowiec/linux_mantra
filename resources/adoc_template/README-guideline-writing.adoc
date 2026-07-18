@@ -1310,14 +1310,25 @@ Every footnote points into the document's source list. The source list holds exa
 [#source-identity]
 ==== Source Identity
 
-Every listed source is identified precisely enough that the reader can obtain the exact artifact the author used - not a similar one, not a later revision. A source takes one of four identity forms. The form follows how the reader can reach the source, not the kind of artifact behind it.
+Every listed source is identified precisely enough that the reader can obtain the exact artifact the author used - not a similar one, not a later revision. The identity is stated in named fields of four groups. `Title` is common to every source and names it: the document's own title, the standard's name, a one-line description of an image. The three remaining groups are dimensions with one subsection each: the xref:#source-class[class] states how the reader can reach the source, the xref:#source-types[type] names the kind of artifact, and the xref:#source-status[status] states the artifact's standing.
 
-. An [[archived-file,archived file]]_archived file_ is any source that exists as a file or was captured as one. The class spans documents, workbooks, presentations, email files, images, and code, among others, wherever they came from. It also spans content with no file form of its own - a database extract, a retrieval from an external tool, a page behind a login - saved to a file when it was consulted. The file is copied under `.docs/sources/` beside the document. Its entry lists the title, the format, the version or date, the origin, the archive path, and the digest of its bytes after the marker `SHA-256:`. The origin names who supplied the file, where it was found, or what retrieval produced it, and when.
-. A [[web-source,web source]]_web source_ is content that stays reachable at a URL. Its entry gives the URL and the date after the marker `accessed`. A page that needs credentials or a subscription is still a web source, and the entry then names the access requirement.
-. A [[request-source,request]]_request_ - the brief that commissioned the text - is listed with the marker `Request of`, its date, and the channel it arrived through. It stays outside the archive and carries no digest. Material pasted into or attached to the request - a screenshot of a conversation, an interface, code, or an error, a photograph of an object, a file - is saved and listed as an xref:#archived-file[archived file] whose origin is the request.
-. A source that can't or must not be copied is declared with the marker `Not archived:` and the best identity available for the canonical copy. A paper book gives the author, the title, the publisher, and the year, plus the International Standard Book Number (ISBN) and the edition where they exist. A purchased electronic book whose license bars copying also gives the store and the product. Confidential material gives its canonical location.
+....
+                  +--------------+
+                  | source entry |
+                  +--------+-----+
+                           |
+      +-------------+------+------+-------------+
+      |             |             |             |
+      v             v             v             v
++-----------+ +-----------+ +-----------+ +-----------+
+|   title   | |   class   | |   type    | |  status   |
+| the name  | | how the   | | what kind | | what      |
+| of the    | | reader    | | of        | | standing  |
+| source    | | reaches it| | artifact  | | it has    |
++-----------+ +-----------+ +-----------+ +-----------+
+....
 
-A document committed to version control pins its sources: the xref:#archived-file[archived files] are committed to the same repository, so the recorded digest names bytes that no later edit can silently change.
+An entry states its `Title`, every required field of its class and type, and the optional fields that apply, in the catalog order. The field names are exact. A required field whose value the author can't establish states the literal value _unknown_, so the reader sees a gap that was checked rather than skipped. An optional field whose value is unknown is omitted. A class field is never unknown, because it records the author's own acts: the archiving, the access, the request.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -1328,7 +1339,82 @@ The numbers come from the pricing spreadsheet the customer sent. (Which file, wh
 [.good-example]
 .{good-icon} Good example
 ====
-The source list entry reads: 2026 Pricing Sheet. Excel workbook, 4 sheets. Received from the customer's procurement lead by email on 2026-05-20. Archived as `.docs/sources/pricing/pricing_2026.xlsx`. `SHA-256:` followed by the digest of the archived bytes.
+The entry's fields read: `Title` - 2026 Pricing Sheet. `Type` - Workbook. `Owner` - the customer's procurement office. `Date` - 2026-05-20. `From` - the procurement lead, by email, 2026-05-20. `Archived as` - the repository path. `SHA-256` - the digest of the archived bytes.
+====
+
+[#source-class]
+===== Source Class
+
+A _class_ states how the reader can reach a source, in one of four forms.
+
+. An [[archived-file,archived file]]_archived file_ is any source that exists as a file or was captured as one. The class spans documents, workbooks, presentations, email files, images, and code, among others, wherever they came from. It also spans content with no file form of its own - a database extract, a retrieval from an external tool, a page behind a login - saved to a file when it was consulted. The file is copied under `.docs/sources/` beside the document. Its fields name the origin (`From`), the archive path (`Archived as`), and the digest of the archived bytes (`SHA-256`). The origin names who supplied the file, where it was found, or what retrieval produced it, and when.
+. A [[web-source,web source]]_web source_ is content that stays reachable at a URL. Its fields give the address (`URL`) and the access date (`Accessed`). A page that needs credentials or a subscription is still a web source, and the `Access` field then names the requirement.
+. A [[request-source,request]]_request_ - the brief that commissioned the text - carries the fields `Request of` (its date) and `By` (the channel it arrived through). It stays outside the archive, carries no digest, and takes no type. Material pasted into or attached to the request - a screenshot of a conversation, an interface, code, or an error, a photograph of an object, a file - is saved and listed as an xref:#archived-file[archived file] whose origin is the request.
+. A source that can't or must not be copied is declared with the field `Not archived`. Its value states the form of the canonical copy. Common forms are a paper book, a licensed standard, a confidential case file, and a live production system.
+
+When the document is committed to version control, its xref:#archived-file[archived files] are committed with it. A committed file can't change without a trace, so the entry's digest keeps matching the file the author cited.
+
+[#source-types]
+===== Source Types
+
+A [[source-type,type]]_type_ names what kind of artifact a source is and fixes the fields that describe it. The catalog below is closed, and a source that fits no listed type takes _Other_.
+
+A field is required only when it's constitutional for its type - every artifact of the type has it, the way every email has a sender and every image depicts something. Every other field is optional and stated when known.
+
+[cols="1,2,2",options="header"]
+|===
+|Type |Required fields |Optional fields
+|Contract |`Parties` |`Concluded on`, `Governing law`
+|Legal source |`Issuing body`, `Identifier` |`Date`
+|Official record |`Register` |`Entry number`
+|Financial record |`Issuer` |`Kind`, `Number`, `Date`, `Amount`
+|Correspondence |`Participants` |`Platform`, `Sender`, `Addressee`, `Sent on`, `Time range`, `Subject`
+|Email |`Sender` |`Recipients`, `Sent on`, `Subject`, `Time range`
+|Minutes |`Held on` |`Participants`, `Recorder`
+|Report | |`Author`, `Date`, `Period covered`
+|Specification |`System` |`Author`, `Date`, `Version`
+|Standard |`Identifier` |`Issuing body`, `Year`, `Version`
+|Publication |`Authors` |`Year`, `Publisher`, `Edition`, `ISBN`, `DOI`
+|Web page | |`Site`, `Published on`
+|Presentation | |`Author`, `Date`, `Slides`
+|Workbook | |`Owner`, `Date`, `Sheets`
+|Ticket |`Tracker`, `Ticket number` |`Ticket state`
+|Repository |`Host and path` |`Commit`, `Branch`
+|System output |`System` |`Query`, `Captured on`
+|Image |`Depicts` |`Captured as`, `Captured on`, `Place`
+|Recording |`Medium` |`Date`, `Participants`, `Duration`
+|Other |`Description` |`Date`, `Version`
+|===
+
+An _Other_ entry describes the source in `Description` and gives the best available date or version, so the fallback can't produce an identity-free entry.
+
+The boundaries that recur resolve as follows:
+
+* _Email_ or _Correspondence_ - delivered by email, or through any other channel.
+* _Report_ or _Specification_ - describes findings, or prescribes a system.
+* _Report_ or _Publication_ - internal or commissioned, or published in an edited venue.
+* _Contract_ or _Correspondence_ - executed by the parties, or sent by one.
+* _Image_ or _System output_ - pixels, or text: a screenshot of an error is an Image, the copied error text is System output.
+* _Minutes_ or _Recording_ - the written record, or the media file of the same meeting.
+* _System output_ or _Publication_ for a dataset - extracted by the author, or published with its own identifier.
+
+[#source-status]
+===== Source Status
+
+A _status_ states the standing of the artifact in the `Status` field: `draft` for work in progress, or `final` for the released form - executed, published, sent, in force. Free elaboration follows the word - _draft v3 of 2026-07-15_, _final, executed 2026-07-30_. An entry of the xref:#source-types[Contract type] states its status always. Other entries state it whenever the standing is contestable.
+
+Status bounds support. The standing is part of the context in the support test of xref:#quote-and-locator[], so a claim that asserts more standing than its source has takes the _unsupported_ verdict of xref:#verify-citations[]. A draft supports claims about the draft. The final instrument supports claims about what was agreed, released, or enacted.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A memo cites the `docx` draft of a services agreement for the claim that the parties agreed to a 30-day payment term. The draft proposed the term. Only the executed instrument knows whether the parties agreed to it.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The entry for the signed PDF carries `Status` - final, executed 2026-07-30. The memo cites it for the agreed term, and cites the draft entry only for the drafting history.
 ====
 
 [#citation-scope]
