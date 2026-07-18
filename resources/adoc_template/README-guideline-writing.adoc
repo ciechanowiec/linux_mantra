@@ -2515,21 +2515,21 @@ To export and lint the source text, install the following tools:
 
 === Export
 
-. To export to HTML:
+. To export the source text to HTML:
 +
 [source,bash,subs="attributes+"]
 ----
 asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
 ----
 
-. To export to PDF:
+. To export the source text to PDF:
 +
 [source,bash,subs="attributes+"]
 ----
 asciidoctor-pdf --attribute allow-uri-read --require ./.docs/lib/common-style.rb {docname}{docfilesuffix}
 ----
 
-. To export to DOCX:
+. To export the source text to DOCX:
 +
 [source,bash,subs="attributes+"]
 ----

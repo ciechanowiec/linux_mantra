@@ -40,7 +40,13 @@ _heading_levels = []
 for i in range(9):
     pstyle = f'<w:pStyle w:val="Heading{i+1}" />' if i < 6 else ''
     lvl_text = '.'.join(f'%{j+1}' for j in range(i + 1)) + '.'
-    ind_left = i * 360
+    # Every section identifier starts at the body-text margin, whatever the
+    # section's depth, and the title hangs: wrapped title lines start at the
+    # same column as the title text after the number. The hang widens per
+    # level and is sized for the widest realistic number -- two digits per
+    # component, "10.11." -- because a number wider than the hang makes the
+    # tab overshoot to the next default stop and break the alignment.
+    hang = 720 + 360 * i
     _heading_levels.append(
         f'<w:lvl w:ilvl="{i}">'
         f'<w:start w:val="1" />'
@@ -49,7 +55,7 @@ for i in range(9):
         f'<w:suff w:val="tab" />'
         f'<w:lvlText w:val="{lvl_text}" />'
         f'<w:lvlJc w:val="left" />'
-        f'<w:pPr><w:ind w:left="{ind_left}" w:firstLine="0" /></w:pPr>'
+        f'<w:pPr><w:ind w:left="{hang}" w:hanging="{hang}" /></w:pPr>'
         f'</w:lvl>'
     )
 
@@ -128,7 +134,10 @@ ORDERED_NUMFMT_TAGS = [
 
 _ordered_levels = []
 for i, numfmt_tag in enumerate(ORDERED_NUMFMT_TAGS):
-    ind_left = (i + 1) * 720
+    # Level 0 hangs its identifier at the body-text margin, and each deeper
+    # level hangs its identifier at the text column of the level above, so
+    # the ladder steps by one 360-twip hanging indent per level.
+    ind_left = (i + 1) * 360
     _ordered_levels.append(
         f'<w:lvl w:ilvl="{i}">'
         f'<w:start w:val="1" />'
@@ -236,6 +245,75 @@ def _unify_ordered_lists(numbering_xml: str) -> str:
         numbering_xml,
         flags=re.DOTALL,
     )
+
+
+# ============================================================================
+# numbering.xml — bullet lists on the same margin ladder
+# ============================================================================
+#
+# Ordered lists hang each level's identifier at the text column of the
+# level above (see `_ordered_levels` above), but bullet lists keep Pandoc's
+# stock ladder of (level+1)*720. A bullet nested under ordered items would
+# then sit off the ladder. Rewrite every bullet level's indent onto the
+# same ladder: level N hangs its marker at N*360 with text at (N+1)*360.
+# Already-conforming values rewrite to themselves, so a re-run is a no-op.
+
+BULLET_ABSTRACT_RE = re.compile(
+    r'<w:abstractNum\b[^>]*>.*?</w:abstractNum>', re.DOTALL)
+BULLET_LVL_RE = re.compile(r'<w:lvl w:ilvl="(\d)"[^>]*>.*?</w:lvl>',
+                           re.DOTALL)
+BULLET_IND_RE = re.compile(r'<w:ind w:left="\d+" w:hanging="360" />')
+
+
+def _align_bullet_lists(numbering_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        seg = match.group(0)
+        first = re.search(r'<w:lvl w:ilvl="0">.*?</w:lvl>', seg, re.DOTALL)
+        if not first or '<w:numFmt w:val="bullet" />' not in first.group(0):
+            return seg
+
+        def reladder(lvl: 're.Match[str]') -> str:
+            left = (int(lvl.group(1)) + 1) * 360
+            return BULLET_IND_RE.sub(
+                f'<w:ind w:left="{left}" w:hanging="360" />', lvl.group(0))
+
+        return BULLET_LVL_RE.sub(reladder, seg)
+
+    return BULLET_ABSTRACT_RE.sub(fix, numbering_xml)
+
+
+# ============================================================================
+# styles.xml — symmetric heading spacing
+# ============================================================================
+#
+# The reference styles give headings a large space before and a small space
+# after (e.g. Heading2: 160/80), while body paragraphs contribute the same
+# 180 above and below. The gap over a heading therefore beats the gap under
+# it. Copying `before` into `after` makes both sums equal, so a heading
+# floats evenly between its neighbors.
+
+HEADING_STYLE_RE = re.compile(
+    r'<w:style\b[^>]*w:styleId="Heading\d"[^>]*>.*?</w:style>', re.DOTALL)
+
+
+def _symmetric_heading_spacing(styles_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        seg = match.group(0)
+        spacing = re.search(r'<w:spacing\b[^/]*/>', seg)
+        if not spacing:
+            return seg
+        before = re.search(r'w:before="(\d+)"', spacing.group(0))
+        if not before:
+            return seg
+        tag = spacing.group(0)
+        if 'w:after="' in tag:
+            new_tag = re.sub(r'w:after="\d+"',
+                             f'w:after="{before.group(1)}"', tag)
+        else:
+            new_tag = tag[:-2] + f'w:after="{before.group(1)}" />'
+        return seg.replace(tag, new_tag, 1)
+
+    return HEADING_STYLE_RE.sub(fix, styles_xml)
 
 
 # ============================================================================
@@ -554,9 +632,16 @@ def _force_a4_section(document_xml: str) -> str:
 # lines up with the body-text right margin while the indent is preserved on
 # the left. Column proportions are kept by scaling gridCol values to that
 # new total.
+#
+# Word additionally starts a table's grid at tblInd minus the leading cell
+# margin, so a table without tblInd juts its left border one cell margin
+# past the text edge and stops one short on the right. Writing tblInd =
+# intended_indent + cell_margin puts both borders exactly on the paragraph
+# verticals. Source-fields tables are borderless and skip the nudge.
 
 TABLE_RE = re.compile(r'<w:tbl>.*?</w:tbl>', re.DOTALL)
 TBL_IND_RE = re.compile(r'<w:tblInd w:w="(\d+)" w:type="dxa"\s*/>')
+TBL_CELL_SIDE_MARGIN = 108  # the Table style's left/right tblCellMar
 TBL_W_RE = re.compile(r'<w:tblW [^/]*/>')
 TBL_GRID_RE = re.compile(r'<w:tblGrid>(.*?)</w:tblGrid>', re.DOTALL)
 GRID_COL_RE = re.compile(r'<w:gridCol w:w="(\d+)"\s*/>')
@@ -592,6 +677,16 @@ def _fit_table_widths(document_xml: str) -> str:
         body = TBL_W_RE.sub(
             f'<w:tblW w:w="{new_total}" w:type="dxa" />', body, count=1,
         )
+        if '<w:tblStyle w:val="horizontal" />' not in body:
+            ind_tag = (f'<w:tblInd w:w="{indent + TBL_CELL_SIDE_MARGIN}" '
+                       f'w:type="dxa" />')
+            if ind_match:
+                body = TBL_IND_RE.sub(ind_tag, body, count=1)
+            else:
+                body = body.replace(
+                    f'<w:tblW w:w="{new_total}" w:type="dxa" />',
+                    f'<w:tblW w:w="{new_total}" w:type="dxa" />' + ind_tag,
+                    1)
         def scale_tc(m: 're.Match[str]') -> str:
             return f'<w:tcW w:w="{int(m.group(1)) * budget // total}" w:type="dxa" />'
         body = TC_W_RE.sub(scale_tc, body)
@@ -696,6 +791,134 @@ def _make_resize_images(numbering: NumberingIndex) -> XmlTransform:
             return para
         return PARAGRAPH_RE.sub(fix, document_xml)
     return _resize_images
+
+
+# ============================================================================
+# document.xml — symmetric table cells
+# ============================================================================
+#
+# A table cell's paragraphs carry no style, so the document default
+# `w:after="200"` hangs under the last line while the cell's top margin is
+# zero: the text hugs the top border and floats 10pt over the bottom one.
+# Zeroing the first paragraph's space-before and the last paragraph's
+# space-after leaves both edges to the cell margins, which are equal.
+# Paragraphs between the first and last keep their spacing, so a
+# multi-paragraph cell still separates its paragraphs. Bibliography
+# metadata tables (`horizontal` style) have their own compaction pass
+# below and are skipped here.
+
+CELL_TBL_RE = re.compile(r'<w:tbl>.*?</w:tbl>', re.DOTALL)
+CELL_TC_RE = re.compile(r'<w:tc>.*?</w:tc>', re.DOTALL)
+CELL_P_RE = re.compile(r'<w:p\b[^>]*/>|<w:p\b[^>]*>.*?</w:p>', re.DOTALL)
+CELL_PPR_RE = re.compile(r'<w:pPr\b[^>]*>.*?</w:pPr>|<w:pPr\b[^>]*/>',
+                         re.DOTALL)
+
+
+def _set_edge_spacing(p_xml: str, attr: str, value: str) -> str:
+    spacing_frag = f'<w:spacing w:{attr}="{value}" />'
+    empty_p = re.match(r'<w:p\b([^>]*)/>$', p_xml, re.DOTALL)
+    if empty_p:
+        return f'<w:p{empty_p.group(1)}><w:pPr>{spacing_frag}</w:pPr></w:p>'
+    ppr = CELL_PPR_RE.search(p_xml)
+    if ppr is None or ppr.group(0).endswith('/>'):
+        open_end = p_xml.find('>') + 1
+        return (p_xml[:open_end] + f'<w:pPr>{spacing_frag}</w:pPr>'
+                + p_xml[open_end:])
+    seg = ppr.group(0)
+    spacing = re.search(r'<w:spacing\b[^/]*/>', seg)
+    if spacing is None:
+        # CT_PPr is a strict sequence: w:spacing sits after w:pStyle and
+        # w:numPr; inserting it earlier makes consumers drop it.
+        insert_at = seg.find('>') + 1
+        for pat in (r'<w:pStyle\b[^/]*/>', r'</w:numPr>'):
+            anchor = re.search(pat, seg)
+            if anchor:
+                insert_at = max(insert_at, anchor.end())
+        new_seg = seg[:insert_at] + spacing_frag + seg[insert_at:]
+    elif f'w:{attr}=' in spacing.group(0):
+        new_seg = seg.replace(
+            spacing.group(0),
+            re.sub(rf'w:{attr}="\d+"', f'w:{attr}="{value}"',
+                   spacing.group(0)), 1)
+    else:
+        new_seg = seg.replace(
+            spacing.group(0),
+            spacing.group(0)[:-2] + f'w:{attr}="{value}" />', 1)
+    return p_xml.replace(seg, new_seg, 1)
+
+
+def _symmetric_table_cells(document_xml: str) -> str:
+    def fix_tc(match: 're.Match[str]') -> str:
+        tc = match.group(0)
+        paragraphs = list(CELL_P_RE.finditer(tc))
+        if not paragraphs:
+            return tc
+        last = paragraphs[-1]
+        tc = (tc[:last.start()]
+              + _set_edge_spacing(last.group(0), 'after', '0')
+              + tc[last.end():])
+        first = CELL_P_RE.search(tc)
+        return (tc[:first.start()]
+                + _set_edge_spacing(first.group(0), 'before', '0')
+                + tc[first.end():])
+
+    def fix_tbl(match: 're.Match[str]') -> str:
+        tbl = match.group(0)
+        if '<w:tblStyle w:val="horizontal" />' in tbl:
+            return tbl
+        return CELL_TC_RE.sub(fix_tc, tbl)
+
+    return CELL_TBL_RE.sub(fix_tbl, document_xml)
+
+
+# ============================================================================
+# document.xml — symmetric space around tables
+# ============================================================================
+#
+# The gap over a table is the preceding paragraph's space-after (the
+# document default of 200 twips), but the paragraph under a table is a list
+# item or plain paragraph whose space-before is zero, so the table hugs
+# what follows it. Give the paragraph on each side of a table the same 200
+# on its table-facing edge. Headings keep their own larger spacing, and
+# bibliography metadata tables (`horizontal` style) have their own gap
+# pass below.
+
+TABLE_GAP = "200"  # the docDefaults space-after that forms the gap above
+_P_CHUNK = r'<w:p\b[^>]*>(?:(?!</w:p>).)*?</w:p>'
+P_BEFORE_TBL_RE = re.compile('(' + _P_CHUNK + r')(?=\s*<w:tbl>)', re.DOTALL)
+P_AFTER_TBL_RE = re.compile(r'(</w:tbl>\s*)(' + _P_CHUNK + ')', re.DOTALL)
+HORIZONTAL_TBL_MARKER = '<w:tblStyle w:val="horizontal" />'
+
+
+def _tbl_at_is_horizontal(document_xml: str, tbl_start: int) -> bool:
+    tblpr_end = document_xml.find('</w:tblPr>', tbl_start)
+    if tblpr_end == -1:
+        return False
+    return HORIZONTAL_TBL_MARKER in document_xml[tbl_start:tblpr_end]
+
+
+def _symmetric_table_margins(document_xml: str) -> str:
+    def pad_before(match: 're.Match[str]') -> str:
+        p_xml = match.group(1)
+        if 'w:pStyle w:val="Heading' in p_xml:
+            return p_xml
+        if _tbl_at_is_horizontal(document_xml, match.end()):
+            return p_xml
+        return _set_edge_spacing(p_xml, 'after', TABLE_GAP)
+
+    def pad_after(match: 're.Match[str]') -> str:
+        p_xml = match.group(2)
+        if 'w:pStyle w:val="Heading' in p_xml:
+            return match.group(0)
+        tbl_start = document_xml.rfind('<w:tbl>', 0, match.start())
+        if tbl_start != -1 and _tbl_at_is_horizontal(document_xml,
+                                                     tbl_start):
+            return match.group(0)
+        return match.group(1) + _set_edge_spacing(p_xml, 'before',
+                                                  TABLE_GAP)
+
+    document_xml = P_BEFORE_TBL_RE.sub(pad_before, document_xml)
+    return P_AFTER_TBL_RE.sub(pad_after, document_xml)
 
 
 # ============================================================================
@@ -840,10 +1063,12 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
         _declare_compat_namespaces,
         _inject_heading_numbering,
         _unify_ordered_lists,
+        _align_bullet_lists,
     ],
     'word/styles.xml': [
         _left_align_source_code,
         _compact_footnotes,
+        _symmetric_heading_spacing,
     ],
     'word/footnotes.xml': [
         _space_after_footnote_number,
@@ -854,6 +1079,8 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
         _strip_empty_headings,
         _force_a4_section,
         _fit_table_widths,
+        _symmetric_table_cells,
+        _symmetric_table_margins,
         _compact_source_fields_tables,
     ],
 }

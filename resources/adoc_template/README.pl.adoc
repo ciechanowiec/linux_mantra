@@ -50,21 +50,21 @@ Aby eksportować i sprawdzać tekst źródłowy, należy zainstalować następuj
 
 === Eksport
 
-. Eksport do HTML:
+. Eksport tekstu źródłowego do HTML:
 +
 [source,bash,subs="attributes+"]
 ----
 asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
 ----
 
-. Eksport do PDF:
+. Eksport tekstu źródłowego do PDF:
 +
 [source,bash,subs="attributes+"]
 ----
 asciidoctor-pdf --attribute allow-uri-read --require ./.docs/lib/common-style.rb {docname}{docfilesuffix}
 ----
 
-. Eksport do DOCX:
+. Eksport tekstu źródłowego do DOCX:
 +
 [source,bash,subs="attributes+"]
 ----
