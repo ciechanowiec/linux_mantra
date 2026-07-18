@@ -36,13 +36,19 @@ The source text of this document is written in the https://asciidoc.org[AsciiDoc
 
 The source text should follow the link:README-guideline-writing.adoc[Writing Guideline], stored beside it in the repository.
 
-=== Export
+=== Prerequisites
 
-. To export the source text to the supported output formats, install the following tools:
-.. https://asciidoctor.org/#installation[Asciidoctor^]
-.. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
-.. https://pandoc.org/installing.html[Pandoc^]
-.. https://www.python.org/downloads/[Python 3^]
+To export and lint the source text, install the following tools:
+
+. https://asciidoctor.org/#installation[Asciidoctor^]
+. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
+. https://pandoc.org/installing.html[Pandoc^]
+. https://www.python.org/downloads/[Python 3^]
+. https://vale.sh/docs/install/[Vale^]
+. https://poppler.freedesktop.org[`pdftotext`^]
+. https://github.com/tesseract-ocr/tesseract[`tesseract`^]
+
+=== Export
 
 . To export to HTML:
 +
@@ -58,31 +64,17 @@ asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
 asciidoctor-pdf --attribute allow-uri-read --require ./.docs/lib/common-style.rb {docname}{docfilesuffix}
 ----
 
-. To export to DOCX - Asciidoctor converts the source text to DocBook XML, which Pandoc then converts to DOCX:
+. To export to DOCX:
 +
 [source,bash,subs="attributes+"]
 ----
-asciidoctor --backend docbook --attribute allow-uri-read --out-file - {docname}{docfilesuffix} | pandoc --from docbook --to docx --reference-doc={sourcedir}/.docs/themes/reference.docx --output {docname}.docx && python3 {sourcedir}/.docs/lib/apply_docx_formatting.py {docname}.docx
+prepared="$(python3 {sourcedir}/.docs/lib/export_prepare.py --docx-compat {docname}{docfilesuffix})" && asciidoctor --backend docbook --attribute allow-uri-read --out-file - "$prepared" | pandoc --from docbook --to docx --reference-doc={sourcedir}/.docs/themes/reference.docx --output {docname}.docx && python3 {sourcedir}/.docs/lib/apply_docx_formatting.py {docname}.docx && rm "$prepared"
 ----
 
 === Linting
 
-==== General Rules
+Lint the source text:
 
-. The source text is linted by `link:.docs/lib/adoc_lint.py[]`, a single command that runs three engines and merges their findings into one report. The three engines are Vale, a structural linter, and an Asciidoctor render pass.
-. The first engine, https://vale.sh[Vale^], checks prose and typography. Vale is configured in `link:.vale.ini[]` and enforces the following style guides:
-.. native https://vale.sh/docs/styles#vale[Vale style^], with https://github.com/vale-cli/en_US-web/tree/master[English dictionary^] included,
-.. a curated `English` style, inspired by the https://developers.google.com/style[Google Developer Documentation Style Guide^], the https://vale.sh/hub/jdkato/write-good/[write-good^] linter, and https://github.com/amperser/proselint/[proselint^],
-.. language-neutral typography rules, applied to every language.
-. The second engine, the structural linter, checks the markup, document structure, and ASCII diagrams that Vale can't see, defined in `link:.docs/lib/adoc_lint.py[]`.
-. The third engine, https://asciidoctor.org[Asciidoctor^], renders the source text to a discarded output file and reports every warning or error it logs, such as a missing include file.
-
-==== Usage
-
-. Install Vale as described in the https://vale.sh/docs/install/[official documentation^]. The linter requires Vale and exits with an error when Vale is missing. The structural checks need only Python 3, and the render pass needs only Asciidoctor - the exports above already require both.
-
-. Lint the source text:
-+
 [source,bash,subs="attributes+"]
 ----
 python3 .docs/lib/adoc_lint.py {docname}{docfilesuffix}

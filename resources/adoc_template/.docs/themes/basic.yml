@@ -27,3 +27,7 @@ role:
     font-color: 'C9302C'
   good-icon:
     font-color: '1E7E34'
+source_fields:
+  font-size: 7.5
+  font-color: '595959'
+  line-height: 1.1

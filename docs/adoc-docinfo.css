@@ -132,3 +132,32 @@
         display: none !important;
     }
 }
+
+/* Bibliography entry metadata (`[horizontal.source-fields]`): a
+   machine-facing record, rendered small and muted behind the prose. */
+.hdlist.source-fields {
+    font-size: 0.75em;
+    color: #595959;
+}
+
+.hdlist.source-fields td.hdlist1,
+.hdlist.source-fields td.hdlist2 {
+    font-size: 1em;
+    color: inherit;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1.3;
+}
+
+/* Asciidoctor wraps each value cell in a <p> that the default stylesheet
+   sizes and margins as a body paragraph; flatten it to the record's own
+   metrics. */
+.hdlist.source-fields td.hdlist2 > p {
+    font-size: inherit;
+    line-height: inherit;
+    margin: 0;
+}
+
+.hdlist.source-fields code {
+    color: inherit;
+}

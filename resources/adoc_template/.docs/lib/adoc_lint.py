@@ -25,6 +25,12 @@ here. Rules of prose judgement (nomenclature drift, false universals, "don't
 invent facts") need a reader of the guideline, not a linter, and are out of
 scope by design.
 
+The source-citation rules add two external binaries, `pdftotext` (poppler)
+and `tesseract`, required like vale and asciidoctor: `pdftotext` extracts the
+text that the quote checks grep in PDF sources, and `tesseract` reads the OCR
+text of image sources. An OCR miss warns instead of gating because OCR is
+lossy.
+
 Every structural check is an `error` that gates the run (non-zero exit). A check
 that can't be made reliable enough to gate is left out rather than downgraded to
 a non-gating hint. Vale findings keep the severity Vale assigns them.
@@ -40,6 +46,9 @@ rule's `enabled` to False to switch it off, change its `severity`, or add a new
 
 Usage: python3 adoc_lint.py [--format text|json] <file.adoc> [<file.adoc> ...]
 """
+import email
+import email.policy
+import hashlib
 import json
 import os
 import re
@@ -47,9 +56,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
+import zipfile
 from collections import Counter
-from dataclasses import dataclass
-from typing import Callable, Dict, Iterator, List, Tuple
+from dataclasses import dataclass, field
+from html.parser import HTMLParser
+from typing import Callable, Dict, Iterator, List, Optional, Set, Tuple
 
 Finding = Tuple[int, int, str]  # (line, col, message) yielded by a rule
 RuleFunc = Callable[["Document"], Iterator[Finding]]
@@ -91,6 +103,7 @@ class Document:
     path: str
     lines: List[Line]
     headings: List[Tuple[int, int]]  # (line_num, level) for level-1+ headings
+    sources: "Optional[SourceAnalysis]" = None  # lazy, via source_analysis()
 
 
 def scan(path: str) -> Document:
@@ -154,10 +167,402 @@ def _prose(doc: Document) -> Iterator[Line]:
 # real defect. Mask span contents with spaces before the macro rules run; the
 # replacement keeps the line length, so reported columns stay correct.
 CODE_SPAN_RE = re.compile(r"`+[^`]*`+")
+# A citation quote -- `"+...+"`, a quoted inline passthrough -- is source
+# wording, not the author's markup, so the inline rules treat it like a code
+# span and see only blanks of the same length.
+QUOTED_PASS_RE = re.compile(r'"\+.*?\+"')
 
 
 def _mask_code(text: str) -> str:
-    return CODE_SPAN_RE.sub(lambda m: " " * len(m.group(0)), text)
+    masked = CODE_SPAN_RE.sub(lambda m: " " * len(m.group(0)), text)
+    return QUOTED_PASS_RE.sub(lambda m: " " * len(m.group(0)), masked)
+
+
+# ============================================================================
+# Source citations — parsed model
+# ============================================================================
+#
+# Serves the source-citation rules (§claim-classes, §closed-source-list,
+# §source-identity, §citation-scope, §quote-and-locator, §citation-footnotes):
+# a document that derives statements from sources cites them in citation
+# footnotes -- `footnote:id[<<bib-anchor>>, LOCATOR: "+QUOTE+"]`, several
+# sources separated by `; `, an inferred claim prefixed `Inferred from: ` --
+# resolved against a closed bibliography: the document's last section,
+# marked by a `[[sources]]` anchor above its heading, holding one
+# `. [[id,Label]]_Label_ - ...` ordered-list entry per source. The Label is
+# the reference text every `<<id>>` renders. This section parses that
+# apparatus once into a SourceAnalysis
+# cached on the Document; the citation rules, the exemptions grafted onto
+# older rules, the Vale post-filter, and the sibling `export_prepare.py` all
+# consume the same parse instead of re-deriving spans with slightly different
+# regexes.
+#
+# The parse reads RAW line text, not `_mask_code` output: the verbatim quote
+# and the archived path live inside backtick spans, which masking blanks.
+# Footnote OPENINGS are located on masked text, though, so an inline-code
+# example of the syntax never counts as a real citation -- the macro body is
+# then sliced from the raw text at the same offsets, which masking preserves.
+
+BIB_MARKER = "[[sources]]"
+SF_STYLE_LINE = "[horizontal.source-fields]"
+BIB_ENTRY_RE = re.compile(r"^\s*\.\s+\[\[([^\[\],]+),([^\]]+)\]\](.*)$")
+BIB_FIELD_RE = re.compile(r"^([A-Z][A-Za-z0-9 -]*?)::\s+(.*)$")
+TRIPLE_ANCHOR_RE = re.compile(r"\[\[\[([^\]]+)\]\]\]")
+KEBAB_ID_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+
+# The metadata schema of a bibliography entry. The field names below appear
+# identically in three places -- the guideline's tables (§source-identity),
+# the `Key:: value` lines of the markup (§bibliography-markup), and these
+# dictionaries -- so there is exactly one vocabulary to maintain. Each field
+# carries a shape name resolved through SHAPES; "text" is presence-only.
+SHAPES = {
+    "text": None,
+    "date": (re.compile(r"^\d{4}-\d{2}-\d{2}$"),
+             "an ISO date YYYY-MM-DD"),
+    "flexdate": (re.compile(r"^\d{4}(?:-\d{2}(?:-\d{2})?)?$"),
+                 "an ISO date YYYY, YYYY-MM, or YYYY-MM-DD"),
+    "year": (re.compile(r"^\d{4}$"), "a year YYYY"),
+    "path": (re.compile(r"^`((?:[^`\s]*/)?\.docs/sources/[^`]+)`$"),
+             "a backticked `.docs/sources/...` path"),
+    "digest": (re.compile(r"^`\+([0-9a-fA-F]{64})\+`$"),
+               "a monospaced literal `+<64 hex>+`"),
+    "url": (re.compile(r"^https?://\S+$"), "an http or https URL"),
+    "status": (re.compile(r"^(?:draft|final)\b"),
+               "draft or final, with optional elaboration"),
+}
+
+# type -> ([required (key, shape)...], [optional (key, shape)...]); the tuple
+# order is also the serialization order the entries follow. A field is
+# required only when it is constitutional for the type -- every artifact of
+# the type has it -- so most descriptive fields are optional.
+TYPE_SCHEMA = {
+    "Contract": ([("Parties", "text")],
+                 [("Concluded on", "date"), ("Governing law", "text")]),
+    "Legal source": ([("Issuing body", "text"), ("Identifier", "text")],
+                     [("Date", "flexdate")]),
+    "Official record": ([("Register", "text")],
+                        [("Entry number", "text")]),
+    "Financial record": ([("Issuer", "text")],
+                         [("Kind", "text"), ("Number", "text"),
+                          ("Date", "date"), ("Amount", "text")]),
+    "Correspondence": ([("Participants", "text")],
+                       [("Platform", "text"), ("Sender", "text"),
+                        ("Addressee", "text"), ("Sent on", "date"),
+                        ("Time range", "text"), ("Subject", "text")]),
+    "Email": ([("Sender", "text")],
+              [("Recipients", "text"), ("Sent on", "date"),
+               ("Subject", "text"), ("Time range", "text")]),
+    "Minutes": ([("Held on", "date")],
+                [("Participants", "text"), ("Recorder", "text")]),
+    "Report": ([], [("Author", "text"), ("Date", "flexdate"),
+                    ("Period covered", "text")]),
+    "Specification": ([("System", "text")],
+                      [("Author", "text"), ("Date", "flexdate"),
+                       ("Version", "text")]),
+    "Standard": ([("Identifier", "text")],
+                 [("Issuing body", "text"), ("Year", "year"),
+                  ("Version", "text")]),
+    "Publication": ([("Authors", "text")],
+                    [("Year", "year"), ("Publisher", "text"), ("Edition", "text"),
+                     ("ISBN", "text"), ("DOI", "text")]),
+    "Web page": ([], [("Site", "text"), ("Published on", "flexdate")]),
+    "Presentation": ([], [("Author", "text"), ("Date", "flexdate"),
+                          ("Slides", "text")]),
+    "Workbook": ([], [("Owner", "text"), ("Date", "flexdate"),
+                      ("Sheets", "text")]),
+    "Ticket": ([("Tracker", "text"), ("Ticket number", "text")],
+               [("Ticket state", "text")]),
+    "Repository": ([("Host and path", "text")],
+                   [("Commit", "text"), ("Branch", "text")]),
+    "System output": ([("System", "text")],
+                      [("Query", "text"), ("Captured on", "date")]),
+    "Image": ([("Depicts", "text")],
+              [("Captured as", "text"), ("Captured on", "date"),
+               ("Place", "text")]),
+    "Recording": ([("Medium", "text")],
+                  [("Date", "date"), ("Participants", "text"),
+                   ("Duration", "text")]),
+    "Other": ([("Description", "text")],
+              [("Date", "flexdate"), ("Version", "text")]),
+}
+
+STATUS_KEYS = [("Status", "status")]
+
+# Types whose entries always state their status: the requirement belongs to
+# the status dimension (§source-status), not to the type's own field set.
+STATUS_REQUIRED_TYPES = {"Contract"}
+
+CLASS_SCHEMA = {
+    "archived-file": ([("From", "text"), ("Archived as", "path"),
+                       ("SHA-256", "digest")], []),
+    "web": ([("URL", "url"), ("Accessed", "date")], [("Access", "text")]),
+    "request": ([("Request of", "date"), ("By", "text")], []),
+    "unarchived": ([("Not archived", "text")], []),
+}
+
+# Any of these keys pins the entry to its reachability class; mixing keys of
+# two classes is a schema error.
+CLASS_SIGNATURE = {
+    key: cls
+    for cls, (required, optional) in CLASS_SCHEMA.items()
+    for key, _shape in required + optional
+}
+FOOTNOTE_OPEN_RE = re.compile(r"footnote:([\w-]*)\[")
+FOOTNOTE_REUSE_RE = re.compile(r"footnote:([\w-]+)\[\]")
+CITE_INFER_PREFIX = "Inferred from: "
+CITE_SEP = "; "
+# One cited source: `<<anchor>>, locator: "+quote+"`. The locator is optional
+# (a requester's brief has no pages, so `<<anchor>>: "+quote+"`); the quote is
+# optional for a source whose support is visual (an image) -- then the
+# locator alone, colon-free, carries the reference. Locators never contain
+# backticks or semicolons: `;` is the source separator.
+CITE_ITEM_QUOTE_RE = re.compile(
+    r"<<([A-Za-z0-9_-]+)>>(?:,\s+([^`;]*?))?:\s+\"\+(.+?)\+\"")
+CITE_ITEM_NOQUOTE_RE = re.compile(
+    r"<<([A-Za-z0-9_-]+)>>,\s+([^`;:]+?)(?=; |$)")
+
+
+@dataclass
+class BibEntry:
+    id: str            # kebab id from the [[id,Label]] anchor
+    label: str         # reference label: what references render
+    line: int          # 1-based source line of the item line
+    item_text: str     # item text after the anchor; must be '_Label_'
+    fields: Dict[str, Tuple[str, int]] = field(default_factory=dict)
+    style_line: bool = False  # the [horizontal.source-fields] attribute seen
+    dup_keys: List[Tuple[str, int]] = field(default_factory=list)
+    cls: str = ""      # 'archived-file'|'web'|'request'|'unarchived'|'none'|'ambiguous'
+    path: str = ""     # archived-file: recorded doc-relative path
+    sha256: str = ""   # archived-file: recorded digest, lowercased
+
+
+@dataclass
+class SourceRef:
+    anchor: str
+    locator: str
+    quote: str         # verbatim, with '\]' unescaped back to ']'
+    col: int           # 1-based column of '<<' in its line
+
+
+@dataclass
+class CitationFootnote:
+    id: str            # '' for an anonymous citation footnote
+    line: int
+    start_col: int     # 1-based column of 'footnote:'
+    end_col: int       # 1-based column just past the closing ']'
+    body: str          # raw body, escapes intact; '' for a reuse
+    is_inference: bool
+    is_reuse: bool
+    sources: List[SourceRef]
+    parse_error: Optional[Tuple[int, str]] = None  # (1-based col, detail)
+
+
+@dataclass
+class SourceAnalysis:
+    bib_attr_line: int          # line of the '[[sources]]' marker, 0 when absent
+    bib_heading_line: int       # line of the section heading under it, 0 when absent
+    bib_end_line: int           # last line of the bibliography section
+    entries: List[BibEntry]
+    bib_ids: Set[str]
+    citations: List[CitationFootnote]   # definitions AND reuses, document order
+    citation_ids: Set[str]              # ids of citation definitions
+    stray_triple_anchors: List[Tuple[int, int, str]]  # [[[x]]] outside the bib
+    bad_bib_lines: List[Tuple[int, str]]  # bibliography lines that fit no rule
+    # lazy caches filled by the rule helpers below:
+    mode: str = ""                      # '' | 'pinned' | 'draft' | 'nogit'
+    pinned_findings: Optional[List[Finding]] = None
+    quote_results: Optional[List[Tuple[Finding, str]]] = None
+    quote_stats: Optional[Dict[str, int]] = None  # checked/verified, ocr_*
+    sha_cache: Dict[str, str] = field(default_factory=dict)
+
+
+def _macro_end(text: str, start: int) -> int:
+    """Index of the ']' closing an inline-macro body that starts at `start`,
+    or -1. Mirrors the walker of rule_footnote_bare_bracket: '\\' escapes the
+    next character, and an unescaped '[' directly after a non-space begins a
+    nested inline macro that is skipped to its matching ']'."""
+    i = start
+    while i < len(text):
+        char = text[i]
+        if char == "\\":
+            i += 2
+            continue
+        if char == "]":
+            return i
+        if char == "[" and i > 0 and not text[i - 1].isspace():
+            depth = 1
+            i += 1
+            while i < len(text) and depth > 0:
+                depth += (text[i] == "[") - (text[i] == "]")
+                i += 1
+            continue
+        i += 1
+    return -1
+
+
+def _classify_entry(entry: BibEntry) -> None:
+    """Fill entry.cls (and path/sha256) from the class-signature keys. One
+    class's keys pin the entry to that reachability class; keys of two
+    classes are contradictory and land in 'ambiguous', no key in 'none'."""
+    classes = {CLASS_SIGNATURE[key] for key in entry.fields
+               if key in CLASS_SIGNATURE}
+    if not classes:
+        entry.cls = "none"
+        return
+    if len(classes) > 1:
+        entry.cls = "ambiguous"
+        return
+    entry.cls = classes.pop()
+    if entry.cls == "archived-file":
+        path_value = entry.fields.get("Archived as", ("", 0))[0]
+        sha_value = entry.fields.get("SHA-256", ("", 0))[0]
+        path_m = SHAPES["path"][0].match(path_value)
+        sha_m = SHAPES["digest"][0].match(sha_value)
+        entry.path = path_m.group(1) if path_m else ""
+        entry.sha256 = sha_m.group(1).lower() if sha_m else ""
+
+
+def _parse_citation_items(cf: CitationFootnote, rest: str,
+                          base_col: int) -> None:
+    """Parse the source list of a citation footnote body. `rest` is the body
+    with any 'Inferred from: ' prefix removed; `base_col` is its 0-based
+    offset in the source line, so failure columns land exactly."""
+    pos = 0
+    while True:
+        m = CITE_ITEM_QUOTE_RE.match(rest, pos)
+        if m:
+            quote = m.group(3).replace("\\]", "]")
+            cf.sources.append(SourceRef(
+                m.group(1), (m.group(2) or "").strip(), quote,
+                base_col + m.start() + 1))
+            pos = m.end()
+        else:
+            m = CITE_ITEM_NOQUOTE_RE.match(rest, pos)
+            if m:
+                cf.sources.append(SourceRef(
+                    m.group(1), m.group(2).strip(), "",
+                    base_col + m.start() + 1))
+                pos = m.end()
+            else:
+                cf.parse_error = (
+                    base_col + pos + 1,
+                    f"unparseable source item at {rest[pos:pos + 40]!r}")
+                return
+        if pos == len(rest):
+            return
+        if rest.startswith(CITE_SEP, pos):
+            pos += len(CITE_SEP)
+            continue
+        cf.parse_error = (base_col + pos + 1,
+                          "expected '; ' before the next source or the end "
+                          "of the footnote")
+        return
+
+
+def _build_source_analysis(doc: Document) -> SourceAnalysis:
+    n_lines = len(doc.lines)
+
+    bib_attr = 0
+    for line in _prose(doc):
+        if line.text.strip() == BIB_MARKER:
+            bib_attr = line.num
+            break
+    bib_heading = 0
+    bib_end = 0
+    if bib_attr:
+        for num, _level in doc.headings:
+            if num > bib_attr:
+                bib_heading = num
+                break
+        following = [num for num, _ in doc.headings
+                     if bib_heading and num > bib_heading]
+        bib_end = (following[0] - 1) if following else n_lines
+
+    entries: List[BibEntry] = []
+    stray: List[Tuple[int, int, str]] = []
+    bad_bib_lines: List[Tuple[int, str]] = []
+    current: Optional[BibEntry] = None
+    for line in _prose(doc):
+        in_bib = bib_attr and bib_attr <= line.num <= bib_end
+        if in_bib:
+            text = line.text
+            stripped = text.strip()
+            em = BIB_ENTRY_RE.match(text)
+            if em:
+                current = BibEntry(em.group(1).strip(),
+                                   em.group(2).strip(), line.num,
+                                   em.group(3).strip())
+                entries.append(current)
+                continue
+            if not stripped or stripped == BIB_MARKER \
+                    or line.num == bib_heading:
+                continue
+            if stripped == SF_STYLE_LINE and current:
+                current.style_line = True
+                continue
+            fm = BIB_FIELD_RE.match(text)
+            if fm and current:
+                key = fm.group(1)
+                if key in current.fields:
+                    current.dup_keys.append((key, line.num))
+                else:
+                    current.fields[key] = (fm.group(2).strip(), line.num)
+                continue
+            if line.num > bib_heading:
+                bad_bib_lines.append((line.num, stripped))
+            continue
+        for tm in TRIPLE_ANCHOR_RE.finditer(_mask_code(line.text)):
+            stray.append((line.num, tm.start() + 1, tm.group(1)))
+    for entry in entries:
+        _classify_entry(entry)
+
+    citations: List[CitationFootnote] = []
+    citation_ids: Set[str] = set()
+    for line in _prose(doc):
+        masked = _mask_code(line.text)
+        for om in FOOTNOTE_OPEN_RE.finditer(masked):
+            end = _macro_end(line.text, om.end())
+            if end == -1:
+                continue  # unterminated macro; other rules report it
+            body = line.text[om.end():end]
+            if not body:
+                continue  # a reuse; collected in the second pass
+            is_inference = body.startswith(CITE_INFER_PREFIX)
+            rest = body[len(CITE_INFER_PREFIX):] if is_inference else body
+            if not rest.startswith("<<"):
+                continue  # an ordinary footnote, not a citation
+            cf = CitationFootnote(
+                om.group(1), line.num, om.start() + 1, end + 2, body,
+                is_inference, False, [])
+            if rest.endswith("."):
+                rest = rest[:-1]  # the terminal period of §footnote-punctuation
+            offset = om.end() + (len(CITE_INFER_PREFIX) if is_inference else 0)
+            _parse_citation_items(cf, rest, offset)
+            citations.append(cf)
+            if cf.id:
+                citation_ids.add(cf.id)
+    for line in _prose(doc):
+        masked = _mask_code(line.text)
+        for rm in FOOTNOTE_REUSE_RE.finditer(masked):
+            if rm.group(1) in citation_ids:
+                citations.append(CitationFootnote(
+                    rm.group(1), line.num, rm.start() + 1, rm.end() + 1,
+                    "", False, True, []))
+
+    return SourceAnalysis(bib_attr, bib_heading, bib_end, entries,
+                          {e.id for e in entries}, citations, citation_ids,
+                          stray, bad_bib_lines)
+
+
+def source_analysis(doc: Document) -> SourceAnalysis:
+    if doc.sources is None:
+        doc.sources = _build_source_analysis(doc)
+    return doc.sources
+
+
+def _in_bib(ana: SourceAnalysis, line_num: int) -> bool:
+    return bool(ana.bib_attr_line
+                and ana.bib_attr_line <= line_num <= ana.bib_end_line)
 
 
 # ============================================================================
@@ -394,10 +799,13 @@ def _ends_list(line: Line, idx: int, doc: Document) -> bool:
 def rule_single_item_list(doc: Document) -> Iterator[Finding]:
     findings: List[Finding] = []
     stack: List[List] = []  # each entry: [marker, count, first_line_num]
+    ana = source_analysis(doc)
 
     def close_top() -> None:
         marker, count, line_num = stack.pop()
-        if count == 1:
+        # The bibliography is a ledger, not a prose enumeration: a document
+        # resting on one source legitimately lists one entry.
+        if count == 1 and not _in_bib(ana, line_num):
             findings.append((line_num, 1,
                 f"Single-item list: the `{marker}` list has one item where a "
                 f"list needs two or more, so write the item as prose "
@@ -464,15 +872,41 @@ NONDESCRIPTIVE = {
 }
 
 
+BARE_URL_RE = re.compile(r"https?://[^\s\[\]]+")
+
+
 def rule_link_text(doc: Document) -> Iterator[Finding]:
+    ana = source_analysis(doc)
     for line in _prose(doc):
-        for m in LINK_RE.finditer(_mask_code(line.text)):
-            text = m.group(1).rstrip("^").strip().lower()
-            if text in NONDESCRIPTIVE:
+        masked = _mask_code(line.text)
+        for m in LINK_RE.finditer(masked):
+            # Masking keeps offsets, so the raw slice recovers link text
+            # whose content is itself a code span.
+            raw_text = line.text[m.start(1):m.end(1)]
+            text = raw_text.rstrip("^").strip()
+            if text.lower() in NONDESCRIPTIVE:
                 yield (line.num, m.start() + 1,
-                       f"Non-descriptive link text {m.group(1)!r} that should "
+                       f"Non-descriptive link text {raw_text!r} that should "
                        f"wrap the phrase the source substantiates "
                        f"(§link-text-carries-the-claim)")
+            if m.group(0).startswith("http"):
+                if not text:
+                    yield (line.num, m.start() + 1,
+                           "External link with empty text renders the bare "
+                           "URL; wrap the phrase the source substantiates "
+                           "(§link-text-carries-the-claim)")
+                elif not raw_text.endswith("^"):
+                    yield (line.num, m.start() + 1,
+                           "External link text doesn't end with '^', which "
+                           "opens the target in a new tab "
+                           "(§link-text-carries-the-claim)")
+        if _in_bib(ana, line.num) or line.text.lstrip().startswith(":"):
+            continue
+        for m in BARE_URL_RE.finditer(LINK_RE.sub(" ", masked)):
+            yield (line.num, m.start() + 1,
+                   "Bare URL in prose carries no information about the "
+                   "target; wrap the phrase the source substantiates "
+                   "(§link-text-carries-the-claim)")
 
 
 # ============================================================================
@@ -487,7 +921,10 @@ def rule_link_text(doc: Document) -> Iterator[Finding]:
 # in an id is a defect.
 
 AUTO_ANCHOR_RE = re.compile(r"(?:<<|xref:#?)_[\w-]+")
-BLOCK_ANCHOR_RE = re.compile(r"\[\[([^\],]+)")
+# The lookarounds keep a bibliography anchor `[[[id]]]` from half-matching as
+# a block anchor with a garbage leading-bracket id; triple anchors are owned
+# by the source-citation analysis above.
+BLOCK_ANCHOR_RE = re.compile(r"(?<!\[)\[\[(?!\[)([^\],]+)")
 INLINE_ANCHOR_RE = re.compile(r"\[#([A-Za-z0-9_-]+)")
 
 
@@ -533,6 +970,7 @@ def rule_xref_targets(doc: Document) -> Iterator[Finding]:
             anchors.add(m.group(1).strip())
         for m in INLINE_ANCHOR_RE.finditer(masked):
             anchors.add(m.group(1))
+    anchors |= source_analysis(doc).bib_ids  # [[[id]]] bibliography anchors
     for line in _prose(doc):
         masked = _mask_code(line.text)
         for rx in (XREF_TARGET_RE, ANGLE_REF_RE):
@@ -616,6 +1054,10 @@ def rule_bare_id_xref(doc: Document) -> Iterator[Finding]:
         return
     bare = {m.group(1) for m in BARE_ID_LINK_RE.finditer(proc.stdout)
             if m.group(1) == m.group(2)}
+    # A reference to a bibliography anchor renders as its bracketed id by
+    # AsciiDoc convention (asciidoctor assigns `[[[id]]]` the xreflabel
+    # `[id]`), so that rendering is correct, not a missing reference text.
+    bare -= source_analysis(doc).bib_ids
     if not bare:
         return
     for line in _prose(doc):
@@ -629,6 +1071,656 @@ def rule_bare_id_xref(doc: Document) -> Iterator[Finding]:
                            f"form no reference text. Supply explicit link text, such "
                            f"as xref:#{m.group(1)}[the term] "
                            f"(§internal-references-with-xref)")
+
+
+# ============================================================================
+# Source citations — verification rules
+# ============================================================================
+#
+# The deterministic slice of the source-citation apparatus, over the parsed
+# model built above. Layer 1 is pure shape: the footnote grammar, the entry
+# classes, and the closed list (every citation resolves to an entry, every
+# entry is cited). Layer 2 reaches outside the document: the archived file
+# exists and hashes to the recorded SHA-256, its bytes are pinned by git when
+# the document itself is committed, and every verbatim quote occurs in the
+# text extracted from its archived source. The semantic layer -- does the
+# source actually SUPPORT the claim -- needs a reader, not a linter, and is
+# owned by the guideline's AI-verification protocol (§verify-citations).
+#
+# Two rule pairs share one detector each and differ only in registered
+# severity: source-pinned/-draft (git findings gate the run only when the
+# document is committed-clean, i.e. "pinned"; while drafting they are
+# warnings) and source-quote/-unverifiable (a quote that IS checkable and
+# absent gates; content nothing can extract text from only warns). The exit
+# code gates on `error` findings alone, so the warning halves never block.
+
+def rule_citation_footnote_format(doc: Document) -> Iterator[Finding]:
+    ana = source_analysis(doc)
+    seen: Set[str] = set()
+    for cf in ana.citations:
+        if cf.is_reuse:
+            continue
+        if cf.id:
+            if cf.id in seen:
+                yield (cf.line, cf.start_col,
+                       f"Duplicate citation footnote id {cf.id!r}: a later "
+                       f"re-citation is written footnote:{cf.id}[] with "
+                       f"empty brackets (§citation-footnotes)")
+            seen.add(cf.id)
+        if cf.parse_error:
+            col, detail = cf.parse_error
+            yield (cf.line, col,
+                   "Citation footnote doesn't match "
+                   "'<<bib-anchor>>, LOCATOR: \"+QUOTE+\"' with sources "
+                   "separated by '; ' and ']' inside a quote escaped as "
+                   f"'\\]': {detail} (§citation-footnotes)")
+
+
+# A render-integrity backstop like orphan-continuation: a prose line that
+# contains ':: ' parses as a description-list item, so a sentence mentioning
+# the marker inline -- "the form `Key:: value`" -- silently becomes a bold
+# term with an indented definition, splitting the code span it sits in.
+# Asciidoctor converts it without a warning. The precise signature of the
+# accident is an odd number of backticks before the '::', which means the
+# split lands inside an inline code span; a deliberate description list
+# never has that.
+DLIST_TERM_RE = re.compile(r"^(.+?)::(?:\s|$)")
+
+
+def rule_split_code_dlist(doc: Document) -> Iterator[Finding]:
+    ana = source_analysis(doc)
+    for line in _prose(doc):
+        if _in_bib(ana, line.num):
+            continue
+        m = DLIST_TERM_RE.match(line.text)
+        if m and m.group(1).count("`") % 2 == 1:
+            yield (line.num, len(m.group(1)) + 1,
+                   "':: ' inside an inline code span turns the line into a "
+                   "description-list item and splits the span; rephrase so "
+                   "the '::' ends the span or drop the trailing space")
+
+
+# The sibling accident: an anchor written inside a monospaced span still
+# registers as a live anchor, so `[[sources]]` renders as an empty span
+# with an invisible anchor where the literal text was meant. A footnote
+# macro in a span fires the same way -- `footnote:id[]` becomes a live
+# reuse mark instead of the literal text. Asciidoctor converts both
+# without a warning. The passthrough form `+...+` shows them literally.
+# (A live `link:` macro in a span is left alone: the About the Document
+# sections write monospaced clickable file links with it on purpose.)
+def rule_anchor_in_code_span(doc: Document) -> Iterator[Finding]:
+    for line in _prose(doc):
+        for m in CODE_SPAN_RE.finditer(line.text):
+            inner = m.group(0).strip("`")
+            if inner.startswith("+") and inner.endswith("+"):
+                continue
+            if "[[" in inner:
+                yield (line.num, m.start() + 1,
+                       "An anchor inside a monospaced span registers as a "
+                       "live anchor and renders nothing; write the literal "
+                       "as `+[[...]]+`")
+            if FOOTNOTE_OPEN_RE.search(inner):
+                yield (line.num, m.start() + 1,
+                       "A footnote macro inside a monospaced span registers "
+                       "as a live footnote instead of literal text; write "
+                       "the literal as `+footnote:...[...]+`")
+
+
+# Serves footnote-punctuation (§footnote-punctuation): every footnote's text
+# -- ordinary or citation -- ends with a period, so no footnote reads as
+# truncated. A reuse (`footnote:id[]`) has no text of its own and is exempt.
+def rule_footnote_dot(doc: Document) -> Iterator[Finding]:
+    for line in _prose(doc):
+        masked = _mask_code(line.text)
+        for om in FOOTNOTE_OPEN_RE.finditer(masked):
+            end = _macro_end(line.text, om.end())
+            if end == -1:
+                continue  # unterminated macro; other rules report it
+            body = line.text[om.end():end]
+            if body and not body.endswith("."):
+                yield (line.num, om.start() + 1,
+                       "Footnote text doesn't end with a period "
+                       "(§footnote-punctuation)")
+
+
+def _entry_schema(entry: BibEntry) -> Optional[List[Tuple[str, str]]]:
+    """The entry's canonical ordered (key, shape) sequence, assembled from
+    the common, type, status, and class dimensions, or None when the Type
+    doesn't resolve. A request-class entry takes no type."""
+    ordered: List[Tuple[str, str]] = [("Title", "text")]
+    if entry.cls == "request":
+        return ordered + CLASS_SCHEMA["request"][0]
+    type_name = entry.fields.get("Type", ("", 0))[0]
+    schema = TYPE_SCHEMA.get(type_name)
+    if schema is None:
+        return None
+    ordered.append(("Type", "text"))
+    ordered += schema[0] + schema[1]
+    present = {key for key, _shape in ordered}
+    ordered += [pair for pair in STATUS_KEYS if pair[0] not in present]
+    cls_schema = CLASS_SCHEMA.get(entry.cls)
+    if cls_schema:
+        ordered += cls_schema[0] + cls_schema[1]
+    return ordered
+
+
+def rule_bibliography_format(doc: Document) -> Iterator[Finding]:
+    ana = source_analysis(doc)
+    for line in _prose(doc):
+        if line.text.strip() == "[bibliography]":
+            yield (line.num, 1,
+                   "Native AsciiDoc '[bibliography]' attribute: its "
+                   "rendering bypasses the anchors' reference labels, so "
+                   "the bibliography is marked with the '[[sources]]' "
+                   "anchor instead (§bibliography-markup)")
+    if ana.citations and not ana.bib_attr_line:
+        yield (len(doc.lines), 1,
+               "Document cites sources but has no bibliography section "
+               "marked '[[sources]]' to resolve them against "
+               "(§closed-source-list)")
+    for line_num, col, anchor_id in ana.stray_triple_anchors:
+        yield (line_num, col,
+               f"Triple-bracket anchor '[[[{anchor_id}]]]': a bibliography "
+               f"entry anchors with the double form '[[id,Label]]' "
+               f"(§bibliography-markup)")
+    if not ana.bib_attr_line:
+        return
+    if not ana.bib_heading_line:
+        yield (ana.bib_attr_line, 1,
+               "'[[sources]]' anchor has no section heading under it "
+               "(§bibliography-markup)")
+    else:
+        heading_text = re.sub(r"^=+\s+", "",
+                              doc.lines[ana.bib_heading_line - 1].text)
+        if heading_text.strip() != "Sources":
+            yield (ana.bib_heading_line, 1,
+                   f"The bibliography section is titled 'Sources', not "
+                   f"{heading_text.strip()!r} (§bibliography-markup)")
+        for num in range(ana.bib_attr_line + 1, ana.bib_heading_line):
+            if doc.lines[num - 1].text.strip():
+                yield (ana.bib_attr_line, 1,
+                       "'[[sources]]' anchor is detached from its section "
+                       "heading (§bibliography-markup)")
+                break
+        for num, _level in doc.headings:
+            if num > ana.bib_heading_line:
+                yield (num, 1,
+                       "Section after the bibliography: the bibliography is "
+                       "the document's last section (§bibliography-markup)")
+        for line_num, _text in ana.bad_bib_lines:
+            yield (line_num, 1,
+                   "Line inside the bibliography is neither a "
+                   "'. [[id,Label]]_Label_' item line nor a 'Key:: value' "
+                   "field line (§bibliography-markup)")
+    seen_labels: Dict[str, int] = {}
+    for entry in ana.entries:
+        if not KEBAB_ID_RE.fullmatch(entry.id):
+            yield (entry.line, 1,
+                   f"bibliography id {entry.id!r} should be lowercase "
+                   f"kebab-case (§source-identity)")
+        if not entry.label:
+            yield (entry.line, 1,
+                   "Bibliography entry declares no reference label; write "
+                   "'[[id,Reference Label]]' so every reference renders "
+                   "the label (§bibliography-markup)")
+        elif entry.label == entry.id:
+            yield (entry.line, 1,
+                   f"Reference label {entry.label!r} repeats the anchor id; "
+                   f"declare a readable label - an author and a year, a "
+                   f"short title, a standard's number (§bibliography-markup)")
+        elif entry.label in seen_labels:
+            yield (entry.line, 1,
+                   f"Reference label {entry.label!r} is already used by the "
+                   f"entry on line {seen_labels[entry.label]}; labels are "
+                   f"unique among the entries (§bibliography-markup)")
+        else:
+            seen_labels[entry.label] = entry.line
+        if entry.label and entry.item_text != f"_{entry.label}_":
+            yield (entry.line, 1,
+                   f"Entry item line carries only the italicized reference "
+                   f"label: write '. [[{entry.id},{entry.label}]]"
+                   f"_{entry.label}_' and give every field its own "
+                   f"'Key:: value' line (§bibliography-markup)")
+        if not entry.style_line:
+            yield (entry.line, 1,
+                   "Entry fields open with a '[horizontal.source-fields]' "
+                   "line directly under the item line (§bibliography-markup)")
+        for key, dup_line in entry.dup_keys:
+            yield (dup_line, 1,
+                   f"Duplicate field {key!r}; each field appears once per "
+                   f"entry (§bibliography-markup)")
+        title_field = entry.fields.get("Title")
+        if title_field and title_field[0] == entry.label:
+            yield (title_field[1], 1,
+                   "Title repeats the reference label; omit the Title field "
+                   "when the label already gives the title "
+                   "(§bibliography-markup)")
+        if entry.cls == "none":
+            yield (entry.line, 1,
+                   "Entry declares no reachability class: state the fields "
+                   "of exactly one class - archived file (From, Archived "
+                   "as, SHA-256), web (URL, Accessed), request (Request "
+                   "of, By), or not archived (Not archived) "
+                   "(§source-identity)")
+            continue
+        if entry.cls == "ambiguous":
+            yield (entry.line, 1,
+                   "Entry mixes the fields of two reachability classes; "
+                   "exactly one class applies (§source-identity)")
+            continue
+        type_field = entry.fields.get("Type")
+        if entry.cls == "request":
+            if type_field:
+                yield (type_field[1], 1,
+                       "A request-class entry takes no Type "
+                       "(§source-identity)")
+        elif type_field is None:
+            yield (entry.line, 1,
+                   "Entry declares no 'Type::'; pick one from the type "
+                   "catalog, with 'Other' as the fallback "
+                   "(§source-identity)")
+            continue
+        elif type_field[0] not in TYPE_SCHEMA:
+            yield (type_field[1], 1,
+                   f"Unknown type {type_field[0]!r}; the type catalog, "
+                   f"including the fallback 'Other', is defined in the "
+                   f"guideline (§source-identity)")
+            continue
+        ordered = _entry_schema(entry)
+        if ordered is None:
+            continue
+        order_index = {key: i for i, (key, _shape) in enumerate(ordered)}
+        shape_of = dict(ordered)
+        known = ", ".join(key for key, _shape in ordered)
+        required = list(CLASS_SCHEMA[entry.cls][0])
+        if entry.cls != "request":
+            required = TYPE_SCHEMA[type_field[0]][0] + required
+        required_keys = {key for key, _shape in required}
+        previous_index = -1
+        for key, (value, line_num) in entry.fields.items():
+            if key not in order_index:
+                yield (line_num, 1,
+                       f"{key!r} isn't a field of this entry; its fields "
+                       f"are: {known} (§source-identity)")
+                continue
+            index = order_index[key]
+            if index < previous_index:
+                yield (line_num, 1,
+                       f"Field {key!r} is out of order; the entry's field "
+                       f"order is: {known} (§bibliography-markup)")
+            previous_index = max(previous_index, index)
+            if value == "unknown":
+                if key in CLASS_SIGNATURE:
+                    yield (line_num, 1,
+                           f"{key!r} can't be unknown: the class fields "
+                           f"record the author's own acts and computations "
+                           f"(§source-identity)")
+                elif key not in required_keys:
+                    yield (line_num, 1,
+                           f"Optional field {key!r} with the value "
+                           f"'unknown'; omit an unknown optional field "
+                           f"(§source-identity)")
+                continue
+            shape_name = shape_of[key]
+            shape = SHAPES[shape_name]
+            if shape and not shape[0].match(value):
+                shown = value if len(value) <= 40 else value[:37] + "..."
+                yield (line_num, 1,
+                       f"{key!r} value {shown!r} isn't {shape[1]} "
+                       f"(§source-identity)")
+        for key, _shape in required:
+            if key not in entry.fields:
+                yield (entry.line, 1,
+                       f"Entry lacks the required field '{key}::' "
+                       f"(§source-identity)")
+        if (entry.cls != "request"
+                and type_field[0] in STATUS_REQUIRED_TYPES
+                and "Status" not in entry.fields):
+            yield (entry.line, 1,
+                   f"A {type_field[0]} entry states 'Status::': its "
+                   f"standing - draft or final - decides what it can "
+                   f"support (§source-status)")
+
+
+def rule_closed_source_list(doc: Document) -> Iterator[Finding]:
+    ana = source_analysis(doc)
+    cited = {ref.anchor for cf in ana.citations for ref in cf.sources}
+    for entry in ana.entries:
+        if entry.id not in cited:
+            yield (entry.line, 1,
+                   f"Bibliography entry {entry.id!r} is cited by no citation "
+                   f"footnote; every listed source substantiates at least "
+                   f"one claim (§closed-source-list)")
+    for cf in ana.citations:
+        for ref in cf.sources:
+            if ref.anchor not in ana.bib_ids:
+                yield (cf.line, ref.col,
+                       f"Citation references {ref.anchor!r}, which is not a "
+                       f"bibliography entry (§closed-source-list)")
+
+
+def _doc_dir(doc: Document) -> str:
+    return os.path.dirname(os.path.abspath(doc.path)) or "."
+
+
+def _file_sha256(path: str, cache: Dict[str, str]) -> str:
+    if path not in cache:
+        digest = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                digest.update(chunk)
+        cache[path] = digest.hexdigest()
+    return cache[path]
+
+
+def rule_source_file(doc: Document) -> Iterator[Finding]:
+    ana = source_analysis(doc)
+    base = _doc_dir(doc)
+    for entry in ana.entries:
+        if entry.cls != "archived-file":
+            continue
+        full = os.path.normpath(os.path.join(base, entry.path))
+        if not os.path.isfile(full):
+            yield (entry.line, 1,
+                   f"Archived source file {entry.path!r} doesn't exist "
+                   f"relative to the document (§source-identity)")
+            continue
+        actual = _file_sha256(full, ana.sha_cache)
+        if actual != entry.sha256:
+            yield (entry.line, 1,
+                   f"Archived source {entry.path!r} hashes to "
+                   f"{actual[:12]}..., not the recorded SHA-256 "
+                   f"{entry.sha256[:12]}...; the file changed after it was "
+                   f"cited (§source-identity)")
+
+
+def _git(base: str, *args: str) -> Optional[str]:
+    try:
+        proc = subprocess.run(["git", "-C", base, *args],
+                              capture_output=True, text=True)
+    except OSError:
+        return None
+    return proc.stdout if proc.returncode == 0 else None
+
+
+def _doc_mode(doc: Document) -> str:
+    """'pinned' when the linted document is git-tracked and clean, 'draft'
+    when it sits in a repository in any other state, 'nogit' outside one.
+    Every git call is pathspec-scoped, so the throwaway files other engines
+    write beside the source never leak into the answer."""
+    ana = source_analysis(doc)
+    if ana.mode:
+        return ana.mode
+    base = _doc_dir(doc)
+    name = os.path.basename(doc.path)
+    if _git(base, "rev-parse", "--is-inside-work-tree") is None:
+        ana.mode = "nogit"
+    elif (_git(base, "ls-files", "--error-unmatch", "--", name) is not None
+          and (_git(base, "status", "--porcelain", "--", name) or "") == ""):
+        ana.mode = "pinned"
+    else:
+        ana.mode = "draft"
+    return ana.mode
+
+
+def _pinned_findings(doc: Document) -> List[Finding]:
+    ana = source_analysis(doc)
+    if ana.pinned_findings is not None:
+        return ana.pinned_findings
+    base = _doc_dir(doc)
+    findings: List[Finding] = []
+    for entry in ana.entries:
+        if entry.cls != "archived-file":
+            continue
+        if not os.path.isfile(os.path.normpath(os.path.join(base,
+                                                            entry.path))):
+            continue  # rule_source_file already reports the absence
+        if _git(base, "ls-files", "--error-unmatch", "--",
+                entry.path) is None:
+            findings.append((entry.line, 1,
+                             f"Archived source {entry.path!r} isn't tracked "
+                             f"by git, so the citation isn't pinned to "
+                             f"committed bytes (§source-identity)"))
+            continue
+        status = _git(base, "status", "--porcelain", "--", entry.path)
+        if status is not None and status.strip():
+            findings.append((entry.line, 1,
+                             f"Archived source {entry.path!r} has "
+                             f"uncommitted changes; commit it so the cited "
+                             f"bytes are pinned (§source-identity)"))
+    ana.pinned_findings = findings
+    return findings
+
+
+def rule_source_pinned(doc: Document) -> Iterator[Finding]:
+    if _doc_mode(doc) == "pinned":
+        yield from _pinned_findings(doc)
+
+
+def rule_source_pinned_draft(doc: Document) -> Iterator[Finding]:
+    if _doc_mode(doc) == "draft":
+        yield from _pinned_findings(doc)
+
+
+def _xml_paragraph_text(data: bytes) -> str:
+    """Visible text of an OOXML part: per paragraph element (`w:p` in
+    WordprocessingML, `a:p` in DrawingML) the text runs are concatenated
+    WITHOUT separators, because one word routinely splits across runs;
+    breaks and tabs become spaces; paragraphs join with spaces."""
+    root = ET.fromstring(data)
+    chunks: List[str] = []
+    for para in root.iter():
+        if para.tag.rsplit("}", 1)[-1] != "p":
+            continue
+        run: List[str] = []
+        for el in para.iter():
+            tag = el.tag.rsplit("}", 1)[-1]
+            if tag == "t" and el.text:
+                run.append(el.text)
+            elif tag in ("br", "tab", "cr"):
+                run.append(" ")
+        chunks.append("".join(run))
+    return " ".join(chunks)
+
+
+class _HTMLText(HTMLParser):
+    """Visible text of an HTML document (an archived web-source snapshot):
+    script and style contents are dropped, everything else concatenates."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts: List[str] = []
+        self._skip = 0
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        if tag in ("script", "style"):
+            self._skip += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in ("script", "style") and self._skip:
+            self._skip -= 1
+
+    def handle_data(self, data: str) -> None:
+        if not self._skip:
+            self.parts.append(data)
+
+
+def _xlsx_text(zf: "zipfile.ZipFile") -> str:
+    texts: List[str] = []
+    names = zf.namelist()
+    if "xl/sharedStrings.xml" in names:
+        root = ET.fromstring(zf.read("xl/sharedStrings.xml"))
+        for si in root:
+            texts.append("".join(el.text for el in si.iter()
+                                 if el.tag.rsplit("}", 1)[-1] == "t"
+                                 and el.text))
+    for name in sorted(names):
+        if not (name.startswith("xl/worksheets/") and name.endswith(".xml")):
+            continue
+        root = ET.fromstring(zf.read(name))
+        for cell in root.iter():
+            if cell.tag.rsplit("}", 1)[-1] == "is":  # inline string
+                texts.append("".join(el.text for el in cell.iter()
+                                     if el.tag.rsplit("}", 1)[-1] == "t"
+                                     and el.text))
+    return " ".join(texts)
+
+
+IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".gif",
+              ".webp")
+
+
+def _extract_source_text(path: str) -> Tuple[Optional[str], str]:
+    """(text, "") when text is extractable from the archived source, else
+    (None, why-not). Stdlib-only except PDF, which uses the required
+    `pdftotext` binary. Never raises: an unreadable source downgrades the
+    quote check to a warning instead of crashing the run.
+
+    The XML inside OOXML containers is parsed with the stdlib parser on
+    purpose (the linter takes no third-party imports). The inputs are files
+    the author archived into the document's own repository, not attacker
+    traffic, and a hostile container is contained anyway: expat's built-in
+    entity-expansion limits and any parse failure land in the except clause
+    below, i.e. in the 'unverifiable' warning path."""
+    ext = os.path.splitext(path)[1].lower()
+    try:
+        if ext == ".pdf":
+            if shutil.which("pdftotext") is None:
+                return None, "pdftotext is not on PATH"
+            proc = subprocess.run(["pdftotext", "-enc", "UTF-8", path, "-"],
+                                  capture_output=True, text=True)
+            if proc.returncode != 0:
+                return None, "pdftotext failed on the file"
+            return proc.stdout, ""
+        if ext in (".docx", ".pptx"):
+            with zipfile.ZipFile(path) as zf:
+                if ext == ".docx":
+                    parts = [n for n in ("word/document.xml",
+                                         "word/footnotes.xml",
+                                         "word/endnotes.xml")
+                             if n in zf.namelist()]
+                else:
+                    parts = sorted(
+                        n for n in zf.namelist()
+                        if (n.startswith("ppt/slides/slide")
+                            or n.startswith("ppt/notesSlides/"))
+                        and n.endswith(".xml"))
+                return " ".join(_xml_paragraph_text(zf.read(p))
+                                for p in parts), ""
+        if ext == ".xlsx":
+            with zipfile.ZipFile(path) as zf:
+                # Numeric cell values are not extracted: quote the labels
+                # around a number, not the raw number alone.
+                return _xlsx_text(zf), ""
+        if ext in (".odt", ".ods", ".odp"):
+            with zipfile.ZipFile(path) as zf:
+                return " ".join(
+                    ET.fromstring(zf.read("content.xml")).itertext()), ""
+        if ext in (".html", ".htm", ".xhtml"):
+            with open(path, encoding="utf-8") as f:
+                parser = _HTMLText()
+                parser.feed(f.read())
+                return " ".join(parser.parts), ""
+        if ext == ".eml":
+            with open(path, "rb") as f:
+                msg = email.message_from_binary_file(
+                    f, policy=email.policy.default)
+            chunks = [str(msg.get(h, ""))
+                      for h in ("Subject", "From", "To", "Date")]
+            for part in msg.walk():
+                ctype = part.get_content_type()
+                if ctype == "text/plain":
+                    chunks.append(part.get_content())
+                elif ctype == "text/html":
+                    parser = _HTMLText()
+                    parser.feed(part.get_content())
+                    chunks.append(" ".join(parser.parts))
+            return " ".join(chunks), ""
+        if ext in IMAGE_EXTS:
+            proc = subprocess.run(["tesseract", path, "-"],
+                                  capture_output=True, text=True)
+            if proc.returncode != 0:
+                return None, "tesseract failed on the image"
+            return proc.stdout, ""
+        with open(path, encoding="utf-8") as f:
+            return f.read(), ""
+    except UnicodeDecodeError:
+        return None, "binary content"
+    except (zipfile.BadZipFile, ET.ParseError, KeyError, LookupError,
+            ValueError, OSError):
+        return None, f"malformed or unreadable {ext or 'file'} container"
+
+
+def _norm_ws(text: str) -> str:
+    return " ".join(text.split())
+
+
+def _quote_results(doc: Document) -> List[Tuple[Finding, str]]:
+    """(finding, kind) pairs for the quote checks; kind is 'fail' for a
+    checkable quote that is absent and 'unverifiable' for content no text
+    can be extracted from. The comparison is case-sensitive -- the quote is
+    verbatim -- with whitespace runs collapsed on both sides."""
+    ana = source_analysis(doc)
+    if ana.quote_results is not None:
+        return ana.quote_results
+    base = _doc_dir(doc)
+    entry_by_id = {e.id: e for e in ana.entries}
+    text_cache: Dict[str, Tuple[Optional[str], str]] = {}
+    results: List[Tuple[Finding, str]] = []
+    stats = {"checked": 0, "verified": 0, "ocr_checked": 0, "ocr_verified": 0}
+    for cf in ana.citations:
+        for ref in cf.sources:
+            entry = entry_by_id.get(ref.anchor)
+            if entry is None or entry.cls != "archived-file" or not ref.quote:
+                continue
+            full = os.path.normpath(os.path.join(base, entry.path))
+            if not os.path.isfile(full):
+                continue  # rule_source_file already reports the absence
+            if full not in text_cache:
+                text_cache[full] = _extract_source_text(full)
+            text, why_not = text_cache[full]
+            is_image = os.path.splitext(full)[1].lower() in IMAGE_EXTS
+            stats["checked"] += 1
+            stats["ocr_checked"] += is_image
+            if text is None:
+                results.append(((cf.line, ref.col,
+                                 f"Quote from {entry.path!r} isn't "
+                                 f"mechanically verifiable ({why_not}); "
+                                 f"verify it by eye (§quote-and-locator)"),
+                                "unverifiable"))
+            elif _norm_ws(ref.quote) in _norm_ws(text):
+                stats["verified"] += 1
+                stats["ocr_verified"] += is_image
+            else:
+                # An OCR miss on an image is lossy evidence, not proof of a
+                # broken quote, so it warns instead of gating the run.
+                if is_image:
+                    results.append(((cf.line, ref.col,
+                                     f"Quote not found in the OCR text of "
+                                     f"{entry.path!r} (OCR is lossy); "
+                                     f"verify it by eye "
+                                     f"(§quote-and-locator)"),
+                                    "unverifiable"))
+                else:
+                    results.append(((cf.line, ref.col,
+                                     f"Quote not found verbatim in "
+                                     f"{entry.path!r} (whitespace-"
+                                     f"insensitive search); the claim's "
+                                     f"support is broken "
+                                     f"(§quote-and-locator)"),
+                                    "fail"))
+    ana.quote_results = results
+    ana.quote_stats = stats
+    return results
+
+
+def rule_source_quote(doc: Document) -> Iterator[Finding]:
+    yield from (f for f, kind in _quote_results(doc) if kind == "fail")
+
+
+def rule_source_quote_unverifiable(doc: Document) -> Iterator[Finding]:
+    yield from (f for f, kind in _quote_results(doc)
+                if kind == "unverifiable")
 
 
 # ============================================================================
@@ -1051,14 +2143,15 @@ ABBREV_RE = re.compile(r"\b(?:e\.g|i\.e|etc|vs|cf)\.", re.IGNORECASE)
 SENTENCE_END_RE = re.compile(r"[.!?]+[\"')\]]*(?:\s+|$)")
 PROSE_WORD_RE = re.compile(r"[^\W\d_]+")
 XREF_TEXT_RE = re.compile(r"xref:[^\[\]\s]*\[([^\]]*)\]")
-BLOCK_ANCHOR_FULL_RE = re.compile(r"\[\[[^\]]*\]\]")
+BLOCK_ANCHOR_FULL_RE = re.compile(r"\[\[\[?[^\]]*\]\]\]?")
 # A footnote is an aside attached to a word, not part of the sentence that
 # carries it. Its text must not inflate the sentence-length, paragraph, and
 # section-body word counts, and its markup must not glue the two prose
 # sentences it sits between. Dropping the whole `footnote:id[...]` macro (named
 # or anonymous) before those rules run restores the sentence boundary the
-# attaching period marks.
-FOOTNOTE_RE = re.compile(r"footnote:[\w-]*\[(?:[^\[\]]|\[[^\[\]]*\])*\]")
+# attaching period marks. The `\\.` alternative steps over escaped characters,
+# so a citation quote's `\]` doesn't truncate the match mid-macro.
+FOOTNOTE_RE = re.compile(r"footnote:[\w-]*\[(?:\\.|[^\[\]]|\[[^\[\]]*\])*\]")
 
 MAX_SENTENCES_PER_PARAGRAPH = 8
 MAX_SECTION_BODY_WORDS = 600
@@ -1078,9 +2171,14 @@ def _rendered(text: str) -> str:
 
 def _paragraphs(doc: Document) -> Iterator[Line]:
     """Prose content lines: paragraphs and list items, without headings,
-    block titles, metadata, tables, or macros standing alone."""
+    block titles, metadata, tables, or macros standing alone. Bibliography
+    entries are records, not prose, so the sentence and vocabulary rules
+    (and the diagnostics totals) skip the bibliography section."""
+    ana = source_analysis(doc)
     for line in doc.lines:
         if line.block != "none" or line.in_table:
+            continue
+        if _in_bib(ana, line.num):
             continue
         s = line.text.strip()
         if not s or HEADING_RE.match(line.text):
@@ -1516,6 +2614,21 @@ def file_diagnostics(doc: Document) -> List[Tuple[str, str]]:
                      f"{_top_abstract_words(part, lexicon)}"))
     elif not is_english:
         rows.append(("abstractness", "skipped (Polish document)"))
+    ana = source_analysis(doc)
+    if ana.bib_attr_line or ana.citations:
+        n_defs = sum(1 for c in ana.citations if not c.is_reuse)
+        n_reuses = sum(1 for c in ana.citations if c.is_reuse)
+        _quote_results(doc)
+        stats = ana.quote_stats or {}
+        rows.append(("sources",
+                     f"{len(ana.entries)} bibliography entries · "
+                     f"{n_defs} citations · {n_reuses} reuses · "
+                     f"{stats.get('verified', 0)}/{stats.get('checked', 0)}"
+                     f" quotes verified · git mode {_doc_mode(doc)}"))
+        if stats.get("ocr_checked"):
+            rows.append(("tesseract",
+                         f"{stats['ocr_verified']}/{stats['ocr_checked']} "
+                         f"image quotes found in OCR text"))
     return rows
 
 
@@ -1565,6 +2678,18 @@ RULES: List[Rule] = [
     Rule("sentence-length", "error", rule_sentence_length),
     Rule("concrete-vocabulary", "error", rule_abstract_vocabulary),
     Rule("nominalization-density", "error", rule_nominalization_density),
+    Rule("split-code-dlist", "error", rule_split_code_dlist),
+    Rule("anchor-in-code-span", "error", rule_anchor_in_code_span),
+    Rule("footnote-punctuation", "error", rule_footnote_dot),
+    Rule("citation-footnote-format", "error", rule_citation_footnote_format),
+    Rule("bibliography-format", "error", rule_bibliography_format),
+    Rule("closed-source-list", "error", rule_closed_source_list),
+    Rule("source-file", "error", rule_source_file),
+    Rule("source-pinned", "error", rule_source_pinned),
+    Rule("source-pinned-draft", "warning", rule_source_pinned_draft),
+    Rule("source-quote", "error", rule_source_quote),
+    Rule("source-quote-unverifiable", "warning",
+         rule_source_quote_unverifiable),
 ]
 
 
@@ -1587,11 +2712,54 @@ def require_vale() -> None:
         sys.exit(2)
 
 
-def run_vale(path: str) -> List[tuple]:
-    proc = subprocess.run(
-        ["vale", "--output=JSON", path],
-        capture_output=True, text=True,
-    )
+# Vale must lint the claim prose around a citation but never the quote inside
+# it: the quote is the source's wording, not the author's. Filtering Vale's
+# findings by their reported positions would trust Vale's drift-prone column
+# mapping, so the exclusion happens on the input instead: Vale lints a shadow
+# copy of the document in which each citation quote's delimiters `"+...+"` are
+# swapped to `` `+...+` `` -- same length, so every line and column maps back
+# 1:1 -- and Vale skips the resulting code span natively. The shadow file is
+# written beside the source (config discovery walks up from the file) with the
+# source's own suffix, so language-specific styles still apply.
+
+def _vale_shadow(doc: Document) -> Optional[str]:
+    ana = source_analysis(doc)
+    spans: Dict[int, List[Tuple[int, int]]] = {}
+    for cf in ana.citations:
+        spans.setdefault(cf.line, []).append((cf.start_col, cf.end_col))
+    if not spans:
+        return None
+    lines = []
+    for line in doc.lines:
+        text = line.text
+        for start, end in spans.get(line.num, ()):
+            seg = text[start - 1:end - 1]
+            seg = seg.replace('"+', "`+").replace('+"', "+`")
+            text = text[:start - 1] + seg + text[end - 1:]
+        lines.append(text)
+    return "\n".join(lines) + "\n"
+
+
+def run_vale(path: str, doc: Document) -> List[tuple]:
+    shadow = _vale_shadow(doc)
+    target, tmp = path, None
+    if shadow is not None:
+        src_dir = os.path.dirname(path) or "."
+        suffix = ".pl.adoc" if path.endswith(".pl.adoc") else ".adoc"
+        with tempfile.NamedTemporaryFile(
+                "w", suffix=suffix, dir=src_dir, delete=False,
+                encoding="utf-8") as tf:
+            tf.write(shadow)
+            tmp = tf.name
+        target = tmp
+    try:
+        proc = subprocess.run(
+            ["vale", "--output=JSON", target],
+            capture_output=True, text=True,
+        )
+    finally:
+        if tmp is not None:
+            os.unlink(tmp)
     try:
         data = json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
@@ -1732,6 +2900,28 @@ def require_asciidoctor() -> None:
         sys.exit(2)
 
 
+def require_pdftotext() -> None:
+    """pdftotext (poppler) extracts the text the source-quote rule greps in
+    PDF sources. Like vale and asciidoctor it is a hard dependency: a missing
+    binary fails loudly instead of silently skipping the quote checks."""
+    if shutil.which("pdftotext") is None:
+        sys.stderr.write(
+            "adoc_lint: `pdftotext` is required but was not found on PATH. "
+            "Install poppler (see README, Linting).\n")
+        sys.exit(2)
+
+
+def require_tesseract() -> None:
+    """tesseract reads the OCR text the source-quote rule searches for quotes
+    cited from image sources. The binary is a hard dependency like pdftotext;
+    an OCR miss still only warns, because OCR is lossy."""
+    if shutil.which("tesseract") is None:
+        sys.stderr.write(
+            "adoc_lint: `tesseract` is required but was not found on PATH. "
+            "Install tesseract (see README, Linting).\n")
+        sys.exit(2)
+
+
 def run_asciidoctor(path: str) -> List[tuple]:
     proc = subprocess.run(
         ["asciidoctor", "--out-file", os.devnull, path],
@@ -1752,6 +2942,31 @@ def run_asciidoctor(path: str) -> List[tuple]:
 # Driver
 # ============================================================================
 
+def filter_vale_citations(findings: List[tuple], doc: Document) -> List[tuple]:
+    """Drop Vale findings inside the source-citation apparatus. Bibliography
+    entries are records whose vocabulary (ids, hashes, surnames, format
+    names) isn't the author's prose, and a citation footnote's locator and
+    quote are governed by the citation grammar, not the prose rules -- both
+    are owned by the structural citation rules instead. The bibliography test
+    is line-ranged and immune to Vale's column drift; the footnote test drops
+    a finding whose start column falls inside the macro span."""
+    ana = source_analysis(doc)
+    if not ana.bib_attr_line and not ana.citations:
+        return findings
+    spans: Dict[int, List[Tuple[int, int]]] = {}
+    for cf in ana.citations:
+        spans.setdefault(cf.line, []).append((cf.start_col, cf.end_col))
+    kept = []
+    for f in findings:
+        line, col = f[0], f[1]
+        if _in_bib(ana, line):
+            continue
+        if any(start <= col < end for start, end in spans.get(line, ())):
+            continue
+        kept.append(f)
+    return kept
+
+
 def lint_file(path: str) -> Tuple[List[tuple], List[Tuple[str, str]]]:
     doc = scan(path)
     findings: List[tuple] = []
@@ -1762,8 +2977,8 @@ def lint_file(path: str) -> Tuple[List[tuple], List[Tuple[str, str]]]:
         for line, col, message in rule.func(doc):
             findings.append((line, col, rule.id, rule.severity, message))
 
-    findings.extend(run_vale(path))
-    findings.extend(run_vale_tables(doc))
+    findings.extend(filter_vale_citations(run_vale(path, doc), doc))
+    findings.extend(filter_vale_citations(run_vale_tables(doc), doc))
     findings.extend(run_asciidoctor(path))
     findings.sort(key=lambda f: (f[0], f[1], f[2]))
     return findings, file_diagnostics(doc)
@@ -1825,8 +3040,17 @@ def render_text(file_results: List[tuple], style: Style, n_rules: int) -> str:
             sorted(counts, key=lambda s: SEVERITY_ORDER.get(s, 9)))
         files_hit = sum(1 for _, fs, _ in file_results if fs)
         out.append("")
-        out.append(" " + style.paint("1;31", f"✗ {parts}")
-                   + style.paint("2", f"  in {_plural(files_hit, 'file')}"))
+        # Only errors fail the run; a warnings-only summary says so instead
+        # of painting a failure glyph over a passing result.
+        if counts.get("error"):
+            out.append(" " + style.paint("1;31", f"✗ {parts}")
+                       + style.paint("2",
+                                     f"  in {_plural(files_hit, 'file')}"))
+        else:
+            out.append(" " + style.paint("1;32", "✓ Passed")
+                       + " " + style.paint("1;33", f"with {parts}")
+                       + style.paint("2",
+                                     f"  in {_plural(files_hit, 'file')}"))
     else:
         out.append(" " + style.paint("1;32", "✓ No problems found")
                    + "  " + scope)
@@ -1859,6 +3083,8 @@ def main(argv: List[str]) -> int:
 
     require_vale()
     require_asciidoctor()
+    require_pdftotext()
+    require_tesseract()
 
     file_results = [(path, *lint_file(path)) for path in paths]
     has_error = any(f[3] == "error" for _, fs, _ in file_results for f in fs)

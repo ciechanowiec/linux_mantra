@@ -699,6 +699,133 @@ def _make_resize_images(numbering: NumberingIndex) -> XmlTransform:
 
 
 # ============================================================================
+# document.xml — source-fields tables
+# ============================================================================
+#
+# A bibliography entry's metadata block (`[horizontal.source-fields]` in the
+# AsciiDoc source) arrives from the DocBook path as a two-column table whose
+# style name carries the dlist style: <w:tblStyle w:val="horizontal" />. The
+# block is a machine-facing record and must recede behind the prose the way
+# the HTML and PDF exports render it: no borders, tight rows, small muted
+# type, bold terms. Word applies whatever the undefined "horizontal" style
+# falls back to (a bordered grid at body size), so the record's look is
+# forced here with direct formatting, which always outranks a table style.
+
+SF_TABLE_MARKER = '<w:tblStyle w:val="horizontal" />'
+SF_RUN_PROPS = (
+    '<w:color w:val="595959" /><w:sz w:val="15" /><w:szCs w:val="15" />'
+)
+SF_BORDERS_AND_MARGINS = (
+    '<w:tblBorders>'
+    '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto" />'
+    '<w:left w:val="none" w:sz="0" w:space="0" w:color="auto" />'
+    '<w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto" />'
+    '<w:right w:val="none" w:sz="0" w:space="0" w:color="auto" />'
+    '<w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto" />'
+    '<w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto" />'
+    '</w:tblBorders>'
+)
+SF_CELL_MARGINS = (
+    '<w:tblCellMar>'
+    '<w:top w:w="0" w:type="dxa" /><w:left w:w="0" w:type="dxa" />'
+    '<w:bottom w:w="15" w:type="dxa" /><w:right w:w="115" w:type="dxa" />'
+    '</w:tblCellMar>'
+)
+SF_PARA_SPACING = (
+    '<w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto" />'
+)
+SF_TR_RE = re.compile(r'<w:tr>.*?</w:tr>', re.DOTALL)
+SF_TC_RE = re.compile(r'<w:tc>.*?</w:tc>', re.DOTALL)
+SF_PSTYLE_RE = re.compile(r'(<w:pPr><w:pStyle w:val="[^"]+" />)(</w:pPr>)?')
+
+
+def _compact_source_fields_tables(document_xml: str) -> str:
+    def compact(match: 're.Match[str]') -> str:
+        body = match.group(0)
+        if SF_TABLE_MARKER not in body or SF_RUN_PROPS in body:
+            return body
+        # Borderless, with hairline cell margins; both slot into tblPr at
+        # their schema positions (borders after tblInd, margins after
+        # tblLayout).
+        body = body.replace('<w:tblLayout w:type="fixed" />',
+                            SF_BORDERS_AND_MARGINS
+                            + '<w:tblLayout w:type="fixed" />'
+                            + SF_CELL_MARGINS, 1)
+        # Tight paragraphs: explicit spacing overrides the style's own.
+        body = SF_PSTYLE_RE.sub(
+            lambda m: m.group(1) + SF_PARA_SPACING + (m.group(2) or ''),
+            body)
+        # Small muted runs: append into existing run properties, wrap the
+        # bare runs.
+        body = body.replace('</w:rPr>', SF_RUN_PROPS + '</w:rPr>')
+        body = re.sub(r'<w:r>(?=<w:t)',
+                      '<w:r><w:rPr>' + SF_RUN_PROPS + '</w:rPr>', body)
+        # Bold terms: every run of each row's first cell.
+        def embolden_row(row_match: 're.Match[str]') -> str:
+            row = row_match.group(0)
+            cell_match = SF_TC_RE.search(row)
+            if not cell_match:
+                return row
+            cell = cell_match.group(0).replace(
+                '<w:rPr>', '<w:rPr><w:b />')
+            return row[:cell_match.start()] + cell + row[cell_match.end():]
+        body = SF_TR_RE.sub(embolden_row, body)
+        return body
+    return _equalize_source_fields_gaps(TABLE_RE.sub(compact, document_xml))
+
+
+# The gap above the record (the entry label's spacing-after) and the gap
+# below it (the next label's spacing-before, which Word defaults to zero)
+# must match. Both neighbors of every source-fields table get one explicit
+# spacing element; a label sitting between two tables receives it once.
+SF_GAP_SPACING = '<w:spacing w:before="120" w:after="120" />'
+SF_ADJACENT_PARA_RE = re.compile(
+    r'<w:p><w:pPr>((?:(?!</w:p>).)*?)</w:pPr>((?:(?!</w:p>).)*?)</w:p>(\s*)$',
+    re.DOTALL)
+SF_FOLLOWING_PARA_RE = re.compile(
+    r'^(\s*)<w:p><w:pPr>((?:(?!</w:p>).)*?)(</w:pPr>)', re.DOTALL)
+
+
+def _equalize_source_fields_gaps(document_xml: str) -> str:
+    pieces: List[str] = []
+    pos = 0
+    patch_following = False
+
+    def patch_leading(segment: str) -> str:
+        match = SF_FOLLOWING_PARA_RE.search(segment)
+        if not match or SF_GAP_SPACING in match.group(2):
+            return segment
+        return (segment[:match.end(2)] + SF_GAP_SPACING
+                + segment[match.end(2):])
+
+    def patch_trailing(segment: str) -> str:
+        match = SF_ADJACENT_PARA_RE.search(segment)
+        if not match or SF_GAP_SPACING in match.group(1):
+            return segment
+        insert_at = match.start(1) + len(match.group(1))
+        return segment[:insert_at] + SF_GAP_SPACING + segment[insert_at:]
+
+    for table_match in TABLE_RE.finditer(document_xml):
+        segment = document_xml[pos:table_match.start()]
+        if patch_following:
+            segment = patch_leading(segment)
+        body = table_match.group(0)
+        if SF_TABLE_MARKER in body:
+            segment = patch_trailing(segment)
+            patch_following = True
+        else:
+            patch_following = False
+        pieces.append(segment)
+        pieces.append(body)
+        pos = table_match.end()
+    tail = document_xml[pos:]
+    if patch_following:
+        tail = patch_leading(tail)
+    pieces.append(tail)
+    return ''.join(pieces)
+
+
+# ============================================================================
 # Pipeline
 # ============================================================================
 #
@@ -727,6 +854,7 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
         _strip_empty_headings,
         _force_a4_section,
         _fit_table_widths,
+        _compact_source_fields_tables,
     ],
 }
 

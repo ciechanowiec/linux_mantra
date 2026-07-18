@@ -72,3 +72,62 @@ module ExampleBlockRoleColors
 end
 
 Asciidoctor::PDF::Converter.prepend ExampleBlockRoleColors
+
+# A bibliography entry's metadata block (`[horizontal.source-fields]`) is a
+# machine-facing record: it renders small and muted so it recedes behind the
+# prose, and its monospaced values (paths, digests) take the same muted color
+# instead of the code accent. The stock horizontal-dlist table carries row
+# spacing this block can't tune away, so the rows are drawn directly: term
+# floated left in a fixed column, value indented beside it, a hair of space
+# between rows. The sizes and colors live in the theme under `source_fields`.
+# Any incompatibility with a future asciidoctor-pdf falls back to the stock
+# renderer instead of failing the export.
+module SourceFieldsRole
+  TERM_COLUMN_WIDTH = 68
+  TERM_GUTTER = 8
+  ROW_GAP = 1.5
+
+  def convert_dlist node
+    return super unless (node.roles || []).include? 'source-fields'
+    # Inline code colors are compiled into the text formatter's Transform at
+    # converter startup, so a theme override mid-render has no effect; the
+    # compiled setting itself is swapped for the duration of the block.
+    code_settings = text_formatter.instance_variable_get(:@transform)
+      &.instance_variable_get(:@theme_settings)&.dig(:code)
+    saved_code = code_settings && code_settings[:color]
+    muted = @theme.source_fields_font_color
+    code_settings[:color] = muted if code_settings && muted
+    begin
+      # The DOCX export sets a symmetric 6pt gap above and below the record;
+      # match it here: halve the inherited top margin, close with 6pt.
+      move_up 6 unless at_page_top?
+      theme_font :source_fields do
+        line_height = @theme.source_fields_line_height || 1.2
+        node.items.each do |terms, desc|
+          term_text = terms.map(&:text).join ' '
+          desc_text = desc && desc.text? ? desc.text : ''
+          advance_page if !at_page_top? && cursor < 16
+          float do
+            bounding_box [0, cursor], width: TERM_COLUMN_WIDTH do
+              theme_font :description_list_term do
+                ink_prose term_text, margin_bottom: 0,
+                          line_height: line_height
+              end
+            end
+          end
+          indent TERM_COLUMN_WIDTH + TERM_GUTTER do
+            ink_prose desc_text, margin_bottom: ROW_GAP,
+                      line_height: line_height
+          end
+        end
+      end
+      move_down 6
+    rescue StandardError
+      super
+    ensure
+      code_settings[:color] = saved_code if code_settings
+    end
+  end
+end
+
+Asciidoctor::PDF::Converter.prepend SourceFieldsRole
