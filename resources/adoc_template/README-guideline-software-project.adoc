@@ -69,13 +69,16 @@ This section defines the terms the guideline uses and states the qualities that 
 [[check-qualities]]
 === Check Qualities
 
-The checks run at the strictest settings their tools offer, relaxed only where a rule of this guideline declares a cap, a floor, an allowlist, or a xref:#suppressions[suppression].
+. The checks run at the strictest settings their tools offer, relaxed only where a rule of this guideline declares a cap, a floor, an allowlist, or a xref:#suppressions[suppression].
+. A check is deterministic: on the same state of the repository it reaches the same verdict on every run and on every machine. The one exception is the xref:#dependency-freshness[freshness check], which reads a package registry by design and states its own bound.
+. The toolchain the checks run - every analyzer, every build plugin, and every container image - is pinned to an exact version, so an upstream release can't change a verdict while the repository doesn't change.
 
 [[the-verification-command]]
 == The Verification Command
 
 . The repository defines a xref:#verification-command[verification command] and may define partial commands that run declared subsets of the checks - for example, a fast command for everyday work.
 . The verification command runs to a verdict on a fresh clone of the repository. The only preparation a fresh clone needs is installing the toolchain.
+. A run of the verification command doesn't write to the tracked tree of the repository. A tool that reshapes a source file, such as a formatter or an import sorter, runs as a check that fails when it would change a file and applies the change only through a separate command the repository declares. A check compares the tree after a run against the tree before it and fails on any difference, so a pass describes the committed tree and not a tree the run reshaped.
 . The verification command itself starts every external service the tests use.
 . The head commit of the main branch passes the verification command.
 . A check the repository implements itself, rather than one it binds to a third-party tool, is source code of the repository. It meets every rule of the sections xref:#code-rules[] and xref:#testing[], and the harness checks it as it checks any other source code.
