@@ -69,6 +69,15 @@
         return clone.innerHTML.replace(/^\s*\.\s*/, '').trim();
     };
 
+    // A footnote marker sits at the end of the claim it cites, and prose wraps, so the claim
+    // occupies the marker's own line and the lines above it. Placing the note above therefore
+    // hides the very text the reader opened it to check. Preferred placement is the margin
+    // beside the text column, where nothing is covered at all; where the window is too narrow
+    // for that, below the marker, which at worst covers the *next* sentence.
+    var SIDE_MIN_WIDTH_PX = 240;   // narrower than this a margin note reads as a ransom note
+    var SIDE_MAX_WIDTH_PX = 380;
+    var GAP_PX = 12;
+
     var show = function (link) {
         window.clearTimeout(hideTimer);
         var html = contentOf(link);
@@ -77,13 +86,35 @@
         }
         var pop = element();
         pop.innerHTML = html;
-        pop.style.visibility = 'hidden';   // measure before placing, so it never flashes
+        pop.classList.remove('fn-pop--side');   // placement is decided fresh on every open
+        pop.style.width = '';
+        pop.style.visibility = 'hidden';        // measure before placing, so it never flashes
         pop.style.display = 'block';
 
         var anchor = link.getBoundingClientRect();
-        var left = Math.min(Math.max(8, anchor.left), Math.max(8, window.innerWidth - pop.offsetWidth - 8));
-        var fitsAbove = anchor.top > pop.offsetHeight + 12;
-        var top = fitsAbove ? anchor.top - pop.offsetHeight - 8 : anchor.bottom + 8;
+        // The margin starts at the right edge of the content column, not of the marker's own
+        // block: an indented block (admonition, nested list) sits inside the column, and a note
+        // pinned to its edge would still overlap prose belonging to the column.
+        var content = document.getElementById('content');
+        var columnRight = content ? content.getBoundingClientRect().right : anchor.right;
+        // clientWidth, not innerWidth: the latter counts the scrollbar, which would let the
+        // note sit under it.
+        var viewportWidth = document.documentElement.clientWidth;
+        var margin = viewportWidth - columnRight - 2 * GAP_PX;
+        var left;
+        var top;
+
+        if (margin >= SIDE_MIN_WIDTH_PX) {
+            pop.classList.add('fn-pop--side');
+            pop.style.width = Math.min(margin, SIDE_MAX_WIDTH_PX) + 'px';
+            left = columnRight + GAP_PX;
+            top = anchor.top + anchor.height / 2 - pop.offsetHeight / 2;   // centred on the marker
+            top = Math.min(Math.max(GAP_PX, top), Math.max(GAP_PX, window.innerHeight - pop.offsetHeight - GAP_PX));
+        } else {
+            left = Math.min(Math.max(8, anchor.left), Math.max(8, viewportWidth - pop.offsetWidth - 8));
+            var fitsBelow = window.innerHeight - anchor.bottom > pop.offsetHeight + GAP_PX;
+            top = fitsBelow ? anchor.bottom + 8 : anchor.top - pop.offsetHeight - 8;
+        }
 
         pop.style.left = (left + window.pageXOffset) + 'px';
         pop.style.top = (top + window.pageYOffset) + 'px';
@@ -113,6 +144,10 @@
             hide();
         }
     });
+
+    // Placement is measured once, at open time. A resize invalidates it — margin mode may no
+    // longer fit, and the marker has moved — so drop the note rather than leave it stranded.
+    window.addEventListener('resize', hide);
 })();
 
 var oldtoc = document.getElementById('toctitle').nextElementSibling;

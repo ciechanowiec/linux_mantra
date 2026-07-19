@@ -119,6 +119,15 @@
     text-align: left;
 }
 
+/* Margin placement: the note sits beside the text column rather than over it, so the
+   sentence it cites stays readable while the reader checks the citation. Width is set
+   inline from the margin actually available; only the height needs capping here. */
+.fn-pop--side {
+    max-width: none;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
 @media (prefers-color-scheme: dark) {
     .fn-pop {
         border-color: #44464f;
