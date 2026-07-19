@@ -15,8 +15,9 @@ The linter runs three engines and merges their findings into one stream:
      rules that Vale cannot see, because Vale lints rendered prose and loses the
      markup layer (heading depth, list nesting, anchor syntax, box-drawing).
   3. Asciidoctor (an external binary) as a render pass: the document is
-     converted to a discarded output file and every WARNING-or-worse message
-     (missing includes, malformed markup) is mapped onto the finding stream.
+     converted to temporary HTML and every WARNING-or-worse message (missing
+     includes, malformed markup) is mapped onto the finding stream. The HTML
+     is also checked for footnote macros left literal in rendered prose.
      Asciidoctor does NOT validate internal cross-references, so the
      structural rule `xref-targets` covers that gap.
 
@@ -3028,6 +3029,32 @@ def run_vale_tables(doc: Document) -> List[tuple]:
 ASCIIDOCTOR_MSG_RE = re.compile(
     r"^asciidoctor: ([A-Z]+): (?:(.*?): line (\d+): )?(.*)$")
 ASCIIDOCTOR_GATING = {"WARNING", "ERROR", "FAILED", "FATAL"}
+RENDERED_FOOTNOTE_RE = re.compile(r"footnote:([\w-]*)\[")
+
+
+class _RenderedMacroParser(HTMLParser):
+    """Collect unexpanded footnote macros from visible, non-code HTML text."""
+
+    _excluded = {"code", "pre", "script", "style"}
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.excluded_depth = 0
+        self.footnotes: List[str] = []
+
+    def handle_starttag(self, tag: str, attrs: List[tuple]) -> None:
+        if tag in self._excluded:
+            self.excluded_depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self._excluded and self.excluded_depth:
+            self.excluded_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if self.excluded_depth:
+            return
+        self.footnotes.extend(m.group(1)
+                              for m in RENDERED_FOOTNOTE_RE.finditer(data))
 
 
 def require_asciidoctor() -> None:
@@ -3061,10 +3088,17 @@ def require_tesseract() -> None:
 
 
 def run_asciidoctor(path: str) -> List[tuple]:
-    proc = subprocess.run(
-        ["asciidoctor", "--out-file", os.devnull, path],
-        capture_output=True, text=True,
-    )
+    with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as tf:
+        rendered_path = tf.name
+    try:
+        proc = subprocess.run(
+            ["asciidoctor", "--out-file", rendered_path, path],
+            capture_output=True, text=True,
+        )
+        with open(rendered_path, encoding="utf-8") as rendered_file:
+            rendered = rendered_file.read()
+    finally:
+        os.unlink(rendered_path)
     findings = []
     for raw in proc.stderr.splitlines():
         m = ASCIIDOCTOR_MSG_RE.match(raw.strip())
@@ -3073,6 +3107,25 @@ def run_asciidoctor(path: str) -> List[tuple]:
         line = int(m.group(3)) if m.group(3) else 1
         findings.append((line, 1, "asciidoctor", "error",
                          f"Asciidoctor {m.group(1).lower()}: {m.group(4)}"))
+
+    parser = _RenderedMacroParser()
+    parser.feed(rendered)
+    with open(path, encoding="utf-8") as source_file:
+        source_lines = source_file.read().splitlines()
+    seen = set()
+    for footnote_id in parser.footnotes:
+        marker = f"footnote:{footnote_id}["
+        line = next((num for num, text in enumerate(source_lines, 1)
+                     if marker in text), 1)
+        key = (line, footnote_id)
+        if key in seen:
+            continue
+        seen.add(key)
+        findings.append((
+            line, 1, "asciidoctor", "error",
+            "Asciidoctor left a footnote macro literal in rendered prose; "
+            "check for an earlier unescaped inline delimiter",
+        ))
     return findings
 
 
