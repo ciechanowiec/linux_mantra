@@ -17,7 +17,8 @@ The linter runs three engines and merges their findings into one stream:
   3. Asciidoctor (an external binary) as a render pass: the document is
      converted to temporary HTML and every WARNING-or-worse message (missing
      includes, malformed markup) is mapped onto the finding stream. The HTML
-     is also checked for footnote macros left literal in rendered prose.
+     is also checked for footnote macros and citation passthrough delimiters
+     left literal in rendered prose.
      Asciidoctor does NOT validate internal cross-references, so the
      structural rule `xref-targets` covers that gap.
 
@@ -3030,10 +3031,11 @@ ASCIIDOCTOR_MSG_RE = re.compile(
     r"^asciidoctor: ([A-Z]+): (?:(.*?): line (\d+): )?(.*)$")
 ASCIIDOCTOR_GATING = {"WARNING", "ERROR", "FAILED", "FATAL"}
 RENDERED_FOOTNOTE_RE = re.compile(r"footnote:([\w-]*)\[")
+RENDERED_QUOTED_PASS_RE = re.compile(r'"\+(.*?)\+"')
 
 
 class _RenderedMacroParser(HTMLParser):
-    """Collect unexpanded footnote macros from visible, non-code HTML text."""
+    """Collect unexpanded inline markup from visible, non-code HTML text."""
 
     _excluded = {"code", "pre", "script", "style"}
 
@@ -3041,6 +3043,7 @@ class _RenderedMacroParser(HTMLParser):
         super().__init__()
         self.excluded_depth = 0
         self.footnotes: List[str] = []
+        self.quoted_passes: List[str] = []
 
     def handle_starttag(self, tag: str, attrs: List[tuple]) -> None:
         if tag in self._excluded:
@@ -3055,6 +3058,8 @@ class _RenderedMacroParser(HTMLParser):
             return
         self.footnotes.extend(m.group(1)
                               for m in RENDERED_FOOTNOTE_RE.finditer(data))
+        self.quoted_passes.extend(m.group(1)
+                                  for m in RENDERED_QUOTED_PASS_RE.finditer(data))
 
 
 def require_asciidoctor() -> None:
@@ -3125,6 +3130,19 @@ def run_asciidoctor(path: str) -> List[tuple]:
             line, 1, "asciidoctor", "error",
             "Asciidoctor left a footnote macro literal in rendered prose; "
             "check for an earlier unescaped inline delimiter",
+        ))
+    for quote in parser.quoted_passes:
+        marker = f'"+{quote}+"'
+        line = next((num for num, text in enumerate(source_lines, 1)
+                     if marker in text), 1)
+        key = (line, quote)
+        if key in seen:
+            continue
+        seen.add(key)
+        findings.append((
+            line, 1, "asciidoctor", "error",
+            "Asciidoctor left citation passthrough plus signs in rendered "
+            "prose; check for a conflicting inline delimiter on the line",
         ))
     return findings
 
