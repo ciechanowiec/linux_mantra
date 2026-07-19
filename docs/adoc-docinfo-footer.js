@@ -38,16 +38,36 @@
 // open while the pointer rests on it so any links inside stay reachable. HTML only: the PDF
 // renders real footnotes at the foot of the page, and the DOCX export loads no docinfo.
 (function () {
-    var HIDE_DELAY_MS = 180;
+    var HIDE_DELAY_MS = 180;             // grace period once the pointer is already at the note
+    var TRAVEL_SPEED_PX_PER_MS = 0.8;    // an unhurried pointer, not a flick
+    var MAX_TRAVEL_MS = 1400;            // a stuck-open note is worse than a lost one
+    var AWAY_TOLERANCE_PX = 60;          // absorbs the wobble of an imprecise but honest approach
     var popover;
     var hideTimer;
+    var hidePending = false;   // the mousemove watcher only arbitrates a hide already scheduled
+    var distanceAtLeave;
+
+    var cancelHide = function () {
+        window.clearTimeout(hideTimer);
+        hidePending = false;
+    };
+
+    var distanceToNote = function (event) {
+        if (!popover || popover.style.display === 'none' || !event || typeof event.clientX !== 'number') {
+            return 0;
+        }
+        var box = popover.getBoundingClientRect();
+        var dx = Math.max(box.left - event.clientX, 0, event.clientX - box.right);
+        var dy = Math.max(box.top - event.clientY, 0, event.clientY - box.bottom);
+        return Math.sqrt(dx * dx + dy * dy);
+    };
 
     var element = function () {
         if (!popover) {
             popover = document.createElement('div');
             popover.className = 'fn-pop';
             popover.setAttribute('role', 'tooltip');
-            popover.addEventListener('mouseenter', function () { window.clearTimeout(hideTimer); });
+            popover.addEventListener('mouseenter', cancelHide);
             popover.addEventListener('mouseleave', scheduleHide);
             document.body.appendChild(popover);
         }
@@ -79,7 +99,7 @@
     var GAP_PX = 12;
 
     var show = function (link) {
-        window.clearTimeout(hideTimer);
+        cancelHide();
         var html = contentOf(link);
         if (!html) {
             return;
@@ -122,14 +142,32 @@
     };
 
     var hide = function () {
+        hidePending = false;
         if (popover) {
             popover.style.display = 'none';
         }
     };
 
-    function scheduleHide() {
-        hideTimer = window.setTimeout(hide, HIDE_DELAY_MS);
+    // In margin mode the note can sit a full column away from its marker — a marker at the start
+    // of a line is the worst case — so a delay tuned for an adjacent note expires mid-journey.
+    // Budget for the gap the pointer actually has to cross. Budgeting that generously would
+    // leave the note hanging whenever the reader *isn't* heading for it, so the companion
+    // mousemove below cuts the wait short as soon as the pointer commits to going elsewhere.
+    function scheduleHide(event) {
+        window.clearTimeout(hideTimer);
+        distanceAtLeave = distanceToNote(event);
+        hidePending = true;
+        hideTimer = window.setTimeout(hide, HIDE_DELAY_MS + Math.min(distanceAtLeave / TRAVEL_SPEED_PX_PER_MS, MAX_TRAVEL_MS));
     }
+
+    document.addEventListener('mousemove', function (event) {
+        if (!hidePending) {
+            return;
+        }
+        if (distanceToNote(event) > distanceAtLeave + AWAY_TOLERANCE_PX) {
+            hide();   // committed to going elsewhere; no reason to keep waiting
+        }
+    });
 
     document.querySelectorAll('a.footnote[href^="#_footnotedef_"]').forEach(function (link) {
         link.removeAttribute('title');   // the native "View footnote." tooltip would fight the popover
