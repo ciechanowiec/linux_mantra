@@ -2858,7 +2858,8 @@ def _vale_shadow(doc: Document) -> Optional[str]:
     spans: Dict[int, List[Tuple[int, int]]] = {}
     for cf in ana.citations:
         spans.setdefault(cf.line, []).append((cf.start_col, cf.end_col))
-    if not spans:
+    has_code = any("`" in line.text for line in doc.lines)
+    if not spans and not has_code:
         return None
     lines = []
     for line in doc.lines:
@@ -2867,6 +2868,12 @@ def _vale_shadow(doc: Document) -> Optional[str]:
             seg = text[start - 1:end - 1]
             seg = seg.replace('"+', "`+").replace('+"', "+`")
             text = text[:start - 1] + seg + text[end - 1:]
+        # Blank every inline code span's content (chars between backticks -> x,
+        # length preserved) so a technical literal like `example.com` can't reach a
+        # prose style even when Vale's AsciiDoc parser fails to segment a code
+        # span inside a table cell.
+        text = CODE_SPAN_RE.sub(
+            lambda m: re.sub(r"[^`]", "x", m.group(0)), text)
         lines.append(text)
     return "\n".join(lines) + "\n"
 
