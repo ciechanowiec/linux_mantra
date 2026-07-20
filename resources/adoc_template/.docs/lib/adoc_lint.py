@@ -1178,6 +1178,21 @@ def rule_anchor_in_code_span(doc: Document) -> Iterator[Finding]:
                        "the literal as `+footnote:...[...]+`")
 
 
+# A render-integrity backstop: without a source-space after an inline
+# monospaced span, Asciidoctor can fail to recognize the span's closing
+# delimiter and render both backticks literally. The footnote itself still
+# expands, so the rendered-macro backstop below cannot detect the damage.
+def rule_footnote_after_code_span(doc: Document) -> Iterator[Finding]:
+    for line in _prose(doc):
+        for span in CODE_SPAN_RE.finditer(line.text):
+            suffix = line.text[span.end():]
+            if FOOTNOTE_OPEN_RE.match(suffix):
+                yield (line.num, span.end() + 1,
+                       "A footnote immediately after a monospaced span makes "
+                       "Asciidoctor render the backticks literally; insert a "
+                       "space before the footnote macro")
+
+
 # Serves footnote-punctuation (§footnote-punctuation): every footnote's text
 # -- ordinary or citation -- ends with a period, so no footnote reads as
 # truncated. A reuse (`footnote:id[]`) has no text of its own and is exempt.
@@ -2812,6 +2827,7 @@ RULES: List[Rule] = [
     Rule("nominalization-density", "error", rule_nominalization_density),
     Rule("split-code-dlist", "error", rule_split_code_dlist),
     Rule("anchor-in-code-span", "error", rule_anchor_in_code_span),
+    Rule("footnote-boundary", "error", rule_footnote_after_code_span),
     Rule("footnote-punctuation", "error", rule_footnote_dot),
     Rule("citation-footnote-format", "error", rule_citation_footnote_format),
     Rule("bibliography-format", "error", rule_bibliography_format),

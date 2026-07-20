@@ -1453,9 +1453,9 @@ The delivery sentence lists three modules: the ingestion module rests on the req
 [#quote-and-locator]
 ==== Quote and Locator
 
-Every source cited by a claim carries a verbatim quote and a locator. The [[quote,quote]]_quote_ is the source's exact wording that the claim rests on. It binds the two directions of support: the quote must entail the claim, and the claim must not assert more than the quote and its context support. The [[locator,locator]]_locator_ is the most specific address the source's format offers. The most common forms are the following:
+Every source cited by a claim carries a verbatim quote and a locator. The [[quote,quote]]_quote_ is the source's exact wording that the claim rests on. It binds the two directions of support: the quote must entail the claim, and the claim must not assert more than the quote and its context support. The [[locator,locator]]_locator_ is the most specific address the source's format offers. A fixed-layout source can use a stable section number or name, a page, or both. A section locator is desirable when it takes the reader closer to the quoted text than the page alone, and the page can accompany it when the combination makes retrieval faster. The most common forms are the following:
 
-* a page for a fixed layout - a PDF or a printed book,
+* a section name or number, a page, or both for a fixed layout - a PDF or a printed book,
 * a section name or number for an editable document,
 * a sheet and row for a workbook,
 * a file and line for code,
