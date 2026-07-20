@@ -132,12 +132,22 @@ ORDERED_NUMFMT_TAGS = [
     LOWER_GREEK_NUMFMT,
 ] + ['<w:numFmt w:val="lowerRoman" />'] * 6
 
+# Upper-letter lists need room for Word's post-Z labels (AA., BB., ...).
+# Roman levels use a five-eighths-inch gutter so labels through XVIII., XIX.,
+# and comparable lower-Roman values retain space before their text tab.
+ORDERED_GUTTER_DXA = [540, 900, 360] + [900] * 6
+ORDERED_TEXT_LEFT_DXA = []
 _ordered_levels = []
+ordered_marker_left = 0
 for i, numfmt_tag in enumerate(ORDERED_NUMFMT_TAGS):
-    # Level 0 hangs its identifier at the body-text margin, and each deeper
-    # level hangs its identifier at the text column of the level above, so
-    # the ladder steps by one 360-twip hanging indent per level.
-    ind_left = (i + 1) * 360
+    # Every marker begins at the text column of its parent level. Roman
+    # numerals need a wider gutter than letters or Greek labels; otherwise
+    # VII. and VIII. cross the text tab and Word advances only those items
+    # to the next default stop. A variable gutter preserves both invariants:
+    # hierarchical marker starts and one text column within each level.
+    gutter = ORDERED_GUTTER_DXA[i]
+    ind_left = ordered_marker_left + gutter
+    ORDERED_TEXT_LEFT_DXA.append(ind_left)
     _ordered_levels.append(
         f'<w:lvl w:ilvl="{i}">'
         f'<w:start w:val="1" />'
@@ -145,9 +155,12 @@ for i, numfmt_tag in enumerate(ORDERED_NUMFMT_TAGS):
         f'<w:suff w:val="tab" />'
         f'<w:lvlText w:val="%{i+1}." />'
         f'<w:lvlJc w:val="left" />'
-        f'<w:pPr><w:ind w:left="{ind_left}" w:hanging="360" /></w:pPr>'
+        f'<w:pPr><w:tabs><w:tab w:val="num" w:pos="{ind_left}" />'
+        f'</w:tabs><w:ind w:left="{ind_left}" w:hanging="{gutter}" />'
+        f'</w:pPr>'
         f'</w:lvl>'
     )
+    ordered_marker_left = ind_left
 
 ORDERED_ABSTRACT_NUM = (
     f'<w:abstractNum w:abstractNumId="{ORDERED_ABSTRACT_NUM_ID}">'
@@ -196,6 +209,20 @@ def _declare_compat_namespaces(numbering_xml: str) -> str:
 
 def _unify_ordered_lists(numbering_xml: str) -> str:
     if f'<w:nsid w:val="{ORDERED_NSID}" />' in numbering_xml:
+        # Replace the generated abstract instead of returning unchanged, so
+        # running a newer post-processor over an older converted DOCX also
+        # picks up numbering-layout fixes.
+        abstract_start = numbering_xml.find(
+            f'<w:abstractNum w:abstractNumId="{ORDERED_ABSTRACT_NUM_ID}">'
+        )
+        abstract_end = numbering_xml.find('</w:abstractNum>', abstract_start)
+        if abstract_start != -1 and abstract_end != -1:
+            abstract_end += len('</w:abstractNum>')
+            return (
+                numbering_xml[:abstract_start]
+                + ORDERED_ABSTRACT_NUM
+                + numbering_xml[abstract_end:]
+            )
         return numbering_xml
 
     ordered_abstract_ids = set()
@@ -254,9 +281,9 @@ def _unify_ordered_lists(numbering_xml: str) -> str:
 # Ordered lists hang each level's identifier at the text column of the
 # level above (see `_ordered_levels` above), but bullet lists keep Pandoc's
 # stock ladder of (level+1)*720. A bullet nested under ordered items would
-# then sit off the ladder. Rewrite every bullet level's indent onto the
-# same ladder: level N hangs its marker at N*360 with text at (N+1)*360.
-# Already-conforming values rewrite to themselves, so a re-run is a no-op.
+# then sit off the ladder. The writing guideline uses ordered levels 0-3
+# and bullet levels 4-5. Put the first bullet marker at ordered level 3's
+# text column, then continue with a 360-twip bullet gutter.
 
 BULLET_ABSTRACT_RE = re.compile(
     r'<w:abstractNum\b[^>]*>.*?</w:abstractNum>', re.DOTALL)
@@ -273,7 +300,14 @@ def _align_bullet_lists(numbering_xml: str) -> str:
             return seg
 
         def reladder(lvl: 're.Match[str]') -> str:
-            left = (int(lvl.group(1)) + 1) * 360
+            level = int(lvl.group(1))
+            if level == 0:
+                marker_left = 0
+            elif level <= 4:
+                marker_left = ORDERED_TEXT_LEFT_DXA[level - 1]
+            else:
+                marker_left = ORDERED_TEXT_LEFT_DXA[3] + (level - 4) * 360
+            left = marker_left + 360
             return BULLET_IND_RE.sub(
                 f'<w:ind w:left="{left}" w:hanging="360" />', lvl.group(0))
 
