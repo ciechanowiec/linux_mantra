@@ -2341,6 +2341,202 @@ def _sentence_source(text: str) -> str:
     return ABBREV_RE.sub(" ", _rendered(text))
 
 
+# ==========================================================================
+# Scope-stable prose punctuation
+# ==========================================================================
+#
+# Vale assigns direct list-item and inline-admonition text to `list` and
+# `text` scopes rather than `sentence`/`paragraph`. Sentence-scoped styles
+# therefore miss those contexts. A citation footnote containing its own
+# semicolon can also consume the Semicolons style's match for the sentence and
+# hide a later author-prose semicolon. These checks run on the source tree
+# instead. They cover body paragraphs, list items, admonitions, description
+# items, and table cells through one shared iterator.
+#
+# The mask is length-preserving: citation footnotes, inline literals, anchors,
+# and macro targets disappear without moving a finding's source column. Macro
+# display text remains visible because it is author prose. Existing Vale
+# `NO`/`YES` directives still suppress the deliberately bad examples in the
+# writing guideline.
+
+VALE_TOGGLE_RE = re.compile(
+    r"<!--\s*vale\s+([\w.]+)\s*=\s*(NO|YES)\s*-->", re.IGNORECASE)
+PROSE_PREFIX_RE = re.compile(
+    r"^\s*(?:(?:\.+|\*+)\s+|(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION):\s+|"
+    r"[^:\n]+::\s+)")
+TABLE_SEPARATOR_RE = re.compile(r"(?<!\\)\|")
+
+
+def _disabled_lines(doc: Document, check: str) -> set[int]:
+    disabled: set[int] = set()
+    enabled = True
+    for line in doc.lines:
+        for match in VALE_TOGGLE_RE.finditer(line.text):
+            if match.group(1).lower() == check.lower():
+                enabled = match.group(2).upper() == "YES"
+        if not enabled:
+            disabled.add(line.num)
+    return disabled
+
+
+def _table_cells(doc: Document) -> Iterator[Tuple[str, int, int]]:
+    """Yield (cell text, source line, 1-based source column).
+
+    An escaped `\\|` stays in its cell. An unescaped `|` is an AsciiDoc table
+    separator even inside inline formatting, so source offsets remain exact.
+    """
+    ana = source_analysis(doc)
+    for line in doc.lines:
+        if not line.in_table or line.block != "none" \
+                or _in_bib(ana, line.num):
+            continue
+        stripped = line.text.strip()
+        if not stripped.startswith("|") or set(stripped) <= set("|="):
+            continue
+        separators = list(TABLE_SEPARATOR_RE.finditer(line.text))
+        for index, separator in enumerate(separators):
+            start = separator.end()
+            end = (separators[index + 1].start()
+                   if index + 1 < len(separators) else len(line.text))
+            piece = line.text[start:end]
+            cell = piece.strip()
+            if not cell:
+                continue
+            lead = len(piece) - len(piece.lstrip())
+            yield cell, line.num, start + lead + 1
+
+
+def _author_units(doc: Document) -> Iterator[Tuple[str, int, int]]:
+    """Yield author-prose units with exact source origins."""
+    ana = source_analysis(doc)
+    citation_spans: Dict[int, List[Tuple[int, int]]] = {}
+    for citation in ana.citations:
+        citation_spans.setdefault(citation.line, []).append(
+            (citation.start_col, citation.end_col))
+
+    def with_notes(text: str, line_num: int, source_col: int):
+        yield text, line_num, source_col
+        for footnote in FOOTNOTE_RE.finditer(text):
+            macro_col = source_col + footnote.start()
+            if any(start <= macro_col < end
+                   for start, end in citation_spans.get(line_num, ())):
+                continue
+            macro = footnote.group(0)
+            body_start = macro.find("[") + 1
+            body = macro[body_start:-1]
+            if body:
+                yield (body, line_num,
+                       source_col + footnote.start() + body_start)
+
+    for line in _paragraphs(doc):
+        match = PROSE_PREFIX_RE.match(line.text)
+        start = match.end() if match else 0
+        yield from with_notes(line.text[start:], line.num, start + 1)
+    for text, line_num, source_col in _table_cells(doc):
+        yield from with_notes(text, line_num, source_col)
+
+
+def _retain_macro_text(match: re.Match) -> str:
+    start, end = match.span(1)
+    return (" " * start + match.group(1)
+            + " " * (len(match.group(0)) - end))
+
+
+def _author_mask(text: str) -> str:
+    masked = _mask_code(text)
+    masked = FOOTNOTE_RE.sub(lambda m: " " * len(m.group(0)), masked)
+    masked = XREF_TEXT_RE.sub(_retain_macro_text, masked)
+    masked = LINK_RE.sub(_retain_macro_text, masked)
+    return BLOCK_ANCHOR_FULL_RE.sub(
+        lambda m: " " * len(m.group(0)), masked)
+
+
+def rule_semicolons(doc: Document) -> Iterator[Finding]:
+    disabled = _disabled_lines(doc, "English.Semicolons")
+    for text, line_num, source_col in _author_units(doc):
+        if line_num in disabled:
+            continue
+        for match in re.finditer(r";", _author_mask(text)):
+            yield (line_num, source_col + match.start(),
+                   "A semicolon joins separate thoughts; split them into "
+                   "separate sentences")
+
+
+COLON_CAP_RE = re.compile(r"(?<!:):\s+([A-Z][\w.]*)")
+COLON_PROPER_WORDS = frozenset({
+    "Payload", "Flutter", "Microsoft", "Storybook", "Amazon", "Google",
+    "Azure", "Braze", "Cloudinary", "CloudFront", "Redshift", "BigQuery",
+    "Deloitte", "PwC", "KPMG", "EY", "Kanban", "Scrum", "DataRide",
+    "WordPress", "ProCyclingStats",
+})
+
+
+def _proper_after_colon(word: str) -> bool:
+    return (word in COLON_PROPER_WORDS
+            or (word.isupper() and len(word) > 1)
+            or bool(re.search(r"[a-z][A-Z]", word))
+            or bool(re.fullmatch(r"[A-Z][a-z]+\.[a-z]+", word)))
+
+
+def rule_colon_case(doc: Document) -> Iterator[Finding]:
+    disabled = _disabled_lines(doc, "English.Colons")
+    for text, line_num, source_col in _author_units(doc):
+        if line_num in disabled:
+            continue
+        for match in COLON_CAP_RE.finditer(_author_mask(text)):
+            word = match.group(1)
+            if _proper_after_colon(word):
+                continue
+            yield (line_num, source_col + match.start(1),
+                   f"{word!r} should be lowercase after the colon")
+
+
+# Deliberately conservative. The former Vale expression treated appositives
+# and nested conjunctions as lists. This pattern gates the unambiguous case: a
+# flat series of at least three single-word items whose final separator lacks
+# the Oxford comma. More complex lists remain a prose-review responsibility.
+SIMPLE_MISSING_OXFORD_RE = re.compile(
+    r"\b[\w-]+(?:,\s+[\w-]+)+\s+(and|or)\s+[\w-]+\s*$",
+    re.IGNORECASE)
+
+
+def _sentence_slices(text: str) -> Iterator[Tuple[int, str]]:
+    probe = ABBREV_RE.sub(lambda m: " " * len(m.group(0)), text)
+    start = 0
+    for boundary in SENTENCE_END_RE.finditer(probe):
+        yield start, text[start:boundary.start()]
+        start = boundary.end()
+    if start < len(text):
+        yield start, text[start:]
+
+
+def rule_oxford_comma(doc: Document) -> Iterator[Finding]:
+    disabled = _disabled_lines(doc, "English.OxfordComma")
+    for text, line_num, source_col in _author_units(doc):
+        if line_num in disabled:
+            continue
+        masked = _author_mask(text)
+        for sentence_start, sentence in _sentence_slices(masked):
+            match = SIMPLE_MISSING_OXFORD_RE.search(sentence.strip())
+            if not match:
+                continue
+            relative = sentence.find(match.group(0)) + match.start(1)
+            yield (line_num, source_col + sentence_start + relative,
+                   "Use the Oxford comma before the final item in this "
+                   "simple series")
+
+
+def rule_paragraph_but(doc: Document) -> Iterator[Finding]:
+    disabled = _disabled_lines(doc, "English.But")
+    for text, line_num, source_col in _author_units(doc):
+        if line_num in disabled:
+            continue
+        match = re.match(r"\s*But\b", _author_mask(text), re.IGNORECASE)
+        if match:
+            yield (line_num, source_col + match.start(),
+                   "Do not start a paragraph or list item with 'But'")
+
+
 def rule_paragraph_sentences(doc: Document) -> Iterator[Finding]:
     for line in _paragraphs(doc):
         n = len(SENTENCE_END_RE.findall(_sentence_source(line.text)))
@@ -2816,6 +3012,10 @@ RULES: List[Rule] = [
     Rule("one-sentence-per-line", "error", rule_one_sentence_per_line),
     Rule("inline-formatting", "error", rule_bold_in_body),
     Rule("asterisk-in-code", "error", rule_asterisk_in_code),
+    Rule("semicolons", "error", rule_semicolons),
+    Rule("colon-case", "error", rule_colon_case),
+    Rule("oxford-comma", "error", rule_oxford_comma),
+    Rule("paragraph-but", "error", rule_paragraph_but),
     Rule("xref-targets", "error", rule_xref_targets),
     Rule("footnote-bare-bracket", "error", rule_footnote_bare_bracket),
     Rule("internal-references-with-xref", "error", rule_bare_id_xref),
@@ -2853,12 +3053,64 @@ RULES: List[Rule] = [
 # dropping every prose check.
 
 
+class LintEngineError(RuntimeError):
+    """An external lint engine failed, so a clean result is impossible."""
+
+
 def require_vale() -> None:
     if shutil.which("vale") is None:
         sys.stderr.write(
             "adoc_lint: `vale` is required but was not found on PATH. "
             "Install Vale (see README, Linting).\n")
         sys.exit(2)
+
+
+def require_safe_vale_scopes(styles_dir: str = ".vale/styles") -> None:
+    """Reject Vale scopes that are incomplete for AsciiDoc prose contexts.
+
+    Vale does not apply `sentence` or `paragraph` styles to direct list-item
+    and inline-admonition text. Those checks must live in the structural
+    engine, whose author-unit iterator covers every supported prose context.
+    Failing here prevents a newly added Vale style from silently reopening the
+    same coverage hole.
+    """
+    unsafe = []
+    for root, _, files in os.walk(styles_dir):
+        for name in files:
+            if not name.endswith((".yml", ".yaml")):
+                continue
+            path = os.path.join(root, name)
+            with open(path, encoding="utf-8") as style_file:
+                match = re.search(
+                    r"^scope:\s*(sentence|paragraph)\s*$",
+                    style_file.read(), re.MULTILINE)
+            if match:
+                unsafe.append((path, match.group(1)))
+    if unsafe:
+        details = ", ".join(f"{path} ({scope})" for path, scope in unsafe)
+        raise LintEngineError(
+            "Vale sentence/paragraph scopes are incomplete for AsciiDoc "
+            "lists and admonitions; move these checks to the structural "
+            f"engine: {details}")
+
+
+def _vale_data(proc: subprocess.CompletedProcess, context: str) -> dict:
+    if proc.returncode not in (0, 1):
+        detail = (proc.stderr or proc.stdout or "no diagnostic output").strip()
+        raise LintEngineError(
+            f"Vale failed while linting {context} (exit {proc.returncode}): "
+            f"{detail}")
+    try:
+        data = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError as exc:
+        detail = (proc.stderr or proc.stdout or "empty output").strip()
+        raise LintEngineError(
+            f"Vale returned invalid JSON while linting {context}: "
+            f"{detail}") from exc
+    if not isinstance(data, dict):
+        raise LintEngineError(
+            f"Vale returned an unexpected JSON value while linting {context}")
+    return data
 
 
 # Vale must lint the claim prose around a citation but never the quote inside
@@ -2916,12 +3168,7 @@ def run_vale(path: str, doc: Document) -> List[tuple]:
     finally:
         if tmp is not None:
             os.unlink(tmp)
-    try:
-        data = json.loads(proc.stdout or "{}")
-    except json.JSONDecodeError:
-        sys.stderr.write("adoc_lint: could not parse Vale output, "
-                         "skipping prose checks\n")
-        return []
+    data = _vale_data(proc, path)
     findings = []
     for alerts in data.values():
         for alert in alerts:
@@ -2937,19 +3184,11 @@ def run_vale(path: str, doc: Document) -> List[tuple]:
 
 
 # A table cell holds ordinary prose, but Vale's AsciiDoc parser never segments
-# cell text into `sentence`/`paragraph` scopes -- so every style scoped to one
-# of those (Semicolons, Colons, OxfordComma, But) silently
-# skips inside a `|===` table, while the same rule fires in body text. Only
-# `text`-scoped styles reach a cell in `run_vale` above. The invariant the
-# guideline wants is that a rule applied to body prose applies to cell prose
-# too. Closing the gap by rewriting the table in place is a dead end: Vale's
-# block tracking is stateful, and dropping the `|===` delimiters desyncs it so
-# it leaks findings out of the code blocks it should skip. Instead, lift each
-# cell's prose into a throwaway file of blank-line-separated paragraphs -- a
-# clean prose document Vale segments normally -- lint THAT, and keep only the
-# findings the body pass structurally cannot produce for a cell: the ones from
-# non-`text`, non-`heading` styles (a cell is never a heading). The source line
-# is exact; the column is mapped back to the cell's offset in its row.
+# cell text into `sentence`/`paragraph` scopes. The structural punctuation
+# rules above own the known scope-sensitive checks. This pass remains as a
+# future-proof backstop for another non-text Vale style enabled later: lift
+# each cell into a clean prose document, lint it, and map the finding back to
+# the exact source line and cell offset.
 
 def _vale_scope(check: str) -> str:
     """The `scope:` a Vale style declares, read from its style file at runtime
@@ -2967,20 +3206,7 @@ def _vale_scope(check: str) -> str:
 
 
 def run_vale_tables(doc: Document) -> List[tuple]:
-    cells: List[Tuple[str, int, int]] = []  # (prose, source_line, source_col)
-    for line in doc.lines:
-        if not line.in_table or line.block != "none":
-            continue
-        stripped = line.text.strip()
-        if not stripped.startswith("|") or set(stripped) <= set("|="):
-            continue  # a `|===` delimiter or a cell-continuation line, not a row
-        col = 0
-        for piece in line.text.split("|"):
-            cell = piece.strip()
-            if cell:
-                lead = len(piece) - len(piece.lstrip())
-                cells.append((cell, line.num, col + lead + 1))
-            col += len(piece) + 1  # +1 for the '|' that split() consumed
+    cells = list(_table_cells(doc))
     if not cells:
         return []
 
@@ -3005,10 +3231,7 @@ def run_vale_tables(doc: Document) -> List[tuple]:
             ["vale", "--output=JSON", tmp], capture_output=True, text=True)
     finally:
         os.unlink(tmp)
-    try:
-        data = json.loads(proc.stdout or "{}")
-    except json.JSONDecodeError:
-        return []
+    data = _vale_data(proc, f"table cells in {doc.path}")
 
     findings = []
     for alerts in data.values():
@@ -3316,7 +3539,12 @@ def main(argv: List[str]) -> int:
     require_pdftotext()
     require_tesseract()
 
-    file_results = [(path, *lint_file(path)) for path in paths]
+    try:
+        require_safe_vale_scopes()
+        file_results = [(path, *lint_file(path)) for path in paths]
+    except LintEngineError as exc:
+        sys.stderr.write(f"adoc_lint: {exc}\n")
+        return 2
     elapsed = time.perf_counter() - start
     has_error = any(f[3] == "error" for _, fs, _ in file_results for f in fs)
 
