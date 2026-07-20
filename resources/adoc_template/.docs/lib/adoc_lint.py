@@ -2133,10 +2133,11 @@ def rule_diagram_lifeline_alignment(doc: Document) -> Iterator[Finding]:
 
 # A paragraph header (§paragraph-headers) is a bold phrase standing as a whole
 # list item, optionally behind a list marker and an anchor: `. *Security*`,
-# `.. [[id]]*Live metrics*`. Bold is licensed there, so such a line is skipped;
-# bold appearing mid-sentence is not.
+# `.. [[id]]*Live metrics*`. Bold is licensed there when the header has no
+# terminal period. Bold appearing mid-sentence remains prohibited.
 PARAGRAPH_HEADER_RE = re.compile(
-    r"^(?:[.*]+\s+)?(?:\[\[[^\]]*\]\]|\[#[^\]]*\])?\s*\*{1,2}[^*]+\*{1,2}\s*$")
+    r"^(?:[.*]+\s+)?(?:\[\[[^\]]*\]\]|\[#[^\]]*\])?\s*"
+    r"\*{1,2}(?P<header>[^*]+)\*{1,2}\s*$")
 # Bold comes in two forms: constrained `*word*` (rejects a doubled `*` at either
 # edge) and unconstrained `**word**`. Both are banned in body text; the second
 # regex catches the double-asterisk form the first deliberately skips.
@@ -2179,7 +2180,11 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
         if line.in_table:
             continue
         stripped = line.text.strip()
-        if PARAGRAPH_HEADER_RE.match(stripped):
+        paragraph_header = PARAGRAPH_HEADER_RE.match(stripped)
+        if paragraph_header:
+            if paragraph_header.group("header").rstrip().endswith("."):
+                yield (line.num, len(line.text.rstrip()),
+                       "Bold paragraph header must not end with a period")
             continue
         # An unordered-list marker's `*`/`**` is not bold, but the item's content
         # can still carry inline bold. Blank the marker (preserving columns) and

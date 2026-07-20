@@ -566,6 +566,47 @@ def _strip_empty_headings(document_xml: str) -> str:
 
 
 # ============================================================================
+# document.xml — paragraph headers stay with their continuation
+# ============================================================================
+#
+# A numbered paragraph header is a bold-only list item followed by its body as
+# continuation content. Pandoc emits the two parts as adjacent paragraphs.
+# Without keepNext, Word can leave the header at the foot of one page and move
+# its body to the next. Mark every bold-only numbered paragraph keep-with-next,
+# which preserves the source's header-and-body unit without affecting ordinary
+# bold text or numbered paragraphs that contain prose.
+
+RUN_RE = re.compile(r'<w:r\b[^>]*>.*?</w:r>', re.DOTALL)
+NUMPR_RE = re.compile(r'<w:numPr>')
+
+
+def _keep_paragraph_headers_with_body(document_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        para = match.group(0)
+        ppr_match = PARA_PPR_RE.search(para)
+        if not ppr_match or not NUMPR_RE.search(ppr_match.group(0)):
+            return para
+        text_runs = [
+            run.group(0)
+            for run in RUN_RE.finditer(para)
+            if any(text.strip() for text in TEXT_RUN_RE.findall(run.group(0)))
+        ]
+        if not text_runs or any('<w:b' not in run for run in text_runs):
+            return para
+        ppr = ppr_match.group(0)
+        if '<w:keepNext' in ppr:
+            return para
+        insert_at = ppr.find('>') + 1
+        style = re.search(r'<w:pStyle\b[^/]*/>', ppr)
+        if style:
+            insert_at = style.end()
+        patched_ppr = ppr[:insert_at] + '<w:keepNext />' + ppr[insert_at:]
+        return para.replace(ppr, patched_ppr, 1)
+
+    return PARAGRAPH_RE.sub(fix, document_xml)
+
+
+# ============================================================================
 # document.xml — section-title bookmarks
 # ============================================================================
 #
@@ -749,6 +790,7 @@ WP_EXTENT_RE = re.compile(r'<wp:extent\s+cx="(\d+)"\s+cy="(\d+)"\s*/>')
 A_EXT_RE = re.compile(r'<a:ext\s+cx="(\d+)"\s+cy="(\d+)"\s*/>')
 
 NumberingIndex = Dict[str, List[int]]
+NumberingLayout = Dict[str, List['tuple[int, int]']]
 
 
 def _build_numbering_index(numbering_xml: str) -> NumberingIndex:
@@ -781,6 +823,43 @@ def _build_numbering_index(numbering_xml: str) -> NumberingIndex:
     return num_to_indents
 
 
+def _build_numbering_layout(numbering_xml: str) -> NumberingLayout:
+    """Map numId levels to their text-left and hanging-indent values."""
+    abstract_layouts: Dict[str, List['tuple[int, int]']] = {}
+    for match in re.finditer(
+        r'<w:abstractNum w:abstractNumId="(\d+)">(.*?)</w:abstractNum>',
+        numbering_xml,
+        re.DOTALL,
+    ):
+        levels: List['tuple[int, int]'] = []
+        for level_match in re.finditer(
+            r'<w:lvl w:ilvl="(\d+)">(.*?)</w:lvl>',
+            match.group(2),
+            re.DOTALL,
+        ):
+            level = int(level_match.group(1))
+            indent = PARA_IND_LEFT_RE.search(level_match.group(2))
+            hanging = re.search(r'<w:ind\b[^/>]*\bw:hanging="(\d+)"',
+                                level_match.group(2))
+            value = (int(indent.group(1)) if indent else 0,
+                     int(hanging.group(1)) if hanging else 0)
+            while len(levels) <= level:
+                levels.append((0, 0))
+            levels[level] = value
+        abstract_layouts[match.group(1)] = levels
+
+    result: NumberingLayout = {}
+    for match in re.finditer(
+        r'<w:num w:numId="(\d+)">(.*?)</w:num>', numbering_xml, re.DOTALL,
+    ):
+        abstract = re.search(
+            r'<w:abstractNumId w:val="(\d+)" />', match.group(2))
+        if abstract:
+            result[match.group(1)] = abstract_layouts.get(
+                abstract.group(1), [])
+    return result
+
+
 def _paragraph_indent(paragraph_xml: str, numbering: NumberingIndex) -> int:
     ppr_m = PARA_PPR_RE.search(paragraph_xml)
     if not ppr_m:
@@ -799,6 +878,137 @@ def _paragraph_indent(paragraph_xml: str, numbering: NumberingIndex) -> int:
     ilvl = int(ilvl_m.group(1))
     indents = numbering.get(numid_m.group(1), [])
     return indents[ilvl] if ilvl < len(indents) else 0
+
+
+def _continuation_num_ids(numbering_xml: str) -> set:
+    """Return numIds whose levels carry Pandoc's invisible list marker."""
+    abstract_ids = set()
+    for match in re.finditer(
+        r'<w:abstractNum\b[^>]*w:abstractNumId="(\d+)"[^>]*>'
+        r'(.*?)</w:abstractNum>',
+        numbering_xml,
+        re.DOTALL,
+    ):
+        body = match.group(2)
+        first_level = re.search(
+            r'<w:lvl w:ilvl="0">(.*?)</w:lvl>', body, re.DOTALL)
+        if first_level and '<w:lvlText w:val=" " />' in first_level.group(1):
+            abstract_ids.add(match.group(1))
+
+    num_ids = set()
+    for match in re.finditer(
+        r'<w:num w:numId="(\d+)">(.*?)</w:num>', numbering_xml, re.DOTALL,
+    ):
+        abstract = re.search(
+            r'<w:abstractNumId w:val="(\d+)" />', match.group(2))
+        if abstract and abstract.group(1) in abstract_ids:
+            num_ids.add(match.group(1))
+    return num_ids
+
+
+def _paragraph_list_ref(paragraph_xml: str) -> 'tuple[int, str] | None':
+    ppr_match = PARA_PPR_RE.search(paragraph_xml)
+    if not ppr_match:
+        return None
+    num_match = PARA_NUMPR_RE.search(ppr_match.group(1))
+    if not num_match:
+        return None
+    level = PARA_ILVL_RE.search(num_match.group(1))
+    num_id = PARA_NUMID_RE.search(num_match.group(1))
+    if not (level and num_id):
+        return None
+    return int(level.group(1)), num_id.group(1)
+
+
+IND_TAG_RE = re.compile(r'<w:ind\b[^/]*/>')
+TABS_TAG_RE = re.compile(r'<w:tabs>.*?</w:tabs>', re.DOTALL)
+IND_LATE_PPR_TAG_RE = re.compile(
+    r'<w:(?:contextualSpacing|mirrorIndents|suppressOverlap|jc|textDirection'
+    r'|textAlignment|textboxTightWrap|outlineLvl|divId|cnfStyle|rPr|sectPr'
+    r'|pPrChange)\b')
+
+
+def _continuation_direct_indent(paragraph_xml: str, left: int) -> str:
+    """Turn an invisible-marker list paragraph into a plain aligned one."""
+    ppr_match = PARA_PPR_RE.search(paragraph_xml)
+    if not ppr_match:
+        return paragraph_xml
+    ppr = ppr_match.group(0)
+    ppr = PARA_NUMPR_RE.sub('', ppr, count=1)
+    ppr = IND_TAG_RE.sub('', ppr)
+    indent = f'<w:ind w:left="{left}" />'
+    late = IND_LATE_PPR_TAG_RE.search(ppr)
+    insert_at = late.start() if late else ppr.rfind('</w:pPr>')
+    ppr = ppr[:insert_at] + indent + ppr[insert_at:]
+    return (paragraph_xml[:ppr_match.start()] + ppr
+            + paragraph_xml[ppr_match.end():])
+
+
+def _numbered_paragraph_direct_layout(
+    paragraph_xml: str,
+    left: int,
+    hanging: int,
+) -> str:
+    """Pin the list text and marker columns in the paragraph properties."""
+    ppr_match = PARA_PPR_RE.search(paragraph_xml)
+    if not ppr_match:
+        return paragraph_xml
+    ppr = ppr_match.group(0)
+    ppr = TABS_TAG_RE.sub('', ppr)
+    ppr = IND_TAG_RE.sub('', ppr)
+    num_match = PARA_NUMPR_RE.search(ppr)
+    if not num_match:
+        return paragraph_xml
+    tabs = f'<w:tabs><w:tab w:val="num" w:pos="{left}" /></w:tabs>'
+    ppr = ppr[:num_match.end()] + tabs + ppr[num_match.end():]
+    spacing = re.search(r'<w:spacing\b[^/]*/>', ppr)
+    insert_at = spacing.end() if spacing else num_match.end() + len(tabs)
+    indent = f'<w:ind w:left="{left}" w:hanging="{hanging}" />'
+    ppr = ppr[:insert_at] + indent + ppr[insert_at:]
+    return (paragraph_xml[:ppr_match.start()] + ppr
+            + paragraph_xml[ppr_match.end():])
+
+
+def _make_align_list_continuations(
+    numbering: NumberingIndex,
+    layouts: NumberingLayout,
+    continuation_num_ids: set,
+) -> XmlTransform:
+    """Align continuation text with its numbered paragraph's text column."""
+    def _align(document_xml: str) -> str:
+        pieces: List[str] = []
+        position = 0
+        active_left_by_level: Dict[int, int] = {}
+        for match in PARAGRAPH_RE.finditer(document_xml):
+            pieces.append(document_xml[position:match.start()])
+            paragraph = match.group(0)
+            ref = _paragraph_list_ref(paragraph)
+            if ref:
+                level, num_id = ref
+                if num_id in continuation_num_ids:
+                    left = active_left_by_level.get(level)
+                    if left is not None:
+                        paragraph = _continuation_direct_indent(paragraph, left)
+                else:
+                    levels = layouts.get(num_id, [])
+                    if level < len(levels) and not HEADING_PSTYLE_RE.search(paragraph):
+                        left, hanging = levels[level]
+                        paragraph = _numbered_paragraph_direct_layout(
+                            paragraph, left, hanging)
+                    active_left_by_level = {
+                        key: value
+                        for key, value in active_left_by_level.items()
+                        if key < level
+                    }
+                    active_left_by_level[level] = _paragraph_indent(
+                        paragraph, numbering)
+            elif any(text.strip() for text in TEXT_RUN_RE.findall(paragraph)):
+                active_left_by_level = {}
+            pieces.append(paragraph)
+            position = match.end()
+        pieces.append(document_xml[position:])
+        return ''.join(pieces)
+    return _align
 
 
 def _make_resize_images(numbering: NumberingIndex) -> XmlTransform:
@@ -1111,6 +1321,7 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
     'word/document.xml': [
         _separate_author_email,
         _strip_empty_headings,
+        _keep_paragraph_headers_with_body,
         _force_a4_section,
         _fit_table_widths,
         _symmetric_table_cells,
@@ -1140,7 +1351,10 @@ def main(docx_path: str) -> None:
         # per-level indents when resolving paragraph indents.
         _patch_part(tmp, 'word/numbering.xml', TRANSFORMS['word/numbering.xml'])
         with open(os.path.join(tmp, 'word', 'numbering.xml'), encoding='utf-8') as f:
-            numbering_index = _build_numbering_index(f.read())
+            numbering_xml = f.read()
+        numbering_index = _build_numbering_index(numbering_xml)
+        numbering_layout = _build_numbering_layout(numbering_xml)
+        continuation_num_ids = _continuation_num_ids(numbering_xml)
         # Collect anchors referenced anywhere so unreferenced bookmarks can
         # be dropped while cross-reference targets survive.
         part_xmls = []
@@ -1155,7 +1369,9 @@ def main(docx_path: str) -> None:
             if rel_path == 'word/numbering.xml':
                 continue
             extra = (
-                [_make_resize_images(numbering_index),
+                [_make_align_list_continuations(
+                     numbering_index, numbering_layout, continuation_num_ids),
+                 _make_resize_images(numbering_index),
                  _make_strip_bookmarks(referenced_anchors)]
                 if rel_path == 'word/document.xml' else []
             )
