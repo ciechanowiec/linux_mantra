@@ -2209,6 +2209,38 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
                        "be italic (§inline-formatting-semantics)")
 
 
+# A constrained italic span cannot safely contain a monospaced span. The
+# AsciiDoc-to-DocBook-to-DOCX path flattens the nested formatting and can emit
+# the backticks as curly quote marks while italicizing the technical literal.
+# Keep the two roles adjacent instead: `` `example.org` _application layer_ ``.
+# This is a source-level integrity rule because Asciidoctor accepts the broken
+# nesting without a warning. Literal examples inside verbatim blocks are
+# excluded by `_prose`.
+ITALIC_WITH_CODE_RE = re.compile(
+    r"(?<![\w_])_(?!_)(?P<body>[^_\n]*`+[^`\n]+`+[^_\n]*)_(?![\w_])")
+UNCONSTRAINED_ITALIC_WITH_CODE_RE = re.compile(
+    r"__(?=\S)(?P<body>[^\n]*?`+[^`\n]+`+[^\n]*?)__")
+
+
+def rule_code_in_italics(doc: Document) -> Iterator[Finding]:
+    for line in _prose(doc):
+        seen: set[int] = set()
+        for pattern in (UNCONSTRAINED_ITALIC_WITH_CODE_RE,
+                        ITALIC_WITH_CODE_RE):
+            for match in pattern.finditer(line.text):
+                code = CODE_SPAN_RE.search(match.group("body"))
+                if code is None:
+                    continue
+                column = match.start("body") + code.start() + 1
+                if column in seen:
+                    continue
+                seen.add(column)
+                yield (line.num, column,
+                       "Code span nested inside italics renders incorrectly in "
+                       "DOCX; close the italics before the code span and reopen "
+                       "them after it")
+
+
 # A render-integrity check. A constrained monospace span (`` `text` ``) still
 # runs inline substitutions on its content, so a word-boundary `*` inside it is
 # parsed as a bold delimiter. Two facts, both verified empirically (Asciidoctor
@@ -3016,6 +3048,7 @@ RULES: List[Rule] = [
     Rule("diagram-lifeline-alignment", "error", rule_diagram_lifeline_alignment),
     Rule("one-sentence-per-line", "error", rule_one_sentence_per_line),
     Rule("inline-formatting", "error", rule_bold_in_body),
+    Rule("code-in-italics", "error", rule_code_in_italics),
     Rule("asterisk-in-code", "error", rule_asterisk_in_code),
     Rule("semicolons", "error", rule_semicolons),
     Rule("colon-case", "error", rule_colon_case),
