@@ -146,7 +146,7 @@ The connection is established when the handshake completes. A request is sent as
 [#one-paragraph-one-topic]
 ==== One Paragraph, One Topic
 
-A paragraph develops one thought: a claim followed by its elaboration, qualifications, and consequences. When the topic shifts, the paragraph ends. A paragraph that introduces a second, parallel topic must be split, even when the two topics are related.
+A paragraph develops one thought: a claim followed by its elaboration, qualifications, and consequences. When the topic shifts, the paragraph ends. A paragraph that introduces a second, parallel topic must be split, even when the two topics are related. The procedure in xref:#verify-every-paragraph[] verifies this structure before delivery.
 
 [.bad-example]
 .{bad-icon} Bad example
@@ -160,6 +160,40 @@ A transaction groups a series of operations into a single atomic unit and is sta
 A transaction groups a series of operations into a single atomic unit. The transaction is started by calling `begin` and is concluded by either `commit` or `rollback`. Until the transaction is concluded, its changes are visible only to operations performed within the same transaction.
 
 An index is a precomputed lookup structure that accelerates query execution. The database maintains an index automatically: every insert, update, and delete on the indexed table updates the index in the same transaction as the data change.
+====
+
+[#verify-every-paragraph]
+==== Verify Every Paragraph
+
+. Verification of the xref:#one-paragraph-one-topic[one-paragraph-one-topic rule] runs after the text is written, after every material reorganization, and before delivery. It covers every prose paragraph, every paragraph inside a list item, every continuation paragraph, and every table cell that contains more than one sentence. A repaired paragraph re-enters verification. The pass ends only when every paragraph receives the xref:#cohesive-verdict[cohesive verdict] defined below.
+. Dissect one paragraph at a time before judging its prose. For every sentence, write its logical essence as a short subject-and-predicate statement. Remove transitions, emphasis, examples, and stylistic phrasing from the essence. This reduction exposes the topics that polished prose can conceal.
+. State the paragraph's governing topic in one concrete sentence. Then assign every sentence one role under that topic: claim, elaboration, evidence, example, qualification, mechanism, or consequence. A sentence that requires a second governing topic doesn't belong in the paragraph.
+. Test every boundary between adjacent sentences. Insert a hypothetical paragraph break at that boundary and read both resulting paragraphs.
+.. If the break loses no meaning, logical dependency, contrast, emphasis, or causal force, presume that the sentences carry different topics and split them.
+.. If the sentences carry one topic but remain equally clear after the break, rewrite them so their relationship is explicit. Make the later sentence visibly explain, evidence, qualify, implement, or follow from the earlier sentence. Naming the shared subject or the precise relationship is preferable to adding an empty transition such as _also_, _moreover_, or _in addition_.
+.. If the break damages a necessary relationship that the wording already makes clear, keep the sentences together.
+. Read the paragraph in xref:#forward-order[forward order]. The governing claim comes before its evidence or consequence, a cause comes before its effect, and a prerequisite comes before what depends on it. Reorder sentences when their logical essences reveal a stronger sequence.
+. Assign one verdict and act on it at once.
+.. [[cohesive-verdict,the cohesive verdict]]_Cohesive_ - one governing topic accounts for every sentence, every later sentence has an explicit role under it, and every pair passes the boundary test. No action follows.
+.. _Rewrite_ - the sentences share one topic, but their relationship depends only on proximity or an ambiguous reference. Rewrite the paragraph until the relationship is explicit, then verify it again.
+.. _Split_ - the paragraph contains parallel claims, independent mechanisms, separate boundaries, or any other second topic. Split at the topic change. Each resulting paragraph receives its own governing topic and re-enters verification.
+. After a split, apply xref:#references-across-paragraphs[] and xref:#internal-references-with-xref[] to the new boundary. The first sentence of the new paragraph names and links any concept carried from the preceding paragraph. It never begins with shorthand whose meaning depends on the old paragraph.
+. Finish with a whole-section read. Paragraphs must form a sequence in which the conclusion of one creates the premise or question answered by the next. This final read catches a paragraph that's internally cohesive but belongs under another heading or in another position.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The gateway gives clients one network address. The gateway checks credentials, enforces request limits, and selects the destination service.
+
+The sentences can be separated without losing meaning. Their shared topic is plausible, but the wording doesn't show how the second sentence develops the first.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The gateway provides one network address by checking credentials, enforcing request limits, and selecting the destination service for every client request.
+
+The mechanism now explains how the gateway provides one entry point. Splitting the thought would damage that relationship.
 ====
 
 ==== No Restatement
@@ -204,6 +238,7 @@ endif::[]
 The load balancer's algorithm controls how requests are distributed across backends. The supported algorithms are round-robin, least-connections, and consistent-hash. The default is round-robin.
 ====
 
+[#forward-order]
 ==== Forward Order
 
 Information flows from the general to the specific, from the prerequisite to the dependent, and from the cause to the consequence. The reader should never need a fact that the document hasn't yet introduced. When a concept is needed before its full definition, give a short gloss at first mention and link to the full definition.
