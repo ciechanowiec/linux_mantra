@@ -23,7 +23,7 @@ XmlTransform = Callable[[str], str]
 
 
 # ============================================================================
-# numbering.xml — heading multilevel numbering
+# numbering.xml -- heading multilevel numbering
 # ============================================================================
 #
 # Pandoc rebuilds word/numbering.xml from scratch when converting, so the
@@ -94,7 +94,7 @@ def _inject_heading_numbering(numbering_xml: str) -> str:
 
 
 # ============================================================================
-# numbering.xml — ordered-list multilevel numbering
+# numbering.xml -- ordered-list multilevel numbering
 # ============================================================================
 #
 # Pandoc emits each nesting level of an ordered list as a separate
@@ -275,7 +275,7 @@ def _unify_ordered_lists(numbering_xml: str) -> str:
 
 
 # ============================================================================
-# numbering.xml — bullet lists on the same margin ladder
+# numbering.xml -- bullet lists on the same margin ladder
 # ============================================================================
 #
 # Ordered lists hang each level's identifier at the text column of the
@@ -317,7 +317,7 @@ def _align_bullet_lists(numbering_xml: str) -> str:
 
 
 # ============================================================================
-# styles.xml — symmetric heading spacing
+# styles.xml -- symmetric heading spacing
 # ============================================================================
 #
 # The reference styles give headings a large space before and a small space
@@ -351,7 +351,7 @@ def _symmetric_heading_spacing(styles_xml: str) -> str:
 
 
 # ============================================================================
-# styles.xml — SourceCode justification
+# styles.xml -- SourceCode justification
 # ============================================================================
 #
 # Normal is justified (w:jc=both), and Pandoc's SourceCode paragraph style is
@@ -384,7 +384,7 @@ def _left_align_source_code(styles_xml: str) -> str:
 
 
 # ============================================================================
-# styles.xml — footnote size and paragraph spacing
+# styles.xml -- footnote size and paragraph spacing
 # ============================================================================
 #
 # FootnoteText in the reference DOCX carries no overrides, so footnotes
@@ -458,13 +458,13 @@ def _compact_footnotes(styles_xml: str) -> str:
 
 
 # ============================================================================
-# footnotes.xml — exactly one space after the footnote number
+# footnotes.xml -- exactly one space after the footnote number
 # ============================================================================
 #
 # The hanging indent of FootnoteText equals the natural width of
 # "superscript number + one word space" (see the styles transform above),
 # so the generated footnotes must read exactly "number, space, text" to
-# sit on the vertical line — same as a footnote typed by hand later.
+# sit on the vertical line -- same as a footnote typed by hand later.
 # Pandoc already separates the number from the text with a space run;
 # normalize the other shapes to it (a legacy tab run from earlier versions
 # of this script is dropped, a leading space inside the first text run is
@@ -515,7 +515,7 @@ def _align_footnote_continuations(footnotes_xml: str) -> str:
 
 
 # ============================================================================
-# document.xml — author/email separator
+# document.xml -- author/email separator
 # ============================================================================
 #
 # Pandoc joins the AsciiDoc :author: and :email: with a single space, so the
@@ -539,7 +539,7 @@ def _separate_author_email(document_xml: str) -> str:
 
 
 # ============================================================================
-# document.xml — empty heading paragraphs
+# document.xml -- empty heading paragraphs
 # ============================================================================
 #
 # With :doctype: book, Asciidoctor wraps any content between the document
@@ -566,7 +566,7 @@ def _strip_empty_headings(document_xml: str) -> str:
 
 
 # ============================================================================
-# document.xml — paragraph headers stay with their continuation
+# document.xml -- paragraph headers stay with their continuation
 # ============================================================================
 #
 # A numbered paragraph header is a bold-only list item followed by its body as
@@ -607,7 +607,7 @@ def _keep_paragraph_headers_with_body(document_xml: str) -> str:
 
 
 # ============================================================================
-# document.xml — section-title bookmarks
+# document.xml -- section-title bookmarks
 # ============================================================================
 #
 # Asciidoctor assigns every section an anchor id and Pandoc materializes
@@ -654,7 +654,7 @@ def _make_strip_bookmarks(referenced: set) -> XmlTransform:
 
 
 # ============================================================================
-# document.xml — A4 page size and margins
+# document.xml -- A4 page size and margins
 # ============================================================================
 #
 # Pandoc's reference.docx doesn't carry an explicit page size, so Word falls
@@ -695,7 +695,7 @@ def _force_a4_section(document_xml: str) -> str:
 
 
 # ============================================================================
-# document.xml — table widths
+# document.xml -- table widths
 # ============================================================================
 #
 # Pandoc emits each table with <w:tblW w:type="pct" w:w="5000" /> (= 100% of
@@ -770,7 +770,7 @@ def _fit_table_widths(document_xml: str) -> str:
 
 
 # ============================================================================
-# document.xml — inline image sizing
+# document.xml -- inline image sizing
 # ============================================================================
 #
 # Pandoc carries through the source bitmap's pixel dimensions, so a screenshot
@@ -1038,7 +1038,7 @@ def _make_resize_images(numbering: NumberingIndex) -> XmlTransform:
 
 
 # ============================================================================
-# document.xml — symmetric table cells
+# document.xml -- symmetric table cells
 # ============================================================================
 #
 # A table cell's paragraphs carry no style, so the document default
@@ -1116,7 +1116,7 @@ def _symmetric_table_cells(document_xml: str) -> str:
 
 
 # ============================================================================
-# document.xml — symmetric space around tables
+# document.xml -- symmetric space around tables
 # ============================================================================
 #
 # The gap over a table is the preceding paragraph's space-after (the
@@ -1166,7 +1166,7 @@ def _symmetric_table_margins(document_xml: str) -> str:
 
 
 # ============================================================================
-# document.xml — source-fields tables
+# document.xml -- source-fields tables
 # ============================================================================
 #
 # A bibliography entry's metadata block (`[horizontal.source-fields]` in the

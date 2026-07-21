@@ -71,7 +71,7 @@ RuleFunc = Callable[["Document"], Iterator[Finding]]
 
 
 # ============================================================================
-# Source model — a block-aware line scanner
+# Source model -- a block-aware line scanner
 # ============================================================================
 #
 # The one non-obvious capability the structural engine needs is to know which
@@ -182,7 +182,7 @@ def _mask_code(text: str) -> str:
 
 
 # ============================================================================
-# Source citations — parsed model
+# Source citations -- parsed model
 # ============================================================================
 #
 # Serves the source-citation rules (§claim-classes, §closed-source-list,
@@ -578,7 +578,7 @@ def _in_bib(ana: SourceAnalysis, line_num: int) -> bool:
 
 
 # ============================================================================
-# Heading tree — depth and lone subsections
+# Heading tree -- depth and lone subsections
 # ============================================================================
 #
 # Serves section-nesting (README-guideline-writing §section-nesting): a heading nests
@@ -614,7 +614,7 @@ def rule_lone_subsection(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# List markers — numbering depth
+# List markers -- numbering depth
 # ============================================================================
 #
 # Serves numbering-depth (§numbering-depth): the ordered ladder is `.` `..`
@@ -643,7 +643,7 @@ def rule_numbering_depth(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# List structure — continuations and starts that render as literal text
+# List structure -- continuations and starts that render as literal text
 # ============================================================================
 #
 # A render-integrity pair. AsciiDoc's list markup fails silently in two ways
@@ -773,7 +773,7 @@ def rule_glued_list_item(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# List structure — a list has two or more items
+# List structure -- a list has two or more items
 # ============================================================================
 #
 # Serves lists-for-enumerable-content (§lists-for-enumerable-content): a list
@@ -846,7 +846,7 @@ def rule_single_item_list(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Images — alt text
+# Images -- alt text
 # ============================================================================
 #
 # Serves alt-text-and-captions (§alt-text-and-captions): every figure carries
@@ -868,7 +868,7 @@ def rule_image_alt_text(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Links — descriptive text
+# Links -- descriptive text
 # ============================================================================
 #
 # Serves link-text-carries-the-claim (§link-text-carries-the-claim): the link
@@ -922,7 +922,7 @@ def rule_link_text(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Anchors — explicit ids, kebab-case
+# Anchors -- explicit ids, kebab-case
 # ============================================================================
 #
 # Serves explicit-anchors (§explicit-anchors): a cross-reference targets an
@@ -996,7 +996,7 @@ def rule_xref_targets(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Footnote text — no bare bracket
+# Footnote text -- no bare bracket
 # ============================================================================
 #
 # Asciidoctor ends a footnote's text at the first `]` that doesn't close a nested
@@ -1086,7 +1086,7 @@ def rule_bare_id_xref(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Source citations — verification rules
+# Source citations -- verification rules
 # ============================================================================
 #
 # The deterministic slice of the source-citation apparatus, over the parsed
@@ -1871,7 +1871,7 @@ def rule_citation_overreach(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# ASCII diagrams — character hygiene
+# ASCII diagrams -- character hygiene
 # ============================================================================
 #
 # Serves ascii-diagrams (§ascii-diagrams): a clean diagram uses one consistent
@@ -2112,7 +2112,7 @@ def rule_diagram_lifeline_alignment(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Prose markup — line and inline heuristics
+# Prose markup -- line and inline heuristics
 # ============================================================================
 #
 # These are pattern heuristics, not parsers, so they assume the document follows
@@ -2194,7 +2194,7 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
         if marker:
             end = marker.end(1)
             text = " " * end + text[end:]
-        # Mask inline code spans and `++…++` passthroughs so a literal `*`/`**`
+        # Mask inline code spans and `++...++` passthroughs so a literal `*`/`**`
         # inside them is not read as an emphasis delimiter.
         masked = PASSTHROUGH_INNER_RE.sub(
             lambda m: " " * len(m.group(0)), _mask_code(text))
@@ -2216,7 +2216,7 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
 #
 #   * Only a BOLDING asterisk counts. A `*` wedged between two word characters
 #     (`` `co*de` ``, `` `2*3` ``) is never an emphasis delimiter and never
-#     leaks; a `*` touching a boundary (span edge, space, `-`, `.`, `/`, …) is.
+#     leaks; a `*` touching a boundary (span edge, space, `-`, `.`, `/`, ...) is.
 #   * Only an ODD number of bolding asterisks is the bug. An even number closes
 #     its own pairs inside the span -- deliberate bold like `` `pre-*x*-post` ``
 #     is allowed. An odd number leaves a dangling delimiter. Alone it renders
@@ -2226,9 +2226,9 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
 #
 # So this rule flags a code span holding an odd count of bolding asterisks. The
 # robust fix is a passthrough -- `` `++*++` `` for the character, or a whole-span
-# `` `+…+` `` -- the form the guideline itself uses (`` `++*++` ``/`` `++**++` ``),
-# which is why those never trip. Asterisks inside a `++…++` passthrough, behind a
-# `\*` escape, or in a whole-span `+…+` passthrough are not counted. Runs on
+# `` `+...+` `` -- the form the guideline itself uses (`` `++*++` ``/`` `++**++` ``),
+# which is why those never trip. Asterisks inside a `++...++` passthrough, behind a
+# `\*` escape, or in a whole-span `+...+` passthrough are not counted. Runs on
 # prose lines only; a `*` inside a `[source]` listing or `....` block is literal
 # source and never reaches here.
 
@@ -2238,7 +2238,7 @@ PASSTHROUGH_INNER_RE = re.compile(r"\+\+.*?\+\+")
 def _bolding_asterisk_count(inner: str) -> int:
     """Number of emphasis-eligible `*` in a code span's inner text: raw `*`
     touching a non-word boundary on at least one side, excluding those inside a
-    `++…++` passthrough or behind a `\\*` escape."""
+    `++...++` passthrough or behind a `\\*` escape."""
     escaped = set()
     for m in PASSTHROUGH_INNER_RE.finditer(inner):
         escaped.update(range(m.start(), m.end()))
@@ -2259,7 +2259,7 @@ def rule_asterisk_in_code(doc: Document) -> Iterator[Finding]:
         for m in CODE_SPAN_RE.finditer(line.text):
             inner = m.group(0).strip("`")
             if len(inner) >= 2 and inner.startswith("+") and inner.endswith("+"):
-                continue  # a whole-span `+…+` passthrough: contents are literal
+                continue  # a whole-span `+...+` passthrough: contents are literal
             if _bolding_asterisk_count(inner) % 2 == 1:
                 yield (line.num, m.start() + 1,
                        "Code span has an odd, unbalanced bolding `*` that "
@@ -2269,7 +2269,7 @@ def rule_asterisk_in_code(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Paragraph and section size — sentence caps, body caps, opener monotony
+# Paragraph and section size -- sentence caps, body caps, opener monotony
 # ============================================================================
 #
 # These rules exploit the one-line-per-paragraph convention: a paragraph IS a
@@ -2637,7 +2637,7 @@ def rule_sentence_length(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Abstractness — graded-lexicon vocabulary check (English)
+# Abstractness -- graded-lexicon vocabulary check (English)
 # ============================================================================
 #
 # Serves concrete-vocabulary (§concrete-vocabulary): prose stays anchored in
@@ -2767,7 +2767,7 @@ def rule_abstract_vocabulary(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Nominalization density — direct verbs over stacked abstract nouns
+# Nominalization density -- direct verbs over stacked abstract nouns
 # ============================================================================
 #
 # Serves direct-verbs (§direct-verbs): one sentence doesn't bury its actions
@@ -2806,7 +2806,7 @@ def rule_nominalization_density(doc: Document) -> Iterator[Finding]:
 
 
 # ============================================================================
-# Diagnostics — per-file metrics panel
+# Diagnostics -- per-file metrics panel
 # ============================================================================
 #
 # The text report shows, for every linted file, the measured value behind
@@ -3260,7 +3260,7 @@ def run_vale_tables(doc: Document) -> List[tuple]:
 
 
 # ============================================================================
-# Asciidoctor engine — render integrity
+# Asciidoctor engine -- render integrity
 # ============================================================================
 #
 # A document that doesn't render cleanly is broken regardless of its prose:
@@ -3438,7 +3438,7 @@ def lint_file(path: str) -> Tuple[List[tuple], List[Tuple[str, str]]]:
 
 
 # ============================================================================
-# Text output — grouped, coloured, with a summary
+# Text output -- grouped, coloured, with a summary
 # ============================================================================
 #
 # Colour is emitted only to a real terminal, so piped or agent-captured output
