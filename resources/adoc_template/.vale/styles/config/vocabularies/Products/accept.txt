@@ -48,6 +48,8 @@ PMD
 GPG
 JaCoCo
 SpotBugs
+gitleaks
+Qodana
 picocli
 tinylog
 Maven

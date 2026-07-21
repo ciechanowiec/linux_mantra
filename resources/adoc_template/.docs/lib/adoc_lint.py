@@ -2463,15 +2463,15 @@ def rule_semicolons(doc: Document) -> Iterator[Finding]:
             continue
         for match in re.finditer(r";", _author_mask(text)):
             yield (line_num, source_col + match.start(),
-                   "A semicolon joins separate thoughts; split them into "
-                   "separate sentences")
+                   "A semicolon joins separate thoughts; consider "
+                   "splitting them into separate sentences")
 
 
 COLON_CAP_RE = re.compile(r"(?<!:):\s+([A-Z][\w.]*)")
 COLON_PROPER_WORDS = frozenset({
     "Payload", "Flutter", "Microsoft", "Storybook", "Amazon", "Google",
     "Azure", "Braze", "Cloudinary", "CloudFront", "Redshift", "BigQuery",
-    "Deloitte", "PwC", "KPMG", "EY", "Kanban", "Scrum", "DataRide",
+    "Deloitte", "PwC", "KPMG", "EY", "Claude", "Kanban", "Scrum", "DataRide",
     "WordPress", "ProCyclingStats",
 })
 
