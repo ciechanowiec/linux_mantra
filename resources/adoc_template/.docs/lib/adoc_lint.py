@@ -2066,6 +2066,49 @@ def rule_diagram_corner_support(doc: Document) -> Iterator[Finding]:
         yield from check(block)
 
 
+# A connector junction may share a line with an arrow label or a node, as in
+# ``+------> [destination] <+``. Such a line isn't a box border, so the corner
+# rule above intentionally skips it. A `+` that touches a horizontal or
+# vertical connector still represents a junction, however, and must join at
+# least two segments. One attached segment means that the junction dangles:
+# most often its vertical branch has drifted to another column. Arithmetic and
+# literal plus signs are ignored because they touch no connector character.
+HORIZONTAL_CONNECTORS = "-<>"
+
+
+def rule_diagram_junction_support(doc: Document) -> Iterator[Finding]:
+    def check(block: List[Line]) -> Iterator[Finding]:
+        for i, line in enumerate(block):
+            text = line.text
+            above = block[i - 1].text if i > 0 else ""
+            below = block[i + 1].text if i + 1 < len(block) else ""
+            for col, char in enumerate(text):
+                if char != "+":
+                    continue
+                left = col > 0 and text[col - 1] in HORIZONTAL_CONNECTORS
+                right = (col + 1 < len(text)
+                         and text[col + 1] in HORIZONTAL_CONNECTORS)
+                up = col < len(above) and above[col] in VERTICAL_CONNECTORS
+                down = col < len(below) and below[col] in VERTICAL_CONNECTORS
+                attached = sum((left, right, up, down))
+                if attached == 1:
+                    yield (line.num, col + 1,
+                           "Connector junction has only one attached segment; "
+                           "align it with its vertical branch or remove the "
+                           "dangling `+` (§ascii-diagrams)")
+
+    block: List[Line] = []
+    for line in doc.lines:
+        if line.block == "literal":
+            block.append(line)
+            continue
+        if block:
+            yield from check(block)
+            block = []
+    if block:
+        yield from check(block)
+
+
 # Serves ascii-diagrams (§ascii-diagrams): a sequence diagram has no boxes, so
 # the box rules above never look at it. Its invariant is that each participant's
 # lifeline holds one fixed column down the whole diagram. This rule takes the
@@ -3045,6 +3088,7 @@ RULES: List[Rule] = [
     Rule("diagram-charset", "error", rule_diagram_charset),
     Rule("diagram-box-alignment", "error", rule_diagram_box_alignment),
     Rule("diagram-corner-support", "error", rule_diagram_corner_support),
+    Rule("diagram-junction-support", "error", rule_diagram_junction_support),
     Rule("diagram-lifeline-alignment", "error", rule_diagram_lifeline_alignment),
     Rule("one-sentence-per-line", "error", rule_one_sentence_per_line),
     Rule("inline-formatting", "error", rule_bold_in_body),
