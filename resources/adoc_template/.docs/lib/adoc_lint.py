@@ -646,11 +646,11 @@ def rule_numbering_depth(doc: Document) -> Iterator[Finding]:
 # List structure -- continuations and starts that render as literal text
 # ============================================================================
 #
-# A render-integrity pair. AsciiDoc's list markup fails silently in two ways
-# that Asciidoctor's own render pass does NOT report (verified empirically: both
-# convert with exit 0 and no warning), so the literal markers reach the reader
-# as body text. These two rules are the deterministic, precisely-located
-# backstop the render pass can't give:
+# Render-integrity checks for AsciiDoc list markup that fails silently.
+# Asciidoctor reports none of these cases (verified empirically: conversion
+# exits 0 with no warning), so literal markers can reach the reader as body
+# text. The rules below are the deterministic, precisely-located backstop the
+# render pass can't give:
 #
 #   * orphan-continuation (Mode A): a list continuation is a lone `+` line that
 #     attaches the block below it to the list item above it. With no list open
@@ -667,10 +667,16 @@ def rule_numbering_depth(doc: Document) -> Iterator[Finding]:
 #     preceding line already belongs to an open list (a wrapped item line), so a
 #     legitimate multi-line list is never touched.
 #
-# Both run in prose (`none`) blocks only, so markers shown inside a `[source]`
+#   * continuation-content (Mode C): a continuation paragraph can be followed
+#     by a deeper list only when another `+` line attaches that list to the same
+#     parent. Without the second `+`, Asciidoctor joins the deeper markers to the
+#     continuation paragraph as literal text.
+#
+# All run in prose (`none`) blocks only, so markers shown inside a `[source]`
 # example, or a `+` standing in a table cell (a legal cell continuation), are
 # left alone. Each flags only the single line that breaks the structure -- the
-# stray `+` or the glued first item -- since fixing it repairs the cascade below.
+# stray `+`, glued first item, or detached deeper item -- since fixing it repairs
+# the cascade below.
 
 LABELED_MARKER_RE = re.compile(r"^\s*\S.*?::(\s|$)")
 BLOCK_TITLE_RE = re.compile(r"^\.\S")
@@ -770,6 +776,82 @@ def rule_glued_list_item(doc: Document) -> Iterator[Finding]:
                "List item is glued to the paragraph above it with no blank line "
                "between them, so the list opens no continuations and any `+` "
                "under it renders as literal text")
+
+
+def _numbered_marker_rank(line: Line) -> Optional[int]:
+    """Return the guideline's six-level list rank, or None for non-items."""
+    ordered = ORDERED_MARKER_RE.match(line.text)
+    if ordered:
+        return len(ordered.group(1))
+    unordered = UNORDERED_MARKER_RE.match(line.text)
+    if unordered:
+        return 4 + len(unordered.group(1))
+    return None
+
+
+def rule_continuation_content(doc: Document) -> Iterator[Finding]:
+    """Reject a deeper list detached from its parent continuation paragraph.
+
+    In this invalid shape::
+
+        . Parent
+        +
+        Continuation paragraph.
+        .. Child
+
+    the child marker renders literally. A `+` immediately before `.. Child`
+    closes the paragraph block and attaches the deeper list to `Parent`.
+    """
+    for i, line in enumerate(doc.lines):
+        if line.block != "none" or line.in_table:
+            continue
+        child_rank = _numbered_marker_rank(line)
+        if child_rank is None:
+            continue
+
+        # A `+` immediately before the deeper item is the required attachment.
+        j = i - 1
+        while j >= 0 and doc.lines[j].text.strip() == "":
+            j -= 1
+        if j < 0 or doc.lines[j].text.strip() == "+":
+            continue
+        if doc.lines[j].block != "none" or doc.lines[j].in_table:
+            continue
+
+        # Walk over the continuation paragraph to the `+` that opened it.
+        continuation_plus = None
+        k = j
+        while k >= 0:
+            candidate = doc.lines[k]
+            if candidate.block != "none" or candidate.in_table:
+                break
+            token = candidate.text.strip()
+            if token == "+":
+                continuation_plus = k
+                break
+            if (token == "" or HEADING_RE.match(candidate.text)
+                    or _opens_list(candidate) or OTHER_DELIM_RE.match(token)
+                    or BLOCK_TITLE_RE.match(token) or token.startswith("[")):
+                break
+            k -= 1
+        if continuation_plus is None:
+            continue
+
+        # Locate the numbered paragraph to which that continuation belongs.
+        parent_rank = None
+        for parent, token in _lines_above(doc, continuation_plus - 1):
+            if token in ("", "+"):
+                continue
+            parent_rank = _numbered_marker_rank(parent)
+            if parent_rank is not None or HEADING_RE.match(parent.text):
+                break
+        if parent_rank is None or child_rank <= parent_rank:
+            continue  # a same-level sibling ends a continuation without `+`
+
+        yield (line.num, 1,
+               "Deeper list follows a continuation paragraph without the "
+               "required `+` attachment, so its marker renders as literal text "
+               "(§continuation-content)")
 
 
 # ============================================================================
@@ -993,6 +1075,65 @@ def rule_xref_targets(doc: Document) -> Iterator[Finding]:
                 yield (line.num, m.start() + 1,
                        f"Cross-reference targets anchor {target!r}, which "
                        f"doesn't exist in the document (§explicit-anchors)")
+
+
+# Serves no-section-heading-self-references
+# (§no-section-heading-self-references): a reference to the current section's
+# own heading adds link styling without navigation and suggests another
+# destination. References to terms and other anchors defined inside the same
+# section remain valid. "Current section" means the nearest preceding heading.
+
+STANDALONE_BLOCK_ANCHOR_RE = re.compile(
+    r"^\s*(?:\[\[(?!\[)[^\]]+\]\]|\[#(?:[A-Za-z0-9_-]+)\])\s*$")
+
+
+def rule_no_section_heading_self_references(
+        doc: Document) -> Iterator[Finding]:
+    heading_lines = {line_num for line_num, _level in doc.headings}
+    section_for_line: Dict[int, Optional[int]] = {}
+    current_section: Optional[int] = None
+    for line in doc.lines:
+        if line.num in heading_lines:
+            current_section = line.num
+        section_for_line[line.num] = current_section
+
+    next_content_line: Dict[int, Optional[int]] = {}
+    next_num: Optional[int] = None
+    for line in reversed(doc.lines):
+        next_content_line[line.num] = next_num
+        if line.block == "none" and line.text.strip():
+            next_num = line.num
+
+    section_anchors: Dict[int, Set[str]] = {}
+    for line in _prose(doc):
+        masked = _mask_code(line.text)
+        if not STANDALONE_BLOCK_ANCHOR_RE.match(masked):
+            continue
+        following = next_content_line[line.num]
+        if following not in heading_lines:
+            continue
+        for rx in (BLOCK_ANCHOR_RE, INLINE_ANCHOR_RE):
+            for match in rx.finditer(masked):
+                section_anchors.setdefault(following, set()).add(
+                    match.group(1).strip())
+
+    for line in _prose(doc):
+        owner = section_for_line[line.num]
+        if owner is None:
+            continue
+        masked = _mask_code(line.text)
+        for rx in (XREF_TARGET_RE, ANGLE_REF_RE):
+            for match in rx.finditer(masked):
+                target = match.group(1)
+                if target not in section_anchors.get(owner, set()):
+                    continue
+                yield (
+                    line.num,
+                    match.start() + 1,
+                    f"Cross-reference to {target!r} targets the heading of "
+                    f"the current section; write the section name as plain "
+                    f"text (§no-section-heading-self-references)",
+                )
 
 
 # ============================================================================
@@ -2181,11 +2322,33 @@ def rule_diagram_lifeline_alignment(doc: Document) -> Iterator[Finding]:
 PARAGRAPH_HEADER_RE = re.compile(
     r"^(?:[.*]+\s+)?(?:\[\[[^\]]*\]\]|\[#[^\]]*\])?\s*"
     r"\*{1,2}(?P<header>[^*]+)\*{1,2}\s*$")
+PARAGRAPH_HEADER_MINOR_WORDS = frozenset({
+    "a", "an", "and", "as", "at", "but", "by", "for", "from", "in",
+    "into", "nor", "of", "on", "or", "per", "the", "to", "via", "with",
+    "without",
+})
+PARAGRAPH_HEADER_WORD_RE = re.compile(r"[A-Za-z][A-Za-z'-]*")
 # Bold comes in two forms: constrained `*word*` (rejects a doubled `*` at either
 # edge) and unconstrained `**word**`. Both are banned in body text; the second
 # regex catches the double-asterisk form the first deliberately skips.
 BOLD_IN_BODY_RE = re.compile(r"(?<![\w*])\*([^*\s][^*]*?)\*(?![\w*])")
 BOLD_UNCONSTRAINED_RE = re.compile(r"\*\*(?=\S).+?\*\*")
+
+
+def _paragraph_header_uses_title_case(header: str) -> bool:
+    """Return true when ordinary header words follow title capitalization."""
+    words = PARAGRAPH_HEADER_WORD_RE.findall(_mask_code(header))
+    ordinary: List[str] = []
+    for word in words:
+        if word.lower() in PARAGRAPH_HEADER_MINOR_WORDS:
+            continue
+        if word.isupper() or any(char.isupper() for char in word[1:]):
+            # Acronyms, identifiers, and internal capitals do not establish case.
+            continue
+        ordinary.append(word)
+    title_words = [word for word in ordinary if word[0].isupper()]
+    lower_words = [word for word in ordinary if word[0].islower()]
+    return len(title_words) >= 2 and not lower_words
 
 
 def _is_sentence_line(text: str) -> bool:
@@ -2225,9 +2388,14 @@ def rule_bold_in_body(doc: Document) -> Iterator[Finding]:
         stripped = line.text.strip()
         paragraph_header = PARAGRAPH_HEADER_RE.match(stripped)
         if paragraph_header:
-            if paragraph_header.group("header").rstrip().endswith("."):
+            header = paragraph_header.group("header").rstrip()
+            if header.endswith("."):
                 yield (line.num, len(line.text.rstrip()),
                        "Bold paragraph header must not end with a period")
+            if _paragraph_header_uses_title_case(header):
+                yield (line.num, line.text.find(header) + 1,
+                       "Bold paragraph header must use sentence case, not "
+                       "title case")
             continue
         # An unordered-list marker's `*`/`**` is not bold, but the item's content
         # can still carry inline bold. Blank the marker (preserving columns) and
@@ -3077,6 +3245,7 @@ RULES: List[Rule] = [
     Rule("numbering-depth", "error", rule_numbering_depth),
     Rule("orphan-continuation", "error", rule_orphan_continuation),
     Rule("glued-list-item", "error", rule_glued_list_item),
+    Rule("continuation-content", "error", rule_continuation_content),
     Rule("single-item-list", "error", rule_single_item_list),
     Rule("alt-text", "error", rule_image_alt_text),
     Rule("link-text", "error", rule_link_text),
@@ -3099,6 +3268,8 @@ RULES: List[Rule] = [
     Rule("oxford-comma", "error", rule_oxford_comma),
     Rule("paragraph-but", "error", rule_paragraph_but),
     Rule("xref-targets", "error", rule_xref_targets),
+    Rule("no-section-heading-self-references", "error",
+         rule_no_section_heading_self_references),
     Rule("footnote-bare-bracket", "error", rule_footnote_bare_bracket),
     Rule("internal-references-with-xref", "error", rule_bare_id_xref),
     Rule("one-paragraph-one-topic", "error", rule_paragraph_sentences),

@@ -322,35 +322,46 @@ Heading: "Off by Default." Body: "Email and phone detection is off by default. T
 
 === Terminology and Precision
 
+[#strict-nomenclature]
 ==== Strict Nomenclature
 
-A concept is named once and the name is used everywhere. The name isn't varied for stylistic relief. Treat terms like identifiers in source code: renaming them mid-document is a defect that breaks the reader's ability to track the same thing across sentences.
-
-The naming rule applies with equal force to operations. _Create_, _insert_, _add_, _register_, _publish_, and _submit_ aren't synonyms. Each names a specific operation in most systems. When the system distinguishes them, the document distinguishes them. When the system doesn't, pick one and use only that one.
+. Give every concept one [[canonical-term,canonical term]]_canonical term_ and use that term throughout the document. The rule covers deliverables, actors, operations, states, boundaries, and units across prose, headings, lists, tables, diagrams, captions, and cross-reference labels.
+. Keep two related terms only when they name different concepts. The concepts differ when they have different functions, owners, outputs, or lifecycles. If none of those properties differ, choose one term and replace the other.
+. A comma-separated list, slash pair, or parenthetical alias is a violation when all terms name the same concept and the sentence gains no information from listing them.
 
 [.bad-example]
 .{bad-icon} Bad example
 ====
-The handler registers itself with the broker. Once the listener is active, the consumer dispatches incoming events to subscribers. (Three names. One concept.)
+After authentication, the service creates a session. The login context stores the user identifier. The authentication state expires after 30 minutes.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-The handler registers itself with the broker. Once the handler is active, it dispatches incoming events to subscribers.
+After authentication, the service creates a session. The session stores the user identifier and expires after 30 minutes.
 ====
 
 [.bad-example]
 .{bad-icon} Bad example
 ====
-You can add a record to the table, then submit the changes by committing the transaction.
+Editors select a page, fill the template with content, and publish the layout.
 ====
 
 [.good-example]
 .{good-icon} Good example
 ====
-A record is inserted into the table by `INSERT INTO`. The change becomes durable when the enclosing transaction is committed.
+Editors select a page template, add content, and publish the page.
 ====
+
+[#verify-nomenclature]
+==== Verify Nomenclature
+
+. Verify compliance with the rule xref:#strict-nomenclature[] after drafting, after every material reorganization, and before delivery. A repaired term re-enters the check.
+. Collect repeated noun phrases from prose, headings, lists, tables, diagrams, captions, and cross-reference labels.
+. Group terms that appear to name the same concept. Choose one xref:#canonical-term[canonical term] for each group and replace its aliases.
+. Check that each term names only one concept. If a term names more than one concept, split the term or narrow its definition and rename the outlying uses.
+. Keep related terms only when they name different concepts and each term is used consistently. When several terms name the same concept, remove terms that add no information.
+. Finish when each concept has one term and each term names one concept. A text search or linter may find candidates, but the final decision depends on the concepts named in context.
 
 [#defined-terms]
 ==== Defined Terms
@@ -1595,7 +1606,7 @@ The new compaction strategy reduces p99 read latency by 40% on the workload desc
 [[part-2]]
 == Technical Texts
 
-This part adds rules for documents whose subject is a technical system: specifications, reference documentation, architecture documents, design documents, protocol descriptions, runbooks, and operator manuals. The rules in xref:#part-1[Part 1] still apply. xref:#part-2[Part 2] specializes them and adds rules that are specific to technical writing.
+This part adds rules for documents whose subject is a technical system: specifications, reference documentation, architecture documents, design documents, protocol descriptions, runbooks, and operator manuals. The rules in xref:#part-1[Part 1] still apply, and the following rules specialize them for technical writing.
 
 === Show, Then Tell - Technical Form
 
@@ -1756,7 +1767,7 @@ Call `commit` to persist the changes.
 [[part-3]]
 == AI Authorship
 
-This part adds rules that apply when an AI system is given this guideline as a style instruction. The rules in xref:#part-1[Part 1] and xref:#part-2[Part 2] still apply. xref:#part-3[Part 3] addresses failure modes specific to AI authorship: inventing facts, restating the prompt, opening with throat-clearing, narrating rule application, hedging from uncertainty, over-weighting items mentioned in the prompt, and treating the guideline's markup as content.
+This part adds rules that apply when an AI system is given this guideline as a style instruction. The rules in xref:#part-1[Part 1] and xref:#part-2[Part 2] still apply. The following rules address failure modes specific to AI authorship: inventing facts, restating the prompt, opening with throat-clearing, narrating rule application, hedging from uncertainty, over-weighting items mentioned in the prompt, and treating the guideline's markup as content.
 
 [#dont-invent-facts]
 === Don't Invent Facts
@@ -2161,7 +2172,29 @@ At every nesting level, a xref:#numbered-paragraphs[numbered paragraph] has at l
 [#paragraph-headers]
 ==== Paragraph Headers
 
-A xref:#numbered-paragraphs[numbered paragraph] may open with a _paragraph header_ - a bold phrase that names the paragraph's topic. The header stands alone on the item's line. The paragraph's text follows as a continuation per xref:#continuation-content[] or as nested numbered paragraphs. A header is due when it helps the reader scan: the paragraph is long and holds several sentences, or the item heads a group of nested items whose shared topic needs a name. A header is omitted when it adds nothing: a paragraph of one or two sentences whose topic is already stated by the section heading doesn't restate that topic in bold. A paragraph header is the one place where bold appears in body text - see xref:#inline-formatting-semantics[].
+A xref:#numbered-paragraphs[numbered paragraph] may open with a _paragraph header_ - a bold phrase that names the paragraph's topic. The header stands alone on the item's line. The paragraph's text follows as a continuation per xref:#continuation-content[] or as nested numbered paragraphs. A paragraph header uses sentence case: the first word and any proper nouns, acronyms, or identifiers are capitalized, while ordinary words that follow remain lowercase. It never uses title case and never ends with a period. A header is due when it helps the reader scan: the paragraph is long and holds several sentences, or the item heads a group of nested items whose shared topic needs a name. A header is omitted when it adds nothing: a paragraph of one or two sentences whose topic is already stated by the section heading doesn't restate that topic in bold. A paragraph header is the one place where bold appears in body text - see xref:#inline-formatting-semantics[].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+. *Cache Invalidation Rules*
++
+The cache removes an entry when the source record changes.
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. *Cache invalidation rules*
++
+The cache removes an entry when the source record changes.
+----
+====
 
 [.good-example]
 .{good-icon} Good example
@@ -2336,6 +2369,8 @@ A [[lease]]_lease_ is the exclusive right to use one pooled connection for the d
 === Internal References with `xref`
 
 In each paragraph that uses a concept defined elsewhere in the document, at least the first use links to the definition. Later uses in the same paragraph may stay plain. The link is written with the `xref` macro against the definition's explicit anchor. The default form is `+xref:#connection-pool[]+` with empty brackets, which renders the target's title and stays correct when the title changes. Custom link text is supplied only when the title doesn't fit the grammar of the sentence. When a reference points to a section and the rendered title alone would leave the grammar or the meaning of the sentence unclear, the reference is preceded by a qualifier such as _the section_ or _the chapter_. xref:#cross-references[] governs the wording around the reference. This rule governs when a reference is due and the markup that carries it.
+
+[[no-section-heading-self-references,no section-heading self-references]]A cross-reference never targets the heading of the current section, defined as the section begun by the nearest preceding heading. The reader is already inside that section, so the link provides no navigation and falsely suggests another destination. Write the current section's name as plain text. The prohibition applies only to the current section's heading. A concept or another anchor defined within the same section remains subject to the paragraph-level linking rule: in each paragraph that uses it, at least the first use links to the precise definition.
 
 [.bad-example]
 .{bad-icon} Bad example
