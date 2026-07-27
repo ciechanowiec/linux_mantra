@@ -93,8 +93,8 @@ This section describes the layout of a compliant repository, from the xref:#inst
 
 . [[instruction-file,an instruction file]]An _instruction file_ is a committed file that holds rules of the repository for agents. [[root-instruction-file,the root instruction file]]The _root instruction file_ sits at the top of the repository and states the xref:#verification-command[verification command], the repository layout, the conventions that the checks enforce, and every rule that binds without a machine check.
 . A directory may hold a scoped instruction file with the rules specific to its part of the repository. A rule appears in exactly one instruction file.
-. Any other file that an agent tool reads for instructions only imports an instruction file and adds no rules of its own.
-. Where the format of an agent-facing entry file supports no import, the file contains only the location of an instruction file.
+. The xref:#root-instruction-file[root instruction file] carries a name that no agent tool owns, so the rules sit in one place whichever agent tool reads them. [[entry-file,an entry file]]An _entry file_ is a file that an agent tool reads for instructions under a fixed name of its own. An entry file holds nothing but a reference to an instruction file and states no rule. Where its format supports an import, the reference is that import. Where its format supports none, the reference is the location of the instruction file in plain text.
+. The repository declares the names of its xref:#entry-file[entry files]. A check reads each declared name present in the repository and fails on a file that holds anything besides the reference.
 . Every command and every path that an instruction file references resolves to an existing target. A check verifies each reference and fails on a dangling one.
 
 [[production-imports]]
