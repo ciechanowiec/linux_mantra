@@ -114,7 +114,6 @@ Production code imports neither test code nor development-only dependencies. A c
 
 . Line endings, character encoding, indentation, and whitespace handling are fixed by configuration files committed to the repository. A check verifies every tracked file that the repository doesn't exempt by role, such as binary assets, against that configuration and fails on the first deviation.
 . Where the ecosystem of the programming language has a code formatter, the formatter is one of the checks, run under a committed configuration. The check formats every source file not exempt by role and fails when the output differs from the committed copy.
-. Production code reads environment variables only in declared configuration source files. A configuration source file validates every variable it reads and reports all violations in one pass, and the rest of the production code receives validated values.
 . No secret sits in any commit. A check scans the tracked content and the whole history for credentials, keys, and tokens.
 . A fake credential committed as a test fixture is listed in a declared allowlist. The secret check fails on any hit outside that allowlist.
 
