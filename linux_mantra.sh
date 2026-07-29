@@ -443,9 +443,6 @@ echo "Installing vidcutter (video cutter)..."
 # DOCUMENTATION: https://github.com/ozmartian/vidcutter
 sudo snap install vidcutter
 
-echo "Installing postman (app for building and using APIs)..."
-sudo snap install postman
-
 echo "Installing drawio (diagramming app)..."
 # DOCUMENTATION: https://snapcraft.io/drawio (published by verified "jgraph",
 # the draw.io team; strict confinement, so no --classic).

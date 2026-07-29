@@ -926,9 +926,6 @@ cat > "$HOME/.config/yt-dlp/config" << EOF
 --remote-components ejs:github
 EOF
 
-echo "Installing postman (app for building and using APIs)..."
-brew install postman
-
 echo "Installing drawio (diagramming app)..."
 brew install --cask drawio
 
