@@ -263,6 +263,7 @@ cat >> "$shellFile" << EOF
 alias aem_init_archetype_65='~/scripts/aem_init_archetype.sh 65'
 alias aem_init_archetype_cloud='~/scripts/aem_init_archetype.sh cloud'
 alias cc='mkdir -p ~/claude && cd ~/claude && claude' # Claude-based chat in CLI; shadows the C compiler in interactive shells (use 'command cc' if needed)
+alias cx='mkdir -p ~/codex && cd ~/codex && codex' # Codex-based chat in CLI
 alias docker_clean='~/scripts/docker_clean.sh'
 alias docker_clean_containers='~/scripts/docker_clean_containers.sh'
 alias docker_clean_images='~/scripts/docker_clean_images.sh'
@@ -1017,6 +1018,7 @@ fi
 jq '. * {
   "theme": "auto",
   "attribution": { "commit": "", "pr": "" },
+  "permissions": { "defaultMode": "bypassPermissions" },
   "extraKnownMarketplaces": {
     "anthropic-agent-skills": { "source": { "source": "github", "repo": "anthropics/skills" } }
   },
@@ -1032,10 +1034,10 @@ jq '. * {
     "pr-review-toolkit@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
-    "figma@claude-plugins-official": true,
     "explanatory-output-style@claude-plugins-official": true
   }
 }
+| del(.enabledPlugins["figma@claude-plugins-official"])
 | .permissions.allow = (((.permissions.allow // []) + [
     "Bash(apt list *)",
     "Bash(apt search *)",
@@ -1116,17 +1118,49 @@ jq '. * {
     "WebSearch"
   ]) | unique)
 | .permissions.deny = (((.permissions.deny // []) + [
+    "Bash(curl * | bash*)",
+    "Bash(curl * | sh*)",
+    "Bash(dd *)",
+    "Bash(docker push*)",
     "Bash(find * -exec *)",
     "Bash(find * -execdir *)",
     "Bash(find * -delete*)",
     "Bash(find * -fprint*)",
+    "Bash(gh pr merge*)",
+    "Bash(gh release create*)",
+    "Bash(git clean -f*)",
+    "Bash(git push*)",
+    "Bash(git reset --hard*)",
+    "Bash(halt*)",
+    "Bash(killall*)",
+    "Bash(launchctl *)",
+    "Bash(mkfs*)",
+    "Bash(npm publish*)",
+    "Bash(pkill*)",
+    "Bash(pnpm publish*)",
+    "Bash(reboot*)",
     "Bash(rg * --pre *)",
     "Bash(rg * --pre-glob *)",
     "Bash(rg * --search-zip*)",
-    "Bash(rg * -z*)"
+    "Bash(rg * -z*)",
+    "Bash(rm -fr *)",
+    "Bash(rm -r -f *)",
+    "Bash(rm -rf *)",
+    "Bash(shutdown*)",
+    "Bash(sudo *)",
+    "Bash(systemctl *)",
+    "Bash(wget * | bash*)",
+    "Bash(wget * | sh*)",
+    "Bash(yarn publish*)"
   ]) | unique)
 ' "$claudeSettingsFile" > "$claudeSettingsFile.tmp" \
     && mv "$claudeSettingsFile.tmp" "$claudeSettingsFile"
+
+# Remove Figma when upgrading a machine configured by an older mantra version.
+if claude plugin list --json \
+    | jq -e 'any(.[]; .id == "figma@claude-plugins-official" and .scope == "user")' >/dev/null; then
+    claude plugin uninstall "figma@claude-plugins-official" --scope user --yes
+fi
 
 echo "Registering the draw.io MCP server (lets Claude Code generate editable .drawio diagrams)..."
 # The official @drawio/mcp stdio server opens diagrams in the browser-based
@@ -1135,6 +1169,9 @@ echo "Registering the draw.io MCP server (lets Claude Code generate editable .dr
 if ! claude mcp get drawio >/dev/null 2>&1; then
     claude mcp add drawio --scope user -- npx -y @drawio/mcp
 fi
+
+echo "Installing and configuring Codex CLI (OpenAI's terminal-based AI coding agent)..."
+bash "$resourcesDir/scripts/configure_codex.sh" "$osType"
 
 echo "Installing Mermaid CLI (diagramming tool)..."
 npm install -g @mermaid-js/mermaid-cli
