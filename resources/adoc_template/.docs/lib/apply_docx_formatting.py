@@ -1116,6 +1116,37 @@ def _symmetric_table_cells(document_xml: str) -> str:
 
 
 # ============================================================================
+# document.xml -- compact lists inside table cells
+# ============================================================================
+#
+# List items inherit the Normal style's 200-twip space-after. That spacing is
+# useful between body paragraphs, but inside a table it creates a blank line
+# between every bullet and makes checklist cells unnecessarily tall. Apply
+# zero before/after spacing only to numbered or bulleted paragraphs inside
+# ordinary table cells. Lists outside tables keep their normal spacing.
+
+
+def _compact_table_cell_lists(document_xml: str) -> str:
+    def compact_paragraph(match: 're.Match[str]') -> str:
+        paragraph = match.group(0)
+        if '<w:numPr>' not in paragraph:
+            return paragraph
+        paragraph = _set_edge_spacing(paragraph, 'before', '0')
+        return _set_edge_spacing(paragraph, 'after', '0')
+
+    def compact_cell(match: 're.Match[str]') -> str:
+        return CELL_P_RE.sub(compact_paragraph, match.group(0))
+
+    def compact_table(match: 're.Match[str]') -> str:
+        table = match.group(0)
+        if '<w:tblStyle w:val="horizontal" />' in table:
+            return table
+        return CELL_TC_RE.sub(compact_cell, table)
+
+    return CELL_TBL_RE.sub(compact_table, document_xml)
+
+
+# ============================================================================
 # document.xml -- symmetric space around tables
 # ============================================================================
 #
@@ -1325,6 +1356,7 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
         _force_a4_section,
         _fit_table_widths,
         _symmetric_table_cells,
+        _compact_table_cell_lists,
         _symmetric_table_margins,
         _compact_source_fields_tables,
     ],
