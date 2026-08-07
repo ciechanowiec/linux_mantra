@@ -206,9 +206,10 @@ This section describes the state of the third-party packages the repository depe
 [[dependency-freshness]]
 === Freshness
 
-Trailing an upstream release by several major versions is a property of the version the repository declares, so it binds as a check. A newer version merely existing isn't a property of the declared version, so it never fails the build on its own.
+Trailing an upstream release by several major versions is a property of the version the repository declares, so it binds as a check. A newer version merely existing isn't a property of the declared version, so it's reported but never fails the build on its own.
 
-. A xref:#declared-dependency[declared dependency] trails its latest published release by fewer major versions than a bound the repository declares - for example, two major versions. The check compares each declared dependency against its latest release and fails when the gap reaches the bound. It counts declared dependencies, not the rest of the xref:#resolved-set[resolved set].
+. Every build reports each stable update available for a package the repository declares, in a manifest of its own or in a manifest that one inherits from. The report names the manifest that owns the declaration, so a manifest that inherits a declaration reports the update without becoming its version owner.
+. A xref:#declared-dependency[declared dependency] trails its latest published release by fewer major versions than a bound the repository declares - for example, two major versions. The check compares every declaration the update report covers against its latest release and fails when the gap reaches the bound. It counts declared dependencies, not the rest of the xref:#resolved-set[resolved set].
 . A conventional version uses its numeric major for that comparison. A version beginning with a four-digit year in the range `20**` uses the year as its major-equivalent, so an available release two or more years ahead fails under a bound of two. A version scheme with neither a numeric major nor a leading year has no comparable level and is excluded from this check.
 . This check reads the package registry, so its verdict can change while the repository doesn't. It's the check that the section xref:#check-qualities[] exempts from its determinism rule. The exemption is bounded. A gap below the bound passes. The check fails only when the gap reaches the declared major-version bound. When the registry is unreachable, the check fails.
 
