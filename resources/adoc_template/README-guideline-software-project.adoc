@@ -11,7 +11,6 @@
 :toc: left
 :toclevels: 5
 :icons: font
-:docinfo: shared,private
 :linkcss:
 :sourcedir: {docdir}
 :pdf-theme: {sourcedir}/.docs/themes/basic.yml
@@ -21,6 +20,26 @@
 :!table-caption:
 :!figure-caption:
 :!example-caption:
+
+ifdef::backend-html5[]
+++++
+<link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
+<!-- Inlined so the IntelliJ AsciiDoc preview honors these rules: its webview blocks external CSS even in
+     UNSAFE mode, so the remote stylesheet above is dropped in the IDE preview. Mirrors rules already in
+     adoc-css-style.css for the published HTML — enforces [cols="..."] column widths and wraps long content. -->
+<style>
+    table.tableblock {
+        table-layout: fixed;
+    }
+
+    table.tableblock td,
+    table.tableblock th {
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
+++++
+endif::[]
 
 [cols=">.^1,<.^1"]
 |===
@@ -325,3 +344,10 @@ Lint the source text:
 ----
 python3 .docs/lib/adoc_lint.py {docname}{docfilesuffix}
 ----
+
+ifdef::backend-html5[]
+++++
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js"></script>
+<script src="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo-footer.js"></script>
+++++
+endif::[]
