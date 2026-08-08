@@ -26,7 +26,7 @@ ifdef::backend-html5[]
 <link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
 <!-- Inlined so the IntelliJ AsciiDoc preview honors these rules: its webview blocks external CSS even in
      UNSAFE mode, so the remote stylesheet above is dropped in the IDE preview. Mirrors rules already in
-     adoc-css-style.css for the published HTML — enforces [cols="..."] column widths and wraps long content. -->
+     adoc-css-style.css for the published HTML - enforces [cols="..."] column widths and wraps long content. -->
 <style>
     table.tableblock {
         table-layout: fixed;
