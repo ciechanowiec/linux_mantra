@@ -55,17 +55,18 @@ The source text of this document is written in the https://asciidoc.org[AsciiDoc
 
 The source text should follow the link:README-guideline-writing.adoc[Writing Guideline], stored beside it in the repository.
 
+[#export]
 === Prerequisites
 
 To export and lint the source text, install the following tools:
 
-. https://asciidoctor.org/#installation[Asciidoctor^]
-. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
-. https://pandoc.org/installing.html[Pandoc^]
-. https://www.python.org/downloads/[Python 3^]
-. https://vale.sh/docs/install/[Vale^]
-. https://poppler.freedesktop.org[`pdftotext`^]
-. https://github.com/tesseract-ocr/tesseract[`tesseract`^]
+. https://asciidoctor.org/#installation[Asciidoctor^],
+. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^],
+. https://pandoc.org/installing.html[Pandoc^],
+. https://www.python.org/downloads/[Python 3^],
+. https://vale.sh/docs/install/[Vale^],
+. https://poppler.freedesktop.org[`pdftotext`^],
+. https://github.com/tesseract-ocr/tesseract[`tesseract`^].
 
 === Export
 
@@ -76,14 +77,14 @@ To export and lint the source text, install the following tools:
 asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
 ----
 
-. To export the source text to PDF:
+. Export the source text to PDF with this command:
 +
 [source,bash,subs="attributes+"]
 ----
 asciidoctor-pdf --attribute allow-uri-read --require ./.docs/lib/common-style.rb {docname}{docfilesuffix}
 ----
 
-. To export the source text to DOCX:
+. Export the source text to DOCX with this command:
 +
 [source,bash,subs="attributes+"]
 ----

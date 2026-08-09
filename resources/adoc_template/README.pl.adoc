@@ -55,17 +55,18 @@ Tekst źródłowy niniejszego dokumentu wykorzystuje język znaczników https://
 
 Tekst źródłowy powinien być zgodny z link:README-guideline-writing.adoc[wytycznymi pisania], przechowywanymi obok niego w repozytorium.
 
+[#export]
 === Wymagane narzędzia
 
 Aby eksportować i sprawdzać tekst źródłowy, należy zainstalować następujące narzędzia:
 
-. https://asciidoctor.org/#installation[Asciidoctor^]
-. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
-. https://pandoc.org/installing.html[Pandoc^]
-. https://www.python.org/downloads/[Python 3^]
-. https://vale.sh/docs/install/[Vale^]
-. https://poppler.freedesktop.org[`pdftotext`^]
-. https://github.com/tesseract-ocr/tesseract[`tesseract`^]
+. https://asciidoctor.org/#installation[Asciidoctor^],
+. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^],
+. https://pandoc.org/installing.html[Pandoc^],
+. https://www.python.org/downloads/[Python 3^],
+. https://vale.sh/docs/install/[Vale^],
+. https://poppler.freedesktop.org[`pdftotext`^],
+. https://github.com/tesseract-ocr/tesseract[`tesseract`^].
 
 === Eksport
 
@@ -76,14 +77,14 @@ Aby eksportować i sprawdzać tekst źródłowy, należy zainstalować następuj
 asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
 ----
 
-. Eksport tekstu źródłowego do PDF:
+. Eksport tekstu źródłowego do PDF za pomocą następującego polecenia:
 +
 [source,bash,subs="attributes+"]
 ----
 asciidoctor-pdf --attribute allow-uri-read --require ./.docs/lib/common-style.rb {docname}{docfilesuffix}
 ----
 
-. Eksport tekstu źródłowego do DOCX:
+. Eksport tekstu źródłowego do DOCX za pomocą następującego polecenia:
 +
 [source,bash,subs="attributes+"]
 ----

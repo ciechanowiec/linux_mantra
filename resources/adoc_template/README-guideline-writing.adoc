@@ -11,6 +11,7 @@
 :toc: left
 :toclevels: 5
 :icons: font
+:docinfo: shared,private
 :linkcss:
 :sourcedir: {docdir}
 :pdf-theme: {sourcedir}/.docs/themes/basic.yml
@@ -192,7 +193,7 @@ An index is a precomputed lookup structure that accelerates query execution. The
 .. If the sentences carry one topic but remain equally clear after the break, rewrite them so their relationship is explicit. Make the later sentence visibly explain, evidence, qualify, implement, or follow from the earlier sentence. Naming the shared subject or the precise relationship is preferable to adding an empty transition such as _also_, _moreover_, or _in addition_.
 .. If the break damages a necessary relationship that the wording already makes clear, keep the sentences together.
 . Read the paragraph in xref:#forward-order[forward order]. The governing claim comes before its evidence or consequence, a cause comes before its effect, and a prerequisite comes before what depends on it. Reorder sentences when their logical essences reveal a stronger sequence.
-. Assign one verdict and act on it at once.
+. Assign one verdict and act on it at once:
 .. [[cohesive-verdict,the cohesive verdict]]_Cohesive_ - one governing topic accounts for every sentence, every later sentence has an explicit role under it, and every pair passes the boundary test. No action follows.
 .. _Rewrite_ - the sentences share one topic, but their relationship depends only on proximity or an ambiguous reference. Rewrite the paragraph until the relationship is explicit, then verify it again.
 .. _Split_ - the paragraph contains parallel claims, independent mechanisms, separate boundaries, or any other second topic. Split at the topic change. Each resulting paragraph receives its own governing topic and re-enters verification.
@@ -464,11 +465,11 @@ Each request is processed by one of several stateless servers behind a load bala
 
 Further pairs where the plain form is usually correct:
 
-* _server_ over _compute node_
-* _file_ over _blob_ (when it's a file)
-* _call_ over _invocation_ (when it's an ordinary function call)
-* _list_ over _collection_ (when the order matters)
-* _user_ over _actor_ (when it's a person)
+. _server_ over _compute node_,
+. _file_ over _blob_ (when it's a file),
+. _call_ over _invocation_ (when it's an ordinary function call),
+. _list_ over _collection_ (when the order matters),
+. _user_ over _actor_ (when it's a person).
 
 ==== Acronyms and Abbreviations
 
@@ -683,22 +684,6 @@ endif::[]
 .{good-icon} Good example
 ====
 The connection pool is configured via `pool.size`. The default size is 10. The value is read at startup.
-====
-
-==== Colon Before an Enumeration Only
-
-A paragraph ends with a colon only when a pure enumeration follows, a list whose items are single terms or short phrases. When the items are prose, full sentences or paragraphs even when numbered or lettered, the introducing paragraph ends with a period, and its last sentence is phrased so that no colon is wanted. That sentence still points the reader forward to the list, so the enumeration is expected and the reader never asks where it went. A locating word such as _below_ or _in this section_ does this, as does a phrase such as _the following_, or a stated count that the list then delivers. A colon promises a tight list, and prose that follows breaks the promise. A colon that introduces a single example, such as a command or a code block, is a separate convention and is unaffected.
-
-[.bad-example]
-.{bad-icon} Bad example
-====
-"The rules fall into three groups:" followed by three multi-sentence, labeled items. The colon promises a list, but each item is a paragraph.
-====
-
-[.good-example]
-.{good-icon} Good example
-====
-"The rules fall into three groups, described below." followed by the same three labeled paragraphs. The period replaces the colon, and "below" still points the reader to the list. A colon is right only before a pure enumeration of bare terms, such as red, green, and blue.
 ====
 
 ==== Natural Phrasing
@@ -1174,14 +1159,23 @@ The resolver follows the rules defined in §5.3.
 [#lists-for-enumerable-content]
 ==== Lists for Enumerable Content
 
-Lists are used for content whose items are genuinely parallel and enumerable: a fixed set of states, a finite set of options, a sequence of steps. Prose is used for arguments, derivations, and connected reasoning. Don't bullet a paragraph. Don't write a list as a single run-on sentence. A list has two or more items at every level, or it isn't a list: a lone item is a bulleted paragraph and is written as prose, the way xref:#section-nesting[] forbids a lone subsection.
+. An _enumeration list_ presents genuinely parallel, enumerable content: a fixed set of states, a finite set of options, or a sequence of steps. Prose presents arguments, derivations, and connected reasoning. Keep connected reasoning in prose, and present parallel enumerable content as separate list items. Every enumeration list is ordered, even when its order only gives the items stable addresses.
+
+. Every enumeration list follows these rules:
+
+.. A complete sentence immediately precedes the list and ends with a colon. A parent item that introduces a nested list serves as its lead-in and also ends with a colon. A colon can also introduce one literal example, such as a command or code block.
+.. Every level contains at least two items. A lone item is prose, just as xref:#section-nesting[] forbids a lone subsection.
+.. Every item at a given level uses one of two forms uniformly.
+... _Sentence-form_ items begin with an uppercase letter and end with terminal punctuation. A question mark or exclamation mark can replace a period, and a colon is allowed only when the item introduces a nested list. Case-sensitive syntax can require a different initial letter.
+... _Fragment-form_ items begin with a lowercase letter and end with a comma, except that the final item ends with a period to close the enumeration. A fragment that introduces a nested list ends with a colon instead. A proper noun, acronym, quoted label, or case-sensitive token keeps its required capitalization.
 
 [.bad-example]
 .{bad-icon} Bad example
 ====
-- The system starts.
-- Then it loads the configuration.
-- It also validates it and applies it in order based on priority which is a number from 1 to N.
+The supported states are
+
+* received,
+* The request is authorized.
 ====
 
 [.good-example]
@@ -1190,18 +1184,30 @@ Lists are used for content whose items are genuinely parallel and enumerable: a 
 The system starts in four phases. First, it reads the configuration file. Second, it validates the configuration against the schema. Third, it resolves references between configuration sections. Fourth, it applies each resolved section in ascending order of priority.
 ====
 
-A bullet list is appropriate when the items are independent and parallel:
+Sentence form is appropriate when each item is a complete statement:
 
 [.good-example]
 .{good-icon} Good example
 ====
 A request is in exactly one of the following states:
 
-* RECEIVED - the request has been parsed but not yet authorized.
-* AUTHORIZED - the caller has been authenticated and authorized.
-* PROCESSING - the handler is executing.
-* COMPLETED - the response has been sent.
-* FAILED - the handler raised an unhandled error.
+. Received means that the request has been parsed but not yet authorized.
+. Authorized means that the caller has been authenticated and authorized.
+. Processing means that the handler is executing.
+. Completed means that the response has been sent.
+. Failed means that the handler raised an unhandled error.
+====
+
+Fragment form is appropriate when the items complete the lead-in sentence:
+
+[.good-example]
+.{good-icon} Good example
+====
+The supported output formats are:
+
+. `html`,
+. `pdf`,
+. `docx`.
 ====
 
 [#exhaustive-lists]
@@ -1424,7 +1430,7 @@ The entry's fields read: `Title` - 2026 Pricing Sheet. `Type` - Workbook. `Owner
 [#source-class]
 ===== Source Class
 
-A _class_ states how the reader can reach a source, in one of four forms.
+A _class_ states how the reader can reach a source, in one of four forms:
 
 . An [[archived-file,archived file]]_archived file_ is any source that exists as a file or was captured as one. The class spans documents, workbooks, presentations, email files, images, and code, among others, wherever they came from. It also spans content with no file form of its own - a database extract, a retrieval from an external tool, a page behind a login - saved to a file when it was consulted. The file is copied under `.docs/sources/` beside the document. Its fields name the archive path (`Archived as`) and the digest of the archived bytes (`SHA-256`).
 . A [[web-source,web source]]_web source_ is content that stays reachable at a URL. Its fields give the address (`URL`) and the access date (`Accessed`). A page that needs credentials or a subscription is still a web source, and the `Access` field then names the requirement.
@@ -1471,13 +1477,13 @@ An _Other_ entry describes the source in `Description` and gives the best availa
 
 The boundaries that recur resolve as follows:
 
-* _Email_ or _Correspondence_ - delivered by email, or through any other channel.
-* _Report_ or _Specification_ - describes findings, or prescribes a system.
-* _Report_ or _Publication_ - internal or commissioned, or published in an edited venue.
-* _Contract_ or _Correspondence_ - executed by the parties, or sent by one.
-* _Image_ or _System output_ - pixels, or text: a screenshot of an error is an Image, the copied error text is System output.
-* _Minutes_ or _Recording_ - the written record, or the media file of the same meeting.
-* _System output_ or _Publication_ for a dataset - extracted by the author, or published with its own identifier.
+. _Email_ or _Correspondence_ - delivered by email, or through any other channel,
+. _Report_ or _Specification_ - describes findings, or prescribes a system,
+. _Report_ or _Publication_ - internal or commissioned, or published in an edited venue,
+. _Contract_ or _Correspondence_ - executed by the parties, or sent by one,
+. _Image_ or _System output_ - pixels, or text: a screenshot of an error is an Image, the copied error text is System output,
+. _Minutes_ or _Recording_ - the written record, or the media file of the same meeting,
+. _System output_ or _Publication_ for a dataset - extracted by the author, or published with its own identifier.
 
 [#source-status]
 ===== Source Status
@@ -1520,13 +1526,13 @@ The delivery sentence lists three modules: the ingestion module rests on the req
 
 Every source cited by a claim carries a verbatim quote and a locator. The [[quote,quote]]_quote_ is the source's exact wording that the claim rests on. It binds the two directions of support: the quote must entail the claim, and the claim must not assert more than the quote and its context support. The [[locator,locator]]_locator_ is the most specific address the source's format offers. A fixed-layout source can use a stable section number or name, a page, or both. A section locator is desirable when it takes the reader closer to the quoted text than the page alone, and the page can accompany it when the combination makes retrieval faster. The most common forms are the following:
 
-* a section name or number, a page, or both for a fixed layout - a PDF or a printed book,
-* a section name or number for an editable document,
-* a sheet and row for a workbook,
-* a file and line for code,
-* a sender and timestamp for a message in a thread,
-* a timestamp for a recording,
-* a described region for an image.
+. a section name or number, a page, or both for a fixed layout - a PDF or a printed book,
+. a section name or number for an editable document,
+. a sheet and row for a workbook,
+. a file and line for code,
+. a sender and timestamp for a message in a thread,
+. a timestamp for a recording,
+. a described region for an image.
 
 The quote is omitted only where no wording exists to quote - a visual fact cited from an image. The locator then carries the reference alone. When a claim cites several sources, each source keeps its own quote and locator.
 
@@ -1936,7 +1942,7 @@ The cache's latency and eviction policy aren't stated in the input. Both would h
 .. Open the source at the xref:#locator[].
 .. Find the xref:#quote[] verbatim at that place.
 .. Re-read the claim and judge the support: the quote must entail the claim, and the claim must not assert more than the quote and its context support.
-. Assign the verdict and act on it at once.
+. Assign the verdict and act on it at once:
 .. _Supported_ - the quote entails the claim and the claim stays within what the quote and its context support. No action follows.
 .. [[unsupported-verdict,the unsupported verdict]]_Unsupported_ - the quote is present but doesn't entail the claim: the claim asserts more than the quote and its context support, or reports something different. Narrow or correct the claim until the quote entails it, or point the citation at a source that entails it. When no source entails the claim, xref:#dont-invent-facts[] governs it: state the gap or delete the claim.
 .. _Not found_ - the quote or the locator doesn't exist in the source. Search the source for the intended support. When the source holds it elsewhere, repair the quote and the locator. When it doesn't, treat the citation as _unsupported_ with no entailing source.
@@ -2342,7 +2348,7 @@ Validation runs on every lease, not only on creation.
 [#explicit-anchors]
 === Explicit Anchors
 
-A part of the text that a cross-reference targets carries an explicit anchor: a block anchor `+[[kebab-case-id]]+` on the line directly above a heading, or an inline anchor of the same form placed directly on text inside a block. The anchor sits on the narrowest span that alone defines the referenced concept. To choose that span, apply the following tests from narrowest to broadest and stop at the first that holds.
+A part of the text that a cross-reference targets carries an explicit anchor: a block anchor `+[[kebab-case-id]]+` on the line directly above a heading, or an inline anchor of the same form placed directly on text inside a block. The anchor sits on the narrowest span that alone defines the referenced concept. To choose that span, apply the following tests from narrowest to broadest and stop at the first that holds:
 
 . A single word defines the concept. Anchor that word.
 . One sentence or one list item defines it. Anchor that sentence or item.
@@ -2632,13 +2638,13 @@ The source text should follow the link:README-guideline-writing.adoc[Writing Gui
 
 To export and lint the source text, install the following tools:
 
-. https://asciidoctor.org/#installation[Asciidoctor^]
-. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^]
-. https://pandoc.org/installing.html[Pandoc^]
-. https://www.python.org/downloads/[Python 3^]
-. https://vale.sh/docs/install/[Vale^]
-. https://poppler.freedesktop.org[`pdftotext`^]
-. https://github.com/tesseract-ocr/tesseract[`tesseract`^]
+. https://asciidoctor.org/#installation[Asciidoctor^],
+. https://docs.asciidoctor.org/pdf-converter/latest/install/[Asciidoctor PDF^],
+. https://pandoc.org/installing.html[Pandoc^],
+. https://www.python.org/downloads/[Python 3^],
+. https://vale.sh/docs/install/[Vale^],
+. https://poppler.freedesktop.org[`pdftotext`^],
+. https://github.com/tesseract-ocr/tesseract[`tesseract`^].
 
 === Export
 
@@ -2649,14 +2655,14 @@ To export and lint the source text, install the following tools:
 asciidoctor --attribute allow-uri-read {docname}{docfilesuffix}
 ----
 
-. To export the source text to PDF:
+. Export the source text to PDF with this command:
 +
 [source,bash,subs="attributes+"]
 ----
 asciidoctor-pdf --attribute allow-uri-read --require ./.docs/lib/common-style.rb {docname}{docfilesuffix}
 ----
 
-. To export the source text to DOCX:
+. Export the source text to DOCX with this command:
 +
 [source,bash,subs="attributes+"]
 ----
