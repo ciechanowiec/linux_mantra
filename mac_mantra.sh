@@ -1170,6 +1170,17 @@ fi
 echo "Installing and configuring Codex CLI (OpenAI's terminal-based AI coding agent)..."
 bash "$resourcesDir/scripts/configure_codex.sh" "$osType"
 
+echo "Installing and configuring GitHub Copilot CLI (GitHub's terminal-based AI coding agent)..."
+# `copilot` is a separate program from `gh` (GitHub CLI, installed in its own
+# procedure); only `copilot` is an agentic coding assistant.
+bash "$resourcesDir/scripts/configure_copilot.sh" "$osType"
+
+echo "Installing and configuring Cursor CLI (Cursor's terminal-based AI coding agent)..."
+# Installs $HOME/.local/bin/agent, so it depends on $HOME/.local/bin being on
+# PATH - exported at the pipx step above and persisted there by `pipx ensurepath`
+# (the same entry `claude` relies on).
+bash "$resourcesDir/scripts/configure_cursor.sh" "$osType"
+
 echo "Installing Mermaid CLI (diagramming tool)..."
 npm install -g @mermaid-js/mermaid-cli
 

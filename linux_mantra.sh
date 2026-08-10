@@ -686,6 +686,16 @@ fi
 echo "Installing and configuring Codex CLI (OpenAI's terminal-based AI coding agent)..."
 bash "$resourcesDir/scripts/configure_codex.sh" "$osType"
 
+echo "Installing and configuring GitHub Copilot CLI (GitHub's terminal-based AI coding agent)..."
+# `copilot` is a separate program from `gh` (GitHub CLI, installed in its own
+# procedure); only `copilot` is an agentic coding assistant.
+bash "$resourcesDir/scripts/configure_copilot.sh" "$osType"
+
+echo "Installing and configuring Cursor CLI (Cursor's terminal-based AI coding agent)..."
+# Installs $HOME/.local/bin/agent, so it depends on the PATH entry added at the
+# Claude Code step above.
+bash "$resourcesDir/scripts/configure_cursor.sh" "$osType"
+
 echo "Installing Mermaid CLI (diagramming tool)..."
 sudo npm install -g @mermaid-js/mermaid-cli
 
@@ -1125,12 +1135,22 @@ fuse() {
 }
 EOF
 
-echo "6. Adding GitHub CLI autocompletion..."
+echo "6. Adding GitHub CLI and GitHub Copilot CLI autocompletion..."
 # Docs: https://cli.github.com/manual/gh_completion
+# NOTE:
+#   `gh` (GitHub CLI) and `copilot` (GitHub Copilot CLI) are separate programs
+#   with separate completion generators. The Copilot line is guarded on both the
+#   binary and the subcommand, because unlike `gh` the Copilot CLI is optional
+#   here - an unguarded eval would print an error on every shell start.
 cat >> "$shellFile" << EOF
 
 # GH CLI AUTOCOMPLETION:
 eval "\$(gh completion -s bash)"
+
+# GH COPILOT CLI AUTOCOMPLETION:
+if command -v copilot > /dev/null 2>&1; then
+    eval "\$(copilot completion bash 2> /dev/null)"
+fi
 EOF
 
 echo "7. Adding local bin to PATH..."
