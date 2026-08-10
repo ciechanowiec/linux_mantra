@@ -21,6 +21,26 @@
 :!figure-caption:
 :!example-caption:
 
+ifdef::backend-html5+not-env-github[]
+++++
+<link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
+<!-- Inlined so the IntelliJ AsciiDoc preview honors these rules: its webview blocks external CSS even in
+     UNSAFE mode, so the remote stylesheet above is dropped in the IDE preview. Mirrors rules already in
+     adoc-css-style.css for the published HTML - enforces [cols="..."] column widths and wraps long content. -->
+<style>
+    table.tableblock {
+        table-layout: fixed;
+    }
+
+    table.tableblock td,
+    table.tableblock th {
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
+++++
+endif::[]
+
 == Overview
 
 _Linux Mantra_ is a set of interconnected Bash/Lua scripts and configuration files, which perform automated fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra has been used on a daily basis for over a year. It has undergone rigorous testing and stands as one of the most sophisticated programs of its kind.
@@ -72,3 +92,10 @@ Copyright © 2022-2026 Herman Ciechanowiec
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
 
 The Software is provided 'as is', without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
+
+ifdef::backend-html5+not-env-github[]
+++++
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js"></script>
+<script src="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo-footer.js"></script>
+++++
+endif::[]
