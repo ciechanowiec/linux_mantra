@@ -1101,9 +1101,6 @@ alias git_clip_cur_branch="git branch | grep '*' | cut -d ' ' -f 2 | xxclip"
 alias git_switch_to_com='~/scripts/git_switch_to_com.sh'
 alias i='idea'
 alias idea='~/scripts/idea.sh'
-alias mantra_java='~/scripts/mantra_java.sh'
-alias mantra_spring_mongo='~/scripts/mantra_spring_mongo.sh'
-alias mantra_spring_sql='~/scripts/mantra_spring_sql.sh'
 alias mantra_docs='~/scripts/mantra_docs.sh'
 alias mvn_download_sources_and_javadocs='mvn dependency:sources && mvn dependency:sources dependency:resolve -Dclassifier=javadoc'
 alias n='nvim'
@@ -2601,7 +2598,7 @@ echo "8. Perform non-synchronizable Checkstyle settings:"
 echo "   Toolbar -> File -> New Projects Setup -> Settings for New Projects"
 echo "   -> Tools"
 echo "      -> Checkstyle"
-echo "         -> Add and apply a custom rule set at this link: https://raw.githubusercontent.com/ciechanowiec/linux_mantra/master/resources/static_code_analysis/checkstyle.xml"
+echo "         -> Add and apply a custom rule set at this link: https://raw.githubusercontent.com/ciechanowiec/airness/refs/heads/main/airness-config/src/main/resources/eu/ciechanowiec/airness/static_code_analysis/checkstyle.xml"
 echo "Press Enter to continue..."
 read voidInput
 
