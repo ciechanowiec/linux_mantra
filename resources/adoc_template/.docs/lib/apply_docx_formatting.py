@@ -580,6 +580,48 @@ RUN_RE = re.compile(r'<w:r\b[^>]*>.*?</w:r>', re.DOTALL)
 NUMPR_RE = re.compile(r'<w:numPr>')
 
 
+# ============================================================================
+# document.xml / footnotes.xml -- highlighted placeholders
+# ============================================================================
+#
+# Asciidoctor converts `#[placeholder]#` to DocBook
+# `<emphasis role="marked">`, but Pandoc's DocBook reader discards the
+# `marked` role and keeps only an emphasis node. The DOCX therefore receives
+# italic text without the yellow highlight. Highlighted fill-in fields in this
+# project have one unambiguous visible form: an italic run whose complete text
+# is enclosed in square brackets. Give those runs Word's native yellow
+# highlight and remove one italic layer -- the layer Pandoc created from the
+# mark. If the source deliberately nests the mark inside italics, Pandoc emits
+# two italic properties and one remains after this transform.
+
+PLACEHOLDER_TEXT_RE = re.compile(r'^\[[^\[\]\r\n]+\]$')
+ITALIC_PROP_RE = re.compile(r'<w:i(?:\s[^>]*)?\s*/>')
+ITALIC_CS_PROP_RE = re.compile(r'<w:iCs(?:\s[^>]*)?\s*/>')
+YELLOW_HIGHLIGHT = '<w:highlight w:val="yellow" />'
+
+
+def _highlight_placeholders(part_xml: str) -> str:
+    def fix(match: 're.Match[str]') -> str:
+        run = match.group(0)
+        text = ''.join(TEXT_RUN_RE.findall(run))
+        if not PLACEHOLDER_TEXT_RE.fullmatch(text) or '<w:i' not in run:
+            return run
+        if YELLOW_HIGHLIGHT in run:
+            return run
+
+        run = ITALIC_PROP_RE.sub('', run, count=1)
+        run = ITALIC_CS_PROP_RE.sub('', run, count=1)
+        rpr_end = run.find('</w:rPr>')
+        if rpr_end != -1:
+            return run[:rpr_end] + YELLOW_HIGHLIGHT + run[rpr_end:]
+
+        run_open_end = run.find('>') + 1
+        return (run[:run_open_end] + '<w:rPr>' + YELLOW_HIGHLIGHT
+                + '</w:rPr>' + run[run_open_end:])
+
+    return RUN_RE.sub(fix, part_xml)
+
+
 def _keep_paragraph_headers_with_body(document_xml: str) -> str:
     def fix(match: 're.Match[str]') -> str:
         para = match.group(0)
@@ -1348,11 +1390,13 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
     'word/footnotes.xml': [
         _space_after_footnote_number,
         _align_footnote_continuations,
+        _highlight_placeholders,
     ],
     'word/document.xml': [
         _separate_author_email,
         _strip_empty_headings,
         _keep_paragraph_headers_with_body,
+        _highlight_placeholders,
         _force_a4_section,
         _fit_table_widths,
         _symmetric_table_cells,
