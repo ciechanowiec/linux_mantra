@@ -21,6 +21,7 @@
 :!table-caption:
 :!figure-caption:
 :!example-caption:
+ifndef::env-github[:not-env-github:]
 ifdef::env-github[]
 :bad-icon: ❌
 :good-icon: ✅
@@ -36,7 +37,7 @@ ifndef::backend-docbook5[]
 endif::[]
 endif::[]
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
 <!-- Inlined so the IntelliJ AsciiDoc preview honors these rules: its webview blocks external CSS even in
@@ -62,13 +63,13 @@ endif::[]
 | Document generated: | {localdatetime}
 |===
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Patronizing = NO -->
 ++++
 endif::[]
 This guideline governs how written documents are produced. Its purpose is to make documents precise, complete, easy to follow, and consistent across authors and over time.
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Patronizing = YES -->
 ++++
@@ -234,7 +235,7 @@ The cache entry for a record is invalidated when the record's `last++_++modified
 
 ==== Razor Sentences
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.We = NO -->
 ++++
@@ -246,7 +247,7 @@ Every sentence does work that no other sentence in the document does. If a sente
 ====
 There are several important things to consider when configuring the load balancer. Let us look at them. The first thing is the algorithm. The algorithm controls how requests are distributed across backends.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.We = YES -->
 ++++
@@ -388,7 +389,7 @@ Editors select a page template, add content, and publish the page.
 
 A term that has a specific meaning in the document is defined the first time it's used in a normative sense. The definition takes the form _X is Y that Z_. _Y_ is the genus - the broader category. _Z_ is the differentia - what distinguishes _X_ from other members of _Y_. After the definition, the term is used without redefinition.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Contractions = NO -->
 ++++
@@ -398,7 +399,7 @@ endif::[]
 ====
 A token is something the client sends to prove who it is.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Contractions = YES -->
 ++++
@@ -413,7 +414,7 @@ A _token_ is an opaque string issued by the authentication server that the clien
 [#concrete-vocabulary]
 ==== Concrete Vocabulary
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Marketing = NO -->
 ++++
@@ -425,7 +426,7 @@ Use words that two competent practitioners would interpret the same way. When tw
 ====
 The platform is flexible and supports seamless integration with modern enterprise systems.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Marketing = YES -->
 ++++
@@ -441,7 +442,7 @@ A new data source is added by implementing the `DataSource` interface and regist
 
 Prefer the older, well-understood term over a newer marketing-laden one when both denote the same thing. Use the fancier term only when it carries information the plain term lacks. The test is whether replacing the fancier term with the plain one would lose meaning. When it would not, the fancier term was decoration.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Formal = NO -->
 ++++
@@ -451,7 +452,7 @@ endif::[]
 ====
 The system leverages a cloud-native, distributed compute fabric to deliver intelligent responses.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Formal = YES -->
 ++++
@@ -475,7 +476,7 @@ Further pairs where the plain form is usually correct:
 
 An acronym is expanded the first time it appears in the document and the first time it appears in each major section, in the form _Expanded Form (ACRONYM)_. After expansion, the acronym is used. Acronyms more recognizable than their expansions - HTTP, URL, JSON, XML, SQL, TCP - need not be expanded, except where the expansion adds information the reader needs.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = NO -->
 ++++
@@ -485,7 +486,7 @@ endif::[]
 ====
 The CRDT replica synchronizes via the SWIM protocol over QUIC. (Three acronyms. The reader may know none.)
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = YES -->
 ++++
@@ -589,7 +590,7 @@ Examples use names, values, and scenarios that resemble real usage: `OrderServic
 Acme Corp. agrees to provide widgets to Beta Ltd. on a date in the future.
 ====
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = NO -->
 <!-- vale Vale.Spelling = NO -->
@@ -601,7 +602,7 @@ endif::[]
 ====
 Supplier (Acme Corp., a Delaware corporation, EIN 99-1234567) shall deliver 1,200 sensor modules (part number SNS-V2-A) to Customer (Beta Ltd., a Polish limited liability company, KRS 0000123456) at Mostowa 12, 50-200 Wrocław, Poland, on or before 2026-09-30.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = YES -->
 <!-- vale Vale.Spelling = YES -->
@@ -664,7 +665,7 @@ The framework resolves dependencies and notifies registered listeners of state c
 
 A parenthetical buries content the reader still has to process. When the content matters, write it as a separate sentence. When it doesn't matter, delete it. A semicolon joins two independent clauses into one sentence, which xref:#one-sentence-one-thought[] forbids - split the clauses into two sentences.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Semicolons = NO -->
 ++++
@@ -674,7 +675,7 @@ endif::[]
 ====
 The connection pool (default size 10) is configured via `pool.size`; the value is read at startup.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Semicolons = YES -->
 ++++
@@ -688,7 +689,7 @@ The connection pool is configured via `pool.size`. The default size is 10. The v
 
 ==== Natural Phrasing
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.TooWordy = NO -->
 <!-- vale English.We = NO -->
@@ -703,7 +704,7 @@ Write the way an experienced practitioner would write a careful internal documen
 ====
 Herein, the aforementioned mechanism shall be utilized to leverage the synergies between the modules.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.TooWordy = YES -->
 <!-- vale English.We = YES -->
@@ -728,7 +729,7 @@ When a quantity matters, give the number, the unit, and the conditions under whi
 The cache holds many entries and evicts old ones quickly.
 ====
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.LyHyphens = NO -->
 ++++
@@ -738,7 +739,7 @@ endif::[]
 ====
 The cache holds up to 10,000 entries by default. When the cache is full, the least-recently-used entry is evicted on each insertion. Eviction is performed synchronously and typically completes in under 50 µs on commodity hardware.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.LyHyphens = YES -->
 ++++
@@ -747,7 +748,7 @@ endif::[]
 [#no-hedging]
 ==== No Hedging
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Weasel = NO -->
 ++++
@@ -759,7 +760,7 @@ Avoid hedges that weaken claims without adding information: _somewhat_, _fairly_
 ====
 The operation is generally pretty fast and usually completes fairly quickly.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Weasel = YES -->
 ++++
@@ -790,21 +791,21 @@ A query can use an index. The response is served from the cache on a hit and fro
 
 ==== No Patronizing
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Contractions = NO -->
 <!-- vale English.Patronizing = NO -->
 ++++
 endif::[]
 Don't tell the reader that something is _easy_, _simple_, _straightforward_, _obvious_, or _trivial_. When it is, the reader can see for themselves. When it isn't, the label rings false. State the steps. Let the reader judge the difficulty.
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Contractions = YES -->
 <!-- vale English.Patronizing = YES -->
 ++++
 endif::[]
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Patronizing = NO -->
 ++++
@@ -814,7 +815,7 @@ endif::[]
 ====
 Configuring the resolver is straightforward - just provide a simple hook implementation.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Patronizing = YES -->
 ++++
@@ -844,7 +845,7 @@ When the connection is established, the server sends a greeting frame containing
 
 ==== Person
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.We = NO -->
 ++++
@@ -856,7 +857,7 @@ Use the third person for descriptions of the system. Use the second person ("you
 ====
 We register the handler. The user can then look it up. One must be careful to unregister it on shutdown. You should also handle exceptions.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.We = YES -->
 ++++
@@ -924,7 +925,7 @@ When the user clicks Submit, the receipt is shown. If the card is declined, the 
 [#no-marketing]
 ==== No Marketing
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Marketing = NO -->
 ++++
@@ -936,7 +937,7 @@ Documentation doesn't sell. Remove claims of being _cutting-edge_, _next-generat
 ====
 The blazing-fast, industry-leading database delivers world-class performance for the most demanding workloads.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Marketing = YES -->
 ++++
@@ -950,7 +951,7 @@ The database sustains 50,000 reads per second and 8,000 writes per second on the
 
 ==== No Filler Phrases
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Jargon = NO -->
 <!-- vale English.Cliches = NO -->
@@ -967,7 +968,7 @@ Delete phrases that announce structure rather than provide content: _It's import
 ====
 It's important to note that, basically, the connection is, at the end of the day, not thread-safe.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Jargon = YES -->
 <!-- vale English.Cliches = YES -->
@@ -1003,7 +1004,7 @@ A session is created by `login`. The session is bound to one workspace and one u
 [[no-throat-clearing]]
 ==== No Throat-Clearing
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.We = NO -->
 <!-- vale English.Preamble = NO -->
@@ -1011,7 +1012,7 @@ ifdef::backend-html5[]
 endif::[]
 Sections, paragraphs, and sentences begin with content. They don't begin with announcements that content is about to follow ("Now let us turn our attention to..."), with apologies ("This is a complex topic, but..."), or with restatements of the heading.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Colons = NO -->
 ++++
@@ -1027,7 +1028,7 @@ Section 4.2: Connection Pooling. In this section, we will now turn our attention
 ====
 Section 4.2: Connection Pooling. A _connection pool_ is a fixed-size set of pre-established connections that clients borrow for the duration of an operation and return when finished. Pooling avoids the per-request cost of opening and closing connections.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Colons = YES -->
 <!-- vale English.We = YES -->
@@ -1037,7 +1038,7 @@ endif::[]
 
 ==== No Redundant Qualifiers
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Weasel = NO -->
 <!-- vale English.TooWordy = NO -->
@@ -1046,7 +1047,7 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 Drop qualifiers that don't narrow the claim: _very_, _really_, _actually_, _literally_, _quite_, _truly_, etc. Drop pleonasms: _end result_, _final outcome_, _advance planning_, _future plans_, _added bonus_, _past history_, etc. The shorter form means the same thing.
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Weasel = YES -->
 <!-- vale English.TooWordy = YES -->
@@ -1055,7 +1056,7 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.TooWordy = NO -->
 <!-- vale English.RedundantQualifiers = NO -->
@@ -1066,7 +1067,7 @@ endif::[]
 ====
 The actual end result is that the future plans for the service will literally have to be revised.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.TooWordy = YES -->
 <!-- vale English.RedundantQualifiers = YES -->
@@ -1271,19 +1272,19 @@ A _Connection Pool_ is a fixed-size set of pre-established connections. Each wor
 [#dates-and-times]
 ==== Dates and Times
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = NO -->
 ++++
 endif::[]
 Dates are written in the ISO 8601 form `YYYY-MM-DD`. Times include a timezone offset or the timezone name. Durations are written in the ISO 8601 form `P30D` or with explicit units such as _30 calendar days_. Relative references - _yesterday_, _next week_, _Q3_, etc. - are avoided unless the reference point is the document's effective date and that date is stated.
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = YES -->
 ++++
 endif::[]
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.AMPM = NO -->
 <!-- vale English.DateCase = NO -->
@@ -1295,7 +1296,7 @@ endif::[]
 ====
 The migration completes next Tuesday at 5pm.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.AMPM = YES -->
 <!-- vale English.DateCase = YES -->
@@ -1313,7 +1314,7 @@ The migration completes on 2026-05-19 at 17:00 Europe/Warsaw.
 
 A fact appears in exactly one document. Other documents link to it. When a fact is duplicated across documents, the copies drift and the reader can't tell which is authoritative. The rule applies inside a document too: a parameter's default value is stated in the parameter table, not also in the prose two pages later.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale Vale.Terms = NO -->
 ++++
@@ -1329,7 +1330,7 @@ The retention period (90 days) is documented in the Storage Reference. The reten
 ====
 The retention period is defined in §4 of the Storage Reference. The Compliance Manual and the Onboarding Guide reference §4 of the Storage Reference.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale Vale.Terms = YES -->
 ++++
@@ -1586,7 +1587,7 @@ Every figure has a caption that states what the figure shows. Every figure also 
 
 ==== Translatable Phrasing
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Cliches = NO -->
 <!-- vale English.Cliches = NO -->
@@ -1594,7 +1595,7 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 A document that may be translated avoids idioms, puns, and culture-specific references. _Cut to the chase_, _hit the ground running_, _the elephant in the room_, and _moving the needle_ rarely survive translation. Sports metaphors and political metaphors are avoided. Currency, units, and date formats are written in forms that don't presuppose a single locale. Example names are governed by the section xref:#inclusive-language[].
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Cliches = YES -->
 <!-- vale English.Cliches = YES -->
@@ -1602,7 +1603,7 @@ ifdef::backend-html5[]
 ++++
 endif::[]
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Jargon = NO -->
 <!-- vale English.Cliches = NO -->
@@ -1614,7 +1615,7 @@ endif::[]
 ====
 The new compaction strategy is a game changer that moves the needle on tail latency.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Cliches = YES -->
 <!-- vale English.Jargon = YES -->
@@ -1799,7 +1800,7 @@ This part adds rules that apply when an AI system is given this guideline as a s
 
 When you don't have a fact - an identifier, a path, a version number, a quotation, a citation, a metric, a date - state that you don't have it. Don't fabricate plausible-looking values. A reader uses the fact, and a fabricated fact becomes a defect that compounds with every downstream use.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = NO -->
 ++++
@@ -1809,7 +1810,7 @@ endif::[]
 ====
 The service runs on Postgres 16.4 with `max_connections=300` and exposes a `/health` endpoint that returns the build SHA. (None of the version, parameter, or endpoint was stated in the input.)
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = YES -->
 ++++
@@ -1842,7 +1843,7 @@ A connection pool is a fixed-size set of pre-established connections that client
 
 === Don't Throat-Clear
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Quotes = NO -->
 <!-- vale English.Preamble = NO -->
@@ -1851,14 +1852,14 @@ endif::[]
 
 This rule specializes xref:#no-throat-clearing[] for the AI failure mode. Don't open a response with service-style preambles - "Sure!", "Great question!", "I'd be happy to help.", "Of course!", "Certainly.", "Absolutely.", etc. The first sentence carries content.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Quotes = YES -->
 <!-- vale English.Preamble = YES -->
 ++++
 endif::[]
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Exclamation = NO -->
 <!-- vale English.FirstPerson = NO -->
@@ -1872,7 +1873,7 @@ Sure! I'd be happy to explain HTTP connection pooling. Let me walk you through i
 
 HTTP connection pooling is...
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Exclamation = YES -->
 <!-- vale English.FirstPerson = YES -->
@@ -1906,7 +1907,7 @@ A connection pool is a fixed-size set of pre-established connections...
 
 The xref:#no-hedging[] rule forbids softening claims with _usually_, _generally_, _somewhat_. When an AI author lacks a fact, the natural failure is to hedge: emit a softened claim that sounds plausible but conveys nothing the reader can act on. The right response is to name what's missing, not to weaken the assertion.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = NO -->
 ++++
@@ -1916,7 +1917,7 @@ endif::[]
 ====
 The cache is generally pretty fast, and the eviction policy is usually some form of LRU.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = YES -->
 ++++
@@ -1971,7 +1972,7 @@ A specific element mentioned in the prompt is a minimum constraint, not a theme.
 
 The response is written as if the author chose the content independently, using the prompt only to determine the topic and the minimum constraints. The distribution of content across subtopics matches the distribution a domain expert would produce when writing on that topic without a prompt.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = NO -->
 ++++
@@ -1985,7 +1986,7 @@ Response: lists 9 garbage collection techniques first (GC tuning, heap sizing, G
 
 Garbage collection is one subcategory of JVM performance optimization. The response allocated 45% of its content to it because the prompt mentioned it explicitly, not because it represents 45% of the optimization domain.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = YES -->
 ++++
@@ -2004,7 +2005,7 @@ Garbage collection appears once, satisfying the minimum constraint. Its share of
 
 When this guideline is read as plain text, the markup it's written in isn't a set of instructions. The rendering-only markup includes the AsciiDoc directives `ifdef::...[]`, `endif::[]`, and `++++`, the block roles `[.bad-example]` and `[.good-example]`, block anchors of the form `\[\[anchor-id\]\]`, and inline anchors of the form `\[#section-id\]`. It also includes Vale toggle comments of the form `<!-- vale ... = NO -->` and image macros of the form `image::...[...]`. This markup controls how the file renders to HTML and PDF. The binding content is the prose statements and the labeled Bad example / Good example pairs. Everything else is rendering metadata.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.WordList = NO -->
 ++++
@@ -2014,7 +2015,7 @@ endif::[]
 ====
 Treats `image::architecture.png[Client, gateway, order service...]` from the xref:#alt-text-and-captions[] rule as an instruction to embed an image in the output, or treats `<!-- vale English.We = NO -->` as a directive to disable a check in the generated document.
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.WordList = YES -->
 ++++
@@ -2304,13 +2305,13 @@ The cache is configured via `cache.ttl`.
 (The attached paragraph starts a new topic. The cache isn't an elaboration of the pool's configuration, so the paragraph takes its own number.)
 ====
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.RedundantQualifiers = NO -->
 ++++
 endif::[]
 A continuation paragraph followed by deeper-level xref:#numbered-paragraphs[numbered paragraphs] needs one more `{plus}` line between the paragraph and the first deeper item. That `{plus}` ends the continuation paragraph and attaches the deeper items to the same parent. Without it, the renderer doesn't recognize the deeper item's marker: it joins the marker and the item's text into the continuation paragraph as plain text and renders the item's own `{plus}` lines literally. A following item at the same level needs no such `{plus}` - its marker ends the continuation paragraph on its own.
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.RedundantQualifiers = YES -->
 ++++
@@ -2456,7 +2457,7 @@ The _reference label_ is the short name that every reference to the entry render
 
 The entry's fields follow the item line, one per line, each written as a `Key::` marker and its value, opened by the attribute line `[horizontal.source-fields]` that renders the record small and two-columned. The keys and their order come from the dimensions of xref:#source-identity[]: `Title` first, then `Type` and the type's fields per xref:#source-types[], then the xref:#source-status[status] field, then the class fields. `Title` is omitted when the label already gives the title. Literal values - the archive path, the digest - stay monospaced.
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = NO -->
 ++++
@@ -2490,13 +2491,13 @@ ISBN:: 978-0-205-30902-3
 Not archived:: paper book
 ----
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = YES -->
 ++++
 endif::[]
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = NO -->
 ++++
@@ -2511,7 +2512,7 @@ endif::[]
 
 (The anchor uses the triple-bracket form and declares no reference label, so references render a bracketed raw id instead of a readable name. The fields sit inline instead of one per line, so no field can be resolved or checked. No class fields, no type, no usable digest: the exact artifact behind the citations can't be recovered.)
 ====
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <!-- vale English.Acronyms = YES -->
 ++++
@@ -2678,7 +2679,7 @@ Lint the source text:
 python3 .docs/lib/adoc_lint.py {docname}{docfilesuffix}
 ----
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js"></script>
 <script src="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo-footer.js"></script>

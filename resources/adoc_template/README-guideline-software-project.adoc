@@ -20,8 +20,9 @@
 :!table-caption:
 :!figure-caption:
 :!example-caption:
+ifndef::env-github[:not-env-github:]
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
 <!-- Inlined so the IntelliJ AsciiDoc preview honors these rules: its webview blocks external CSS even in
@@ -345,7 +346,7 @@ Lint the source text:
 python3 .docs/lib/adoc_lint.py {docname}{docfilesuffix}
 ----
 
-ifdef::backend-html5[]
+ifdef::backend-html5+not-env-github[]
 ++++
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js"></script>
 <script src="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo-footer.js"></script>
