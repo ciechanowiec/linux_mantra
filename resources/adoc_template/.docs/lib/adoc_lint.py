@@ -1334,6 +1334,42 @@ def rule_footnote_after_code_span(doc: Document) -> Iterator[Finding]:
                        "space before the footnote macro")
 
 
+# The same accident one character further out, where the span DOES close.
+# A monospaced URL still autolinks, and Asciidoctor ends an autolink target
+# only at whitespace or a bracket -- a backtick doesn't stop it, and the
+# quotes substitution has already turned the span into `</code>` by the time
+# the macro substitution runs. So a monospaced URL glued to the text after it
+# lets the target run through the span's own closing delimiter and on into
+# whatever macro follows: `` `https://host/`.footnote:id[...] `` renders as
+# ONE link whose target is `https://host/</code>.footnote:id` and whose link
+# TEXT is the footnote's text, spilled inline into the sentence. The footnote
+# is consumed rather than left literal, so the rendered-macro backstop below
+# finds no stray `footnote:` to report, and Asciidoctor converts with exit 0
+# and no message (verified empirically). A `[` reached without crossing a
+# backtick is the deliberate `https://host/[Link text^]` macro, which
+# link-text owns. The fix is a space before the macro, or the passthrough
+# span `+...+`, whose content doesn't autolink.
+MONO_URL_RE = re.compile(r"^(?:https?|file|ftp|irc)://[^\s\[\]]*$")
+AUTOLINK_TAIL_RE = re.compile(r"[^\s\[\]]*\[")
+
+
+def rule_autolink_after_code_span(doc: Document) -> Iterator[Finding]:
+    for line in _prose(doc):
+        for span in CODE_SPAN_RE.finditer(line.text):
+            inner = span.group(0).strip("`")
+            if inner.startswith("+") and inner.endswith("+"):
+                continue  # a passthrough span: its content doesn't autolink
+            if not MONO_URL_RE.match(inner):
+                continue
+            if AUTOLINK_TAIL_RE.match(line.text, span.end()):
+                yield (line.num, span.end() + 1,
+                       "A monospaced URL glued to the text after it lets the "
+                       "autolink target run past the closing backtick and "
+                       "swallow the following macro's brackets as link text, "
+                       "so that macro is dropped and its body renders inline; "
+                       "insert a space, or write the address as `+...+`")
+
+
 # Serves footnote-punctuation (§footnote-punctuation): every footnote's text
 # -- ordinary or citation -- ends with a period, so no footnote reads as
 # truncated. A reuse (`footnote:id[]`) has no text of its own and is exempt.
@@ -3281,6 +3317,7 @@ RULES: List[Rule] = [
     Rule("split-code-dlist", "error", rule_split_code_dlist),
     Rule("anchor-in-code-span", "error", rule_anchor_in_code_span),
     Rule("footnote-boundary", "error", rule_footnote_after_code_span),
+    Rule("autolink-boundary", "error", rule_autolink_after_code_span),
     Rule("footnote-punctuation", "error", rule_footnote_dot),
     Rule("citation-footnote-format", "error", rule_citation_footnote_format),
     Rule("bibliography-format", "error", rule_bibliography_format),
