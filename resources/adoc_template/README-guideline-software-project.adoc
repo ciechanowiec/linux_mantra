@@ -111,11 +111,9 @@ This section describes the layout of a compliant repository, from the xref:#inst
 [[agent-instructions]]
 === Agent Instructions
 
-. [[instruction-file,an instruction file]]An _instruction file_ is a committed file that holds rules of the repository for agents. [[root-instruction-file,the root instruction file]]The _root instruction file_ sits at the top of the repository and states the xref:#verification-command[verification command], the repository layout, the conventions that the checks enforce, and every rule that binds without a machine check.
-. A directory may hold a scoped instruction file with the rules specific to its part of the repository. A rule appears in exactly one instruction file.
-. The xref:#root-instruction-file[root instruction file] carries a name that no agent tool owns, so the rules sit in one place whichever agent tool reads them. [[entry-file,an entry file]]An _entry file_ is a file that an agent tool reads for instructions under a fixed name of its own. An entry file holds nothing but a reference to an instruction file and states no rule. Where its format supports an import, the reference is that import. Where its format supports none, the reference is the location of the instruction file in plain text.
-. The repository declares the names of its xref:#entry-file[entry files]. A check reads each declared name present in the repository and fails on a file that holds anything besides the reference.
-. Every command and every path that an instruction file references resolves to an existing target. A check verifies each reference and fails on a dangling one.
+. [[instruction-file,an instruction file]]An _instruction file_ is a committed file that holds rules of the repository for agents. [[root-instruction-file,the root instruction file]]The root instruction file is `AGENTS.md` at the top of the repository and is neutral to agent tools.
+. If this guideline and an instruction file conflict, this guideline applies. An instruction file adds only repository- or directory-specific details and doesn't restate this guideline.
+. A tool-specific instruction file contains only a reference to `AGENTS.md`. A check rejects any other content and any instruction reference, command, or path that doesn't resolve.
 
 [[production-imports]]
 === Production Imports
@@ -200,9 +198,9 @@ This section describes the state of the source code: its size, its types, its na
 [[suppressions]]
 === Suppressions
 
-. A _suppression_ is a source-level annotation that turns one named rule off at one specific place in the code. Every suppression carries a one-line justification.
-. The repository declares the closed list of rules that a suppression may name.
-. A check fails on a suppression without a justification, on a suppression that names a rule outside the declared list, on a suppression that spans a whole file, and on a suppression that no longer suppresses anything.
+. A _suppression_ is a machine-readable exception that turns one named rule off at the narrowest scope its tool supports. It's a source-level annotation where the tool supports one. A tool that has no stable source-level form may use a declared configuration entry or baseline record instead.
+. Every suppression carries a concise justification in the source annotation, configuration, or baseline record that declares it.
+. A check fails on a suppression without a justification, on one broader than its tool requires, and on one that no longer suppresses anything.
 
 [[typography]]
 === Typography
@@ -250,7 +248,7 @@ This section describes the state of the test suite and what it proves.
 
 . Line coverage and branch coverage are at least 80% in every measured file. A file with no branches satisfies the branch floor.
 . A file is excluded from coverage only by role - for example, generated code - and a machine can recognize the role from the file itself. An exclusion never names an individual file.
-. Where the ecosystem of the programming language has a mutation-testing tool, mutation testing is one of the checks, and the repository declares the directories it covers. A surviving mutant fails the check unless it carries a suppression that names it as equivalent, per the section xref:#suppressions[].
+. Where the ecosystem of the programming language has a mutation-testing tool, mutation testing is one of the checks, and the repository declares the directories it covers. A surviving mutant fails the check unless a xref:#suppressions[suppression] records its identity and explains why it's equivalent.
 
 [[determinism]]
 === Determinism
@@ -284,12 +282,11 @@ Provider tokens leaked into the proxy logs through the header dump.
 Masking them in the header parser closes the leak for every consumer.
 ----
 . No commit message attributes the change to an AI agent or to an agent session. No co-authorship trailer, sign-off address, session identifier, or generated-by signature that names an automated agent or the session that produced the change appears in any commit message. A check scans each commit message for the known attribution markers and fails on a hit. Because no pattern can enumerate every agent, an xref:#instruction-file[instruction file] states the rule in prose as well, and an inspection against its wording decides a marker the check doesn't yet know.
-. The commit checks above are deterministic per commit, so the xref:#verification-command[verification command] applies them not only to new commits but to every commit reachable from the head of the main branch, back to and including the first commit, and fails when any commit violates one. Every commit satisfied the checks when it was recorded, so the whole history stays compliant by construction, and a failure signals a commit that reached the branch through a bypassed hook.
+. The commit checks above are deterministic per commit, so the xref:#verification-command[verification command] applies them not only to new commits but to every commit reachable from the head of the main branch, back to and including the first commit, and fails when any commit violates one. Every commit satisfied the checks when it was recorded, so the whole history stays compliant by construction, and a failure signals a commit that reached the branch without the required verification.
 
-[[hooks-and-continuous-integration]]
-=== Hooks and Continuous Integration
+[[continuous-integration]]
+=== Continuous Integration
 
-. The repository configures hooks of the version control system that run declared subsets of the checks before a commit is recorded and before a push leaves the machine.
 . The repository configures a shared automation service that reruns the xref:#verification-command[verification command] on every push and every merge request. The service blocks a merge whose rerun fails.
 . The history of the main branch is append-only: a published commit is corrected by a new commit, never by rewriting.
 
