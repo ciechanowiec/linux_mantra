@@ -271,7 +271,7 @@ This section describes the state of the commit history and of the automation tha
 === Commit Messages
 
 . Every commit message passes a machine check of one format: a typed header of the form `type(scope): subject`, with the type drawn from a closed list that the repository declares.
-. Merge commits and revert commits follow the fixed header forms that the repository declares, and the repository declares whether the scope may be omitted.
+. Revert commits follow the fixed header form that the repository declares, and the repository declares whether the scope may be omitted. The section xref:#linear-history[] governs merge commits.
 . The subject holds 15 to 72 characters, ends without a period, and contains no whole word from the closed junk-word list that the repository declares - for example, `wip`, `tmp`, or `misc`.
 . A change that crosses the triviality threshold the repository declares - for example, more than 2 files or more than 50 changed lines - carries a body that states why the change was made.
 +
@@ -283,6 +283,12 @@ Masking them in the header parser closes the leak for every consumer.
 ----
 . No commit message attributes the change to an AI agent or to an agent session. No co-authorship trailer, sign-off address, session identifier, or generated-by signature that names an automated agent or the session that produced the change appears in any commit message. A check scans each commit message for the known attribution markers and fails on a hit. Because no pattern can enumerate every agent, an xref:#instruction-file[instruction file] states the rule in prose as well, and an inspection against its wording decides a marker the check doesn't yet know.
 . The commit checks above are deterministic per commit, so the xref:#verification-command[verification command] applies them not only to new commits but to every commit reachable from the head of the main branch, back to and including the first commit, and fails when any commit violates one. Every commit satisfied the checks when it was recorded, so the whole history stays compliant by construction, and a failure signals a commit that reached the branch without the required verification.
+
+[[linear-history]]
+=== Linear History
+
+. The history is linear: no commit has more than one parent. A branch takes the work of another by a rebase or a cherry-pick.
+. A check walks the whole history, back to and including the first commit. A commit with more than one parent fails the check.
 
 [[continuous-integration]]
 === Continuous Integration

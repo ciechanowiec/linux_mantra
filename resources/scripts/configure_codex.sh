@@ -122,29 +122,34 @@ command = "npx"
 args = ["-y", "@upstash/context7-mcp"]
 startup_timeout_sec = 60
 tool_timeout_sec = 120
+required = true
 
 [mcp_servers.openaiDeveloperDocs]
 url = "https://developers.openai.com/mcp"
 startup_timeout_sec = 30
 tool_timeout_sec = 120
+required = true
 
 [mcp_servers.drawio]
 command = "npx"
 args = ["-y", "@drawio/mcp"]
 startup_timeout_sec = 60
 tool_timeout_sec = 120
+required = true
 
 [mcp_servers.playwright]
 command = "npx"
 args = ["-y", "@playwright/mcp@latest"]
 startup_timeout_sec = 60
 tool_timeout_sec = 120
+required = true
 
 [mcp_servers.chrome_devtools]
 command = "npx"
 args = ["-y", "chrome-devtools-mcp"]
 startup_timeout_sec = 60
 tool_timeout_sec = 120
+required = true
 EOF
 
 echo "Configuring Codex global instructions..."
