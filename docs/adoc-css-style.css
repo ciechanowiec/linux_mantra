@@ -76,3 +76,8 @@ table.tableblock th {
     overflow-wrap: break-word;
     word-break: break-word;
 }
+
+table.tableblock td.halign-left,
+table.tableblock td.halign-left p.tableblock {
+    text-align: justify;
+}

@@ -1366,6 +1366,44 @@ def _equalize_source_fields_gaps(document_xml: str) -> str:
 
 
 # ============================================================================
+# document.xml -- table cell justification
+# ============================================================================
+#
+# Normal is justified, so body prose fills the measure. Pandoc nevertheless
+# writes an explicit <w:jc w:val="left"/> on every table-cell paragraph,
+# derived from the column alignment, and that override makes a prose cell read
+# ragged beside the justified prose around it. Promote the default left
+# alignment to justified inside tables. Four cases keep their alignment: a
+# cell the author aligned right or centre, a code paragraph (left for the
+# reason in _left_align_source_code), a source-fields record, whose
+# machine-facing paths and digests shouldn't be stretched across the column,
+# and a bold paragraph. The last one stands in for a header column (`h` in the
+# AsciiDoc column spec), which arrives here carrying no marker of its own
+# beyond the bold run Pandoc gives it. Such a cell holds a label, and a label
+# that wraps would have its words spread across the column.
+
+CELL_PARA_RE = re.compile(r'<w:p\b.*?</w:p>', re.DOTALL)
+JC_LEFT_RE = re.compile(r'<w:jc w:val="left"\s*/>')
+BOLD_RUN_RE = re.compile(r'<w:b\s*/>')
+
+
+def _justify_table_cells(document_xml: str) -> str:
+    def justify_table(match: 're.Match[str]') -> str:
+        body = match.group(0)
+        if SF_TABLE_MARKER in body:
+            return body
+
+        def justify_para(para_match: 're.Match[str]') -> str:
+            para = para_match.group(0)
+            if 'w:val="SourceCode"' in para or BOLD_RUN_RE.search(para):
+                return para
+            return JC_LEFT_RE.sub('<w:jc w:val="both" />', para)
+
+        return CELL_PARA_RE.sub(justify_para, body)
+    return TABLE_RE.sub(justify_table, document_xml)
+
+
+# ============================================================================
 # Pipeline
 # ============================================================================
 #
@@ -1403,6 +1441,7 @@ TRANSFORMS: Dict[str, List[XmlTransform]] = {
         _compact_table_cell_lists,
         _symmetric_table_margins,
         _compact_source_fields_tables,
+        _justify_table_cells,
     ],
 }
 

@@ -20,6 +20,17 @@ footer:
   verso:
     center:
       content: '{page-number}'
+table:
+  # The default theme distinguishes a header row by bold weight alone, which
+  # a reader loses on a dense table and on a row that repeats across a page
+  # break. Shading and a heavier rule under the head make the boundary
+  # between labels and data visible at a glance.
+  head:
+    background-color: 'F4F6F8'
+    font-style: bold
+    border-bottom-width: 1.25
+  border-color: 'B0B7BE'
+  grid-color: 'D6DADE'
 role:
   red:
     font-color: ff0000

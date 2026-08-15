@@ -17,6 +17,25 @@ Asciidoctor::Extensions.register do
             longest = Array(block.lines).map(&:length).max.to_i
             block.set_attr('autofit-option', '') if longest.between?(1, 125)
           end
+          # A table cell takes its alignment from the cell's `halign`
+          # attribute, and AsciiDoc's column spec can only set that to left,
+          # center, or right -- there is no justify operator. The body prose
+          # is justified (the theme's `base text_align`), so a prose cell
+          # would read ragged beside it. Prawn accepts :justify, so promote
+          # the default left alignment on body and footer cells, leaving a
+          # cell the author aligned right or centre untouched. A header
+          # column (`h` in the column spec) holds labels, not prose, so it
+          # keeps its left alignment: justifying a label that wraps spreads
+          # its words across the column.
+          if block.context == :table
+            (block.rows.body + block.rows.foot).each do |row|
+              row.each do |cell|
+                next if cell.style == :header
+                next unless (cell.attr 'halign') == 'left'
+                cell.set_attr 'halign', 'justify'
+              end
+            end
+          end
           if block.context == :olist
             block.style = styles[depth] || styles.last
             block.set_attr('style', styles[depth] || styles.last)
