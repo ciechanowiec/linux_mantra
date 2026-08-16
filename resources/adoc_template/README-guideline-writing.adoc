@@ -872,7 +872,7 @@ Register the handler during initialization and store the returned registration. 
 [#pronoun-antecedents]
 ==== Pronoun Antecedents
 
-Every pronoun - _it_, _this_, _they_, _that_ - has a single, unambiguous antecedent in the same sentence or the immediately preceding sentence. When the candidate antecedents are two or more, replace the pronoun with the name. _This_ and _that_ at the start of a sentence are followed by the noun they refer to - _this change_, _that release_ - when the antecedent isn't a single noun.
+Every pronoun - _it_, _this_, _they_, _that_ - has a single, unambiguous antecedent in the same sentence or the immediately preceding sentence in the same paragraph. When the candidate antecedents are two or more, replace the pronoun with the name. _This_ and _that_ at the start of a sentence are followed by the noun they refer to - _this change_, _that release_ - when the antecedent isn't a single noun.
 
 [.bad-example]
 .{bad-icon} Bad example
