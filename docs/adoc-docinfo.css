@@ -142,6 +142,108 @@
     }
 }
 
+/* Internal-link hover preview (behaviour in adoc-docinfo-footer.js). A cross-reference asks
+   the reader to go elsewhere in the document to recover one definition, and the jump costs
+   them the place they were holding; quoting the referenced text where they stand leaves the
+   sentence they are reading intact. Kept apart from .fn-pop above rather than merged with it:
+   a footnote quotes a whole short note written to be read on its own, while this quotes a
+   fragment of a longer document and needs its own sizing and its own placement rules. */
+.xref-preview {
+    position: absolute;
+    z-index: 1001;
+    display: none;
+    /* A placeholder only: the script sets an explicit pixel width on every open, because
+       the width has to be measured against the same viewport figure the placement maths
+       uses. A CSS 100vw expression counts the scrollbar that document.documentElement's
+       clientWidth leaves out, and the box would hang past the clamp by that difference. */
+    width: 38rem;
+    max-height: min(24rem, 70vh);
+    overflow: auto;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #c8c8c8;
+    border-radius: 4px;
+    background: #fffdf5;
+    color: #222222;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    text-align: left;
+}
+
+.xref-preview__title {
+    font-weight: 600;
+    color: #ba3925;
+}
+
+.xref-preview p,
+.xref-preview pre,
+.xref-preview ul,
+.xref-preview ol,
+.xref-preview dl {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: inherit;
+    line-height: inherit;
+    text-align: left;
+}
+
+/* Every block the script appends carries this class, so one rule spaces the stack however
+   it is composed: heading over content, or a lead-in over the list or table it announces. */
+.xref-preview__block + .xref-preview__block {
+    margin-top: 0.5rem;
+}
+
+.xref-preview pre {
+    white-space: pre-wrap;
+}
+
+.xref-preview ol,
+.xref-preview ul {
+    padding-left: 1.3rem;
+}
+
+/* A previewed table is a guest in a box far narrower than the column it was laid out for,
+   so it wraps within the width it is given rather than forcing the popover to scroll. */
+.xref-preview table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.xref-preview th,
+.xref-preview td {
+    padding: 0.2rem 0.35rem;
+    border: 1px solid #d5d5d5;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-align: left;
+    vertical-align: top;
+}
+
+@media (prefers-color-scheme: dark) {
+    .xref-preview {
+        border-color: #44464f;
+        background: #22232a;
+        color: #dddddd;
+    }
+
+    .xref-preview__title {
+        color: #ff8f70;
+    }
+
+    .xref-preview th,
+    .xref-preview td {
+        border-color: #44464f;
+    }
+}
+
+@media print {
+    .xref-preview {
+        display: none !important;
+    }
+}
+
 /* Bibliography entry metadata (`[horizontal.source-fields]`): a
    machine-facing record, rendered small and muted behind the prose. */
 .hdlist.source-fields {

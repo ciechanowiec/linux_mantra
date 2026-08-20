@@ -188,6 +188,426 @@
     window.addEventListener('resize', hide);
 })();
 
+// Internal-link hover preview: a cross-reference asks the reader to go elsewhere in the
+// document to recover one definition, and the jump costs them the place they were holding.
+// Show the referenced text beside the link on hover or keyboard focus instead, and keep it
+// open while the pointer rests on it. Deliberately separate from the footnote preview above:
+// the two answer different questions — a footnote quotes a whole short note written to be read
+// on its own, while this quotes a fragment of a longer document and has to decide which
+// fragment that is. HTML only, like the footnote preview; the PDF and DOCX exports carry
+// neither the behaviour nor the docinfo that would load it.
+(function () {
+    var SHOW_DELAY_MS = 140;
+    var HIDE_DELAY_MS = 180;
+    var TRAVEL_SPEED_PX_PER_MS = 0.8;
+    var MAX_TRAVEL_MS = 1400;
+    var AWAY_TOLERANCE_PX = 60;
+    // Prose reflows, so a narrow margin still reads. A table laid out to a fixed width and a
+    // verbatim block cannot reflow: squeezed into the same column they break words mid-token
+    // and lose the alignment that made them worth showing, which costs the reader more than
+    // the two lines the fallback placement covers. Each asks for the room it needs.
+    var SIDE_MIN_WIDTH_PX = 240;
+    var SIDE_MIN_WIDTH_RIGID_PX = 340;
+    var RIGID_CONTENT_SELECTOR = 'table, pre';
+    var SIDE_MAX_WIDTH_PX = 520;
+    var PREFERRED_WIDTH_REM = 38;
+    var GAP_PX = 12;
+    var SECTION_SELECTOR = '.sect0, .sect1, .sect2, .sect3, .sect4, .sect5';
+    // A colon ends an announcement, not an answer.
+    var LEAD_IN_PATTERN = /:\s*$/;
+    // What a colon may introduce. Deliberately not a paragraph: prose following prose is the
+    // next thought, not the completion of the previous one, and pulling it in doubles the
+    // preview for no gain.
+    var CONTINUATION_SELECTOR = [
+        '.olist',
+        '.ulist',
+        '.dlist',
+        '.listingblock',
+        '.literalblock',
+        '.admonitionblock',
+        '.exampleblock',
+        'table.tableblock'
+    ].join(', ');
+    var CONTENT_SELECTOR = [
+        '.paragraph > p',
+        '.olist > ol > li > p',
+        '.ulist > ul > li > p',
+        '.dlist dd > p',
+        '.admonitionblock td.content',
+        '.listingblock pre',
+        '.literalblock pre',
+        'table.tableblock p'
+    ].join(', ');
+    var popover;
+    var currentLink;
+    var showTimer;
+    var hideTimer;
+    var hidePending = false;
+    var distanceAtLeave = 0;
+
+    var cancelShow = function () {
+        window.clearTimeout(showTimer);
+    };
+
+    var cancelHide = function () {
+        window.clearTimeout(hideTimer);
+        hidePending = false;
+    };
+
+    var removeDescribedBy = function (link) {
+        if (!link) {
+            return;
+        }
+        var tokens = (link.getAttribute('aria-describedby') || '')
+            .split(/\s+/)
+            .filter(function (token) { return token && token !== 'xref-preview'; });
+        if (tokens.length) {
+            link.setAttribute('aria-describedby', tokens.join(' '));
+        } else {
+            link.removeAttribute('aria-describedby');
+        }
+    };
+
+    var addDescribedBy = function (link) {
+        var value = (link.getAttribute('aria-describedby') || '').trim();
+        var tokens = value ? value.split(/\s+/) : [];
+        if (tokens.indexOf('xref-preview') === -1) {
+            tokens.push('xref-preview');
+        }
+        link.setAttribute('aria-describedby', tokens.join(' '));
+    };
+
+    var hide = function () {
+        cancelShow();
+        cancelHide();
+        removeDescribedBy(currentLink);
+        currentLink = null;
+        if (popover) {
+            popover.style.display = 'none';
+        }
+    };
+
+    var distanceToPopover = function (event) {
+        if (!popover || popover.style.display === 'none' || !event ||
+            typeof event.clientX !== 'number') {
+            return 0;
+        }
+        var box = popover.getBoundingClientRect();
+        var dx = Math.max(box.left - event.clientX, 0, event.clientX - box.right);
+        var dy = Math.max(box.top - event.clientY, 0, event.clientY - box.bottom);
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    function scheduleHide(event) {
+        window.clearTimeout(hideTimer);
+        distanceAtLeave = distanceToPopover(event);
+        hidePending = true;
+        hideTimer = window.setTimeout(
+            hide,
+            HIDE_DELAY_MS + Math.min(distanceAtLeave / TRAVEL_SPEED_PX_PER_MS, MAX_TRAVEL_MS)
+        );
+    }
+
+    var element = function () {
+        if (!popover) {
+            popover = document.createElement('div');
+            popover.id = 'xref-preview';
+            popover.className = 'xref-preview';
+            popover.setAttribute('role', 'tooltip');
+            popover.addEventListener('mouseenter', cancelHide);
+            popover.addEventListener('mouseleave', scheduleHide);
+            document.body.appendChild(popover);
+        }
+        return popover;
+    };
+
+    var targetOf = function (link) {
+        var href = link.getAttribute('href') || '';
+        if (href.length < 2 || href.charAt(0) !== '#') {
+            return null;
+        }
+        var id;
+        try {
+            id = decodeURIComponent(href.slice(1));
+        } catch (error) {
+            return null;
+        }
+        return document.getElementById(id);
+    };
+
+    var cleanClone = function (source) {
+        var clone = source.cloneNode(true);
+        // Every id in the document is already spoken for by the original. A copy carrying the
+        // same ones would shadow them for getElementById and for the browser's own fragment
+        // navigation, so the preview would start answering for the text it is quoting.
+        clone.removeAttribute('id');
+        clone.querySelectorAll('[id]').forEach(function (node) {
+            node.removeAttribute('id');
+        });
+        // A footnote marker is removed outright rather than unwrapped like the links below: its
+        // visible text is the bare number, so unwrapping would strand a "[1]" that numbers
+        // nothing and leads nowhere.
+        clone.querySelectorAll(
+            'sup.footnote, a.footnote, script, style, iframe, form, button, input, .anchor'
+        ).forEach(function (node) {
+            node.remove();
+        });
+        // Links are unwrapped, not removed: their text is ordinary prose the reader still needs.
+        // They must not stay links, though — a tooltip is not a place to start navigating from,
+        // and a focusable copy would put stops on the tab route that lead nowhere.
+        clone.querySelectorAll('a').forEach(function (link) {
+            var parent = link.parentNode;
+            while (link.firstChild) {
+                parent.insertBefore(link.firstChild, link);
+            }
+            parent.removeChild(link);
+        });
+        // A cell lifted out of its table has no table to be a cell of, and renders at the mercy
+        // of the anonymous box the browser invents for it. Carry its children in a plain div.
+        if (/^(TD|TH|LI)$/.test(clone.tagName)) {
+            var box = document.createElement('div');
+            while (clone.firstChild) {
+                box.appendChild(clone.firstChild);
+            }
+            clone = box;
+        }
+        return clone;
+    };
+
+    var firstContentOfSection = function (heading) {
+        var section = heading.closest(SECTION_SELECTOR);
+        if (!section) {
+            return null;
+        }
+        var candidates = section.querySelectorAll(CONTENT_SELECTOR);
+        for (var index = 0; index < candidates.length; index += 1) {
+            var candidate = candidates[index];
+            if (candidate.closest(SECTION_SELECTOR) === section && candidate.textContent.trim()) {
+                return candidate;
+            }
+        }
+        return null;
+    };
+
+    var inlineContentOf = function (target) {
+        // A cell is tried before the paragraph: Asciidoctor wraps cell text in a <p>, so the
+        // nearest paragraph to an anchor inside a table is an artifact of the renderer, and
+        // previewing it would clip the cell to its first line.
+        var cell = target.closest('td, th');
+        if (cell && cell.textContent.trim()) {
+            return cell;
+        }
+        var container = target.closest('p, li, dd, dt, pre, figcaption');
+        if (container && container.textContent.trim()) {
+            return container;
+        }
+        if (target.textContent.trim()) {
+            return target;
+        }
+        // An empty anchor placed on its own line by a block attribute belongs to whatever
+        // follows it, which is where the definition the reader came for actually is.
+        var following = target.nextElementSibling;
+        return following && following.textContent.trim() ? following : null;
+    };
+
+    // A block ending in a colon promises something and stops short of delivering it: "declares:",
+    // "the built-in defaults are the following:". Previewing that alone answers nothing and sends
+    // the reader to the page anyway, so the list or table it introduces comes along with it.
+    var continuationOf = function (block) {
+        if (!LEAD_IN_PATTERN.test(block.textContent)) {
+            return null;
+        }
+        // Asciidoctor puts a standalone paragraph in a wrapper div and a list-item paragraph
+        // directly in the <li>, so what follows the promise is a sibling of one or the other.
+        var candidate = block.nextElementSibling ||
+            (block.parentElement ? block.parentElement.nextElementSibling : null);
+        return candidate && candidate.matches(CONTINUATION_SELECTOR) ? candidate : null;
+    };
+
+    var appendBlock = function (wrapper, source) {
+        var clone = cleanClone(source);
+        clone.classList.add('xref-preview__block');
+        wrapper.appendChild(clone);
+    };
+
+    var contentOf = function (link) {
+        var target = targetOf(link);
+        if (!target) {
+            return null;
+        }
+        var wrapper = document.createElement('div');
+        var block;
+        if (/^H[1-6]$/.test(target.tagName)) {
+            var title = document.createElement('div');
+            title.className = 'xref-preview__title xref-preview__block';
+            // The heading's own anchor icon is an empty link, so its text is the title alone.
+            title.textContent = target.textContent.trim();
+            wrapper.appendChild(title);
+            block = firstContentOfSection(target);
+        } else {
+            block = inlineContentOf(target);
+        }
+        if (block) {
+            appendBlock(wrapper, block);
+            var continuation = continuationOf(block);
+            if (continuation) {
+                appendBlock(wrapper, continuation);
+            }
+        }
+        return wrapper.textContent.trim() ? wrapper : null;
+    };
+
+    var preferredWidthPx = function () {
+        var root = parseFloat(window.getComputedStyle(document.documentElement).fontSize);
+        return PREFERRED_WIDTH_REM * (root || 16);
+    };
+
+    // An internal link sits mid-sentence, so the lines around it are the context the reader is
+    // holding while they look. Preferred placement is the margin beside the text column, where
+    // nothing is covered at all; where the window is too narrow for that, below the link, and
+    // above it only when there is no room below.
+    var place = function (link, pop) {
+        var anchor = link.getBoundingClientRect();
+        // The margin starts at the right edge of the content column, not of the link's own
+        // block: an indented block sits inside the column, and a preview pinned to its edge
+        // would still overlap prose belonging to the column.
+        var content = document.getElementById('content');
+        var columnRight = content ? content.getBoundingClientRect().right : anchor.right;
+        // clientWidth, not innerWidth: the latter counts the scrollbar, which would let the
+        // preview sit under it.
+        var viewportWidth = document.documentElement.clientWidth;
+        var viewportHeight = window.innerHeight;
+        var margin = viewportWidth - columnRight - 2 * GAP_PX;
+        var minSideWidth = pop.querySelector(RIGID_CONTENT_SELECTOR)
+            ? SIDE_MIN_WIDTH_RIGID_PX
+            : SIDE_MIN_WIDTH_PX;
+        var left;
+        var top;
+
+        if (margin >= minSideWidth) {
+            pop.style.width = Math.min(margin, SIDE_MAX_WIDTH_PX) + 'px';
+            left = columnRight + GAP_PX;
+            top = anchor.top + anchor.height / 2 - pop.offsetHeight / 2;   // centred on the link
+            top = Math.min(
+                Math.max(GAP_PX, top),
+                Math.max(GAP_PX, viewportHeight - pop.offsetHeight - GAP_PX)
+            );
+        } else {
+            // Both gaps are spent here, so the box can always be placed at one of them and
+            // still clear the other, however narrow the window gets.
+            pop.style.width = Math.min(preferredWidthPx(), viewportWidth - 2 * GAP_PX) + 'px';
+            left = Math.min(
+                Math.max(GAP_PX, anchor.left),
+                Math.max(GAP_PX, viewportWidth - pop.offsetWidth - GAP_PX)
+            );
+            var fitsBelow = viewportHeight - anchor.bottom >= pop.offsetHeight + GAP_PX;
+            top = fitsBelow ? anchor.bottom + 8 : anchor.top - pop.offsetHeight - 8;
+            top = Math.max(GAP_PX, top);
+        }
+
+        pop.style.left = (left + window.pageXOffset) + 'px';
+        pop.style.top = (top + window.pageYOffset) + 'px';
+    };
+
+    var show = function (link) {
+        cancelShow();
+        cancelHide();
+        var content = contentOf(link);
+        if (!content) {
+            hide();
+            return;
+        }
+        removeDescribedBy(currentLink);
+        currentLink = link;
+        addDescribedBy(link);
+        var pop = element();
+        pop.innerHTML = '';
+        pop.appendChild(content);
+        pop.style.visibility = 'hidden';
+        pop.style.display = 'block';
+        place(link, pop);
+        pop.style.visibility = 'visible';
+    };
+
+    // What is left out, and why. The anchor icon beside a heading points at the heading it sits
+    // on, so its preview would quote the text already under the pointer. Footnote markers and
+    // the notes they lead to have their own preview, and two of them firing on one marker would
+    // fight over the same corner of the screen. Contents entries are a map of the document, read
+    // as a list; a preview opening over the next entry down would obstruct that reading. Links
+    // inside an open preview would let one preview replace the one it is standing in. A link to
+    // an id that is not in the document has nothing to show, and is left as an ordinary link.
+    var isEligible = function (link) {
+        var href = link.getAttribute('href') || '';
+        return href.charAt(0) === '#' && href.length > 1 &&
+            !link.classList.contains('anchor') &&
+            !link.classList.contains('footnote') &&
+            !link.closest('#toc, #tocbot, #footnotes, .footnotes, .xref-preview') &&
+            href.indexOf('#_footnotedef_') !== 0 &&
+            href.indexOf('#_footnoteref_') !== 0 &&
+            targetOf(link) !== null;
+    };
+
+    // Clicking a link focuses it too, but that reader is already on their way to the target and
+    // a preview of where they are going only lands on top of it. Only a keyboard arrival needs
+    // one. Browsers without :focus-visible reject the selector, and keep the plainer behaviour.
+    var arrivedByKeyboard = function (link) {
+        try {
+            return link.matches(':focus-visible');
+        } catch (error) {
+            return true;
+        }
+    };
+
+    var bind = function (link) {
+        link.addEventListener('mouseenter', function () {
+            cancelShow();
+            cancelHide();
+            showTimer = window.setTimeout(function () { show(link); }, SHOW_DELAY_MS);
+        });
+        link.addEventListener('mouseleave', function (event) {
+            cancelShow();
+            scheduleHide(event);
+        });
+        link.addEventListener('focus', function () {
+            if (arrivedByKeyboard(link)) {
+                show(link);
+            }
+        });
+        link.addEventListener('blur', hide);
+    };
+
+    // Asciidoctor emits the footnotes block after this one, so at parse time the end of the
+    // document is not there to be queried yet. Waiting for the parse keeps which links are
+    // covered a matter of isEligible rather than of where this block happens to sit.
+    var init = function () {
+        document.querySelectorAll('#content a[href^="#"]').forEach(function (link) {
+            if (isEligible(link)) {
+                bind(link);
+            }
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    document.addEventListener('mousemove', function (event) {
+        if (hidePending && distanceToPopover(event) > distanceAtLeave + AWAY_TOLERANCE_PX) {
+            hide();
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            hide();
+        }
+    });
+
+    window.addEventListener('resize', hide);
+})();
+
 var oldtoc = document.getElementById('toctitle').nextElementSibling;
 var newtoc = document.createElement('div');
 newtoc.setAttribute('id', 'tocbot');
