@@ -202,6 +202,13 @@
     padding-left: 1.3rem;
 }
 
+/* The subsection titles a container section previews as carry their own section numbers, so a
+   bullet in front of each would mark the same thing twice. */
+.xref-preview ul.xref-preview__contents {
+    list-style: none;
+    padding-left: 0;
+}
+
 /* A previewed table is a guest in a box far narrower than the column it was laid out for,
    so it wraps within the width it is given rather than forcing the popover to scroll. */
 .xref-preview table {

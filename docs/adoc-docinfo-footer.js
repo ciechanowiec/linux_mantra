@@ -215,6 +215,11 @@
     var SECTION_SELECTOR = '.sect0, .sect1, .sect2, .sect3, .sect4, .sect5';
     // A colon ends an announcement, not an answer.
     var LEAD_IN_PATTERN = /:\s*$/;
+    // A bold run standing alone announces the same way a colon does: "Purpose", "Worked example"
+    // name what comes next instead of saying it. Sentence-ending punctuation marks a statement,
+    // and length marks prose that merely happens to be emphasised, so both rule the label out.
+    var LABEL_PATTERN = /[.!?:\u2026]\s*$/;
+    var LABEL_MAX_CHARS = 60;
     // What a colon may introduce. Deliberately not a paragraph: prose following prose is the
     // next thought, not the completion of the previous one, and pulling it in doubles the
     // preview for no gain.
@@ -228,6 +233,13 @@
         '.exampleblock',
         'table.tableblock'
     ].join(', ');
+    // What a label may introduce, which is anything a colon may plus the prose the colon rule
+    // declines: a label is a heading in all but markup, so the paragraph under it is not the
+    // next thought, it is the only thought there is.
+    var LABEL_CONTINUATION_SELECTOR = CONTINUATION_SELECTOR + ', .paragraph';
+    // A label may introduce a lead-in, which in turn introduces a list or a block. Two hops
+    // reach the end of that chain; a third would be quoting the section rather than sampling it.
+    var MAX_CONTINUATIONS = 2;
     var CONTENT_SELECTOR = [
         '.paragraph > p',
         '.olist > ol > li > p',
@@ -383,10 +395,42 @@
         for (var index = 0; index < candidates.length; index += 1) {
             var candidate = candidates[index];
             if (candidate.closest(SECTION_SELECTOR) === section && candidate.textContent.trim()) {
-                return candidate;
+                // A section that opens with a table is answered by the table. Reached this way
+                // the candidate is its first cell, which is one square of that answer and reads
+                // as a stray fragment: "5.14. English" over "English.AmericanSpelling".
+                return candidate.closest('table.tableblock') || candidate;
             }
         }
         return null;
+    };
+
+    // A section holding nothing but subsections has no prose of its own to quote, and quoting a
+    // subsection's opening would answer for a section the reader did not ask about. What such a
+    // section does have is its shape, so the preview lists what it holds. Only the subsections
+    // one level down: the deeper ones belong to those, and the list would stop being a summary.
+    var contentsOfSection = function (heading) {
+        var section = heading.closest(SECTION_SELECTOR);
+        if (!section) {
+            return null;
+        }
+        // Asciidoctor wraps a level-1 section's children in a .sectionbody and nests deeper
+        // sections directly, so the subsections sit under one or the other.
+        var body = section.querySelector(':scope > .sectionbody') || section;
+        var list = document.createElement('ul');
+        list.className = 'xref-preview__contents xref-preview__block';
+        Array.prototype.forEach.call(body.children, function (child) {
+            if (!child.matches(SECTION_SELECTOR)) {
+                return;
+            }
+            var title = child.querySelector('h1, h2, h3, h4, h5, h6');
+            if (!title) {
+                return;
+            }
+            var item = document.createElement('li');
+            item.textContent = title.textContent.trim();
+            list.appendChild(item);
+        });
+        return list.firstChild ? list : null;
     };
 
     var inlineContentOf = function (target) {
@@ -410,18 +454,64 @@
         return following && following.textContent.trim() ? following : null;
     };
 
-    // A block ending in a colon promises something and stops short of delivering it: "declares:",
-    // "the built-in defaults are the following:". Previewing that alone answers nothing and sends
-    // the reader to the page anyway, so the list or table it introduces comes along with it.
+    // A label is a title the author set in bold rather than in a heading: the whole block is
+    // emphasised, it names a thing instead of asserting one, and it is short enough to be read
+    // as a caption. Bold used for stress inside a sentence leaves unemphasised text behind and
+    // fails the comparison, which is what keeps this off ordinary prose.
+    var isLabel = function (block) {
+        var text = block.textContent.trim();
+        if (!text || text.length > LABEL_MAX_CHARS || LABEL_PATTERN.test(text)) {
+            return false;
+        }
+        var emphasised = '';
+        Array.prototype.forEach.call(block.children, function (child) {
+            if (child.tagName === 'STRONG' || child.tagName === 'B') {
+                emphasised += child.textContent;
+            }
+        });
+        return emphasised.trim() === text;
+    };
+
+    // A block promising something and stopping short of delivering it answers nothing on its own
+    // and sends the reader to the page anyway, so what completes it comes along. Two shapes
+    // promise: a colon — "declares:", "the built-in defaults are the following:" — which the
+    // list or table it announces completes, and a label — "Purpose", "Worked example" — which
+    // the prose beneath it completes.
     var continuationOf = function (block) {
-        if (!LEAD_IN_PATTERN.test(block.textContent)) {
+        var selector;
+        if (isLabel(block)) {
+            selector = LABEL_CONTINUATION_SELECTOR;
+        } else if (LEAD_IN_PATTERN.test(block.textContent)) {
+            selector = CONTINUATION_SELECTOR;
+        } else {
             return null;
         }
         // Asciidoctor puts a standalone paragraph in a wrapper div and a list-item paragraph
         // directly in the <li>, so what follows the promise is a sibling of one or the other.
         var candidate = block.nextElementSibling ||
             (block.parentElement ? block.parentElement.nextElementSibling : null);
-        return candidate && candidate.matches(CONTINUATION_SELECTOR) ? candidate : null;
+        return candidate && candidate.matches(selector) ? candidate : null;
+    };
+
+    // Only a label defers twice. It names a thing, and what it names may open with a lead-in of
+    // its own — "Worked example" over "the configuration is the following:" over the YAML that
+    // answers both. A lead-in announces one structure and is finished once that structure is in
+    // hand, so a chain starting at one ends after a single step, as it always has.
+    var continuationsOf = function (block) {
+        var chain = [];
+        var current = block;
+        while (chain.length < MAX_CONTINUATIONS) {
+            var next = continuationOf(current);
+            if (!next) {
+                break;
+            }
+            chain.push(next);
+            if (!isLabel(current)) {
+                break;
+            }
+            current = next;
+        }
+        return chain;
     };
 
     var appendBlock = function (wrapper, source) {
@@ -444,15 +534,20 @@
             title.textContent = target.textContent.trim();
             wrapper.appendChild(title);
             block = firstContentOfSection(target);
+            if (!block) {
+                var contents = contentsOfSection(target);
+                if (contents) {
+                    wrapper.appendChild(contents);
+                }
+            }
         } else {
             block = inlineContentOf(target);
         }
         if (block) {
             appendBlock(wrapper, block);
-            var continuation = continuationOf(block);
-            if (continuation) {
+            continuationsOf(block).forEach(function (continuation) {
                 appendBlock(wrapper, continuation);
-            }
+            });
         }
         return wrapper.textContent.trim() ? wrapper : null;
     };
