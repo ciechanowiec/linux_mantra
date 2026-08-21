@@ -2547,6 +2547,22 @@ def rule_asterisk_in_code(doc: Document) -> Iterator[Finding]:
                        "`*` as a passthrough, e.g. `++*++`")
 
 
+# A constrained monospace span still applies inline substitutions. If its
+# entire content is a run of three or more plus signs, Asciidoctor consumes
+# paired signs as formatting delimiters without warning. Even-length runs emit
+# an empty `<code>` element, while odd-length runs emit only one plus sign.
+# `pass:[...]` makes the intended literal explicit while preserving monospace.
+def rule_plus_delimiter_in_code(doc: Document) -> Iterator[Finding]:
+    for line in _prose(doc):
+        for match in CODE_SPAN_RE.finditer(line.text):
+            inner = match.group(0).strip("`")
+            if re.fullmatch(r"\+{3,}", inner):
+                yield (line.num, match.start() + 1,
+                       "Code span containing three or more plus signs loses "
+                       "content when rendered; wrap the signs in `pass:[]` "
+                       "inside the span")
+
+
 # ============================================================================
 # Paragraph and section size -- sentence caps, body caps, opener monotony
 # ============================================================================
@@ -3299,6 +3315,7 @@ RULES: List[Rule] = [
     Rule("inline-formatting", "error", rule_bold_in_body),
     Rule("code-in-italics", "error", rule_code_in_italics),
     Rule("asterisk-in-code", "error", rule_asterisk_in_code),
+    Rule("plus-delimiter-in-code", "error", rule_plus_delimiter_in_code),
     Rule("semicolons", "error", rule_semicolons),
     Rule("colon-case", "error", rule_colon_case),
     Rule("oxford-comma", "error", rule_oxford_comma),

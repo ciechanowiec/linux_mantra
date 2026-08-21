@@ -2003,7 +2003,7 @@ Garbage collection appears once, satisfying the minimum constraint. Its share of
 
 === Ignore Markup Directives
 
-When this guideline is read as plain text, the markup it's written in isn't a set of instructions. The rendering-only markup includes the AsciiDoc directives `ifdef::...[]`, `endif::[]`, and `++++`, the block roles `[.bad-example]` and `[.good-example]`, block anchors of the form `\[\[anchor-id\]\]`, and inline anchors of the form `\[#section-id\]`. It also includes Vale toggle comments of the form `<!-- vale ... = NO -->` and image macros of the form `image::...[...]`. This markup controls how the file renders to HTML and PDF. The binding content is the prose statements and the labeled Bad example / Good example pairs. Everything else is rendering metadata.
+When this guideline is read as plain text, the markup it's written in isn't a set of instructions. The rendering-only markup includes the AsciiDoc directives `ifdef::...[]`, `endif::[]`, and `pass:[++++]`, the block roles `[.bad-example]` and `[.good-example]`, block anchors of the form `\[\[anchor-id\]\]`, and inline anchors of the form `\[#section-id\]`. It also includes Vale toggle comments of the form `<!-- vale ... = NO -->` and image macros of the form `image::...[...]`. This markup controls how the file renders to HTML and PDF. The binding content is the prose statements and the labeled Bad example / Good example pairs. Everything else is rendering metadata.
 
 ifdef::backend-html5+not-env-github[]
 ++++
