@@ -434,12 +434,19 @@
     };
 
     var inlineContentOf = function (target) {
-        // A cell is tried before the paragraph: Asciidoctor wraps cell text in a <p>, so the
+        // A table is tried before the paragraph: Asciidoctor wraps cell text in a <p>, so the
         // nearest paragraph to an anchor inside a table is an artifact of the renderer, and
         // previewing it would clip the cell to its first line.
+        //
+        // The whole row is quoted, not the cell the anchor sits in. A row is one record and a
+        // cell is one field of it, so an anchor on the field that names the record - the gate
+        // identifier, the key, the term - answers with the name the reader already read and
+        // withholds the definition they followed the link for. The definition is the rest of
+        // the row.
         var cell = target.closest('td, th');
         if (cell && cell.textContent.trim()) {
-            return cell;
+            var row = cell.closest('tr');
+            return row && row.textContent.trim() ? row : cell;
         }
         var container = target.closest('p, li, dd, dt, pre, figcaption');
         if (container && container.textContent.trim()) {
@@ -514,8 +521,30 @@
         return chain;
     };
 
+    // No engine lays out a <tr> outside a table, so a quoted row is rehoused in a table of its
+    // own before it is appended. The preview's existing table rules then style it, which is what
+    // makes a quoted row and a quoted table look alike.
+    var housed = function (clone, source) {
+        if (clone.tagName !== 'TR') {
+            return clone;
+        }
+        var table = document.createElement('table');
+        // The column widths live in the source table's colgroup. A row rehoused without it is
+        // laid out in equal columns, which matches neither the document nor the proportions the
+        // reader just looked at.
+        var origin = source.closest('table');
+        var colgroup = origin && origin.querySelector(':scope > colgroup');
+        if (colgroup) {
+            table.appendChild(cleanClone(colgroup));
+        }
+        var body = document.createElement('tbody');
+        body.appendChild(clone);
+        table.appendChild(body);
+        return table;
+    };
+
     var appendBlock = function (wrapper, source) {
-        var clone = cleanClone(source);
+        var clone = housed(cleanClone(source), source);
         clone.classList.add('xref-preview__block');
         wrapper.appendChild(clone);
     };
