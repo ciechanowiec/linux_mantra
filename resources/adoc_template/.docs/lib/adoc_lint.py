@@ -340,8 +340,17 @@ CITE_SEP = "; "
 # optional for a source whose support is visual (an image) -- then the
 # locator alone, colon-free, carries the reference. Locators never contain
 # backticks or semicolons: `;` is the source separator.
+#
+# The plus run that fences the quote is 1 to 3 signs long and symmetric, so
+# source wording that itself contains a plus stays quotable: `GMS+` needs
+# `++...++` and `C++` needs `+++...+++`. The run is captured, because the rule
+# `citation-quote-delimiter` has to see which run the author chose: Asciidoctor
+# ends an inline passthrough at the first recurrence of its own delimiter, and
+# it does so silently -- `"+GMS+)+"` renders as `GMS)` plus a stray sign, a
+# corrupted quote that still passes the verbatim check, since this regex reads
+# the source text rather than the rendered output.
 CITE_ITEM_QUOTE_RE = re.compile(
-    r"<<([A-Za-z0-9_-]+)>>(?:,\s+([^`;]*?))?:\s+\"\+(.+?)\+\"")
+    r"<<([A-Za-z0-9_-]+)>>(?:,\s+([^`;]*?))?:\s+\"(\+{1,3})(.+?)\3\"")
 CITE_ITEM_NOQUOTE_RE = re.compile(
     r"<<([A-Za-z0-9_-]+)>>,\s+([^`;:]+?)(?=; |$)")
 
@@ -366,6 +375,7 @@ class SourceRef:
     locator: str
     quote: str         # verbatim, with '\]' unescaped back to ']'
     col: int           # 1-based column of '<<' in its line
+    delim: str = ""    # the plus run fencing the quote; '' when there is none
 
 
 @dataclass
@@ -455,10 +465,10 @@ def _parse_citation_items(cf: CitationFootnote, rest: str,
     while True:
         m = CITE_ITEM_QUOTE_RE.match(rest, pos)
         if m:
-            quote = m.group(3).replace("\\]", "]")
+            quote = m.group(4).replace("\\]", "]")
             cf.sources.append(SourceRef(
                 m.group(1), (m.group(2) or "").strip(), quote,
-                base_col + m.start() + 1))
+                base_col + m.start() + 1, m.group(3)))
             pos = m.end()
         else:
             m = CITE_ITEM_NOQUOTE_RE.match(rest, pos)
@@ -1420,6 +1430,34 @@ def _entry_schema(entry: BibEntry) -> Optional[List[Tuple[str, str]]]:
     if cls_schema:
         ordered += cls_schema[0] + cls_schema[1]
     return ordered
+
+
+# Asciidoctor ends an inline passthrough at the first recurrence of its own
+# delimiter, and it emits no warning when it happens: the tail of the quote is
+# dropped, the surplus signs leak into the prose, and the footnote can lose its
+# macro entirely. The wording that reaches the reader then differs from the
+# wording the author cited, which defeats the point of a byte-exact quote --
+# and the verbatim check can't see it, because that check reads the source text,
+# where the quote is still whole. So the delimiter is checked directly: a quote
+# fenced by a plus run must not contain that run. The repair is a longer run,
+# which is why the item regex accepts one to three signs.
+def rule_citation_quote_delimiter(doc: Document) -> Iterator[Finding]:
+    for cf in source_analysis(doc).citations:
+        for ref in cf.sources:
+            if not ref.delim or ref.delim not in ref.quote:
+                continue
+            wider = "+" * (len(ref.delim) + 1)
+            longest = max(len(run) for run in
+                          re.findall(r"\++", ref.quote))
+            fix = ("no plus run of this form fences it, so quote wording "
+                   "without the run instead"
+                   if longest >= 3 else
+                   f"fence it with {wider!r} instead")
+            yield (cf.line, ref.col,
+                   f"Citation quote contains its own delimiter {ref.delim!r}, "
+                   f"so Asciidoctor truncates it silently and the rendered "
+                   f"quote stops being verbatim: {fix} "
+                   f"(§citation-footnotes)")
 
 
 def rule_bibliography_format(doc: Document) -> Iterator[Finding]:
@@ -3351,6 +3389,8 @@ RULES: List[Rule] = [
     Rule("autolink-boundary", "error", rule_autolink_after_code_span),
     Rule("footnote-punctuation", "error", rule_footnote_dot),
     Rule("citation-footnote-format", "error", rule_citation_footnote_format),
+    Rule("citation-quote-delimiter", "error",
+         rule_citation_quote_delimiter),
     Rule("bibliography-format", "error", rule_bibliography_format),
     Rule("closed-source-list", "error", rule_closed_source_list),
     Rule("source-file", "error", rule_source_file),
