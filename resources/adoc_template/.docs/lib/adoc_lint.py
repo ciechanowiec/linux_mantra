@@ -212,6 +212,18 @@ BIB_ENTRY_RE = re.compile(r"^\s*\.\s+\[\[([^\[\],]+),([^\]]+)\]\](.*)$")
 BIB_FIELD_RE = re.compile(r"^([A-Z][A-Za-z0-9 -]*?)::\s+(.*)$")
 TRIPLE_ANCHOR_RE = re.compile(r"\[\[\[([^\]]+)\]\]\]")
 KEBAB_ID_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+# A preprocessor conditional -- `ifdef::[]`, `ifndef::[]`, `ifeval::[]`, `endif::[]`
+# -- is rendering metadata, not document content (§ignore-markup-directives): it
+# asserts nothing and belongs to no bibliography entry. It has to be tolerated
+# inside the bibliography's line range because two rules meet there. The
+# bibliography is the document's last section, and the house pattern closes every
+# document with a backend-guarded passthrough block that loads tocbot and the
+# verbatim-autofit footer script. In any document that cites sources those two
+# rules put that block after `== Sources`, so without this skip the block reads as
+# a malformed entry and the only way to keep the scripts is a per-document docinfo
+# file. The passthrough body between the `++++` delimiters needs no skip of its
+# own: it is not `block == "none"`, so `_prose` never yields it.
+COND_DIRECTIVE_RE = re.compile(r"^\s*(?:ifdef|ifndef|ifeval|endif)::")
 
 # The metadata schema of a bibliography entry. The field names below appear
 # identically in three places -- the guideline's tables (§source-identity),
@@ -508,6 +520,8 @@ def _build_source_analysis(doc: Document) -> SourceAnalysis:
                 continue
             if not stripped or stripped == BIB_MARKER \
                     or line.num == bib_heading:
+                continue
+            if COND_DIRECTIVE_RE.match(text):
                 continue
             if stripped == SF_STYLE_LINE and current:
                 current.style_line = True
