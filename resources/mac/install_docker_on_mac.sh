@@ -547,6 +547,61 @@ echo "Done"
 
 echo ""
 echo "==========================="
+echo "|      DOCKER SOCKET      |"
+echo "==========================="
+echo "Ensuring the Docker socket at the path every tool looks in..."
+# Colima keeps its socket under $HOME and announces it only through `docker context`. Whatever reads
+# the context, such as the docker command itself, is fine. Whatever does not, such as Testcontainers,
+# looks at /var/run/docker.sock and at DOCKER_HOST, so anything started outside a login shell - an
+# IDE opened from the Dock, a launch agent, cron - never sees the exports written above and reports
+# that it cannot find a Docker environment. A link at the standard path answers all of them and needs
+# no environment at all.
+#
+# macOS empties /var/run on every boot, so the link is recreated by a launch daemon rather than made
+# once by hand. The daemon runs before Colima has started, which leaves the link pointing at nothing
+# until it does. That is harmless: there is no daemon to talk to until then either.
+DOCKER_SOCKET_LABEL="la.abio.docker-socket"
+DOCKER_SOCKET_DAEMON="/Library/LaunchDaemons/$DOCKER_SOCKET_LABEL.plist"
+DOCKER_SOCKET_SOURCE="$HOME/.colima/default/docker.sock"
+DOCKER_SOCKET_TARGET="/var/run/docker.sock"
+DOCKER_SOCKET_STAGING="$(mktemp)"
+
+echo "Writing the launch daemon: $DOCKER_SOCKET_DAEMON..."
+cat > "$DOCKER_SOCKET_STAGING" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+ <dict>
+   <key>Label</key>
+   <string>$DOCKER_SOCKET_LABEL</string>
+   <key>ProgramArguments</key>
+   <array>
+     <string>/bin/ln</string>
+     <string>-sfn</string>
+     <string>$DOCKER_SOCKET_SOURCE</string>
+     <string>$DOCKER_SOCKET_TARGET</string>
+   </array>
+   <key>RunAtLoad</key>
+   <true/>
+ </dict>
+</plist>
+EOF
+
+echo -e "Installing the launch daemon. \033[1mEnter your password if requested...\033[0m"
+# launchd refuses a daemon that is not owned by root and not world-readable, so the file is placed
+# with its ownership and mode rather than copied and adjusted afterwards.
+sudo install -o root -g wheel -m 644 "$DOCKER_SOCKET_STAGING" "$DOCKER_SOCKET_DAEMON"
+rm -f "$DOCKER_SOCKET_STAGING"
+echo "Loading the launch daemon..."
+# Booting it out first makes a re-run of this script replace the running daemon rather than fail on
+# a label that is already loaded. It reports an error when nothing is loaded, which is expected.
+sudo launchctl bootout "system/$DOCKER_SOCKET_LABEL" 2>/dev/null
+sudo launchctl bootstrap system "$DOCKER_SOCKET_DAEMON"
+echo "Docker socket at the standard path:"
+ls -l "$DOCKER_SOCKET_TARGET"
+
+echo ""
+echo "==========================="
 echo "|     DOCKER BUILDX       |"
 echo "==========================="
 echo "Ensuring Docker Buildx..."
