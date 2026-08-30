@@ -26,6 +26,102 @@ replace_managed_block() {
     printf "%s\n" "$endMarker" >> "$targetFile"
 }
 
+set_root_toml_value() {
+    targetFile="$1"
+    settingName="$2"
+    settingValue="$3"
+    tmpFile="$targetFile.tmp"
+
+    mkdir -p "$(dirname "$targetFile")"
+    touch "$targetFile"
+    awk -v name="$settingName" -v value="$settingValue" '
+        BEGIN {
+            print name " = " value
+            inRoot = 1
+        }
+        inRoot && /^[[:space:]]*\[/ { inRoot = 0 }
+        inRoot {
+            candidate = $0
+            sub(/=.*/, "", candidate)
+            gsub(/[[:space:]]/, "", candidate)
+            if (candidate == name) {
+                next
+            }
+        }
+        { print }
+    ' "$targetFile" > "$tmpFile" && mv "$tmpFile" "$targetFile"
+}
+
+set_toml_table_value() {
+    targetFile="$1"
+    tableName="$2"
+    settingName="$3"
+    settingValue="$4"
+    tmpFile="$targetFile.tmp"
+
+    mkdir -p "$(dirname "$targetFile")"
+    touch "$targetFile"
+    awk -v table="$tableName" -v name="$settingName" -v value="$settingValue" '
+        function printSetting() {
+            print name " = " value
+        }
+        function flushPendingBlankLines() {
+            while (pendingBlankLines > 0) {
+                print ""
+                pendingBlankLines--
+            }
+        }
+        $0 == "[" table "]" {
+            foundTable = 1
+            inTargetTable = 1
+            pendingBlankLines = 0
+            print
+            next
+        }
+        inTargetTable && skippingArray {
+            if ($0 ~ /^[[:space:]]*\]/) {
+                skippingArray = 0
+            }
+            next
+        }
+        inTargetTable && /^[[:space:]]*$/ {
+            pendingBlankLines++
+            next
+        }
+        inTargetTable && /^[[:space:]]*\[/ {
+            printSetting()
+            print ""
+            pendingBlankLines = 0
+            inTargetTable = 0
+        }
+        inTargetTable {
+            candidate = $0
+            sub(/=.*/, "", candidate)
+            gsub(/[[:space:]]/, "", candidate)
+            if (candidate == name) {
+                if ($0 ~ /=[[:space:]]*\[/ && $0 !~ /\][[:space:]]*$/) {
+                    skippingArray = 1
+                }
+                pendingBlankLines = 0
+                next
+            }
+            flushPendingBlankLines()
+            print
+            next
+        }
+        { print }
+        END {
+            if (inTargetTable) {
+                printSetting()
+            } else if (!foundTable) {
+                print ""
+                print "[" table "]"
+                printSetting()
+            }
+        }
+    ' "$targetFile" > "$tmpFile" && mv "$tmpFile" "$targetFile"
+}
+
 install_codex_plugin() {
     pluginSelector="$1"
 
@@ -71,86 +167,70 @@ codexHome="$HOME/.codex"
 codexConfigFile="$codexHome/config.toml"
 mkdir -p "$codexHome/rules"
 
-replace_managed_block "$codexConfigFile" "# BEGIN MANTRA CODEX CONFIG" "# END MANTRA CODEX CONFIG" << 'EOF'
 # Primary model and reasoning defaults. This mirrors the Claude Code "opus"
 # preference with Codex's strongest default model.
-model = "gpt-5.6"
-review_model = "gpt-5.6"
-model_reasoning_effort = "xhigh"
-plan_mode_reasoning_effort = "xhigh"
-model_verbosity = "high"
-personality = "pragmatic"
+set_root_toml_value "$codexConfigFile" "model" '"gpt-5.6"'
+set_root_toml_value "$codexConfigFile" "review_model" '"gpt-5.6"'
+set_root_toml_value "$codexConfigFile" "model_context_window" "1050000"
+set_root_toml_value "$codexConfigFile" "model_reasoning_effort" '"xhigh"'
+set_root_toml_value "$codexConfigFile" "plan_mode_reasoning_effort" '"xhigh"'
+set_root_toml_value "$codexConfigFile" "model_verbosity" '"high"'
+set_root_toml_value "$codexConfigFile" "personality" '"pragmatic"'
 
 # Codex does not inherit Claude Code's deny rules, so keep approval prompts and
 # workspace isolation instead of mirroring Claude's bypassPermissions mode.
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-web_search = "live"
+set_root_toml_value "$codexConfigFile" "approval_policy" '"on-request"'
+set_root_toml_value "$codexConfigFile" "sandbox_mode" '"workspace-write"'
+set_root_toml_value "$codexConfigFile" "web_search" '"live"'
 
 # Let Codex consume existing Claude-oriented repository guidance while repos
 # are gradually migrated to AGENTS.md.
-project_doc_fallback_filenames = ["CLAUDE.md"]
-project_doc_max_bytes = 65536
+set_root_toml_value "$codexConfigFile" "project_doc_fallback_filenames" '["CLAUDE.md"]'
+set_root_toml_value "$codexConfigFile" "project_doc_max_bytes" "65536"
 
 # Codex-specific quality-of-life features.
-features.apps = true
-features.hooks = true
-features.memories = true
-features.multi_agent = true
-features.shell_snapshot = true
+set_toml_table_value "$codexConfigFile" "features" "apps" "true"
+set_toml_table_value "$codexConfigFile" "features" "hooks" "true"
+set_toml_table_value "$codexConfigFile" "features" "memories" "true"
+set_toml_table_value "$codexConfigFile" "features" "multi_agent" "true"
+set_toml_table_value "$codexConfigFile" "features" "shell_snapshot" "true"
 
 # Offer both close Claude equivalents and useful Codex-specific capabilities.
-tool_suggest.discoverables = [
-  { type = "plugin", id = "browser@openai-bundled" },
-  { type = "plugin", id = "chrome@openai-bundled" },
-  { type = "plugin", id = "computer-use@openai-bundled" },
-  { type = "plugin", id = "github@openai-curated" },
-  { type = "plugin", id = "codex-security@openai-curated" },
-  { type = "plugin", id = "build-web-apps@openai-curated" },
-  { type = "plugin", id = "openai-developers@openai-curated" },
-  { type = "plugin", id = "superpowers@openai-curated" },
-  { type = "plugin", id = "cloudflare@openai-curated" }
-]
+set_toml_table_value "$codexConfigFile" "tool_suggest" "discoverables" '[{ type = "plugin", id = "browser@openai-bundled" }, { type = "plugin", id = "chrome@openai-bundled" }, { type = "plugin", id = "computer-use@openai-bundled" }, { type = "plugin", id = "github@openai-curated" }, { type = "plugin", id = "codex-security@openai-curated" }, { type = "plugin", id = "build-web-apps@openai-curated" }, { type = "plugin", id = "openai-developers@openai-curated" }, { type = "plugin", id = "superpowers@openai-curated" }, { type = "plugin", id = "cloudflare@openai-curated" }]'
 
 # Do not suggest Figma even if it is present in a configured marketplace.
-tool_suggest.disabled_tools = [
-  { type = "plugin", id = "figma@openai-curated" }
-]
+set_toml_table_value "$codexConfigFile" "tool_suggest" "disabled_tools" '[{ type = "plugin", id = "figma@openai-curated" }]'
 
-[mcp_servers.context7]
-command = "npx"
-args = ["-y", "@upstash/context7-mcp"]
-startup_timeout_sec = 60
-tool_timeout_sec = 120
-required = true
+# Update only the owned MCP keys so Codex can retain per-server state such as
+# enabled/disabled flags alongside the mantra defaults.
+set_toml_table_value "$codexConfigFile" "mcp_servers.context7" "command" '"npx"'
+set_toml_table_value "$codexConfigFile" "mcp_servers.context7" "args" '["-y", "@upstash/context7-mcp"]'
+set_toml_table_value "$codexConfigFile" "mcp_servers.context7" "startup_timeout_sec" "60"
+set_toml_table_value "$codexConfigFile" "mcp_servers.context7" "tool_timeout_sec" "120"
+set_toml_table_value "$codexConfigFile" "mcp_servers.context7" "required" "true"
 
-[mcp_servers.openaiDeveloperDocs]
-url = "https://developers.openai.com/mcp"
-startup_timeout_sec = 30
-tool_timeout_sec = 120
-required = true
+set_toml_table_value "$codexConfigFile" "mcp_servers.openaiDeveloperDocs" "url" '"https://developers.openai.com/mcp"'
+set_toml_table_value "$codexConfigFile" "mcp_servers.openaiDeveloperDocs" "startup_timeout_sec" "30"
+set_toml_table_value "$codexConfigFile" "mcp_servers.openaiDeveloperDocs" "tool_timeout_sec" "120"
+set_toml_table_value "$codexConfigFile" "mcp_servers.openaiDeveloperDocs" "required" "true"
 
-[mcp_servers.drawio]
-command = "npx"
-args = ["-y", "@drawio/mcp"]
-startup_timeout_sec = 60
-tool_timeout_sec = 120
-required = true
+set_toml_table_value "$codexConfigFile" "mcp_servers.drawio" "command" '"npx"'
+set_toml_table_value "$codexConfigFile" "mcp_servers.drawio" "args" '["-y", "@drawio/mcp"]'
+set_toml_table_value "$codexConfigFile" "mcp_servers.drawio" "startup_timeout_sec" "60"
+set_toml_table_value "$codexConfigFile" "mcp_servers.drawio" "tool_timeout_sec" "120"
+set_toml_table_value "$codexConfigFile" "mcp_servers.drawio" "required" "true"
 
-[mcp_servers.playwright]
-command = "npx"
-args = ["-y", "@playwright/mcp@latest"]
-startup_timeout_sec = 60
-tool_timeout_sec = 120
-required = true
+set_toml_table_value "$codexConfigFile" "mcp_servers.playwright" "command" '"npx"'
+set_toml_table_value "$codexConfigFile" "mcp_servers.playwright" "args" '["-y", "@playwright/mcp@latest"]'
+set_toml_table_value "$codexConfigFile" "mcp_servers.playwright" "startup_timeout_sec" "60"
+set_toml_table_value "$codexConfigFile" "mcp_servers.playwright" "tool_timeout_sec" "120"
+set_toml_table_value "$codexConfigFile" "mcp_servers.playwright" "required" "true"
 
-[mcp_servers.chrome_devtools]
-command = "npx"
-args = ["-y", "chrome-devtools-mcp"]
-startup_timeout_sec = 60
-tool_timeout_sec = 120
-required = true
-EOF
+set_toml_table_value "$codexConfigFile" "mcp_servers.chrome_devtools" "command" '"npx"'
+set_toml_table_value "$codexConfigFile" "mcp_servers.chrome_devtools" "args" '["-y", "chrome-devtools-mcp"]'
+set_toml_table_value "$codexConfigFile" "mcp_servers.chrome_devtools" "startup_timeout_sec" "60"
+set_toml_table_value "$codexConfigFile" "mcp_servers.chrome_devtools" "tool_timeout_sec" "120"
+set_toml_table_value "$codexConfigFile" "mcp_servers.chrome_devtools" "required" "true"
 
 echo "Configuring Codex global instructions..."
 codexInstructionsFile="$codexHome/AGENTS.md"
