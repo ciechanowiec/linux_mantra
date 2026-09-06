@@ -177,10 +177,10 @@ set_root_toml_value "$codexConfigFile" "plan_mode_reasoning_effort" '"xhigh"'
 set_root_toml_value "$codexConfigFile" "model_verbosity" '"high"'
 set_root_toml_value "$codexConfigFile" "personality" '"pragmatic"'
 
-# Codex does not inherit Claude Code's deny rules, so keep approval prompts and
-# workspace isolation instead of mirroring Claude's bypassPermissions mode.
-set_root_toml_value "$codexConfigFile" "approval_policy" '"on-request"'
-set_root_toml_value "$codexConfigFile" "sandbox_mode" '"workspace-write"'
+# Mirror Claude Code's bypassPermissions workflow: no command approval prompts
+# or Codex sandbox restrictions. Repository instructions still define task scope.
+set_root_toml_value "$codexConfigFile" "approval_policy" '"never"'
+set_root_toml_value "$codexConfigFile" "sandbox_mode" '"danger-full-access"'
 set_root_toml_value "$codexConfigFile" "web_search" '"live"'
 
 # Let Codex consume existing Claude-oriented repository guidance while repos
