@@ -1,6 +1,0 @@
-extends: metric
-message: "Average paragraph length is %s words; keep it at 40 or below."
-level: error
-formula: |
-  words / paragraphs
-condition: "> 40"
