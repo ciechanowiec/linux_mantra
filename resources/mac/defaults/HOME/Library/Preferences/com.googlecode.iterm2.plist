@@ -829,6 +829,8 @@
 	</dict>
 	<key>HapticFeedbackForEsc</key>
 	<false/>
+	<key>HideActivityIndicator</key>
+	<true/>
 	<key>HideTabNumber</key>
 	<true/>
 	<key>Hotkey</key>
@@ -2630,8 +2632,6 @@ Make Text Bigger</string>
 	<true/>
 	<key>NoSyncLastOSVersion</key>
 	<string>Version 26.7 (Build 25G229)</string>
-	<key>NoSyncLastShutdownWasClean</key>
-	<false/>
 	<key>NoSyncLastSystemPythonVersionRequirement</key>
 	<string>1.17</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
