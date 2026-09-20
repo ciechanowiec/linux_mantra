@@ -1249,7 +1249,7 @@ informAboutProcedureStart
 
 # Regularly review the current version (it is hardcoded now).
 # In case of version change, update the plist configuration:
-iTermInstallationArchive="iTerm2-3_6_10.zip"
+iTermInstallationArchive="iTerm2-3_7_2.zip"
 
 echo "1. Downloading the iTerm2 archive..."
 # iterm2.com sits behind Cloudflare, which throttles wget's default 'Wget/...' User-Agent

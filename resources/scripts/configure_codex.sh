@@ -270,6 +270,48 @@ prefix_rule(pattern=["snap", "info"], decision="allow")
 prefix_rule(pattern=["sdk", "list"], decision="allow")
 EOF
 
+echo "Configuring Codex status reporting in the iTerm2 tab bar..."
+# iTerm2's Claude Code integration installs `cc-status` and symlinks it into
+# ~/.config/iterm2. That helper reads a hook payload on stdin, maps its
+# `hook_event_name` onto the tab status indicator (working/waiting/idle) and
+# shells out to iTerm2's `it2` CLI. Codex emits the same event names as Claude
+# Code, so codex_iterm_status.sh forwards the payload to that helper instead of
+# reimplementing the mapping; the wrapper only adds the `{}` stdout that Codex
+# demands from Stop/SubagentStop/Interrupt hooks. Outside an iTerm2 session
+# cc-status does nothing, which keeps the hooks harmless in other terminals.
+# Codex nests the event names under a top-level "hooks" key (see HooksFile in
+# codex-rs/config/src/hook_config.rs), and the file is parsed with
+# deny_unknown_fields - so a stray top-level key aborts the whole config.
+codexHooksFile="$codexHome/hooks.json"
+ccStatusBinary="$HOME/.config/iterm2/cc-status"
+codexStatusHook="$HOME/scripts/codex_iterm_status.sh"
+if [ "$osType" = "mac" ] && [ -x "$ccStatusBinary" ] && [ -x "$codexStatusHook" ]; then
+    if [ ! -s "$codexHooksFile" ]; then
+        echo '{}' > "$codexHooksFile"
+    fi
+    codexHooksTmpFile="$codexHooksFile.tmp"
+    # Replace only the handler entries that already point at cc-status, so
+    # hooks added by hand on the same events survive re-runs of the mantra.
+    # SessionEnd (like Interrupt) is capped at 3s by Codex and warns on a larger
+    # value - see normalize_command_hook in codex-rs/hooks/src/engine/discovery.rs.
+    # cc-status returns in well under a second either way.
+    if jq --arg cc "$codexStatusHook" '
+        .description //= "iTerm2 tab status reporting, installed by the mantra"
+        | reduce ["SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse",
+                  "PermissionRequest", "SubagentStop", "Stop", "SessionEnd"][] as $event
+            (.; .hooks[$event] = (((.hooks[$event] // []) | map(select([.hooks[]?.command] | index($cc) | not)))
+                                  + [{"hooks": [{"type": "command", "command": $cc,
+                                                 "timeout": (if $event == "SessionEnd" then 3 else 5 end)}]}]))
+    ' "$codexHooksFile" > "$codexHooksTmpFile"; then
+        mv "$codexHooksTmpFile" "$codexHooksFile"
+        echo "Codex will now report its status to the iTerm2 tab. Codex asks to trust changed hooks on its next start."
+    else
+        echo "Could not update $codexHooksFile. Wire the Codex status hooks manually."
+        rm -f "$codexHooksTmpFile"
+    fi
+else
+    echo "Skipping Codex tab status: needs macOS, iTerm2's cc-status helper ($ccStatusBinary) and $codexStatusHook."
+fi
 if command -v codex >/dev/null 2>&1; then
     remove_codex_plugin "figma@openai-curated"
 
