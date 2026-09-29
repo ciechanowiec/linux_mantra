@@ -1014,6 +1014,7 @@ fi
 # prompt-free while the code-execution escape hatches still require approval.
 jq '. * {
   "theme": "auto",
+  "autoMemoryEnabled": false,
   "attribution": { "commit": "", "pr": "" },
   "permissions": { "defaultMode": "bypassPermissions" },
   "extraKnownMarketplaces": {
