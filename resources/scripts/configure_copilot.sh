@@ -94,12 +94,13 @@ echo "Configuring GitHub Copilot CLI defaults..."
 # NOTES:
 #   Only settings.json is user-editable. config.json in the same directory holds
 #   auto-managed state (credentials, installed plugins) and must not be touched.
-#   Copilot has no equivalent of Claude Code's `bypassPermissions`; like the
-#   Codex setup, approval prompts are deliberately kept on. Blanket approval is
-#   available per-invocation via `copilot --yolo` / the `/yolo` slash command.
+#   New interactive sessions start with all permissions allowed, matching the
+#   Claude Code and Codex defaults. Resumed sessions keep their permission mode;
+#   use `/allow-all` there or `--allow-all` for programmatic invocations.
 #   The model is pinned to Claude Opus 5 with the long-context tier rather than
 #   left on "auto", matching the Claude Code preference on this workstation.
 merge_json_file "$copilotHome/settings.json" '. * {
+  "defaultPermissionMode": "allow-all",
   "model": "claude-opus-5",
   "contextTier": "long_context",
   "theme": "github",
