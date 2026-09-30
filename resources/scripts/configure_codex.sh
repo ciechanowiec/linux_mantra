@@ -191,9 +191,17 @@ set_root_toml_value "$codexConfigFile" "project_doc_max_bytes" "65536"
 # Codex-specific quality-of-life features.
 set_toml_table_value "$codexConfigFile" "features" "apps" "true"
 set_toml_table_value "$codexConfigFile" "features" "hooks" "true"
-set_toml_table_value "$codexConfigFile" "features" "memories" "true"
 set_toml_table_value "$codexConfigFile" "features" "multi_agent" "true"
 set_toml_table_value "$codexConfigFile" "features" "shell_snapshot" "true"
+
+# Codex must not keep cross-session memories (chat history in sessions/ and
+# history.jsonl stays). The feature flag is the master switch; the [memories]
+# keys additionally stop both writing new memory inputs and injecting existing
+# ones, so memory stays off even if the flag is later flipped on or its
+# default changes. Docs: https://learn.chatgpt.com/docs/customization/memories
+set_toml_table_value "$codexConfigFile" "features" "memories" "false"
+set_toml_table_value "$codexConfigFile" "memories" "generate_memories" "false"
+set_toml_table_value "$codexConfigFile" "memories" "use_memories" "false"
 
 # Offer both close Claude equivalents and useful Codex-specific capabilities.
 set_toml_table_value "$codexConfigFile" "tool_suggest" "discoverables" '[{ type = "plugin", id = "browser@openai-bundled" }, { type = "plugin", id = "chrome@openai-bundled" }, { type = "plugin", id = "computer-use@openai-bundled" }, { type = "plugin", id = "github@openai-curated" }, { type = "plugin", id = "codex-security@openai-curated" }, { type = "plugin", id = "build-web-apps@openai-curated" }, { type = "plugin", id = "openai-developers@openai-curated" }, { type = "plugin", id = "superpowers@openai-curated" }, { type = "plugin", id = "cloudflare@openai-curated" }]'

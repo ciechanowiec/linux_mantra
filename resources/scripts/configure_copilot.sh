@@ -99,8 +99,13 @@ echo "Configuring GitHub Copilot CLI defaults..."
 #   use `/allow-all` there or `--allow-all` for programmatic invocations.
 #   The model is pinned to Claude Opus 5 with the long-context tier rather than
 #   left on "auto", matching the Claude Code preference on this workstation.
+#   "memory": false turns off agentic memory (cross-session fact recall), the
+#   counterpart of Claude Code's autoMemoryEnabled=false; session history stays.
+#   It only stops the CLI from storing/recalling facts - facts already stored
+#   live on GitHub's side and are deleted at github.com/settings/copilot/memory.
 merge_json_file "$copilotHome/settings.json" '. * {
   "defaultPermissionMode": "allow-all",
+  "memory": false,
   "model": "claude-opus-5",
   "contextTier": "long_context",
   "theme": "github",
