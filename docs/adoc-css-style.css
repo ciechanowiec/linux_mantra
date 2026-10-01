@@ -333,19 +333,16 @@ h1, h2, h3, h4, h5, h6, #toctitle, .sidebarblock > .content > .title {
     margin-bottom: 0.55rem;
 }
 
-#content h4 {
+/* The third level and everything under it share one appearance. Below the
+   second level the hierarchy is carried by the section numbers, which state
+   the depth exactly, so shrinking each further level only costs legibility to
+   restate what the numbering already says. */
+#content h4, #content h5, #content h6 {
     font-size: var(--ad-h4-size);
     color: var(--ad-h4-ink);
+    font-style: var(--ad-h4-style);
     margin-top: var(--ad-subsection-gap);
     margin-bottom: 0.45rem;
-}
-
-#content h5, #content h6 {
-    font-size: var(--ad-h5-size);
-    color: var(--ad-h4-ink);
-    font-style: var(--ad-h5-style);
-    margin-top: var(--ad-subsection-gap);
-    margin-bottom: 0.4rem;
 }
 
 /* Section numbers are set apart from the title text they qualify, so the
@@ -896,13 +893,10 @@ table.tableblock {
     margin-bottom: calc(0.55rem + (var(--ad-body-leading) - 1) / 2 * var(--ad-body-size));
 }
 
-#content h4:has(+ table.tableblock) {
-    margin-bottom: calc(0.45rem + (var(--ad-body-leading) - 1) / 2 * var(--ad-body-size));
-}
-
+#content h4:has(+ table.tableblock),
 #content h5:has(+ table.tableblock),
 #content h6:has(+ table.tableblock) {
-    margin-bottom: calc(0.4rem + (var(--ad-body-leading) - 1) / 2 * var(--ad-body-size));
+    margin-bottom: calc(0.45rem + (var(--ad-body-leading) - 1) / 2 * var(--ad-body-size));
 }
 
 table.tableblock caption,
@@ -1650,8 +1644,7 @@ a.bare, .bare {
     --ad-h3-ink: #1b3a6b;
     --ad-h4-size: 1.1em;
     --ad-h4-ink: #1b3a6b;
-    --ad-h5-size: 0.91em;
-    --ad-h5-style: normal;
+    --ad-h4-style: normal;
     --ad-num-ink: #1b3a6b;
     --ad-num-weight: 600;
     --ad-num-gap: 0.7rem;
@@ -1734,7 +1727,8 @@ a.bare, .bare {
 
 #content h3 .adnum,
 #content h4 .adnum,
-#content h5 .adnum {
+#content h5 .adnum,
+#content h6 .adnum {
     display: inline-block;
     font-size: 0.86em;
     font-weight: 700;
