@@ -770,3 +770,227 @@ var handleTocOnResize = function () {
 };
 window.addEventListener('resize', handleTocOnResize);
 handleTocOnResize();
+
+/* === Document behaviour ===========================================
+   Generated. Edit the theme sources, then re-run publish.py.
+
+   Three things the rendered page needs that the converter does not do, and that
+   the stylesheet cannot do on its own, because each one needs an element that
+   does not exist in the markup.
+
+   Everything here is idempotent: the page may be rendered once and the script
+   may run again after tocbot rebuilds part of it. */
+(function () {
+    'use strict';
+
+    /* A leading section number: "4.", "4.1.", "3.6.4.2.". The leading space is
+       optional and is consumed with it: a book-doctype document with an empty
+       chapter signifier writes "</a> 1. Title", and a pattern anchored straight
+       to the anchor would skip every top-level heading in such a document. */
+    var HEADING_NUMBER = /^\s*((?:\d+\.)+)\s+/;
+
+    /* 1. The section number and the title it qualifies are laid out as two
+       boxes on one baseline, so that every line of a wrapped title starts in
+       the same place whatever the number's width. Both need an element of their
+       own. The title is wrapped as well as the number: the heading is a flex
+       container, and a flex container promotes every inline child to an item,
+       so a bare title holding a code span would lay that span out as a separate
+       block stretched to the heading's height. */
+    var wrapHeadings = function () {
+        var headings = document.querySelectorAll(
+            '#content h2, #content h3, #content h4, #content h5, #content h6'
+        );
+        for (var i = 0; i < headings.length; i++) {
+            var heading = headings[i];
+            if (heading.querySelector('.adnum')) continue;
+            var anchor = heading.querySelector('a.anchor');
+            var rest = [];
+            for (var n = 0; n < heading.childNodes.length; n++) {
+                var node = heading.childNodes[n];
+                if (node !== anchor) rest.push(node);
+            }
+            if (!rest.length || rest[0].nodeType !== Node.TEXT_NODE) continue;
+            var match = HEADING_NUMBER.exec(rest[0].nodeValue);
+            if (!match) continue;
+            rest[0].nodeValue = rest[0].nodeValue.slice(match[0].length);
+
+            var number = document.createElement('span');
+            number.className = 'adnum';
+            /* The trailing space collapses away between flex items, where the
+               gap is drawn by the layout, but it survives in the text the
+               reader copies, which would otherwise read "3.2.Known Facts". */
+            number.textContent = match[1] + ' ';
+
+            var title = document.createElement('span');
+            title.className = 'adtext';
+            for (var r = 0; r < rest.length; r++) title.appendChild(rest[r]);
+
+            heading.appendChild(number);
+            heading.appendChild(title);
+        }
+    };
+
+    /* 2. A footnote's marker is an anchor followed by a bare "." text node, so
+       the note's text begins wherever that run happens to end: one column for a
+       one-digit number, another for three. Wrapping the run lets the stylesheet
+       give it a slot of fixed width, so every line of every note starts on the
+       same vertical. The separating space goes with it, because the slot
+       supplies the gap. */
+    var wrapFootnoteMarkers = function () {
+        var notes = document.querySelectorAll('#footnotes .footnote');
+        for (var i = 0; i < notes.length; i++) {
+            var note = notes[i];
+            if (note.querySelector('.adfn-num')) continue;
+            var marker = note.querySelector('a[href^="#_footnoteref"]');
+            if (!marker || marker.parentNode !== note) continue;
+
+            var wrapper = document.createElement('span');
+            wrapper.className = 'adfn-num';
+            note.insertBefore(wrapper, marker);
+            wrapper.appendChild(marker);
+
+            var next = wrapper.nextSibling;
+            if (next && next.nodeType === Node.TEXT_NODE) {
+                var tail = /^\s*\.\s*/.exec(next.nodeValue);
+                if (tail) {
+                    wrapper.appendChild(document.createTextNode('.'));
+                    next.nodeValue = next.nodeValue.slice(tail[0].length);
+                }
+            }
+        }
+    };
+
+    /* 3. A link that leaves the document opens in its own tab, as the ones
+       written into the prose already do. Asciidoctor adds the attribute only
+       where the source marks a link with `^`; a bare URL written into a sources
+       record carries no such mark, so following one replaced the document the
+       reader was in. */
+    var detachExternalLinks = function () {
+        var links = document.querySelectorAll(
+            'a[href^="http://"], a[href^="https://"]'
+        );
+        for (var i = 0; i < links.length; i++) {
+            if (links[i].getAttribute('target')) continue;
+            links[i].setAttribute('target', '_blank');
+            links[i].setAttribute('rel', 'noopener');
+        }
+    };
+
+    var apply = function () {
+        wrapHeadings();
+        wrapFootnoteMarkers();
+        detachExternalLinks();
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', apply);
+    } else {
+        apply();
+    }
+})();
+
+/* Contents panel behaviour.
+
+   Two things the shared docinfo script does not do, and cannot be asked to:
+   it is hosted elsewhere and serves other documents.
+
+   1. Keep the entry for the section being read inside the panel. tocbot marks
+      the current entry with `.is-active-link` but never scrolls its own panel,
+      so in a document with a hundred headings the marked entry leaves the panel
+      within a few sections and the reader loses their place.
+
+   2. Give each entry's number its own box. tocbot builds every link from the
+      heading's text, so the number arrives as plain text and a wrapped entry
+      runs back under it. Wrapping the number lets the stylesheet lay the entry
+      out as number plus title, the way a heading is laid out, so every line of
+      a wrapped entry starts in the same place. */
+(function () {
+    var panel = document.querySelector('#toc.toc2');
+    if (!panel) return;
+
+    /* Space kept between the marked entry and the panel edge, so the entries
+       around it stay visible and the reader keeps the context of where they are. */
+    var EDGE_MARGIN_PX = 96;
+
+    /* A leading section number: "4.", "4.1.", "3.6.4.2.". The leading space is
+       optional and is consumed with it, because a book-doctype document with an
+       empty chapter signifier puts one in front of every top-level number. */
+    var LEADING_NUMBER = /^\s*((?:\d+\.)+)\s+/;
+
+    /* Set while this script edits the panel, so the observer watching the panel
+       does not treat those edits as a reason to run again. */
+    var editing = false;
+
+    var wrapNumbers = function () {
+        var links = panel.querySelectorAll('a.toc-link');
+        if (!links.length) return;
+        editing = true;
+        for (var i = 0; i < links.length; i++) {
+            var link = links[i];
+            if (link.querySelector('.adnum')) continue;      // already wrapped
+            var match = LEADING_NUMBER.exec(link.textContent);
+            if (!match) continue;
+            var title = link.textContent.slice(match[0].length);
+            var number = document.createElement('span');
+            number.className = 'adnum';
+            /* The trailing space collapses away inside the flex item, where the
+               gap is drawn by the layout, but it survives in the text the reader
+               copies, which would otherwise read "3.2.Known Facts". */
+            number.textContent = match[1] + ' ';
+            link.textContent = '';
+            link.appendChild(number);
+            link.appendChild(document.createTextNode(title));
+        }
+        editing = false;
+    };
+
+    var follow = function () {
+        /* Below the layout breakpoint the panel is part of the page rather than
+           a fixed column, and it has nothing of its own to scroll. */
+        if (window.getComputedStyle(panel).position !== 'fixed') return;
+
+        var active = panel.querySelector('.is-active-link');
+        if (!active) return;
+
+        var panelBox = panel.getBoundingClientRect();
+        var activeBox = active.getBoundingClientRect();
+        var margin = Math.min(EDGE_MARGIN_PX, panelBox.height / 3);
+
+        if (activeBox.top < panelBox.top + margin) {
+            panel.scrollTop += activeBox.top - panelBox.top - margin;
+        } else if (activeBox.bottom > panelBox.bottom - margin) {
+            panel.scrollTop += activeBox.bottom - panelBox.bottom + margin;
+        }
+    };
+
+    /* The page scroll fires far more often than the frame rate, and tocbot
+       rewrites the panel on its own schedule; both are coalesced into one pass
+       per frame, so the panel is never measured and written in the same turn. */
+    var pending = false;
+    var schedule = function () {
+        if (pending) return;
+        pending = true;
+        window.requestAnimationFrame(function () {
+            pending = false;
+            wrapNumbers();
+            follow();
+        });
+    };
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+
+    /* tocbot moves the active class rather than firing an event, and rebuilds
+       the list outright when it refreshes, so both kinds of change are watched. */
+    new MutationObserver(function () {
+        if (editing) return;
+        schedule();
+    }).observe(panel, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['class']
+    });
+
+    schedule();
+})();

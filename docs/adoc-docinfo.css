@@ -1,218 +1,81 @@
-#tocbot ol,
-#tocbot ul {
-    list-style-type: none;
+/* ==========================================================================
+   Generated. Edit the theme sources, then re-run publish.py.
+   ========================================================================== */
+
+/* Only the hover previews live here. This sheet is linked from the body
+   and so overrides the document stylesheet; anything else kept in it would
+   quietly outrank the theme. */
+
+/* --- Hover previews (behaviour lives in adoc-docinfo-footer.js) ---------- */
+
+/* A preview belongs to the phrase it explains, so it sits close under it. */
+.fn-pop, .xref-preview {
+    margin-top: -4px;
 }
 
-#tocbot a.toc-link.node-name--H1 {
-    font-style: italic
+/* Placed beside the text column instead of under the link, the box is aligned
+   to the line it belongs to and needs no vertical correction. */
+.fn-pop--side {
+    margin-top: 0;
 }
 
-@media screen {
-    #tocbot > ul.toc-list {
-        margin-bottom: 0.5em;
-        margin-left: 0.125em
-    }
-
-    #tocbot ul.sectlevel0, #tocbot a.toc-link.node-name--H1 + ul {
-        padding-left: 0
-    }
-
-    #tocbot a.toc-link {
-        height: 100%
-    }
-
-    .is-collapsible {
-        max-height: 3000px;
-        overflow: hidden;
-    }
-
-    .is-collapsed {
-        max-height: 0
-    }
-
-    .is-active-link {
-        font-weight: 700
-    }
-}
-
-@media print {
-    #tocbot a.toc-link.node-name--H4 {
-        display: none
-    }
-}
-
-.olist > ol {
-    list-style-type: upper-alpha;
-}
-
-.olist .olist > ol {
-    list-style-type: upper-roman;
-}
-
-.olist .olist .olist > ol {
-    list-style-type: lower-greek;
-}
-
-.olist .olist .olist .olist > ol {
-    list-style-type: lower-roman;
-}
-
-/* Counter sequences follow https://www.w3.org/TR/predefined-counter-styles/. */
-@counter-style korean-consonant {
-    system: alphabetic;
-    symbols: '\3131' '\3134' '\3137' '\3139' '\3141' '\3142' '\3145' '\3147' '\3148' '\314A' '\314B' '\314C' '\314D' '\314E';
-    suffix: ". ";
-}
-
-@counter-style hebrew {
-    system: additive;
-    range: 1 10999;
-    additive-symbols: 10000 \5D9\5F3, 9000 \5D8\5F3, 8000 \5D7\5F3, 7000 \5D6\5F3, 6000 \5D5\5F3, 5000 \5D4\5F3, 4000 \5D3\5F3, 3000 \5D2\5F3, 2000 \5D1\5F3, 1000 \5D0\5F3, 400 \5EA, 300 \5E9, 200 \5E8, 100 \5E7, 90 \5E6, 80 \5E4, 70 \5E2, 60 \5E1, 50 \5E0, 40 \5DE, 30 \5DC, 20 \5DB, 19 \5D9\5D8, 18 \5D9\5D7, 17 \5D9\5D6, 16 \5D8\5D6, 15 \5D8\5D5, 10 \5D9, 9 \5D8, 8 \5D7, 7 \5D6, 6 \5D5, 5 \5D4, 4 \5D3, 3 \5D2, 2 \5D1, 1 \5D0;
-    suffix: ". ";
-}
-
-@counter-style cjk-decimal {
-    system: numeric;
-    range: 0 infinite;
-    symbols: '\3007' '\4E00' '\4E8C' '\4E09' '\56DB' '\4E94' '\516D' '\4E03' '\516B' '\4E5D';
-    suffix: ". ";
-}
-
-.olist .olist .olist .olist .olist > ol {
-    list-style-type: korean-consonant;
-}
-
-.olist .olist .olist .olist .olist .olist > ol {
-    list-style-type: hebrew;
-}
-
-.olist .olist .olist .olist .olist .olist .olist > ol {
-    list-style-type: cjk-decimal;
-}
-
-.exampleblock.bad-example > .content,
-.exampleblock.good-example > .content {
-    padding: 0.9em 1.1em;
-    border-radius: 4px;
-}
-
-.exampleblock.bad-example > .content {
-    border-left: 4px solid #d9534f;
-    background-color: #fdecea;
-}
-
-.exampleblock.good-example > .content {
-    border-left: 4px solid #28a745;
-    background-color: #e6f4ea;
-}
-
-.exampleblock.bad-example > .title,
-.exampleblock.good-example > .title {
-    font-weight: 600;
-    font-style: normal;
-    margin-bottom: 0.35em;
-}
-
-.exampleblock.bad-example > .title {
-    color: #c9302c;
-}
-
-.exampleblock.good-example > .title {
-    color: #1e7e34;
-}
-
-.bad-icon {
-    color: #c9302c;
-}
-
-.good-icon {
-    color: #1e7e34;
-}
-
-.exampleblock.good-example + .exampleblock.bad-example {
-    margin-top: 2em;
-}
-
-/* Footnote hover preview (behaviour in adoc-docinfo-footer.js). A footnote carries the
-   citation for the statement it hangs off, so reading one otherwise costs a jump to the
-   foot of the page and the reader's place. */
 .fn-pop {
     position: absolute;
     z-index: 1000;
     display: none;
     max-width: min(46rem, 90vw);
     padding: 0.6rem 0.8rem;
-    border: 1px solid #c8c8c8;
-    border-radius: 4px;
-    background: #fffdf5;
-    color: #222222;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-    font-size: 0.82rem;
-    line-height: 1.45;
+    border: 1px solid var(--ad-pop-border);
+    border-top: 3px solid var(--ad-accent);
+    border-radius: var(--ad-radius);
+    background: var(--ad-pop-bg);
+    color: var(--ad-ink);
+    box-shadow: var(--ad-pop-shadow);
+    /* The preview is placed in a box whose width the script fixes against the
+       root font size, so it cannot simply take the body size: at the body size
+       the lines become too short to read. A 14px floor is clearly a step down
+       from the prose while staying a normal reading size. */
+    font-size: max(0.875rem, calc(var(--ad-body-size) * 0.8));
+    line-height: 1.35;
     text-align: left;
 }
 
-/* Margin placement: the note sits beside the text column rather than over it, so the
-   sentence it cites stays readable while the reader checks the citation. Width is set
-   inline from the margin actually available; only the height needs capping here. */
 .fn-pop--side {
     max-width: none;
     max-height: 80vh;
     overflow-y: auto;
 }
 
-@media (prefers-color-scheme: dark) {
-    .fn-pop {
-        border-color: #44464f;
-        background: #22232a;
-        color: #dddddd;
-    }
-}
-
-@media print {
-    .fn-pop {
-        display: none !important;
-    }
-}
-
-/* Internal-link hover preview (behaviour in adoc-docinfo-footer.js). A cross-reference asks
-   the reader to go elsewhere in the document to recover one definition, and the jump costs
-   them the place they were holding; quoting the referenced text where they stand leaves the
-   sentence they are reading intact. Kept apart from .fn-pop above rather than merged with it:
-   a footnote quotes a whole short note written to be read on its own, while this quotes a
-   fragment of a longer document and needs its own sizing and its own placement rules. */
 .xref-preview {
     position: absolute;
     z-index: 1001;
     display: none;
-    /* A placeholder only: the script sets an explicit pixel width on every open, because
-       the width has to be measured against the same viewport figure the placement maths
-       uses. A CSS 100vw expression counts the scrollbar that document.documentElement's
-       clientWidth leaves out, and the box would hang past the clamp by that difference. */
     width: 38rem;
-    max-height: min(24rem, 70vh);
+    max-height: min(32rem, 74vh);
     overflow: auto;
     padding: 0.7rem 0.9rem;
-    border: 1px solid #c8c8c8;
-    border-radius: 4px;
-    background: #fffdf5;
-    color: #222222;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-    font-size: 0.82rem;
-    line-height: 1.45;
+    border: 1px solid var(--ad-pop-border);
+    border-top: 3px solid var(--ad-accent);
+    border-radius: var(--ad-radius);
+    background: var(--ad-pop-bg);
+    color: var(--ad-ink);
+    box-shadow: var(--ad-pop-shadow);
+    /* The preview is placed in a box whose width the script fixes against the
+       root font size, so it cannot simply take the body size: at the body size
+       the lines become too short to read. A 14px floor is clearly a step down
+       from the prose while staying a normal reading size. */
+    font-size: max(0.875rem, calc(var(--ad-body-size) * 0.8));
+    line-height: 1.35;
     text-align: left;
 }
 
 .xref-preview__title {
-    font-weight: 600;
-    color: #ba3925;
+    font-weight: 700;
+    color: var(--ad-accent);
 }
 
-.xref-preview p,
-.xref-preview pre,
-.xref-preview ul,
-.xref-preview ol,
-.xref-preview dl {
+.xref-preview p, .xref-preview pre, .xref-preview ul,
+.xref-preview ol, .xref-preview dl {
     margin-top: 0;
     margin-bottom: 0;
     font-size: inherit;
@@ -220,8 +83,21 @@
     text-align: left;
 }
 
-/* Every block the script appends carries this class, so one rule spaces the stack however
-   it is composed: heading over content, or a lead-in over the list or table it announces. */
+/* A footnote marker means nothing in a preview: there is no footnote list to
+   jump to. The preview script drops the anchor but not what surrounds it - the
+   `sup`, whose square brackets are plain text nodes either side of it, left an
+   empty `[]` trailing the quoted passage; and the note's own marker span, whose
+   trailing "." was left heading the popped-up note. Hiding the marker in both
+   shapes removes every leftover. */
+.xref-preview sup.footnote,
+.xref-preview sup.footnoteref,
+.xref-preview .adfn-num,
+.fn-pop sup.footnote,
+.fn-pop sup.footnoteref,
+.fn-pop .adfn-num {
+    display: none;
+}
+
 .xref-preview__block + .xref-preview__block {
     margin-top: 0.5rem;
 }
@@ -230,20 +106,15 @@
     white-space: pre-wrap;
 }
 
-.xref-preview ol,
-.xref-preview ul {
+.xref-preview ol, .xref-preview ul {
     padding-left: 1.3rem;
 }
 
-/* The subsection titles a container section previews as carry their own section numbers, so a
-   bullet in front of each would mark the same thing twice. */
 .xref-preview ul.xref-preview__contents {
     list-style: none;
     padding-left: 0;
 }
 
-/* A previewed table is a guest in a box far narrower than the column it was laid out for,
-   so it wraps within the width it is given rather than forcing the popover to scroll. */
 .xref-preview table {
     width: 100%;
     table-layout: fixed;
@@ -251,64 +122,11 @@
     font-size: 0.95em;
 }
 
-.xref-preview th,
-.xref-preview td {
+.xref-preview th, .xref-preview td {
     padding: 0.2rem 0.35rem;
-    border: 1px solid #d5d5d5;
+    border: 1px solid var(--ad-rule);
     overflow-wrap: break-word;
     word-break: break-word;
     text-align: left;
     vertical-align: top;
-}
-
-@media (prefers-color-scheme: dark) {
-    .xref-preview {
-        border-color: #44464f;
-        background: #22232a;
-        color: #dddddd;
-    }
-
-    .xref-preview__title {
-        color: #ff8f70;
-    }
-
-    .xref-preview th,
-    .xref-preview td {
-        border-color: #44464f;
-    }
-}
-
-@media print {
-    .xref-preview {
-        display: none !important;
-    }
-}
-
-/* Bibliography entry metadata (`[horizontal.source-fields]`): a
-   machine-facing record, rendered small and muted behind the prose. */
-.hdlist.source-fields {
-    font-size: 0.75em;
-    color: #595959;
-}
-
-.hdlist.source-fields td.hdlist1,
-.hdlist.source-fields td.hdlist2 {
-    font-size: 1em;
-    color: inherit;
-    padding-top: 0;
-    padding-bottom: 0;
-    line-height: 1.3;
-}
-
-/* Asciidoctor wraps each value cell in a <p> that the default stylesheet
-   sizes and margins as a body paragraph; flatten it to the record's own
-   metrics. */
-.hdlist.source-fields td.hdlist2 > p {
-    font-size: inherit;
-    line-height: inherit;
-    margin: 0;
-}
-
-.hdlist.source-fields code {
-    color: inherit;
 }

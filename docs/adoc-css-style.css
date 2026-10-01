@@ -1,19 +1,23 @@
-@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";
-@import "https://cdn.jsdelivr.net/gh/asciidoctor/asciidoctor@2.0/data/stylesheets/asciidoctor-default.css";
-@import "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css";
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Source+Code+Pro:wght@400;600&display=swap");
+@import url("https://cdn.jsdelivr.net/gh/asciidoctor/asciidoctor@2.0/data/stylesheets/asciidoctor-default.css");
+@import url("https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css");
 
-p:not(table p) {
-    text-align: justify;
-    text-justify: inter-word;
-}
+/* ==========================================================================
+   Generated. Edit the theme sources, then re-run publish.py.
+   ========================================================================== */
+
+/* Carried over from the stylesheet this one replaces.
+
+   The counter styles and the list cascade are required behaviour rather than
+   decoration: the specification names `korean-consonant`, `hebrew` and
+   `cjk-decimal` as the markers for ordered-list levels five, six and seven.
+   The scrollbar and image rules are unrelated to the theme and are kept as they
+   were. Everything else the old sheet carried is superseded by the theme below
+   and is not repeated here. */
 
 img {
     display: block;
     margin: 0 auto;
-}
-
-.imageblock .title {
-    text-align: center;
 }
 
 ::-webkit-scrollbar {
@@ -36,19 +40,6 @@ img {
 
 ::-webkit-scrollbar-thumb:active {
     background: #eae9e9;
-}
-
-#footer {
-    background: #fff;
-}
-
-.admonitionblock > table td.content {
-    color: rgba(0, 0, 0, .8) !important;
-}
-
-#toc {
-    text-align: left;
-    font-size: 15px;
 }
 
 .olist > ol {
@@ -100,17 +91,1656 @@ img {
     list-style-type: cjk-decimal;
 }
 
-table.tableblock {
-    table-layout: fixed;
+
+/* ==========================================================================
+   Functional layer (theme-agnostic)
+   Everything here is driven by the custom properties declared by the theme
+   layer that precedes it. No colour or font literal belongs in this file.
+   ========================================================================== */
+
+/* --- Page frame ---------------------------------------------------------- */
+
+html {
+    background: var(--ad-canvas);
 }
 
-table.tableblock td,
-table.tableblock th {
+body {
+    background: var(--ad-canvas);
+    color: var(--ad-ink);
+    font-family: var(--ad-font-body);
+    font-size: var(--ad-body-size);
+    line-height: var(--ad-body-leading);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
+    font-variant-numeric: lining-nums proportional-nums;
+}
+
+/* Figures that sit in a column are read against each other, so they are set on
+   a fixed advance width. */
+table.tableblock, #toc, code, pre, .adnum {
+    font-variant-numeric: lining-nums tabular-nums;
+}
+
+#header, #content, #footnotes, #footer {
+    max-width: var(--ad-measure);
+    padding-left: 1.6em;
+    padding-right: 1.6em;
+}
+
+/* --- Body copy ----------------------------------------------------------- */
+
+p, li, dd {
+    font-family: var(--ad-font-body);
+}
+
+td.tableblock {
+    font-family: var(--ad-font-body);
+}
+
+/* Asciidoctor wraps every cell's content in a paragraph, which would otherwise
+   pull the body face back into a cell that has deliberately taken another. */
+th.tableblock > p.tableblock,
+td.tableblock > p.tableblock {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+}
+
+p:not(table p) {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+}
+
+/* Asciidoctor sizes these in rem (1.0625rem), which detaches the prose from the
+   body size a theme sets and leaves the text smaller than the contents list.
+   Re-expressing the same rule in em puts the theme back in charge. */
+p, blockquote, dt, td.content, td.hdlist1, span.alt, summary {
+    font-size: 1em;
+}
+
+#content p {
+    margin-bottom: 0.9em;
+}
+
+a {
+    color: var(--ad-link);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ad-link-underline);
+    transition: color .12s ease, border-color .12s ease, background-color .12s ease;
+}
+
+a:hover {
+    color: var(--ad-link-hover);
+    border-bottom-color: var(--ad-link-hover);
+    background: var(--ad-link-hover-bg);
+}
+
+a.anchor {
+    border-bottom: 0;
+}
+
+/* The footnote marker is a navigation handle, not prose, so it carries no rule.
+   Every other link in a note is an ordinary link and keeps its underline: a
+   blanket `#footnotes a` reset stripped them all, leaving no way to see where
+   a reference in a note actually led. */
+#toc a, .exampleblock .title a,
+#footnotes .adfn-num a,
+#footnotes a[href^="#_footnoteref"] {
+    border-bottom: 0;
+}
+
+strong, b {
+    font-weight: var(--ad-bold-weight);
+    color: var(--ad-ink-strong);
+}
+
+/* --- Document title block ------------------------------------------------ */
+
+/* The title's leading space is carried by the header's padding, not by the
+   title's own margin. A margin on the first child collapses out through #header
+   and through <body>, which moves the body's box down the page by that amount.
+   Asciidoctor sets `body{position:relative}`, so <body> is the containing block
+   for the hover previews, and the script positions them in page coordinates:
+   every preview was landing one title-margin lower than the link it belongs to. */
+#header {
+    padding-top: var(--ad-title-margin-top);
+}
+
+#header > h1:first-child {
+    font-family: var(--ad-font-display);
+    color: var(--ad-title-ink);
+    font-size: var(--ad-title-size);
+    font-weight: var(--ad-title-weight);
+    line-height: 1.12;
+    letter-spacing: var(--ad-title-tracking);
+    text-transform: var(--ad-title-case);
+    text-align: var(--ad-title-align);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    hyphens: none;
+}
+
+/* Asciidoctor draws a grey rule under the title with
+   `body.toc2 #header>h1:nth-last-child(2)`, which matches only when the title
+   is the second-to-last child of the header - that is, precisely when the
+   document has no byline. Its two classes outrank a plain
+   `#header > h1:first-child`, so the theme's own title rule lost in exactly the
+   case this rule exists to cover. The theme value is therefore restated on the
+   same selectors, where it ties on weight and wins on order. */
+#header > h1:first-child,
+#header > h1:only-child,
+body.toc2 #header > h1:nth-last-child(2) {
+    border-bottom: var(--ad-title-rule);
+    padding-bottom: var(--ad-title-rule-gap);
+}
+
+/* The byline is the smallest text on the page. A display face at this size
+   loses its thin strokes, so the byline takes the text face, which is drawn for
+   small sizes; its small capitals and tracking are unchanged. */
+#header .details {
+    font-family: var(--ad-font-body);
+    font-size: 0.72em;
+    letter-spacing: 0.16em;
+    text-transform: var(--ad-label-transform);
+    font-variant: var(--ad-label-variant);
+    color: var(--ad-ink-muted);
+    justify-content: var(--ad-title-flex-align);
+    border: 0;
+    margin-top: var(--ad-byline-gap);
+    padding-top: 0.69rem;
+    padding-bottom: 0;
+}
+
+/* The rule closing the title block is hung on elements the renderer always
+   emits. Asciidoctor drops `#header .details` altogether when a document names
+   no author, so a rule carried by the byline vanished with it: the report
+   scopes its byline to the PDF backend and so lost the rule the guideline kept.
+   Each theme places its own rule - under the title (above) or under the whole
+   block - and sets the unused one to 0. */
+/* The rule is drawn by a generated last child rather than by a border on
+   `#header`, because `#header` carries the page's side padding: a border there
+   runs 1.6em wider on each side than the masthead bar and every other rule on
+   the page. A generated block sits inside the content box and so matches them. */
+#header::after {
+    content: "";
+    display: block;
+    border-top: var(--ad-header-rule);
+    margin-top: var(--ad-header-rule-gap);
+}
+
+#header .details a {
+    color: inherit;
+    border-bottom: 0;
+}
+
+#header .details a:hover {
+    color: var(--ad-accent);
+}
+
+/* The header rule that closes the title block. */
+#header::before {
+    content: "";
+    display: block;
+}
+
+/* --- Section headings ---------------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6, #toctitle, .sidebarblock > .content > .title {
+    font-family: var(--ad-font-heading);
+    color: var(--ad-heading-ink);
+    font-weight: var(--ad-heading-weight);
+    line-height: 1.22;
+    hyphens: none;
+    word-spacing: normal;
+    text-align: left;
+    /* A title is upright unless the source marks part of it as emphasised. */
+    font-style: normal;
+}
+
+#content h2 em, #content h3 em, #content h4 em,
+#content h5 em, #content h6 em,
+#content h2 i, #content h3 i, #content h4 i,
+#content h5 i, #content h6 i {
+    font-style: italic;
+}
+
+#content h2 {
+    font-size: var(--ad-h2-size);
+    letter-spacing: var(--ad-h2-tracking);
+    text-transform: var(--ad-h2-case);
+    color: var(--ad-h2-ink);
+    margin-top: 2.4rem;
+    margin-bottom: 0.8rem;
+    padding-top: var(--ad-h2-pad-top);
+    border-top: var(--ad-h2-rule);
+}
+
+#content #preamble + .sect1 > h2 {
+    margin-top: 2.5rem;
+}
+
+#content h3 {
+    font-size: var(--ad-h3-size);
+    color: var(--ad-h3-ink);
+    letter-spacing: var(--ad-h3-tracking);
+    text-transform: var(--ad-h3-case);
+    margin-top: var(--ad-subsection-gap);
+    margin-bottom: 0.55rem;
+}
+
+#content h4 {
+    font-size: var(--ad-h4-size);
+    color: var(--ad-h4-ink);
+    margin-top: var(--ad-subsection-gap);
+    margin-bottom: 0.45rem;
+}
+
+#content h5, #content h6 {
+    font-size: var(--ad-h5-size);
+    color: var(--ad-h4-ink);
+    font-style: var(--ad-h5-style);
+    margin-top: var(--ad-subsection-gap);
+    margin-bottom: 0.4rem;
+}
+
+/* Section numbers are set apart from the title text they qualify, so the
+   reader scans titles without the digits interrupting the phrase. */
+#content h2 .adnum, #content h3 .adnum,
+#content h4 .adnum, #content h5 .adnum, #content h6 .adnum {
+    color: var(--ad-num-ink);
+    font-weight: var(--ad-num-weight);
+    font-variant-numeric: lining-nums tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+h2 > a.anchor, h3 > a.anchor, h4 > a.anchor,
+h5 > a.anchor, h6 > a.anchor {
+    color: var(--ad-accent);
+}
+
+/* --- Table of contents --------------------------------------------------- */
+
+/* Both declarations below must resolve to the identical length. They sit on
+   different elements, so the unit has to be root-relative: an em here would be
+   measured against each element's own font-size and the panel would cover the
+   first characters of every line. */
+body.toc2 {
+    padding-left: var(--ad-toc-width);
+}
+
+/* The panel's top padding is set so that the rule under the contents title
+   lands on the same line as the rule over the document title, which both themes
+   place at `--ad-title-margin-top` from the top of the page. The contents title
+   occupies a known height above its rule (its line box plus the space under it),
+   so the padding is that distance less those two. Both themes share the contents
+   title's metrics, so one value serves both. */
+#toc.toc2 {
+    width: var(--ad-toc-width);
+    background: var(--ad-toc-bg);
+    border-right: var(--ad-toc-border);
+    padding: calc(var(--ad-title-margin-top) - var(--ad-toc-title-block)) 1.35em 3em 1.5em;
+    font-family: var(--ad-font-toc);
+    scrollbar-width: thin;
+}
+
+/* Contents entries are labels, not prose: justification would stretch the
+   short lines a five-level outline is made of. */
+#toc, #toc a, #toc li {
+    text-align: left;
+    hyphens: none;
+}
+
+/* The default sheet puts "Open Sans" on `#toc ul` itself, so inheriting the
+   theme face from the panel is not enough; the lists are named directly, in
+   both the rendered and the tocbot-rebuilt shape. */
+#toc ul, #toc ol,
+#toc #tocbot, #toc #tocbot ul, #toc #tocbot ol,
+#toc a.toc-link {
+    font-family: var(--ad-font-toc);
+}
+
+#toc.toc2 #toctitle {
+    font-family: var(--ad-font-label);
+    font-size: var(--ad-label-size-lg);
+    font-weight: 600;
+    letter-spacing: var(--ad-label-tracking-lg);
+    text-transform: var(--ad-label-transform);
+    font-variant: var(--ad-label-variant);
+    color: var(--ad-toc-title-ink);
+    margin: 0 0 1.2em;
+    padding-bottom: 0.7em;
+    border-bottom: var(--ad-rule-hair);
+}
+
+/* tocbot replaces the rendered `ul.sectlevel1` with its own `ul.toc-list` once
+   the page loads, so each contents rule names both shapes of the same list. */
+#toc.toc2 > ul,
+#toc.toc2 > #tocbot {
+    font-size: var(--ad-toc-size);
+    line-height: 1.4;
+}
+
+/* Each nesting level is drawn as a rule running down the left of the entries it
+   contains. A five-level outline is otherwise read by indent alone, which the
+   eye loses as soon as an entry wraps onto a second line. */
+#toc.toc2 ul ul {
+    border-left: 1px solid var(--ad-toc-guide);
+    margin-left: 0.2em;
+    padding-left: 0.8em;
+}
+
+/* The contents are scanned, not read, so the entries are set close together and
+   a wrapped entry still holds as one block. */
+#toc li {
+    margin-top: 0.14em;
+}
+
+/* Top-level entries are the divisions of the document and are separated by
+   space rather than by a rule. */
+#toc .sectlevel1 > li,
+#toc #tocbot > ul.toc-list > li {
+    margin-top: 0.75em;
+}
+
+#toc .sectlevel1 > li:first-child,
+#toc #tocbot > ul.toc-list > li:first-child {
+    margin-top: 0;
+}
+
+/* An entry is a number and a title, laid out as two boxes on one baseline, the
+   same way a heading is. The title box then sets its own left edge, so a title
+   that wraps starts every line in the same place instead of running back under
+   its number. The number's box is wrapped in by the contents script, because
+   tocbot rebuilds each link from the heading's plain text. */
+#toc a {
+    color: var(--ad-toc-ink);
+    display: flex;
+    align-items: baseline;
+    column-gap: 0.4em;
+    padding: 0.06em 0;
+    line-height: 1.32;
+}
+
+#toc a > .adnum {
+    flex: 0 0 auto;
+}
+
+#toc a:hover {
+    color: var(--ad-toc-active);
+}
+
+#toc .sectlevel1 > li > a,
+#toc #tocbot > ul.toc-list > li > a {
+    color: var(--ad-toc-ink-strong);
+    font-weight: 600;
+}
+
+#toc .sectlevel3 a, #toc .sectlevel4 a, #toc .sectlevel5 a,
+#toc a.toc-link.node-name--H4,
+#toc a.toc-link.node-name--H5,
+#toc a.toc-link.node-name--H6 {
+    color: var(--ad-toc-ink);
+    font-size: 0.95em;
+}
+
+#tocbot ol, #tocbot ul {
+    list-style-type: none;
+}
+
+#tocbot a.toc-link.node-name--H1 {
+    font-style: italic;
+}
+
+@media screen {
+    #tocbot > ul.toc-list {
+        margin-bottom: 0.5em;
+        margin-left: 0.125em;
+    }
+
+    #tocbot ul.sectlevel0,
+    #tocbot a.toc-link.node-name--H1 + ul {
+        padding-left: 0;
+    }
+
+    #tocbot a.toc-link {
+        height: 100%;
+    }
+
+    .is-collapsible {
+        max-height: 3000px;
+        overflow: hidden;
+    }
+
+    .is-collapsed {
+        max-height: 0;
+    }
+
+    .is-active-link {
+        font-weight: 700;
+        color: var(--ad-toc-active) !important;
+    }
+}
+
+@media print {
+    #tocbot a.toc-link.node-name--H4 {
+        display: none;
+    }
+}
+
+/* --- Lists --------------------------------------------------------------- */
+
+#content ul, #content ol {
+    margin-bottom: 1em;
+}
+
+#content li > p {
+    margin-bottom: 0.5em;
+}
+
+.ulist > ul > li::marker {
+    color: var(--ad-marker-ink);
+}
+
+.olist > ol > li::marker {
+    color: var(--ad-marker-ink);
+    font-variant-numeric: lining-nums tabular-nums;
+}
+
+.olist > ol {
+    list-style-type: upper-alpha;
+}
+
+.olist .olist > ol {
+    list-style-type: upper-roman;
+}
+
+.olist .olist .olist > ol {
+    list-style-type: lower-greek;
+}
+
+.olist .olist .olist .olist > ol {
+    list-style-type: lower-roman;
+}
+
+/* Counter sequences follow https://www.w3.org/TR/predefined-counter-styles/. */
+@counter-style korean-consonant {
+    system: alphabetic;
+    symbols: '\3131' '\3134' '\3137' '\3139' '\3141' '\3142' '\3145' '\3147' '\3148' '\314A' '\314B' '\314C' '\314D' '\314E';
+    suffix: ". ";
+}
+
+@counter-style hebrew {
+    system: additive;
+    range: 1 10999;
+    additive-symbols: 10000 \5D9\5F3, 9000 \5D8\5F3, 8000 \5D7\5F3, 7000 \5D6\5F3, 6000 \5D5\5F3, 5000 \5D4\5F3, 4000 \5D3\5F3, 3000 \5D2\5F3, 2000 \5D1\5F3, 1000 \5D0\5F3, 400 \5EA, 300 \5E9, 200 \5E8, 100 \5E7, 90 \5E6, 80 \5E4, 70 \5E2, 60 \5E1, 50 \5E0, 40 \5DE, 30 \5DC, 20 \5DB, 19 \5D9\5D8, 18 \5D9\5D7, 17 \5D9\5D6, 16 \5D8\5D6, 15 \5D8\5D5, 10 \5D9, 9 \5D8, 8 \5D7, 7 \5D6, 6 \5D5, 5 \5D4, 4 \5D3, 3 \5D2, 2 \5D1, 1 \5D0;
+    suffix: ". ";
+}
+
+@counter-style cjk-decimal {
+    system: numeric;
+    range: 0 infinite;
+    symbols: '\3007' '\4E00' '\4E8C' '\4E09' '\56DB' '\4E94' '\516D' '\4E03' '\516B' '\4E5D';
+    suffix: ". ";
+}
+
+.olist .olist .olist .olist .olist > ol {
+    list-style-type: korean-consonant;
+}
+
+.olist .olist .olist .olist .olist .olist > ol {
+    list-style-type: hebrew;
+}
+
+.olist .olist .olist .olist .olist .olist .olist > ol {
+    list-style-type: cjk-decimal;
+}
+
+/* --- Block titles -------------------------------------------------------- */
+
+/* A caption names the block beneath it. It is set at full strength, because
+   marking it by making it fainter than the prose only makes it harder to read,
+   and distinguished by italic, which is what a caption has always been. */
+#content .title {
+    font-family: var(--ad-font-caption);
+    color: var(--ad-ink-strong);
+    font-style: italic;
+    font-weight: var(--ad-caption-weight);
+    font-size: var(--ad-caption-size);
+    letter-spacing: var(--ad-caption-tracking);
+}
+
+/* An example label is upright: its colour and icon already mark it. */
+#content .exampleblock > .title {
+    font-style: normal;
+}
+
+/* --- Good and bad examples ----------------------------------------------- */
+
+.exampleblock {
+    margin-bottom: 1.1em;
+}
+
+.exampleblock.good-example > .content,
+.exampleblock.bad-example > .content {
+    padding: 0.85em 1.15em;
+    border-radius: 2px;
+    border-left: 3px solid;
+    background-clip: padding-box;
+}
+
+.exampleblock.good-example > .content {
+    border-left-color: var(--ad-good);
+    background-color: var(--ad-good-bg);
+}
+
+.exampleblock.bad-example > .content {
+    border-left-color: var(--ad-bad);
+    background-color: var(--ad-bad-bg);
+}
+
+.exampleblock.good-example > .content > :last-child,
+.exampleblock.bad-example > .content > :last-child {
+    margin-bottom: 0;
+}
+
+/* The example label is a label like the others and takes the display face. */
+#content .exampleblock.good-example > .title,
+#content .exampleblock.bad-example > .title {
+    font-family: var(--ad-font-label);
+    font-weight: 600;
+    font-style: normal;
+    font-size: 0.88em;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant: normal;
+    margin-bottom: 0.45em;
+}
+
+#content .exampleblock.good-example > .title {
+    color: var(--ad-good-ink);
+}
+
+#content .exampleblock.bad-example > .title {
+    color: var(--ad-bad-ink);
+}
+
+.good-icon {
+    color: var(--ad-good-ink);
+}
+
+.bad-icon {
+    color: var(--ad-bad-ink);
+}
+
+/* --- Code ---------------------------------------------------------------- */
+
+code, pre, kbd, tt, .listingblock pre, .literalblock pre {
+    font-family: var(--ad-font-mono);
+    font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Asciidoctor styles inline code with `:not(pre):not([class^=L])>code`, whose
+   specificity (0,0,1,2) beats a plain `:not(pre) > code`. Its declarations were
+   winning here: `word-spacing:-.15em` closed up the space in a two-word name,
+   `background:#f7f7f8` replaced the theme fill, and `line-height:1.45` with
+   vertical padding made the chip taller than the line box, so chips on adjacent
+   lines met. Scoping under #content outranks it and puts every value back. */
+#content :not(pre) > code,
+#header :not(pre) > code {
+    background: var(--ad-code-inline-bg);
+    color: var(--ad-code-inline-ink);
+    border: 1px solid var(--ad-code-inline-edge);
+    padding: 0.06em 0.36em;
+    margin: 0 0.09em;
+    border-radius: 2px;
+    font-size: 0.86em;
+    /* The chip must fit inside the line box it sits in, or the boxes on two
+       consecutive lines overlap. */
+    line-height: 1.15;
+    word-spacing: normal;
+    letter-spacing: 0;
+    word-break: break-word;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+/* A code chip that is also a link must still read as a link. The page marks a
+   link with a rule beneath it, but the anchor's own border lands exactly on the
+   chip's lower edge and reads as a doubled, broken frame. So the chip draws the
+   rule itself, offset clear of its outline by a generated box that costs no
+   layout, and takes the link colour on its frame as a second cue. Both nestings
+   occur: `xref:...[`x`]` puts the chip inside the anchor, `` `xref:...[x]` ``
+   puts the anchor inside the chip. */
+#content a:has(> code),
+#content code > a,
+#header a:has(> code),
+#header code > a {
+    border-bottom: 0;
+}
+
+#content a:has(> code) > code,
+#content code:has(> a) {
+    position: relative;
+    color: var(--ad-link);
+    border-color: var(--ad-link);
+}
+
+#content a:has(> code) > code::after,
+#content code:has(> a)::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.26em;
+    border-bottom: 1px solid var(--ad-link-underline);
+}
+
+/* The anchor's own hover fill would paint a rectangle behind the chip that is
+   taller than the chip itself, so the chip takes the hover instead. */
+#content a:has(> code):hover {
+    background: none;
+}
+
+#content a:has(> code):hover > code,
+#content code:has(> a):hover {
+    color: var(--ad-link-hover);
+    background: var(--ad-link-hover-bg);
+    border-color: var(--ad-link-hover);
+}
+
+#content a:has(> code):hover > code::after,
+#content code:has(> a):hover::after {
+    border-bottom-color: var(--ad-link-hover);
+}
+
+/* A cell's leading is tighter than prose, so the chip's vertical padding no
+   longer fits inside the line box and two chips on consecutive lines of one
+   cell would meet. The padding is dropped and the frame carries the mark, as it
+   does in a heading. The text size is untouched, so a chip still reads at the
+   same size whether it sits in a cell or in a paragraph. */
+#content table.tableblock :not(pre) > code,
+#content h2 code, #content h3 code, #content h4 code,
+#content h5 code, #content h6 code, #toctitle code {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* The attribute-selector forms mirror Asciidoctor's own default rule. A
+   `[source,lang]` block renders as `pre.highlight`, which the default sheet
+   paints through `.listingblock>.content>pre[class=highlight]` - one weight
+   above a plain `.listingblock > .content > pre`, so the theme fill lost. */
+.listingblock > .content > pre,
+.listingblock > .content > pre[class=highlight],
+.listingblock > .content > pre[class^="highlight "],
+.literalblock > .content > pre {
+    background: var(--ad-code-bg);
+    color: var(--ad-code-ink);
+    border: var(--ad-code-border);
+    border-left: 3px solid var(--ad-code-edge);
+    border-radius: var(--ad-radius);
+    padding: 0.85em 1.1em;
+    font-size: 0.8em;
+    line-height: 1.55;
+}
+
+.literalblock > .content > pre {
+    background: var(--ad-code-bg);
+}
+
+pre > code {
+    background: none;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+}
+
+/* Code is read line by line against a fixed left edge. The body sets justified
+   text and `word-wrap: anywhere`, which together reach into `pre` and stretch
+   the word spacing of any line long enough to wrap. */
+pre, pre > code, .listingblock pre, .literalblock pre {
+    text-align: left;
+    hyphens: none;
+}
+
+/* A verbatim block that already sits inside an example is not a separate object
+   and must not be drawn as one: the example supplies the frame, the tint and the
+   left edge, so the block inside keeps only its type. */
+.exampleblock > .content .listingblock > .content > pre,
+.exampleblock > .content .literalblock > .content > pre,
+.quoteblock .listingblock > .content > pre,
+.quoteblock .literalblock > .content > pre,
+.admonitionblock .listingblock > .content > pre,
+.admonitionblock .literalblock > .content > pre {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+}
+
+/* With the frames gone, the example's children are spaced by one rule applied
+   between every adjacent pair, rather than by each block type carrying its own
+   bottom margin. Any order of prose and verbatim blocks is then spaced alike,
+   and the last child never pushes against the example's lower padding. */
+/* These selectors are scoped under #content deliberately. The paragraph margin
+   they cancel is set by `#content p`, whose id out-ranks any number of classes,
+   so an unscoped reset loses and the last line sits on a margin the container's
+   padding then adds to: the box gains a bottom gap twice the top one. */
+/* The inner reset names any last element, not just a paragraph: the final block
+   inside an example is as often a list or a verbatim block. */
+#content .exampleblock > .content > *,
+#content .exampleblock > .content > * > :last-child,
+#content .exampleblock > .content > * > * > :last-child {
+    margin-bottom: 0;
+}
+
+#content .exampleblock > .content > * + * {
+    margin-top: 0.85em;
+}
+
+/* The same trap applies to every container that pads its own content. */
+#content .quoteblock > blockquote > :last-child,
+#content .quoteblock > blockquote > :last-child > :last-child,
+#content .sidebarblock > .content > :last-child,
+#content .sidebarblock > .content > :last-child > :last-child,
+#content .admonitionblock td.content > :last-child,
+#content .admonitionblock td.content > :last-child > :last-child,
+#content .olist > ol > li > :last-child,
+#content .ulist > ul > li > :last-child {
+    margin-bottom: 0.9em;
+}
+
+/* --- Tables -------------------------------------------------------------- */
+
+/* Asciidoctor's defaults paint tables as a white box with grey #dedede rules,
+   a grey row-header column and near-black cell text, none of which is aware of
+   the theme. Every one of those defaults is re-stated here against the theme's
+   own paper, rules and ink so a table reads as part of the page. */
+
+table.tableblock {
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: transparent;
+    border: 0 solid var(--ad-rule);
+    margin-bottom: 1.5em;
+    /* Cells are set at the body size rather than shrunk. A smaller cell size
+       keeps the same leading ratio but a smaller absolute leading, while a code
+       span's padding and border do not shrink with it, so an identical chip got
+       less clearance in a cell than in a paragraph. Matching the size makes the
+       two contexts identical instead of adding a table-only exception. */
+    font-size: 1em;
+    word-wrap: normal;
+}
+
+/* A heading leaves the same space above a table as it does above a paragraph.
+   Equal margins do not look equal: a paragraph's first line sits half a line's
+   leading below the top of its box, while a table's rule is drawn right on the
+   edge of its own. That half-leading is given back here, measured from the body
+   text's own size and leading.
+   It is added to the heading's margin rather than to the table's, because a
+   table's top margin collapses into the heading's bottom one and the larger of
+   the two simply wins. And it is margin rather than padding because some levels
+   carry a hairline under the title, positioned by their padding: adding the
+   space there would push the rule away from the words it belongs to. */
+#content h2:has(+ table.tableblock) {
+    margin-bottom: calc(0.8rem + (var(--ad-body-leading) - 1) / 2 * var(--ad-body-size));
+}
+
+#content h3:has(+ table.tableblock) {
+    margin-bottom: calc(0.55rem + (var(--ad-body-leading) - 1) / 2 * var(--ad-body-size));
+}
+
+#content h4:has(+ table.tableblock) {
+    margin-bottom: calc(0.45rem + (var(--ad-body-leading) - 1) / 2 * var(--ad-body-size));
+}
+
+#content h5:has(+ table.tableblock),
+#content h6:has(+ table.tableblock) {
+    margin-bottom: calc(0.4rem + (var(--ad-body-leading) - 1) / 2 * var(--ad-body-size));
+}
+
+table.tableblock caption,
+table.tableblock > caption.title {
+    font-family: var(--ad-font-meta);
+    color: var(--ad-blocktitle-ink);
+    font-size: 0.8em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-align: left;
+    margin-bottom: 0.45em;
+}
+
+/* Frame and grid classes carry only widths in the defaults; the colour comes
+   from the shorthand above, so restating the colour here covers every variant.
+   AsciiDoc applies `grid=all` to every table unless the author says otherwise,
+   which is a source default rather than a design intent, so each theme decides
+   how much of that ruling it actually draws. */
+/* Leading is set from the measure it has to serve. A body line runs to some
+   ninety characters and needs the eye helped back to the start of the next one;
+   a cell line averages six, where that journey does not exist and the same
+   leading only pushes the rows apart, so the table reads as stacked paragraphs
+   rather than as a grid. The text size is left alone: a code span's border and
+   padding do not scale with it, so shrinking the text would leave an identical
+   chip more cramped in a cell than in a paragraph. */
+table.tableblock > * > tr > th,
+table.tableblock > * > tr > td {
+    border-style: solid;
+    border-color: var(--ad-rule);
+    border-width: 0 var(--ad-cell-rule-width);
+    color: inherit;
+    line-height: var(--ad-cell-leading);
+}
+
+table.tableblock.frame-all,
+table.tableblock.frame-sides {
+    border-width: 0 var(--ad-cell-rule-width);
+    border-style: solid;
+    border-color: var(--ad-rule);
+}
+
+table.tableblock > thead,
+table.tableblock > tfoot {
+    background: var(--ad-thead-bg);
+}
+
+/* A column head is a short phrase read as words. Capitals, whether forced or
+   small, make it a different kind of object from the cells beneath it, so it is
+   set in the case the source wrote. The vertical rules continue through the
+   header: the grid divides the columns, and the columns start here. */
+table.tableblock > thead > tr > th,
+table.tableblock > thead > tr > td {
+    font-family: var(--ad-font-label);
+    color: var(--ad-thead-ink);
+    font-size: var(--ad-label-size-lg);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant: normal;
+    border-style: solid;
+    border-color: var(--ad-thead-grid);
+    border-width: 0 var(--ad-cell-rule-width);
+    border-bottom: var(--ad-thead-rule);
+    border-top: var(--ad-thead-toprule);
+    padding: 0.6em 0.75em;
+    text-align: left;
+}
+
+/* A header column: the row's label, so it takes the same voice as a column
+   header but keeps the cell's own alignment. */
+table.tableblock > tbody > tr > th,
+table.tableblock > tfoot > tr > th {
+    background: var(--ad-rowhead-bg);
+    font-family: var(--ad-font-label);
+    font-size: 1em;
+    font-weight: 600;
+    letter-spacing: 0;
+    font-variant: normal;
+    text-transform: none;
+}
+
+table.tableblock > tbody > tr > th,
+table.tableblock > tbody > tr > th p,
+table.tableblock > tfoot > tr > th,
+table.tableblock > tfoot > tr > th p {
+    color: var(--ad-rowhead-ink);
+}
+
+table.tableblock > tbody > tr {
+    background: transparent;
+    border-bottom: var(--ad-rule-hair);
+}
+
+table.tableblock > tbody > tr:last-child {
+    border-bottom: var(--ad-table-bottom-rule);
+}
+
+/* A table is closed top and bottom by the same heavy rule. Where a header row
+   exists its band supplies the top edge, but a table whose first row is data
+   had only the hairline grid there, so it read as though its top had been cut
+   off. The rule is given to every first body row and then withdrawn from the
+   one that follows a header. `thead + tbody` is used rather than `:has()` so
+   the pair stays plain CSS, and `:first-of-type` rather than `:first-child`
+   because Asciidoctor emits a `<colgroup>` ahead of every section. */
+table.tableblock > tbody:first-of-type > tr:first-child > th,
+table.tableblock > tbody:first-of-type > tr:first-child > td {
+    border-top: var(--ad-table-bottom-rule);
+}
+
+table.tableblock > thead + tbody > tr:first-child > th,
+table.tableblock > thead + tbody > tr:first-child > td {
+    border-top: 0;
+}
+
+table.tableblock.stripes-all > * > tr,
+table.tableblock.stripes-odd > * > tr:nth-of-type(odd),
+table.tableblock.stripes-even > * > tr:nth-of-type(even),
+table.tableblock.stripes-hover > * > tr:hover,
+table.tableblock > * > tr.even,
+table.tableblock > * > tr.alt {
+    background: var(--ad-stripe-bg);
+}
+
+table.tableblock td, table.tableblock th {
     overflow-wrap: break-word;
     word-break: break-word;
+    padding: 0.55em 0.75em;
+    vertical-align: middle;
+}
+
+/* Asciidoctor emits an alignment class per cell from the table definition; the
+   row's own centring governs, so one short cell beside a wrapped one keeps the
+   same space above and below its text. */
+table.tableblock td.valign-top, table.tableblock th.valign-top,
+table.tableblock td.valign-bottom, table.tableblock th.valign-bottom {
+    vertical-align: middle;
 }
 
 table.tableblock td.halign-left,
 table.tableblock td.halign-left p.tableblock {
-    text-align: justify;
+    text-align: left;
+}
+
+table.tableblock td.tableblock > p.tableblock > strong {
+    color: var(--ad-ink-strong);
+}
+
+p.tableblock {
+    line-height: var(--ad-cell-leading);
+}
+
+#content p.tableblock:last-child,
+#content td.tableblock > p.tableblock:last-child,
+#content th.tableblock > p.tableblock:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Admonitions --------------------------------------------------------- */
+
+.admonitionblock > table {
+    border-collapse: collapse;
+}
+
+.admonitionblock > table td.icon {
+    border: 0;
+    padding-right: 0.7em;
+    width: 3.2em;
+}
+
+/* Asciidoctor sizes the glyph at 2.5em - larger than an h2 - gives it a
+   drop shadow, and colours it from a fixed palette (`#bf0000` for important)
+   through `.admonitionblock td.icon .icon-important::before`. That selector
+   carries three classes, so the theme's plainer `td.icon i::before` lost. The
+   class names are matched here exactly so weight ties and order decides.
+   The shadow goes because a bevelled glyph dates a page faster than anything
+   else on it, and the mark is scaled back so it reads as a sign, not a siren. */
+.admonitionblock td.icon [class^="fa icon-"] {
+    font-size: 1.5em;
+    text-shadow: none;
+}
+
+.admonitionblock td.icon .icon-note::before,
+.admonitionblock td.icon .icon-tip::before {
+    color: var(--ad-accent);
+}
+
+.admonitionblock td.icon .icon-important::before,
+.admonitionblock td.icon .icon-warning::before,
+.admonitionblock td.icon .icon-caution::before {
+    color: var(--ad-bad);
+}
+
+.admonitionblock > table td.content {
+    color: var(--ad-ink) !important;
+    border-left: 2px solid var(--ad-rule);
+    padding-left: 1em;
+}
+
+/* --- Quotes and sidebars ------------------------------------------------- */
+
+.quoteblock, .verseblock {
+    border-left: 3px solid var(--ad-accent);
+    background: var(--ad-quote-bg);
+    color: var(--ad-ink);
+    padding: 0.9em 1.2em;
+    margin-bottom: 1.2em;
+}
+
+.quoteblock blockquote, .quoteblock p {
+    line-height: 1.55;
+}
+
+.quoteblock .attribution {
+    font-family: var(--ad-font-meta);
+    font-size: 0.8em;
+    color: var(--ad-ink-muted);
+}
+
+.sidebarblock {
+    background: var(--ad-quote-bg);
+    border: var(--ad-rule-hair);
+    border-radius: var(--ad-radius);
+}
+
+/* --- Footnotes ----------------------------------------------------------- */
+
+#footnotes {
+    border-top: var(--ad-rule-strong);
+    margin-top: 3em;
+    padding-top: 1em;
+}
+
+/* The record takes the page's reading ink, like any other prose. A footnote is
+   read, not skimmed past, so it is not greyed back from the text it supports.
+   The marker occupies a slot exactly as wide as the indent, so the first line's
+   text begins on the same vertical as every wrapped line, and so does the text
+   of every other note whatever its number of digits. A plain hanging indent
+   cannot do this - it aligns the wrapped lines while the first line still
+   starts wherever the marker ends - and flex cannot either: a note's body holds
+   inline links and code spans, and flex would promote each of them to a
+   separate item, breaking the sentence apart. */
+#footnotes .footnote {
+    position: relative;
+    font-size: 0.82em;
+    color: var(--ad-ink);
+    line-height: 1.5;
+    margin-bottom: 0.4em;
+    padding-left: 2.6em;
+}
+
+/* Asciidoctor builds a hanging indent of its own here: it indents the note by
+   1.2em and pulls `a:first-of-type` back by 1.05em so the number hangs. That is
+   a descendant selector, so once the marker is wrapped in a span it stops
+   matching the marker and matches the first link in the note's *text* instead -
+   dragging the opening words of every note that begins with a reference 15px
+   back into the marker's column, and setting them bold. Both halves are
+   withdrawn; the slot is the padding, and the marker is floated into it. */
+#footnotes .footnote {
+    margin-left: 0;
+}
+
+#footnotes .footnote a:first-of-type {
+    margin-left: 0;
+    font-weight: inherit;
+}
+
+/* The marker stays bold: it is the handle the reader scans for. */
+#footnotes .footnote > .adfn-num a {
+    font-weight: 700;
+}
+
+/* Floated into the note's own left padding. The float's margin box occupies
+   exactly the padding, so it displaces no line box: the first line and every
+   wrapped line alike begin at the content edge, whatever the marker's width.
+   In normal flow the marker has to be balanced against a negative text-indent
+   and the two never agree exactly; flex cannot be used at all, because a note's
+   body holds inline links and code spans that flex would promote to separate
+   items, breaking the sentence apart. */
+#footnotes .footnote > .adfn-num {
+    float: left;
+    width: 2.6em;
+    margin-left: -2.6em;
+    white-space: nowrap;
+}
+
+#footnotes hr {
+    display: none;
+}
+
+/* A footnote marker is a link the reader follows, so it takes the link colour
+   rather than the heading accent. The brackets live on the `sup`, outside the
+   anchor, and are coloured with it so the marker reads as one mark. */
+sup.footnote, sup.footnoteref,
+sup.footnote a, sup.footnoteref a {
+    color: var(--ad-link);
+}
+
+sup.footnote a, sup.footnoteref a {
+    border-bottom: 0;
+    font-variant-numeric: lining-nums;
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+#footer {
+    background: transparent;
+    max-width: var(--ad-measure);
+    padding: 1.5em 1.6em 3em;
+    border-top: var(--ad-rule-hair);
+    margin-top: 3em;
+}
+
+#footer-text {
+    color: var(--ad-ink-muted);
+    font-family: var(--ad-font-meta);
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+}
+
+/* --- Bibliography record metadata ---------------------------------------- */
+
+.hdlist.source-fields {
+    font-size: 0.75em;
+    color: var(--ad-ink-muted);
+}
+
+/* Scoped under #content deliberately. The margin being cancelled is set by
+   `#content p`, whose id out-ranks any number of classes, so the unscoped reset
+   lost and every value in the record kept a full paragraph's bottom margin -
+   turning a dense machine-facing record into a loosely spaced list.
+   The leading is set from the chip rather than from the text: a value can be a
+   backticked path, and a chip is taller than the line it sits on, so rows set
+   to the text's own leading let the chips of adjacent rows touch. */
+#content .hdlist.source-fields td.hdlist1,
+#content .hdlist.source-fields td.hdlist2 {
+    font-size: 1em;
+    color: inherit;
+    padding-top: 0.14em;
+    padding-bottom: 0.14em;
+    line-height: 1.45;
+}
+
+/* The label names the field and is read as one unit, so it never breaks across
+   lines; the column takes only the width its longest label needs. */
+#content .hdlist.source-fields td.hdlist1 {
+    white-space: nowrap;
+    width: 1%;
+    padding-right: 1.1em;
+}
+
+#content .hdlist.source-fields td.hdlist2 > p {
+    font-size: inherit;
+    line-height: inherit;
+    margin: 0;
+}
+
+.hdlist.source-fields code {
+    color: inherit;
+    background: none;
+    padding: 0;
+}
+
+/* --- Images -------------------------------------------------------------- */
+
+img {
+    display: block;
+    margin: 0 auto;
+}
+
+.imageblock .title {
+    text-align: center;
+}
+
+/* --- Scrollbar ----------------------------------------------------------- */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--ad-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--ad-rule);
+    border-radius: 5px;
+    border: 2px solid var(--ad-canvas);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ad-ink-muted);
+}
+
+/* --- Print --------------------------------------------------------------- */
+
+@media print {
+    body.toc2 {
+        padding-left: 0;
+    }
+
+    #toc.toc2 {
+        position: static;
+        width: auto;
+        height: auto;
+        border-right: 0;
+    }
+
+    .fn-pop, .xref-preview {
+        display: none !important;
+    }
+}
+
+/* --- Narrow viewports ---------------------------------------------------- */
+
+@media screen and (max-width: 900px) {
+    body.toc2 {
+        padding-left: 0;
+    }
+
+    /* The panel's own padding is sized for the fixed column, where 3em at the
+       foot keeps the last entry clear of the viewport edge. Laid inline above
+       the document that space is simply a hole between the last entry and the
+       rule, so it is reset here. The side padding matches the body's, so the
+       entries line up with the text below them. */
+    #toc.toc2 {
+        position: static;
+        width: auto;
+        height: auto;
+        border-right: 0;
+        border-bottom: var(--ad-rule-strong);
+        padding: 1.2em 1.1em 1.2em;
+    }
+
+    #header, #content, #footnotes, #footer {
+        padding-left: 1.1em;
+        padding-right: 1.1em;
+    }
+}
+
+
+/* ==========================================================================
+   Remaining Asciidoctor defaults
+   Every rule below answers a specific declaration in the default stylesheet
+   that carries a hardcoded colour or one of its three bundled font families.
+   Without these, isolated components fall back to the default look and read
+   as foreign to the theme.
+   ========================================================================== */
+
+/* Block titles are also emitted outside #content (sidebars, admonitions), and
+   the default sets them in Noto Serif italic at a rem size. */
+.admonitionblock td.content > .title,
+.audioblock > .title, .exampleblock > .title, .imageblock > .title,
+.listingblock > .title, .literalblock > .title, .stemblock > .title,
+.openblock > .title, .paragraph > .title, .quoteblock > .title,
+table.tableblock > .title, .verseblock > .title, .videoblock > .title,
+.dlist > .title, .olist > .title, .ulist > .title, .qlist > .title,
+.hdlist > .title, .sidebarblock > .content > .title, .subheader {
+    font-family: var(--ad-font-meta);
+    color: var(--ad-blocktitle-ink);
+    font-size: 0.82em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+/* A heading that is itself a link keeps the heading's colour. */
+#content h1 > a.link, h2 > a.link, h3 > a.link,
+h4 > a.link, h5 > a.link, h6 > a.link {
+    color: inherit;
+    border-bottom: 0;
+}
+
+#content h1 > a.link:hover, h2 > a.link:hover, h3 > a.link:hover,
+h4 > a.link:hover, h5 > a.link:hover, h6 > a.link:hover {
+    color: var(--ad-accent);
+}
+
+/* The admonition label is set in Open Sans by the default. */
+.admonitionblock > table td.icon .title {
+    font-family: var(--ad-font-meta);
+    color: var(--ad-accent);
+    letter-spacing: 0.08em;
+}
+
+/* A verse is prose in lines, not code, and the default sets it in Open Sans
+   at a rem size that ignores the theme. */
+.verseblock pre {
+    font-family: var(--ad-font-body);
+    font-size: 1em;
+    font-weight: 400;
+    color: var(--ad-ink);
+    background: none;
+    border: 0;
+    padding: 0;
+}
+
+/* A key name: the default draws a grey chip with a white inner bevel. */
+kbd {
+    font-family: var(--ad-font-mono);
+    color: var(--ad-ink-strong);
+    background: var(--ad-code-inline-bg);
+    border: 1px solid var(--ad-code-inline-edge);
+    border-radius: 2px;
+    box-shadow: 0 1px 0 var(--ad-rule);
+    font-size: 0.72em;
+}
+
+/* A callout number: the default paints a solid black disc. */
+.conum[data-value] {
+    font-family: var(--ad-font-meta);
+    background: var(--ad-accent);
+    color: var(--ad-canvas) !important;
+}
+
+/* Highlighted text: the default uses pure yellow on pure black. */
+mark, .highlight {
+    background: var(--ad-mark-bg);
+    color: var(--ad-ink-strong);
+}
+
+/* Definition lists follow the body, not the default's bold rem sizing. */
+dl dt, .dlist dt {
+    font-family: var(--ad-font-label);
+    color: var(--ad-ink-strong);
+    font-size: 1em;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+
+/* --- Front matter -------------------------------------------------------
+   The document's dates are marked up as a table and are drawn as one, with the
+   same frame, band and grid as every other table in the document. Styling them
+   as a quiet "colophon" meant one bespoke rule set keyed to one document's
+   markup shape, which broke as soon as a second document authored the same
+   record with a header row instead of row headers.
+   Only the spacing below is set here, and that is layout rather than table
+   styling: it holds the gap between the front matter and the first heading.
+   -------------------------------------------------------------------------- */
+
+/* Matches the first heading's own `margin-top`, so the two collapse to a single
+   40px gap whichever is larger at a given root size. */
+#preamble table.tableblock {
+    margin-bottom: 2.5rem;
+}
+
+/* The front matter is separated from the body by space alone: a rule here sits
+   immediately above the first section heading, which already announces itself. */
+#preamble > .sectionbody {
+    padding-bottom: 0;
+}
+
+/* Asciidoctor promotes the opening paragraph to a "lead": 1.21875em in
+   `rgba(0,0,0,.85)`. Both are withdrawn. The colour made the first paragraph of
+   a document a paler ink than every paragraph that follows it, and the size
+   made it a different kind of object from the prose it introduces - it is the
+   same prose, and is set at the same size. */
+.lead > p,
+#preamble > .sectionbody > [class=paragraph]:first-of-type p {
+    font-size: 1em;
+    line-height: var(--ad-body-leading);
+    color: var(--ad-ink);
+}
+
+
+/* --- Inline code in tables ----------------------------------------------- */
+
+/* Half the cells in this document are a field name marked up with backticks.
+   Rendered in a mono face they turn a table into a grid of code, which reads
+   heavier than the prose around it and fights the text face of the page. In a
+   cell the name keeps the reading face and is marked only by its outline, which
+   is what distinguishes it from the prose in the neighbouring column. */
+/* A field name is one construct and is drawn one way wherever it appears. Only
+   the typeface differs from a code span in prose: in a table the reading face
+   keeps the column from turning into a grid of code. The chip's own fill must
+   differ from every cell background it can land on (plain row, striped row,
+   header column), or the frame disappears in one column and not the next. */
+/* A code span keeps the mono face in a table cell too; only the surrounding
+   cell text uses the reading face. The size is the one the chip has everywhere,
+   so its box clears the next line by the same amount as in a paragraph. */
+#preamble code {
+    font-family: var(--ad-font-mono);
+}
+
+/* A bare URL is an address the reader follows, not code they type; the default
+   sheet sets it in the mono face. */
+a.bare, .bare {
+    font-family: inherit;
+}
+
+
+/* --- Numbered headings ---------------------------------------------------
+   A section number and its title are two boxes on one baseline. Laid out as a
+   hanging indent the slot has to be guessed in advance, and a number one level
+   deeper than the guess pushes the first line out of step with the lines that
+   follow it. As two flex items the title box sets its own left edge, so every
+   line of a wrapped title starts in the same place whatever the number's width.
+   The title must be wrapped for this: a flex container promotes every inline
+   child to an item of its own, so a bare title holding a code span laid that
+   span out as a separate block, stretched to the heading's full height.
+   -------------------------------------------------------------------------- */
+
+#content h2:has(> .adnum),
+#content h3:has(> .adnum),
+#content h4:has(> .adnum),
+#content h5:has(> .adnum),
+#content h6:has(> .adnum) {
+    display: flex;
+    align-items: baseline;
+    column-gap: var(--ad-num-gap);
+    padding-left: 0;
+    text-indent: 0;
+}
+
+#content h2 > .adnum,
+#content h3 > .adnum,
+#content h4 > .adnum,
+#content h5 > .adnum,
+#content h6 > .adnum {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    margin-right: 0;
+    text-indent: 0;
+}
+
+/* The title keeps its own inline flow: code spans and emphasis inside it are
+   laid out as text, not as sibling boxes of the number. */
+#content h2 > .adtext,
+#content h3 > .adtext,
+#content h4 > .adtext,
+#content h5 > .adtext,
+#content h6 > .adtext {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+
+/* --- Section boundaries ---------------------------------------------------
+   Asciidoctor draws its own hairline between top-level sections
+   (`.sect1+.sect1`). Each theme already marks the boundary at the heading, so
+   the default rule lands beside that one and the seam carries two lines. The
+   heading's rule is the one the theme controls, so the default is removed.
+   -------------------------------------------------------------------------- */
+
+#content .sect1 + .sect1 {
+    border-top: 0;
+}
+
+
+/* --- Example block: final margin reset ------------------------------------
+   Restated at the end of the sheet on purpose. The list rule that gives a list
+   item's last block a bottom margin has the same specificity as this one, so
+   whichever is declared later wins; inside an example that margin would be
+   added to the box's own padding and the bottom gap would no longer match the
+   top. Order, not specificity, is what settles it.
+   -------------------------------------------------------------------------- */
+
+#content .exampleblock > .content > *,
+#content .exampleblock > .content > * > :last-child,
+#content .exampleblock > .content > * > * > :last-child,
+#content .exampleblock > .content .olist > ol > li > :last-child,
+#content .exampleblock > .content .ulist > ul > li > :last-child {
+    margin-bottom: 0;
+}
+
+#content .exampleblock > .content > * + * {
+    margin-top: 0.85em;
+}
+
+
+/* ==========================================================================
+   Theme — BUREAU
+   An institutional standard. White stock, navy rules, a display serif titling
+   a text serif, a strict horizontal grid. The look of a specification.
+   ========================================================================== */
+
+
+:root {
+    --ad-font-body: "Source Serif 4", "Charter", Georgia, "Times New Roman", serif;
+    --ad-font-heading: "Playfair Display", "Iowan Old Style", Georgia, serif;
+    --ad-font-display: "Playfair Display", "Iowan Old Style", Georgia, serif;
+    --ad-font-meta: "Source Serif 4", "Charter", Georgia, serif;
+    --ad-font-toc: "Source Serif 4", "Charter", Georgia, serif;
+    --ad-font-mono: "Source Code Pro", "SFMono-Regular", Menlo, Consolas, monospace;
+    --ad-font-label: "Playfair Display", "Iowan Old Style", Georgia, serif;
+    --ad-label-transform: none;
+    --ad-label-variant: all-small-caps;
+    --ad-label-size: 0.92em;
+    --ad-label-size-lg: 1em;
+    --ad-label-tracking: 0.08em;
+    --ad-label-tracking-lg: 0.12em;
+    --ad-font-caption: "Playfair Display", "Iowan Old Style", Georgia, serif;
+    --ad-caption-style: normal;
+    --ad-caption-weight: 400;
+    --ad-caption-size: 0.88em;
+    --ad-caption-tracking: 0;
+
+    --ad-body-size: 17px;
+    --ad-body-leading: 1.6;
+    /* Cell lines average six characters, far short of the measure the body
+       leading is cut for. */
+    --ad-cell-leading: 1.3;
+    --ad-measure: 58.5em;
+
+    --ad-canvas: #ffffff;
+    --ad-ink: #1b1f26;
+    --ad-ink-strong: #0a0d12;
+    --ad-ink-muted: #4d5560;
+    --ad-accent: #1b3a6b;
+    --ad-rule: #d5dae1;
+    --ad-rule-hair: 1px solid #e2e6ec;
+    --ad-rule-strong: 2px solid #1b3a6b;
+    --ad-marker-ink: #1b3a6b;
+    --ad-bold-weight: 700;
+    --ad-radius: 0px;
+
+    --ad-link: #1b3a6b;
+    --ad-link-hover: #0a0d12;
+    --ad-link-underline: rgba(27, 58, 107, .5);
+    --ad-link-hover-bg: rgba(27, 58, 107, .08);
+
+    --ad-title-ink: #0a0d12;
+    --ad-title-size: 3em;
+    --ad-title-weight: 600;
+    --ad-title-tracking: -0.015em;
+    --ad-title-case: none;
+    --ad-title-align: left;
+    --ad-title-flex-align: flex-start;
+    --ad-title-margin-top: 3rem;
+
+    --ad-heading-ink: #1b3a6b;
+    --ad-heading-weight: 600;
+    --ad-h2-size: 1.9em;
+    --ad-h2-tracking: -0.005em;
+    --ad-h2-case: none;
+    --ad-h2-ink: #1b3a6b;
+    --ad-h2-rule: 3px solid #1b3a6b;
+    --ad-h2-pad-top: 0.8rem;
+    --ad-h3-size: 1.36em;
+    --ad-h3-tracking: 0;
+    --ad-h3-case: none;
+    --ad-h3-ink: #1b3a6b;
+    --ad-h4-size: 1.1em;
+    --ad-h4-ink: #1b3a6b;
+    --ad-h5-size: 0.91em;
+    --ad-h5-style: normal;
+    --ad-num-ink: #1b3a6b;
+    --ad-num-weight: 600;
+    --ad-num-gap: 0.7rem;
+    --ad-subsection-gap: 1.6875rem;
+
+    --ad-toc-width: 22rem;
+    --ad-toc-size: 0.87rem;
+    --ad-toc-title-block: 31.6px;
+    --ad-toc-bg: #f6f8fa;
+    --ad-toc-border: 1px solid #e2e6ec;
+    --ad-toc-ink: #3c434e;
+    --ad-toc-ink-strong: #1b3a6b;
+    --ad-toc-title-ink: #16315c;
+    --ad-toc-guide: #c6cedb;
+    --ad-toc-active: #16315c;
+
+    --ad-blocktitle-ink: #515966;
+    --ad-good: #166a2f;
+    --ad-good-ink: #1b7334;
+    --ad-good-bg: #edf4ef;
+    --ad-bad: #ae2a20;
+    --ad-bad-ink: #bb2e23;
+    --ad-bad-bg: #f9eeec;
+
+    --ad-code-bg: #f6f8fa;
+    --ad-code-ink: #1b1f26;
+    --ad-code-edge: #1b3a6b;
+    --ad-code-border: 1px solid #e2e6ec;
+    --ad-code-inline-bg: #f3f6fb;
+    --ad-code-inline-ink: #1b3a6b;
+    --ad-code-inline-edge: #b4c1d4;
+
+    /* A light header band. A reversed band makes every inline object inside it
+       fight the page: a code chip is drawn as dark-on-light everywhere else and
+       inverted only here. The weight the band carried moves into the rules that
+       close the header top and bottom. */
+    --ad-thead-bg: #e4eaf3;
+    --ad-thead-ink: #1b3a6b;
+    --ad-thead-grid: #c3cfe0;
+    /* The table is framed top and bottom by the same weight. The band's own
+       fill already separates the header from the body, so its lower edge is a
+       divider rather than the heaviest rule on the table - which is what made
+       the head read as a lid sitting on a much lighter box. */
+    --ad-thead-rule: 1px solid #1b3a6b;
+    --ad-thead-toprule: 2px solid #1b3a6b;
+    --ad-table-bottom-rule: 2px solid #1b3a6b;
+    --ad-rowhead-bg: #eef1f5;
+    --ad-rowhead-ink: #1b3a6b;
+    --ad-stripe-bg: #f9fafc;
+    /* The closing rule sits below the byline, at the foot of the title block. */
+    --ad-title-rule: 0;
+    --ad-title-rule-gap: 0;
+    --ad-header-rule: 1px solid #d5dae1;
+    --ad-header-rule-gap: 0.69rem;
+    --ad-byline-gap: 1.07rem;
+    --ad-cell-rule-width: 1px;
+
+    --ad-quote-bg: #f6f8fa;
+    --ad-mark-bg: #e8eefb;
+    --ad-pop-bg: #ffffff;
+    --ad-pop-border: #9aa3b0;
+    --ad-pop-shadow: 0 12px 32px rgba(10, 13, 18, .24), 0 2px 6px rgba(10, 13, 18, .14);
+}
+
+/* --- Theme-specific flourishes ------------------------------------------- */
+
+/* The closing rule sits under the whole title block, below the byline. */
+#header > h1:first-child {
+    padding-top: 1.1rem;
+    border-top: 6px solid #1b3a6b;
+}
+
+/* Clause numbers are the handle a specification is cited by, so they are set
+   apart from the clause title and kept on a fixed tabular width. */
+/* A number and the title it belongs to are one object, so they carry one
+   colour; only their weight and size tell them apart. */
+#content h2 .adnum {
+    display: inline-block;
+}
+
+#content h3 .adnum,
+#content h4 .adnum,
+#content h5 .adnum {
+    display: inline-block;
+    font-size: 0.86em;
+    font-weight: 700;
+}
+
+#content h3 {
+    border-bottom: 1px solid #e2e6ec;
+    padding-bottom: 0.35em;
 }
