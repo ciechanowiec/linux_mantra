@@ -97,8 +97,8 @@ echo "Configuring GitHub Copilot CLI defaults..."
 #   New interactive sessions start with all permissions allowed, matching the
 #   Claude Code and Codex defaults. Resumed sessions keep their permission mode;
 #   use `/allow-all` there or `--allow-all` for programmatic invocations.
-#   The model is pinned to Claude Opus 5 with the long-context tier rather than
-#   left on "auto", matching the Claude Code preference on this workstation.
+#   The model is pinned to Claude Opus 5.5 with xhigh reasoning and the
+#   long-context tier (currently 1,000,000 tokens, the maximum), not "auto".
 #   "memory": false turns off agentic memory (cross-session fact recall), the
 #   counterpart of Claude Code's autoMemoryEnabled=false; session history stays.
 #   It only stops the CLI from storing/recalling facts - facts already stored
@@ -111,11 +111,11 @@ merge_json_file "$copilotHome/settings.json" '. * {
   "defaultPermissionMode": "allow-all",
   "memory": false,
   "showReasoning": false,
-  "model": "claude-opus-5",
+  "model": "claude-opus-5.5",
   "contextTier": "long_context",
   "theme": "github",
   "banner": "never",
-  "effortLevel": "high",
+  "effortLevel": "xhigh",
   "stream": true,
   "renderMarkdown": true,
   "showTimestamps": true,
