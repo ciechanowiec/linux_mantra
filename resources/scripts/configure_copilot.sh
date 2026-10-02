@@ -103,9 +103,14 @@ echo "Configuring GitHub Copilot CLI defaults..."
 #   counterpart of Claude Code's autoMemoryEnabled=false; session history stays.
 #   It only stops the CLI from storing/recalling facts - facts already stored
 #   live on GitHub's side and are deleted at github.com/settings/copilot/memory.
+#   "showReasoning": false hides the model's "Thought for..." reasoning blocks in
+#   the timeline. It is the same key Ctrl+T toggles and persists, so it can be
+#   flipped back per machine. It only hides the reasoning; how much the model
+#   reasons is governed by effortLevel.
 merge_json_file "$copilotHome/settings.json" '. * {
   "defaultPermissionMode": "allow-all",
   "memory": false,
+  "showReasoning": false,
   "model": "claude-opus-5",
   "contextTier": "long_context",
   "theme": "github",
