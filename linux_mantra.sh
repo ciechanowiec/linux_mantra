@@ -1099,6 +1099,7 @@ echo "5.1. Setting up UNIX aliases..."
 cat >> "$shellFile" << EOF
 
 # UNIX ALIASES:
+alias a='adocent'
 alias aem_init_archetype_65='~/scripts/aem_init_archetype.sh 65'
 alias aem_init_archetype_cloud='~/scripts/aem_init_archetype.sh cloud'
 alias cc='mkdir -p ~/claude && cd ~/claude && claude' # Claude-based chat in CLI; shadows the C compiler in interactive shells (use 'command cc' if needed)
