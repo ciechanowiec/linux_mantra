@@ -42,6 +42,10 @@
     var TRAVEL_SPEED_PX_PER_MS = 0.8;    // an unhurried pointer, not a flick
     var MAX_TRAVEL_MS = 1400;            // a stuck-open note is worse than a lost one
     var AWAY_TOLERANCE_PX = 60;          // absorbs the wobble of an imprecise but honest approach
+    // Shared with the internal-link preview below. Each preview replaces only itself, and a
+    // closing one deliberately lingers while the pointer may still be travelling to it, so
+    // without a shared signal the two would stack. The one opened last is the one asked for.
+    var PREVIEW_OPEN_EVENT = 'adoc:preview-open';
     var popover;
     var hideTimer;
     var hidePending = false;   // the mousemove watcher only arbitrates a hide already scheduled
@@ -139,6 +143,7 @@
         pop.style.left = (left + window.pageXOffset) + 'px';
         pop.style.top = (top + window.pageYOffset) + 'px';
         pop.style.visibility = 'visible';
+        document.dispatchEvent(new CustomEvent(PREVIEW_OPEN_EVENT, { detail: pop }));
     };
 
     var hide = function () {
@@ -147,6 +152,12 @@
             popover.style.display = 'none';
         }
     };
+
+    document.addEventListener(PREVIEW_OPEN_EVENT, function (event) {
+        if (event.detail !== popover) {
+            hide();
+        }
+    });
 
     // In margin mode the note can sit a full column away from its marker — a marker at the start
     // of a line is the worst case — so a delay tuned for an adjacent note expires mid-journey.
@@ -212,6 +223,7 @@
     var SIDE_MAX_WIDTH_PX = 520;
     var PREFERRED_WIDTH_REM = 38;
     var GAP_PX = 12;
+    var PREVIEW_OPEN_EVENT = 'adoc:preview-open';   // see the footnote preview above
     var SECTION_SELECTOR = '.sect0, .sect1, .sect2, .sect3, .sect4, .sect5';
     // A colon ends an announcement, not an answer.
     var LEAD_IN_PATTERN = /:\s*$/;
@@ -651,6 +663,7 @@
         pop.style.display = 'block';
         place(link, pop);
         pop.style.visibility = 'visible';
+        document.dispatchEvent(new CustomEvent(PREVIEW_OPEN_EVENT, { detail: pop }));
     };
 
     // What is left out, and why. The anchor icon beside a heading points at the heading it sits
@@ -719,6 +732,12 @@
 
     document.addEventListener('mousemove', function (event) {
         if (hidePending && distanceToPopover(event) > distanceAtLeave + AWAY_TOLERANCE_PX) {
+            hide();
+        }
+    });
+
+    document.addEventListener(PREVIEW_OPEN_EVENT, function (event) {
+        if (event.detail !== popover) {
             hide();
         }
     });
