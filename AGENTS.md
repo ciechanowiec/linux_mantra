@@ -50,13 +50,11 @@ Other conventions:
 ## Resources layout (what each subtree is for)
 
 - `resources/linux/`, `resources/mac/` — OS-specific config payloads dropped onto the target system.
-- `resources/scripts/` — standalone helper scripts the mantra installs into the user's PATH (e.g. `mantra_docs.sh`, `idea.sh`, `xplr.sh`, the `colima_*` and `docker_clean*` family).
-- `resources/adoc_template/` — the AsciiDoc project skeleton used by the `mantra_docs.sh` generator script.
+- `resources/scripts/` — standalone helper scripts the mantra installs into the user's PATH (e.g. `aem_init_archetype.sh`, `idea.sh`, `xplr.sh`, the `colima_*` and `docker_clean*` family).
 - `resources/fernflower/` — bundled `fernflower.jar` (the script mounts it instead of installing a separate decompiler; CFR was tried and rejected — see comments in the FERNFLOWER block).
 - `resources/font/`, `resources/xplr/`, `resources/intellij-idea-*-settings-export.zip` — assets the script copies into place.
 
 ## Documentation files
 
 - `README.adoc` — user-facing description and run instructions.
-- `resources/adoc_template/README-guideline-writing.adoc` — an AsciiDoc style/structure guideline. Per the user's memory, this document is fed almost exclusively to AI as style instructions, so when editing it, optimize for clarity-to-an-LLM rather than human prose polish.
 - `docs/` and the root `docinfo*.html` files are AsciiDoc styling assets, not project documentation.

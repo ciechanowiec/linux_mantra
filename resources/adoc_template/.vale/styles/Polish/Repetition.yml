@@ -1,6 +1,0 @@
-extends: repetition
-message: "'%s' jest powtórzone."
-level: error
-alpha: true
-tokens:
-  - '[^\s]+'

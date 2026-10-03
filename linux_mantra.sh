@@ -1112,7 +1112,6 @@ alias git_clip_cur_branch="git branch | grep '*' | cut -d ' ' -f 2 | xxclip"
 alias git_switch_to_com='~/scripts/git_switch_to_com.sh'
 alias i='idea'
 alias idea='~/scripts/idea.sh'
-alias mantra_docs='~/scripts/mantra_docs.sh'
 alias mvn_download_sources_and_javadocs='mvn dependency:sources && mvn dependency:sources dependency:resolve -Dclassifier=javadoc'
 alias n='nvim'
 alias nvim="~/scripts/nvim.sh"
