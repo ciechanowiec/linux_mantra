@@ -1,3 +1,38 @@
+// A mixed link remains one anchor. Its ordinary text receives its own inline
+// spans so the underline can stop at each code frame without changing wrapping,
+// emphasis, whitespace, the destination, or the link's accessible name.
+(function () {
+    var markLinkText = function () {
+        var links = document.querySelectorAll('#content a[href], #header a[href], #footnotes a[href]');
+        links.forEach(function (link) {
+            if (link.closest('code, pre, .source-fields') || !link.querySelector('code')) {
+                return;
+            }
+            var walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
+            var texts = [];
+            var text;
+            while ((text = walker.nextNode())) {
+                if (text.textContent.trim() && !text.parentElement.closest('code, .ad-link-text')) {
+                    texts.push(text);
+                }
+            }
+            // Collect first: walking while inserting spans would visit the moved
+            // text again. Existing spans are skipped when the script runs twice.
+            texts.forEach(function (node) {
+                var span = document.createElement('span');
+                span.className = 'ad-link-text';
+                node.parentNode.insertBefore(span, node);
+                span.appendChild(node);
+            });
+        });
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', markLinkText);
+    } else {
+        markLinkText();
+    }
+})();
+
 // Autofit wide verbatim blocks: shrink each <pre> whose content overflows its
 // box just enough to fit, so wide ASCII diagrams and code render whole instead
 // of wrapping. Mirrors the autofit applied on the PDF side. Below the block's

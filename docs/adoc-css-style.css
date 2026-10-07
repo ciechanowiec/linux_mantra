@@ -3,7 +3,7 @@
 @import url("https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css");
 
 /* ==========================================================================
-   Generated. Edit the theme sources, then re-run publish.py.
+   Shared AsciiDoc document stylesheet, maintained in this repository.
    ========================================================================== */
 
 /* Carried over from the stylesheet this one replaces.
@@ -688,7 +688,9 @@ code, pre, kbd, tt, .listingblock pre, .literalblock pre {
    vertical padding made the chip taller than the line box, so chips on adjacent
    lines met. Scoping under #content outranks it and puts every value back. */
 #content :not(pre) > code,
-#header :not(pre) > code {
+#header :not(pre) > code,
+#footnotes a[href] code,
+#footnotes code:has(a[href]) {
     background: var(--ad-code-inline-bg);
     color: var(--ad-code-inline-ink);
     border: 1px solid var(--ad-code-inline-edge);
@@ -706,53 +708,58 @@ code, pre, kbd, tt, .listingblock pre, .literalblock pre {
     box-decoration-break: clone;
 }
 
-/* A code chip that is also a link must still read as a link. The page marks a
-   link with a rule beneath it, but the anchor's own border lands exactly on the
-   chip's lower edge and reads as a doubled, broken frame. So the chip draws the
-   rule itself, offset clear of its outline by a generated box that costs no
-   layout, and takes the link colour on its frame as a second cue. Both nestings
-   occur: `xref:...[`x`]` puts the chip inside the anchor, `` `xref:...[x]` ``
-   puts the anchor inside the chip. */
-#content a:has(> code),
-#content code > a,
-#header a:has(> code),
-#header code > a {
+/* Linked code uses the frame itself as the link cue. A separate underline
+   sits outside the line box and can collide with the next wrapped line.
+   Both AsciiDoc nesting orders are supported. Destinations without href,
+   preformatted blocks, and source metadata keep their existing presentation. */
+:is(#content, #header, #footnotes) a[href]:has(code:not(pre code, .source-fields code)),
+:is(#content, #header, #footnotes) code:not(pre code, .source-fields code) a[href] {
     border-bottom: 0;
+    text-decoration: none;
 }
 
-#content a:has(> code) > code,
-#content code:has(> a) {
-    position: relative;
+:is(#content, #header, #footnotes) a[href] code:not(pre code, .source-fields code),
+:is(#content, #header, #footnotes) code:not(pre code, .source-fields code):has(a[href]) {
     color: var(--ad-link);
     border-color: var(--ad-link);
+    border-width: var(--ad-code-link-width);
 }
 
-#content a:has(> code) > code::after,
-#content code:has(> a)::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -0.26em;
-    border-bottom: 1px solid var(--ad-link-underline);
-}
-
-/* The anchor's own hover fill would paint a rectangle behind the chip that is
-   taller than the chip itself, so the chip takes the hover instead. */
-#content a:has(> code):hover {
+/* The anchor's hover fill would paint beyond the frame, so the code owns it. */
+:is(#content, #header, #footnotes) a[href]:has(code:not(pre code, .source-fields code)):hover,
+:is(#content, #header, #footnotes) code:not(pre code, .source-fields code) a[href]:hover {
     background: none;
 }
 
-#content a:has(> code):hover > code,
-#content code:has(> a):hover {
+:is(#content, #header, #footnotes) a[href]:hover code:not(pre code, .source-fields code),
+:is(#content, #header, #footnotes) code:not(pre code, .source-fields code):has(a[href]:hover) {
     color: var(--ad-link-hover);
     background: var(--ad-link-hover-bg);
     border-color: var(--ad-link-hover);
 }
 
-#content a:has(> code):hover > code::after,
-#content code:has(> a):hover::after {
+:is(#content, #header, #footnotes) a[href]:has(code:not(pre code, .source-fields code)):focus-visible,
+:is(#content, #header, #footnotes) code:not(pre code, .source-fields code) a[href]:focus-visible {
+    outline: 2px solid var(--ad-link);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+/* The shared footer wraps only text outside code in a mixed link. Drawing
+   the rule on those spans keeps each normal fragment underlined without a
+   parent underline propagating through the code frames. */
+:is(#content, #header, #footnotes) a[href] .ad-link-text {
+    border-bottom: 1px solid var(--ad-link-underline);
+}
+
+:is(#content, #header, #footnotes) a[href]:hover .ad-link-text {
     border-bottom-color: var(--ad-link-hover);
+}
+
+/* Only paragraphs carrying code links need the extra room. Plain cells retain
+   the compact leading, and themes with more generous leading keep it. */
+#content table.tableblock p:has(a[href] code, code a[href]) {
+    line-height: max(var(--ad-cell-leading), var(--ad-code-link-leading));
 }
 
 /* A cell's leading is tighter than prose, so the chip's vertical padding no
@@ -1676,6 +1683,8 @@ a.bare, .bare {
     --ad-code-inline-bg: #f3f6fb;
     --ad-code-inline-ink: #1b3a6b;
     --ad-code-inline-edge: #b4c1d4;
+    --ad-code-link-width: 2px;
+    --ad-code-link-leading: 1.55;
 
     /* A light header band. A reversed band makes every inline object inside it
        fight the page: a code chip is drawn as dark-on-light everywhere else and
