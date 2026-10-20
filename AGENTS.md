@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Not an application — a personalized, interactive setup script for the author's Linux/Java/AEM (and parallel macOS) workstation. The deliverables are two long, top-level Bash scripts that drive every step of provisioning a freshly installed OS:
 
 - `linux_mantra.sh` (~2.9k lines) — Ubuntu 26.x (`resolute`)
-- `mac_mantra.sh` (~2.3k lines) — macOS 26
+- `mac_mantra.sh` (~2.3k lines) — macOS 27
 
 Each script is the entry point for its platform. Together with the sibling `resources/` directory, they form a self-contained tool: the scripts hardcode paths into `resources/` and copy/source/trigger files from there.
 
@@ -19,7 +19,7 @@ Each script is the entry point for its platform. Together with the sibling `reso
 
 ## Approaching changes: look past the literal request
 
-This repo provisions one specific, *moving* target (currently Ubuntu 26 "resolute" / macOS 26). A request phrased as a narrow edit usually has second-order consequences that aren't visible at the edit site. Before calling a change done, check three things:
+This repo provisions one specific, *moving* target (currently Ubuntu 26 "resolute" / macOS 27). A request phrased as a narrow edit usually has second-order consequences that aren't visible at the edit site. Before calling a change done, check three things:
 
 1. **Is it coupled to the OS / desktop-environment release?** OS-shipped defaults change between releases and usually aren't a version string you can grep. When a change touches package names, default apps, OS-shipped tools, GNOME/`dconf`/`gsettings` schema paths or app IDs, GNOME-Shell extensions, or download URLs, treat the target release as a dependency that may have moved — verify the name/path/URL still exists and is still the default on the *current* target instead of assuming continuity from an older release. (Trap to remember: the default GUI terminal is release-coupled — older Ubuntu shipped `gnome-terminal`, current ships `ptyxis`; a "bump the OS" that only edits version strings silently leaves terminal launches, `dconf` keybindings, app IDs, and the profile block pointing at a program that no longer exists.)
 2. **Where else does this fact live?** Identifiers and settings are duplicated across the tree, not centralized — the same value can appear in both top-level scripts, `resources/scripts/*.sh`, `resources/**/*.lua`, and `dconf` dumps like `resources/linux/desktopSettingsFile.txt`, sometimes in different forms. The pinned-version rule below is one case of a general habit: after changing a value in one file, `grep -rn` the whole repo (including `resources/`) for siblings and fix them in the same pass. Other duplicated facts: the release-name guard `expectedLinuxReleaseName="resolute"` (top-level scripts + ~6 helper scripts under `resources/scripts/`), the JetBrains Mono Nerd Font (download URLs/filenames in the top-level script vs. the `font-name` setting `JetBrainsMonoNL Nerd Font Mono` in config payloads), and terminal app IDs (launches + keybindings + notification settings).

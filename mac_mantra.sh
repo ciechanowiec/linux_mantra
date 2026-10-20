@@ -60,7 +60,7 @@ shellFile="null"
 isMacOS=false
 isLinux=false
 expectedLinuxReleaseName="resolute"
-expectedMacReleaseName="macOS 26"
+expectedMacReleaseName="macOS 27"
 
 echo "2. Checking whether the resources directory exists..."
 if [ ! -d "$resourcesDir" ]
@@ -2224,18 +2224,33 @@ if [ -d "$xplrSettingsDir" ]
 fi
 
 echo "2. Installing xplr..." # docs: https://xplr.dev/en/install
+# The binary must match the CPU architecture: plain `xplr-linux`/`xplr-macos`
+# archives contain x86_64 builds, which on ARM fail with "Bad CPU type in
+# executable" whenever no x86_64 emulation is available (e.g. after the
+# upgrade to macOS 27 on Apple Silicon).
+cpuArchitecture=$(uname -m)
 if [ "$isLinux" == true ] && [ "$isMacOS" == false ];
   then
-    wget https://github.com/sayanarijit/xplr/releases/latest/download/xplr-linux.tar.gz
-    tar --verbose --extract --file xplr-linux.tar.gz
+    if [ "$cpuArchitecture" == "aarch64" ] || [ "$cpuArchitecture" == "arm64" ];
+      then
+        xplrArchive="xplr-linux-aarch64.tar.gz"
+      else
+        xplrArchive="xplr-linux.tar.gz"
+    fi
   elif [ "$isMacOS" == true ] && [ "$isLinux" == false ];
     then
-      wget https://github.com/sayanarijit/xplr/releases/latest/download/xplr-macos.tar.gz
-      tar --verbose --extract --file xplr-macos.tar.gz
+      if [ "$cpuArchitecture" == "arm64" ];
+        then
+          xplrArchive="xplr-macos-aarch64.tar.gz"
+        else
+          xplrArchive="xplr-macos.tar.gz"
+      fi
   else
     echo "Unexpected error occurred. Update failed"
     exit 1
 fi
+wget "https://github.com/sayanarijit/xplr/releases/latest/download/$xplrArchive"
+tar --verbose --extract --file "$xplrArchive"
 # On binary installation: https://superuser.com/a/7163
 sudo cp ./xplr /usr/local/bin
 mkdir -p "$xplrSettingsDir"
