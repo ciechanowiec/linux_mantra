@@ -251,10 +251,11 @@
     // Prose reflows, so a narrow margin still reads. A table laid out to a fixed width and a
     // verbatim block cannot reflow: squeezed into the same column they break words mid-token
     // and lose the alignment that made them worth showing, which costs the reader more than
-    // the two lines the fallback placement covers. Each asks for the room it needs.
+    // the two lines the fallback placement covers. Each asks for the room it needs. An image
+    // reflows by scaling, but a diagram scaled into a margin is too small to read.
     var SIDE_MIN_WIDTH_PX = 240;
     var SIDE_MIN_WIDTH_RIGID_PX = 340;
-    var RIGID_CONTENT_SELECTOR = 'table, pre';
+    var RIGID_CONTENT_SELECTOR = 'table, pre, img';
     var SIDE_MAX_WIDTH_PX = 520;
     var PREFERRED_WIDTH_REM = 38;
     var GAP_PX = 12;
@@ -295,7 +296,8 @@
         '.admonitionblock td.content',
         '.listingblock pre',
         '.literalblock pre',
-        'table.tableblock p'
+        'table.tableblock p',
+        '.imageblock'
     ].join(', ');
     var popover;
     var currentLink;
@@ -441,7 +443,10 @@
         var candidates = section.querySelectorAll(CONTENT_SELECTOR);
         for (var index = 0; index < candidates.length; index += 1) {
             var candidate = candidates[index];
-            if (candidate.closest(SECTION_SELECTOR) === section && candidate.textContent.trim()) {
+            // An image has no text of its own, yet a section that opens with a diagram is
+            // answered by the diagram.
+            var substantial = candidate.textContent.trim() || candidate.querySelector('img');
+            if (candidate.closest(SECTION_SELECTOR) === section && substantial) {
                 // A section that opens with a table is answered by the table. Reached this way
                 // the candidate is its first cell, which is one square of that answer and reads
                 // as a stray fragment: "5.14. English" over "English.AmericanSpelling".

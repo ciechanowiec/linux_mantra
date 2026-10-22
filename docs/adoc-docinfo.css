@@ -106,6 +106,12 @@
     white-space: pre-wrap;
 }
 
+.xref-preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
 .xref-preview ol, .xref-preview ul {
     padding-left: 1.3rem;
 }
