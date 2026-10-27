@@ -104,13 +104,6 @@ else
   echo "Colima is installed"
 fi
 
-if ! brew list --formula | grep -q '^qemu$'; then
-  echo "Installing QEMU..."
-  brew install qemu --quiet
-else
-  echo "QEMU is installed"
-fi
-
 SHARE_DIR="$HOME/.local/share"
 SCRIPTS_DIR="$SHARE_DIR/colima-scripts"
 SCRIPTS_LOGS_DIR="$SCRIPTS_DIR/logs"
@@ -324,12 +317,6 @@ network:
   dnsHosts:
     host.docker.internal: host.lima.internal
 
-  # Network driver to use (slirp, gvproxy), (requires vmType \`qemu\`)
-  #   - slirp is the default user mode networking provided by Qemu
-  #   - gvproxy is an alternative to VPNKit based on gVisor https://github.com/containers/gvisor-tap-vsock
-  # Default: gvproxy
-  driver: gvproxy
-
 # ===================================================================== #
 # ADVANCED CONFIGURATION
 # ===================================================================== #
@@ -357,35 +344,18 @@ forwardAgent: false
 # Default: {}
 docker: {}
 
-# Virtual Machine type (qemu, vz)
-# NOTE: this is macOS 13 only. For Linux and macOS <13.0, qemu is always used.
-#
-# vz is macOS virtualization framework and requires macOS 13
-#
-# Default: qemu
-vmType: qemu
+# Use Apple's Virtualization framework (requires macOS 13 or newer).
+# Keep arch: host above so the VM uses the host's native CPU architecture.
+# VM type is fixed at creation; changing this template does not migrate an existing VM.
+vmType: vz
 
-# Utilise rosetta for amd64 emulation (requires m1 mac and vmType \`vz\`)
+# Utilise Rosetta for amd64 emulation (requires Apple Silicon and vmType \`vz\`).
 # Default: false
 rosetta: false
 
-# Volume mount driver for the virtual machine (virtiofs, 9p, sshfs).
-#
-# virtiofs is limited to macOS and vmType \`vz\`. It is the fastest of the options.
-#
-# 9p is the recommended and the most stable option for vmType \`qemu\`.
-#
-# sshfs is faster than 9p but the least reliable of the options (when there are lots
-# of concurrent reads or writes).
-#
-# Default: virtiofs (for vz), sshfs (for qemu)
-mountType: sshfs
-
-# The CPU type for the virtual machine (requires vmType \`qemu\`).
-# Options available for host emulation can be checked with: \`qemu-system-\$(arch) -cpu help\`.
-# Instructions are also supported by appending to the cpu type e.g. "qemu64,+ssse3".
-# Default: host
-cpuType: host
+# Share host files through VirtioFS, avoiding SSHFS overhead for bind mounts.
+# Requires vmType \`vz\` on macOS; Docker named volumes remain on the VM's data disk.
+mountType: virtiofs
 
 # For a more general purpose virtual machine, Ubuntu container is optionally provided
 # as a layer on the virtual machine.
