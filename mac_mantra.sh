@@ -1007,11 +1007,13 @@ mkdir -p "$HOME/.claude"
 if [ ! -f "$claudeSettingsFile" ]; then
     echo '{}' > "$claudeSettingsFile"
 fi
-# `find` and `rg` are allowlisted for prompt-free read-only searching, but both
-# can be coaxed into running arbitrary code (`find -exec`/`-delete`/`-fprint`,
-# `rg --pre`/`--search-zip`). The deny list below blocks exactly those flags;
-# deny takes precedence over allow in Claude Code, so ordinary searches stay
-# prompt-free while the code-execution escape hatches still require approval.
+# bypassPermissions skips every approval prompt, so the allow list only matters
+# if defaultMode is switched back to a prompting mode. Deny rules are the one
+# thing bypass mode still enforces, so they are kept to actions that leave this
+# machine and cannot be undone locally (pushes, publishes, merges, releases).
+# Local commands such as `rm -rf`, `sudo` or `find -exec` are deliberately not
+# denied, matching Codex's danger-full-access setup in configure_codex.sh. The
+# subtracted list drops deny entries written by older mantra versions.
 jq '. * {
   "theme": "auto",
   "autoMemoryEnabled": false,
@@ -1115,27 +1117,21 @@ jq '. * {
     "Bash(yt-dlp --version)",
     "WebSearch"
   ]) | unique)
-| .permissions.deny = (((.permissions.deny // []) + [
+| .permissions.deny = (((.permissions.deny // []) - [
     "Bash(curl * | bash*)",
     "Bash(curl * | sh*)",
     "Bash(dd *)",
-    "Bash(docker push*)",
     "Bash(find * -exec *)",
     "Bash(find * -execdir *)",
     "Bash(find * -delete*)",
     "Bash(find * -fprint*)",
-    "Bash(gh pr merge*)",
-    "Bash(gh release create*)",
     "Bash(git clean -f*)",
-    "Bash(git push*)",
     "Bash(git reset --hard*)",
     "Bash(halt*)",
     "Bash(killall*)",
     "Bash(launchctl *)",
     "Bash(mkfs*)",
-    "Bash(npm publish*)",
     "Bash(pkill*)",
-    "Bash(pnpm publish*)",
     "Bash(reboot*)",
     "Bash(rg * --pre *)",
     "Bash(rg * --pre-glob *)",
@@ -1148,7 +1144,14 @@ jq '. * {
     "Bash(sudo *)",
     "Bash(systemctl *)",
     "Bash(wget * | bash*)",
-    "Bash(wget * | sh*)",
+    "Bash(wget * | sh*)"
+  ] + [
+    "Bash(docker push*)",
+    "Bash(gh pr merge*)",
+    "Bash(gh release create*)",
+    "Bash(git push*)",
+    "Bash(npm publish*)",
+    "Bash(pnpm publish*)",
     "Bash(yarn publish*)"
   ]) | unique)
 ' "$claudeSettingsFile" > "$claudeSettingsFile.tmp" \
