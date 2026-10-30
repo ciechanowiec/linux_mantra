@@ -1010,7 +1010,9 @@ fi
 # bypassPermissions skips every approval prompt, so the allow list only matters
 # if defaultMode is switched back to a prompting mode. Deny rules are the one
 # thing bypass mode still enforces, so they are kept to actions that leave this
-# machine and cannot be undone locally (pushes, publishes, merges, releases).
+# machine and cannot be undone locally (image pushes, publishes, merges,
+# releases). `git push` is deliberately allowed: a pushed branch can still be
+# force-pushed over or deleted, unlike a published package or a merged PR.
 # Local commands such as `rm -rf`, `sudo` or `find -exec` are deliberately not
 # denied, matching Codex's danger-full-access setup in configure_codex.sh. The
 # subtracted list drops deny entries written by older mantra versions.
@@ -1126,6 +1128,7 @@ jq '. * {
     "Bash(find * -delete*)",
     "Bash(find * -fprint*)",
     "Bash(git clean -f*)",
+    "Bash(git push*)",
     "Bash(git reset --hard*)",
     "Bash(halt*)",
     "Bash(killall*)",
@@ -1149,7 +1152,6 @@ jq '. * {
     "Bash(docker push*)",
     "Bash(gh pr merge*)",
     "Bash(gh release create*)",
-    "Bash(git push*)",
     "Bash(npm publish*)",
     "Bash(pnpm publish*)",
     "Bash(yarn publish*)"
