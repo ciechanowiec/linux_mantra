@@ -320,7 +320,7 @@ alias ir='( nohup ~/scripts/idea_restart.sh >/dev/null 2>&1 & )'
 alias logout="launchctl reboot logout" # https://apple.stackexchange.com/a/450798
 alias reboot="sudo shutdown -r now"
 alias shutdown="sudo shutdown -h now"
-alias sleep="sudo pmset sleepnow"
+alias zzz="sudo pmset sleepnow" # not "sleep": an alias would shadow sleep(1) and break wait loops
 alias xxclip="perl -pe 'chomp if eof' | pbcopy" # perl is required to drop the last NL character
 EOF
 
