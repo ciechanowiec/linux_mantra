@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(.editorconfig)",
+      "Edit(.gitattributes)",
+      "Edit(.java-version)",
+      "Edit(.mvn/maven.config)",
+      "Edit(.mvn/jvm.config)",
+      "Edit(.mvn/settings.xml)",
+      "Edit(.airness/agent-guide.md)",
+      "Edit(README-guideline-software-project.adoc)",
+      "Edit(.airness/license-inventory.ftl)",
+      "Edit(.airness/test.gitconfig)",
+      "Edit(docs/eslint.config.mjs)",
+      "Edit(docs/vitest.config.mts)",
+      "Edit(docs/.airness/npm-registry.py)"
+    ]
+  }
+}

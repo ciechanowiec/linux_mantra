@@ -1,0 +1,13 @@
+# Configuration for the secret scan, which reads the whole history under the slow profile.
+#
+# This file is seeded once and then belongs to the project. Its rules are the scanner's own defaults,
+# which are shared by construction and need nothing from the harness.
+#
+# Start without exclusions. A project that deliberately carries an invalid credential fixture may add
+# an exact, rule-scoped exception for that value: the whole value anchored as ^value$ and matched against
+# the secret, because gitleaks excuses every finding that contains an unanchored one. A real secret must
+# never reach a commit.
+title = "Secret scan configuration"
+
+[extend]
+useDefault = true

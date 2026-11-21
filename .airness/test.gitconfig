@@ -1,0 +1,17 @@
+# The Git configuration every test run of the repository reads as its global one. The Surefire and Failsafe
+# runs a Java module inherits and the Vitest runs of a node project point GIT_CONFIG_GLOBAL here and set
+# GIT_CONFIG_NOSYSTEM, so no hook, signing key, ignore file or attribute file of the machine that runs the
+# tests reaches a test's verdict. A test that needs another setting writes it into its own repository.
+[core]
+    hooksPath = /dev/null
+    excludesFile = /dev/null
+    attributesFile = /dev/null
+[commit]
+    gpgSign = false
+[tag]
+    gpgSign = false
+[init]
+    defaultBranch = main
+[user]
+    name = Airness Test
+    email = test@airness.invalid

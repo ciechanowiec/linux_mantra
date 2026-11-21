@@ -1,0 +1,23 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+[*.{yml,yaml,ts,tsx,mts,cts,js,jsx,mjs,cjs,json,jsonc}]
+indent_size = 2
+
+# A Markdown paragraph is one source line however long it runs, as the Markdown check requires, so an editor
+# wrapping Markdown at the limit above would cut the paragraph the check then refuses.
+[*.md]
+max_line_length = off
+
+# Formats whose syntax or own formatter requires a tab: a make recipe, the submodule list that git writes, gofmt
+# output, and a Caddyfile as caddy fmt writes it, which Caddy warns about at startup when it departs from that.
+[{Makefile,makefile,GNUmakefile,*.mk,.gitmodules,*.go,Caddyfile,*.Caddyfile,*.caddyfile}]
+indent_style = tab

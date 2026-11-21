@@ -1,0 +1,638 @@
+#!/bin/bash
+echo "==================================="
+echo "|                                 |"
+echo "|       DOCKER INSTALLATION       |"
+echo "|                                 |"
+echo "==================================="
+echo "This script will install headless Docker and related software on your macOS"
+
+osName=$(uname)
+if [[ "${osName}" != "Darwin" ]]; then
+  echo "This script is intended to be run on macOS only"
+  exit 1
+fi
+
+echo ""
+echo "==========================="
+echo "|  MACOS DEVELOPER TOOLS  |"
+echo "==========================="
+echo "Ensuring macOS developer tools, including git..."
+clt_installed() {
+    pkgutil --pkg-info=com.apple.pkg.CLTools_Executables &> /dev/null
+}
+echo "Checking if macOS developer tools, including git, are installed..."
+if clt_installed && git --version &> /dev/null; then
+    echo "macOS developer tools, including git, are installed"
+    git --version
+else
+    echo -e "Installing macOS developer tools, including git. \033[1mConfirm installation in pop-up windows if requested...\033[0m"
+    xcode-select --install > /dev/null 2>&1
+    echo "Waiting for macOS developer tools, including git, installation to complete..."
+    until clt_installed && git --version &> /dev/null; do
+        sleep 5
+    done
+    echo "macOS developer tools, including git, were installed successfully"
+    git --version
+fi
+
+echo ""
+echo "==========================="
+echo "|         HOMEBREW        |"
+echo "==========================="
+echo "Ensuring Homebrew..."
+ZSHRC="${HOME}/.zshrc"
+touch "${ZSHRC}"
+append_if_missing() {
+  local snippet="$1"
+  local marker="$2"  # A unique marker to search within the file
+  if ! grep -Fq "${marker}" "${ZSHRC}"; then
+    echo -e "${snippet}" >> "${ZSHRC}"
+  fi
+}
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    brewShellenv=$(/opt/homebrew/bin/brew shellenv)
+    eval "${brewShellenv}"
+fi
+if [[ -f "/usr/local/bin/brew" ]]; then
+    brewShellenv=$(/usr/local/bin/brew shellenv)
+    eval "${brewShellenv}"
+fi
+if command -v brew &>/dev/null; then
+    echo "Homebrew is installed."
+else
+    echo "Installing Homebrew..."
+    export NONINTERACTIVE=1
+    sudo -v # Caches the sudo credentials the installer needs; NONINTERACTIVE above skips its prompts
+    homebrewInstaller=$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
+    /bin/bash -c "${homebrewInstaller}"
+fi
+echo "Ensuring the 'brew' command in the shell..."
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    BREW_SHELLENV="eval \"\$(/opt/homebrew/bin/brew shellenv)\""
+fi
+if [[ -f "/usr/local/bin/brew" ]]; then
+    BREW_SHELLENV="eval \"\$(/usr/local/bin/brew shellenv)\""
+fi
+BREW_SHELL_MARKER="# 'brew' command:"
+append_if_missing "${BREW_SHELL_MARKER}" "${BREW_SHELLENV}"
+append_if_missing "${BREW_SHELLENV}" "${BREW_SHELLENV}"
+echo "Ensuring Homebrew autocompletion..."
+read -r -d '' BREW_AUTOCOMPLETE <<'EOF'
+# 'brew' autocompletion:
+if type brew &>/dev/null; then
+    FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+    autoload -Uz compinit
+    compinit
+fi
+EOF
+BREW_AUTOCOMPLETE_MARKER="# 'brew' autocompletion:"
+append_if_missing "${BREW_AUTOCOMPLETE}" "${BREW_AUTOCOMPLETE_MARKER}"
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    brewShellenv=$(/opt/homebrew/bin/brew shellenv)
+    eval "${brewShellenv}"
+fi
+if [[ -f "/usr/local/bin/brew" ]]; then
+    brewShellenv=$(/usr/local/bin/brew shellenv)
+    eval "${brewShellenv}"
+fi
+brew --version
+
+echo ""
+echo "==========================="
+echo "|          COLIMA         |"
+echo "==========================="
+echo "Ensuring Colima..."
+
+installedFormulae=$(brew list --formula)
+if ! grep -q '^colima$' <<< "${installedFormulae}"; then
+  echo "Installing Colima..."
+  brew install colima --quiet
+else
+  echo "Colima is installed"
+fi
+
+SHARE_DIR="${HOME}/.local/share"
+SCRIPTS_DIR="${SHARE_DIR}/colima-scripts"
+SCRIPTS_LOGS_DIR="${SCRIPTS_DIR}/logs"
+LAUNCH_AGENTS_DIR="${HOME}/Library/LaunchAgents"
+LAUNCH_AGENT="${LAUNCH_AGENTS_DIR}/la.abio.colima.plist"
+COLIMA_LAUNCH_SCRIPT="${SCRIPTS_DIR}/colima-start-fg.sh"
+ERROR_LOG_FILE="${SCRIPTS_LOGS_DIR}/startup.scripts.err"
+OUT_LOG_FILE="${SCRIPTS_LOGS_DIR}/startup.scripts.out"
+
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    COLIMA_BIN_PATH="/opt/homebrew/bin/colima"
+fi
+if [[ -f "/usr/local/bin/brew" ]]; then
+    COLIMA_BIN_PATH="/usr/local/bin/colima"
+fi
+
+if [[ ! -d "${SHARE_DIR}" ]]
+ then
+   echo "Share directory doesn't exist. Creating ${SHARE_DIR}..."
+   mkdir -p "${SHARE_DIR}"
+fi
+if [[ ! -d "${SCRIPTS_DIR}" ]]
+ then
+   echo "Scripts directory doesn't exist. Creating ${SCRIPTS_DIR}..."
+   mkdir -p "${SCRIPTS_DIR}"
+fi
+if [[ ! -d "${SCRIPTS_LOGS_DIR}" ]]
+ then
+   echo "Scripts logs directory doesn't exist. Creating ${SCRIPTS_LOGS_DIR}..."
+   mkdir -p "${SCRIPTS_LOGS_DIR}"
+fi
+if [[ ! -d "${LAUNCH_AGENTS_DIR}" ]]
+ then
+   echo "Launch agents directory doesn't exist. Creating ${LAUNCH_AGENTS_DIR}..."
+   mkdir -p "${LAUNCH_AGENTS_DIR}"
+fi
+touch "${ERROR_LOG_FILE}"
+touch "${OUT_LOG_FILE}"
+
+echo "Creating a startup launch agent: ${LAUNCH_AGENT}..."
+cat > "${LAUNCH_AGENT}" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"\>
+<plist version="1.0">
+ <dict>
+   <key>Label</key>
+   <string>la.abio.colima.plist</string>
+   <key>Program</key>
+   <string>${COLIMA_LAUNCH_SCRIPT}</string>
+   <key>RunAtLoad</key>
+   <true/>
+   <key>KeepAlive</key>
+   <false/>
+   <key>StandardErrorPath</key>
+   <string>${ERROR_LOG_FILE}</string>
+   <key>StandardOutPath</key>
+   <string>${OUT_LOG_FILE}</string>
+ </dict>
+</plist>
+EOF
+
+echo "Creating a startup launch script: ${COLIMA_LAUNCH_SCRIPT}..."
+cat > "${COLIMA_LAUNCH_SCRIPT}" << EOF
+#!/bin/bash
+
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+if [ -f "/opt/homebrew/bin/brew" ]; then
+    eval "\$(/opt/homebrew/bin/brew shellenv)"
+fi
+if [ -f "/usr/local/bin/brew" ]; then
+    eval "\$(/usr/local/bin/brew shellenv)"
+fi
+
+function shutdown() {
+    ${COLIMA_BIN_PATH} stop
+    exit 0
+}
+
+trap shutdown SIGTERM
+trap shutdown SIGKILL
+trap shutdown SIGINT
+
+# wait until Colima is running
+while true; do
+    ${COLIMA_BIN_PATH} status &>/dev/null
+    if [[ \$? -eq 0 ]]; then
+        break
+    fi
+    ${COLIMA_BIN_PATH} start
+    sleep 5
+done
+
+tail -f /dev/null &
+wait \$!
+EOF
+
+echo "Making the startup launch script executable..."
+sudo chmod +x "${COLIMA_LAUNCH_SCRIPT}"
+
+echo "Defining the Colima template file..."
+COLIMA_TEMPLATES_DIR="${HOME}/.colima/_templates"
+COLIMA_TEMPLATE_DESTINATION_FILE="${COLIMA_TEMPLATES_DIR}/default.yaml"
+if [[ ! -d "${COLIMA_TEMPLATES_DIR}" ]]
+ then
+   echo "Colima templates directory directory doesn't exist. Creating ${COLIMA_TEMPLATES_DIR}..."
+   mkdir -p "${COLIMA_TEMPLATES_DIR}"
+fi
+if [[ -f "${COLIMA_TEMPLATE_DESTINATION_FILE}" ]]; then
+  printf '\033[1mOld template file for Colima detected: %s\033[0m\n' "${COLIMA_TEMPLATE_DESTINATION_FILE}"
+  echo -n "Do you want to remove it (if you choose no, the script execution will stop)? [y/N] "
+  read -r answer < /dev/tty
+  case "${answer}" in
+    [Yy]* )
+      rm -f "${COLIMA_TEMPLATE_DESTINATION_FILE}"
+      echo "File removed. Proceeding..."
+      ;;
+    * )
+      printf '\033[1mPlease remove the file manually and run the script again.\033[0m\n'
+      exit 1
+      ;;
+  esac
+fi
+echo "Sizing the Colima virtual machine against the host's capabilities..."
+# CPU: half of the host's logical cores (the other half stays with macOS).
+COLIMA_CPU=$(( $(sysctl -n hw.logicalcpu) / 2 ))
+[[ "${COLIMA_CPU}" -lt 1 ]] && COLIMA_CPU=1
+# Memory: half of the host's RAM in GiB (hw.memsize is reported in bytes).
+COLIMA_MEMORY=$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 / 2 ))
+[[ "${COLIMA_MEMORY}" -lt 1 ]] && COLIMA_MEMORY=1
+# Disk: half of the total capacity of the volume backing $HOME, in GiB.
+# The Colima disk is a sparse max-size cap, so it only consumes what is actually used.
+homeVolumeUsage=$(df -k "${HOME}")
+homeVolumeKilobytes=$(awk 'NR==2 {print $2}' <<< "${homeVolumeUsage}")
+COLIMA_DISK=$(( homeVolumeKilobytes / 1024 / 1024 / 2 ))
+[[ "${COLIMA_DISK}" -lt 1 ]] && COLIMA_DISK=1
+echo "Allocating to Colima: cpu=${COLIMA_CPU}, memory=${COLIMA_MEMORY}GiB, disk=${COLIMA_DISK}GiB"
+
+echo "Writing: ${COLIMA_TEMPLATE_DESTINATION_FILE}..."
+cat > "${COLIMA_TEMPLATE_DESTINATION_FILE}" << EOF
+# Number of CPUs to be allocated to the virtual machine.
+# Default: 2
+cpu: ${COLIMA_CPU}
+
+# Size of the disk in GiB to be allocated to the virtual machine.
+# NOTE: changing this has no effect after the virtual machine has been created.
+# Default: 60
+disk: ${COLIMA_DISK}
+
+# Size of the memory in GiB to be allocated to the virtual machine.
+# Default: 2
+memory: ${COLIMA_MEMORY}
+
+# Architecture of the virtual machine (x86_64, aarch64, host).
+# Default: host
+arch: host
+
+# Container runtime to be used (docker, containerd).
+# Default: docker
+runtime: docker
+
+# Kubernetes configuration for the virtual machine.
+kubernetes:
+  # Enable kubernetes.
+  # Default: false
+  enabled: false
+
+  # Kubernetes version to use.
+  # This needs to exactly match a k3s version https://github.com/k3s-io/k3s/releases
+  # Default: latest stable release
+  version: v1.24.3+k3s1
+
+  # Disable k3s features [coredns servicelb traefik local-storage metrics-server].
+  # All features are enabled unless disabled.
+  #
+  # EXAMPLE - disable traefik and metrics-server
+  # disable: [traefik, metrics-server]
+  #
+  # Default: [traefik]
+  disable:
+    - traefik
+
+# Auto-activate on the Host for client access.
+# Setting to true does the following on startup
+#  - sets as active Docker context (for Docker runtime).
+#  - sets as active Kubernetes context (if Kubernetes is enabled).
+# Default: true
+autoActivate: true
+
+# Network configurations for the virtual machine.
+network:
+  # Assign reachable IP address to the virtual machine.
+  # NOTE: this is currently macOS only and ignored on Linux.
+  # Default: false
+  address: true
+
+  # Custom DNS resolvers for the virtual machine.
+  #
+  # EXAMPLE
+  # dns: [8.8.8.8, 1.1.1.1]
+  #
+  # Default: []
+  dns: []
+
+  # DNS hostnames to resolve to custom targets using the internal resolver.
+  # This setting has no effect if a custom DNS resolver list is supplied above.
+  # It does not configure the /etc/hosts files of any machine or container.
+  # The value can be an IP address or another host.
+  #
+  # EXAMPLE
+  # dnsHosts:
+  #   example.com: 1.2.3.4
+  dnsHosts:
+    host.docker.internal: host.lima.internal
+
+# ===================================================================== #
+# ADVANCED CONFIGURATION
+# ===================================================================== #
+
+# Forward the host's SSH agent to the virtual machine.
+# Default: false
+forwardAgent: false
+
+# Docker daemon configuration that maps directly to daemon.json.
+# https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file.
+# NOTE: some settings may affect Colima's ability to start docker. e.g. \`hosts\`.
+#
+# EXAMPLE - disable buildkit
+# docker:
+#   features:
+#     buildkit: false
+#
+# EXAMPLE - add insecure registries
+# docker:
+#   insecure-registries:
+#     - myregistry.com:5000
+#     - host.docker.internal:5000
+#
+# Colima default behaviour: buildkit enabled
+# Default: {}
+docker: {}
+
+# Use Apple's Virtualization framework (requires macOS 13 or newer).
+# Keep arch: host above so the VM uses the host's native CPU architecture.
+# VM type is fixed at creation; changing this template does not migrate an existing VM.
+vmType: vz
+
+# Utilise Rosetta for amd64 emulation (requires Apple Silicon and vmType \`vz\`).
+# Default: false
+rosetta: false
+
+# Share host files through VirtioFS, avoiding SSHFS overhead for bind mounts.
+# Requires vmType \`vz\` on macOS; Docker named volumes remain on the VM's data disk.
+mountType: virtiofs
+
+# For a more general purpose virtual machine, Ubuntu container is optionally provided
+# as a layer on the virtual machine.
+# The underlying virtual machine is still accessible via \`colima ssh --layer=false\` or running \`colima\` in
+# the Ubuntu session.
+#
+# Default: false
+layer: false
+
+# Custom provision scripts for the virtual machine.
+# Provisioning scripts are executed on startup and therefore needs to be idempotent.
+#
+# EXAMPLE - script exected as root
+# provision:
+#   - mode: system
+#     script: apk add htop vim
+#
+# EXAMPLE - script exected as user
+# provision:
+#   - mode: user
+#     script: |
+#       [ -f ~/.provision ] && exit 0;
+#       echo provisioning as \$USER...
+#       touch ~/.provision
+#
+# Default: []
+provision: []
+
+# Modify ~/.ssh/config automatically to include a SSH config for the virtual machine.
+# SSH config will still be generated in ~/.colima/ssh_config regardless.
+# Default: true
+sshConfig: true
+
+# Configure volume mounts for the virtual machine.
+# Colima mounts user's home directory by default to provide a familiar
+# user experience.
+#
+# EXAMPLE
+# mounts:
+#   - location: ~/secrets
+#     writable: false
+#   - location: ~/projects
+#     writable: true
+#
+# Colima default behaviour: \$HOME and /tmp/colima are mounted as writable.
+# Default: []
+mounts: []
+
+# Environment variables for the virtual machine.
+#
+# EXAMPLE
+# env:
+#   KEY: value
+#   ANOTHER_KEY: another value
+#
+# Default: {}
+env: {}
+EOF
+
+echo ""
+echo "==========================="
+echo "|          DOCKER         |"
+echo "==========================="
+echo "Ensuring Docker..."
+
+installedFormulae=$(brew list --formula)
+if ! grep -q '^docker$' <<< "${installedFormulae}"; then
+  echo "Installing Docker brew..."
+  brew install docker --quiet
+else
+  echo "Docker brew is installed"
+fi
+
+installedFormulae=$(brew list --formula)
+if ! grep -q '^docker-compose$' <<< "${installedFormulae}"; then
+  echo "Installing Docker Compose brew..."
+  brew install docker-compose --quiet
+else
+  echo "Docker Compose brew is installed"
+fi
+echo "Attempting to stop Colima..."
+colima stop
+echo "Attempting to start Colima..."
+colima start
+echo "Will run sample docker container to verify the installation..."
+dockerVerified=true
+if ! docker run hello-world; then
+  # The most common reason for the verification to fail on an otherwise working setup is a
+  # corporate VPN/proxy that performs TLS interception: it re-signs HTTPS traffic with a
+  # corporate root CA. macOS trusts that CA (so `brew` downloads succeed), but the Colima
+  # Linux VM ships only the stock public root store, so the in-VM Docker daemon rejects the
+  # re-signed certificates when pulling images (`x509: certificate signed by unknown
+  # authority`, e.g. from production.cloudfront.docker.com). This step is a no-op on a
+  # non-corporate machine (the host simply has no extra anchors to add), so it is safe to run
+  # universally. The host home directory is mounted into the VM at the same path, so the
+  # absolute paths below are valid inside the VM as well.
+  echo "Verification failed - attempting to recover from a possible corporate VPN/proxy TLS interception..."
+  HOST_CA_BUNDLE="${HOME}/.colima/host-ca-certificates.pem"
+  HOST_CA_INSTALLER="${HOME}/.colima/install-host-ca.sh"
+  echo "Exporting host-trusted CA certificates to ${HOST_CA_BUNDLE}..."
+  {
+    security find-certificate -a -p /Library/Keychains/System.keychain 2>/dev/null
+    security find-certificate -a -p "${HOME}/Library/Keychains/login.keychain-db" 2>/dev/null
+  } > "${HOST_CA_BUNDLE}"
+  echo "Writing the in-VM CA installer to ${HOST_CA_INSTALLER}..."
+  cat > "${HOST_CA_INSTALLER}" << EOF
+#!/bin/sh
+# Installs the host's trusted CA certificates into the Colima VM so that the in-VM Docker
+# daemon trusts a corporate VPN/proxy that performs TLS interception. Idempotent.
+set -e
+HOST_CA="${HOST_CA_BUNDLE}"
+DEST=/usr/local/share/ca-certificates
+if [ ! -s "\$HOST_CA" ]; then
+  echo "No host CA bundle at \$HOST_CA - nothing to install."
+  exit 0
+fi
+rm -f "\$DEST"/colima-host-ca-*.crt
+csplit -z -s -f "\$DEST/colima-host-ca-" -b '%03d.crt' "\$HOST_CA" '/-----BEGIN CERTIFICATE-----/' '{*}'
+update-ca-certificates
+command -v systemctl >/dev/null 2>&1 && systemctl restart docker >/dev/null 2>&1 || true
+EOF
+  chmod +x "${HOST_CA_INSTALLER}"
+  echo "Installing host-trusted CA certificates into the Colima VM..."
+  colima ssh -- sudo sh "${HOST_CA_INSTALLER}"
+  echo "Re-running sample docker container to re-verify the installation..."
+  if ! docker run hello-world; then
+    dockerVerified=false
+  fi
+fi
+
+if [[ "${dockerVerified}" == false ]]; then
+  echo -e "\033[31mDocker installation failed\033[0m"
+  echo -n "Proceed with the script anyway? [y/N] "
+  read -r answer < /dev/tty
+  case "${answer}" in
+    [Yy]* )
+      echo "Proceeding..."
+      ;;
+    * )
+      echo "Exiting..."
+      exit 1
+      ;;
+  esac
+fi
+
+echo ""
+echo "==========================="
+echo "|    DOCKER VARIABLES     |"
+echo "==========================="
+echo "Ensuring Docker Variables..."
+DOCKER_VARIABLES_MARKER="# MAKE DOCKER CLIENTS SEE THE CUSTOM SOCKET:"
+if ! grep -Fq "${DOCKER_VARIABLES_MARKER}" "${HOME}/.zshrc"; then
+  echo "Adding Docker variables to ${HOME}/.zshrc..."
+  cat >> "${HOME}/.zshrc" << EOF
+
+${DOCKER_VARIABLES_MARKER}
+export DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock
+# FIX TESTCONTAINERS (https://github.com/testcontainers/testcontainers-java/issues/7082):
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock"
+export TESTCONTAINERS_HOST_OVERRIDE="\$(colima ls -j | jq -r '.address')"
+EOF
+fi
+echo "Done"
+
+echo ""
+echo "==========================="
+echo "|      DOCKER SOCKET      |"
+echo "==========================="
+echo "Ensuring the Docker socket at the path every tool looks in..."
+# Colima keeps its socket under $HOME and announces it only through `docker context`. Whatever reads
+# the context, such as the docker command itself, is fine. Whatever does not, such as Testcontainers,
+# looks at /var/run/docker.sock and at DOCKER_HOST, so anything started outside a login shell - an
+# IDE opened from the Dock, a launch agent, cron - never sees the exports written above and reports
+# that it cannot find a Docker environment. A link at the standard path answers all of them and needs
+# no environment at all.
+#
+# macOS empties /var/run on every boot, so the link is recreated by a launch daemon rather than made
+# once by hand. The daemon runs before Colima has started, which leaves the link pointing at nothing
+# until it does. That is harmless: there is no daemon to talk to until then either.
+DOCKER_SOCKET_LABEL="la.abio.docker-socket"
+DOCKER_SOCKET_DAEMON="/Library/LaunchDaemons/${DOCKER_SOCKET_LABEL}.plist"
+DOCKER_SOCKET_SOURCE="${HOME}/.colima/default/docker.sock"
+DOCKER_SOCKET_TARGET="/var/run/docker.sock"
+DOCKER_SOCKET_STAGING="$(mktemp)"
+
+echo "Writing the launch daemon: ${DOCKER_SOCKET_DAEMON}..."
+cat > "${DOCKER_SOCKET_STAGING}" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+ <dict>
+   <key>Label</key>
+   <string>${DOCKER_SOCKET_LABEL}</string>
+   <key>ProgramArguments</key>
+   <array>
+     <string>/bin/ln</string>
+     <string>-sfn</string>
+     <string>${DOCKER_SOCKET_SOURCE}</string>
+     <string>${DOCKER_SOCKET_TARGET}</string>
+   </array>
+   <key>RunAtLoad</key>
+   <true/>
+ </dict>
+</plist>
+EOF
+
+echo -e "Installing the launch daemon. \033[1mEnter your password if requested...\033[0m"
+# launchd refuses a daemon that is not owned by root and not world-readable, so the file is placed
+# with its ownership and mode rather than copied and adjusted afterwards.
+sudo install -o root -g wheel -m 644 "${DOCKER_SOCKET_STAGING}" "${DOCKER_SOCKET_DAEMON}"
+rm -f "${DOCKER_SOCKET_STAGING}"
+echo "Loading the launch daemon..."
+# Booting it out first makes a re-run of this script replace the running daemon rather than fail on
+# a label that is already loaded. It reports an error when nothing is loaded, which is expected.
+sudo launchctl bootout "system/${DOCKER_SOCKET_LABEL}" 2>/dev/null
+sudo launchctl bootstrap system "${DOCKER_SOCKET_DAEMON}"
+echo "Docker socket at the standard path:"
+ls -l "${DOCKER_SOCKET_TARGET}"
+
+echo ""
+echo "==========================="
+echo "|     DOCKER BUILDX       |"
+echo "==========================="
+echo "Ensuring Docker Buildx..."
+if [[ -f "${HOME}/.docker/cli-plugins/docker-buildx" ]]; then
+    echo "Docker Buildx already installed at ~/.docker/cli-plugins/docker-buildx. Skipping installation."
+else
+  unameOutput=$(uname)
+  os=$(tr '[:upper:]' '[:lower:]' <<< "${unameOutput}")
+  arch=$(uname -m)
+  case "${arch}" in
+      x86_64) arch="amd64" ;;
+      arm64|aarch64) arch="arm64" ;;
+      *) echo "Unsupported architecture: ${arch}"; exit 1 ;;
+  esac
+  releaseFileSuffix="${os}-${arch}"
+  echo "Detected platform suffix: ${releaseFileSuffix}"
+  temp_dir=$(mktemp -d)
+  echo "Using temporary directory: ${temp_dir}"
+  pushd "${temp_dir}" > /dev/null || { echo "Failed to change directory to ${temp_dir}"; exit 1; }
+  BUILDX_API_URL="https://api.github.com/repos/docker/buildx/releases/latest"
+  echo "Querying GitHub API for the latest release..."
+  buildxRelease=$(curl -s "${BUILDX_API_URL}")
+  # The first download URL ending in the platform suffix: the fourth field between double quotes.
+  asset_url=$(awk -v pattern="browser_download_url.*\\.${releaseFileSuffix}\"" '$0 ~ pattern { split($0, fields, "\""); print fields[4]; exit }' <<< "${buildxRelease}")
+  if [[ -z "${asset_url}" ]]; then
+      echo "No asset found for suffix ${releaseFileSuffix}"
+      popd > /dev/null || { echo "Failed to return from directory ${temp_dir}"; exit 1; }
+      rm -rf "${temp_dir}"
+      exit 1
+  else
+      filename=$(basename "${asset_url}")
+      echo "Downloading ${filename} from ${asset_url}..."
+      curl --verbose --location --output "${filename}" "${asset_url}"
+      mkdir -v -p "${HOME}/.docker/cli-plugins"
+      mv -v -f "${filename}" "${HOME}/.docker/cli-plugins/docker-buildx"
+      chmod +x "${HOME}/.docker/cli-plugins/docker-buildx"
+      popd > /dev/null || { echo "Failed to return from directory ${temp_dir}"; exit 1; }
+      rm -rf "${temp_dir}"
+  fi
+fi
+
+echo "Docker Buildx version installed:"
+docker buildx version || exit 1
+
+echo ""
+echo "==========================="
+echo "|         RESTART         |"
+echo "==========================="
+echo "Installation finished"
+echo "Restart your computer for changes to come info force..."

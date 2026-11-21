@@ -1,0 +1,34 @@
+# BEGIN AIRNESS MANAGED: generic
+# The project owns every pattern below the managed blocks. Keep them aligned with the files that
+# Dockerfile COPY and ADD instructions need. Add build-output exclusions such as target/ only when the
+# Docker build creates those outputs instead of copying them from the host.
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+
+# IDE and editors
+*.iml
+.idea/
+.vscode/
+.fleet/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.log.[0-9]*
+*.logs*
+logs/
+log/
+# END AIRNESS MANAGED: generic
+
+# BEGIN AIRNESS MANAGED: node
+# The host dependency tree is not a deployment artifact. Standalone runtime dependencies travel
+# inside their verified output directory instead.
+node_modules/
+# END AIRNESS MANAGED: node

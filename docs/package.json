@@ -1,0 +1,32 @@
+{
+  "name": "linux-mantra-pages",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The stylesheets and the footer script that AsciiDoc documents load from the GitHub Pages site of linux_mantra.",
+  "type": "module",
+  "imports": {
+    "#scripts/*": "./scripts/*.ts"
+  },
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "format": "airness-node format"
+  },
+  "devDependencies": {
+    "@airness/node": "1.0.13",
+    "@types/node": "26.6.6",
+    "@vitest/coverage-v8": "5.0.5",
+    "esbuild": "0.28.2",
+    "happy-dom": "21.0.4",
+    "tocbot": "4.36.8",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  },
+  "airness": {
+    "productionEntries": [
+      {
+        "pattern": "src/main.ts",
+        "reason": "the build script bundles it into adoc-docinfo-footer.js, the classic script the published documents load"
+      }
+    ]
+  }
+}

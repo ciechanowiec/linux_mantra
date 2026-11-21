@@ -1,0 +1,479 @@
+[.text-justify]
+= Software Project Guideline
+:reproducible:
+:doctype: article
+:author: Herman Ciechanowiec
+:email: herman@ciechanowiec.eu
+:chapter-signifier:
+:sectnums:
+:sectnumlevels: 5
+:sectanchors:
+:toc: left
+:toclevels: 5
+:icons: font
+:linkcss:
+:sourcedir: {docdir}
+:stylesdir: https://www.ciechanowiec.eu/linux_mantra/
+:stylesheet: adoc-css-style.css
+:!table-caption:
+:!figure-caption:
+:!example-caption:
+
+ifdef::backend-html5[]
+ifndef::env-github[]
+++++
+<link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
+<style>
+    table.tableblock {
+        table-layout: fixed;
+    }
+
+    table.tableblock td,
+    table.tableblock th {
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
+++++
+endif::[]
+endif::[]
+
+// This metadata table pairs each event with its timestamp and needs no column headers.
+[cols=">.^1,<.^1",adocent-disable-next-line="Structure.TableHeaders"]
+|===
+| Document last modified | {docdatetime}
+| Document generated | {localdatetime}
+|===
+
+This guideline is written primarily for AI agents that work in software project repositories. It applies from the creation of a repository through everyday coding and the remake of an existing repository.
+
+[[goal]]
+== Goal
+
+. [[governed-repository]]A _governed repository_ is a software project repository in which AI agents write all code without manual programming and changes merge without human review. Human review therefore catches none of its defects.
+. The xref:#governed-repository[governed repository] aims to create confidence without human code review. It automatically rejects every change that violates a rule.
+. Hard, explicit rules describe the exact state that a xref:#governed-repository[governed repository] must preserve. The governed repository enforces that state automatically.
+. Every rule of this guideline serves the goal. A stronger rule replaces a weaker rule. A missing rule that would serve the goal is a gap. A rule that doesn't serve the goal doesn't belong. An improvement to this guideline is judged against the same goal.
+
+[[application]]
+== Application
+
+. Every rule of this guideline describes the state of a compliant xref:#governed-repository[governed repository] - its layout, its xref:#harness[harness of automated checks], its code, its tests, its dependencies, and its commit history.
+. A rule is satisfied when an inspection confirms that the xref:#governed-repository[governed repository] has the state that the rule describes.
+. The section xref:#scouts[] describes procedures, not rules.
+. An AI agent applies the guideline by taking it together with an assignment. Example assignments include:
+.. creating a new software project repository on a chosen technology stack whose state follows these rules,
+.. remaking an existing software project repository until its state follows these rules,
+.. changing a xref:#governed-repository[governed repository] while preserving its compliance,
+.. running a xref:#scout[scout] of the section xref:#scouts[] on a governed repository.
+
+[[governing-principles]]
+== Governing Principles
+
+. The rules apply to every programming language and platform, so they name no concrete tools and no concrete programming languages.
+. A rule is absolute: it binds in every case unless the rule itself states its exception.
+. A rule that automation can verify reliably is wired into an automated xref:#check[check], and the xref:#governed-repository[governed repository] binds that check to a concrete tool of its technology stack.
+. A rule that no xref:#check[automated check] can verify reliably binds with the same force: an xref:#instruction-file[instruction file for AI agents] states it or refers to it, and an inspection of the xref:#governed-repository[governed repository] against the rule's wording decides compliance.
+
+[[foundations]]
+== Foundations
+
+This section defines the terms the guideline uses and states the qualities required of every automated xref:#check[check].
+
+[[definitions]]
+=== Definitions
+
+. [[check]]A _check_ is an automated verification with exactly two verdicts: pass and fail. Any outcome other than a pass, including the failure of the check itself to run, is a fail. A warning severity doesn't exist in a xref:#governed-repository[governed repository].
+. [[harness]]A _harness_ is the complete set of xref:#check[checks] of a xref:#governed-repository[governed repository].
+. [[verification-command]]A _verification command_ is a command of the xref:#governed-repository[governed repository] that covers every xref:#check[check] and runs the checks in a fixed order. It stops at the first check that fails and fails with it, so one run reports one failing check. The verdict of the verification command is the verdict of the whole xref:#harness[harness].
+. [[file-role]]A _file role_ is a category that a xref:#governed-repository[governed repository] can determine from a file itself and uses to include or exclude the file from xref:#check[checks].
+
+[[check-qualities]]
+=== Check Qualities
+
+. The xref:#check[checks] run at the strictest settings their tools offer, relaxed only where a rule of this guideline declares a cap, a floor, an allowlist, or a xref:#suppressions[machine-readable suppression].
+. A xref:#check[check] is deterministic: on the same state of the xref:#governed-repository[governed repository] it reaches the same verdict on every run and on every machine. The exceptions are the three checks of the section xref:#dependencies[] that read a public package registry by design: the xref:#dependency-freshness[freshness check], the xref:#dependency-vulnerabilities[vulnerability check], and the xref:#compliance-report[compliance report check].
+. The toolchain that the xref:#check[checks] run - every analyzer, every build plugin, and every container image - is pinned to an exact version. An upstream release therefore can't change a verdict while the xref:#governed-repository[governed repository] doesn't change.
+
+[[the-verification-command]]
+== The Verification Command
+
+. The xref:#governed-repository[governed repository] defines a xref:#verification-command[verification command] and may define commands that run declared subsets of the xref:#check[checks] - for example, a fast command for everyday work.
+. The xref:#verification-command[verification command] runs to a verdict on a fresh clone of the xref:#governed-repository[governed repository]. The only preparation a fresh clone needs is installing the toolchain.
+. A run of the xref:#verification-command[verification command] doesn't write to the tracked tree of the xref:#governed-repository[governed repository]. A tool that reshapes a source file, such as a formatter or an import sorter, runs as a xref:#check[check] that fails when the tool would change a file and applies the change only through a separate command the governed repository declares. A check compares the tree after a run against the tree before it and fails on any difference, so a pass describes the committed tree and not a tree the run reshaped.
+. The xref:#verification-command[verification command] itself starts every external service the tests use.
+. The head commit of the main branch passes the xref:#verification-command[verification command].
+. A xref:#check[check] the xref:#governed-repository[governed repository] implements itself, rather than one it binds to a third-party tool, is source code of the governed repository. The check meets every rule of the sections xref:#code-rules[] and xref:#testing[], and the xref:#harness[harness] treats it like any other source code.
+
+[[harness-integrity]]
+== Harness Integrity
+
+The xref:#harness[harness] stays beyond the xref:#governed-repository[governed repository's] reach. A xref:#check[check] the governed repository can turn off isn't a rule.
+
+. The xref:#harness[harness] decides which xref:#check[checks] run, how strict they must be, and what they exclude. The harness configuration lives outside the xref:#governed-repository[governed repository], or in a xref:#generated-files[generated file] that the regeneration check binds. The governed repository sets only what the harness leaves open.
+. The xref:#harness[harness] rejects any setting of the xref:#governed-repository[governed repository] that skips a xref:#check[check], lowers its severity, narrows its scope, or swaps the configuration it reads. Exceptions come only from the harness: a xref:#suppressions[suppression], an exclusion by xref:#file-role[file role], or a stricter cap.
+. The xref:#verification-command[verification command] fails on any finding. A report-only mode helps a software project repository adopt the harness. No run in that mode is a pass.
+
+[[governed-repository-organization]]
+== Governed Repository Organization
+
+This section describes the organization of a xref:#governed-repository[governed repository]: its xref:#instruction-file[instruction files], its project goal, the coherence of its parts, its production boundaries, its generated files, and the configuration that fixes formatting.
+
+[[instruction-files]]
+=== Instruction Files
+
+. [[instruction-file]]An _instruction file_ is a committed file that holds rules of the xref:#governed-repository[governed repository] for AI agents. [[root-instruction-file]]The root instruction file is `AGENTS.md` at the top of the governed repository and is neutral to the tools used by AI agents.
+. If this guideline and an xref:#instruction-file[instruction file] conflict, this guideline applies. An instruction file adds only details specific to the xref:#governed-repository[governed repository] or one of its directories and doesn't restate this guideline.
+. A tool-specific xref:#instruction-file[instruction file] contains only a reference to `AGENTS.md`. A xref:#check[check] rejects any other content and any instruction reference, command, or path that doesn't resolve.
+
+[[project-goal-rules]]
+=== Project Goal
+
+. [[project-goal]]The _project goal_ is the statement in the xref:#root-instruction-file[root instruction file] of what the software of the xref:#governed-repository[governed repository] achieves and for whom.
+. Every feature of the xref:#governed-repository[governed repository] serves the xref:#project-goal[project goal].
+. Only a human changes the xref:#project-goal[project goal].
+
+[[coherence]]
+=== Coherence
+
+A xref:#governed-repository[governed repository] grows through many separate changes. Its parts still fit together as if the whole repository had been designed at once.
+
+. [[part]]A _part_ is a directory, a file, or a named division of a file in the xref:#governed-repository[governed repository], such as a section of a document or a type in code.
+. Each xref:#part[part] covers one distinct area of the domain, and no two parts cover the same area. Each fact, rule, and piece of logic therefore has one authoritative location, and other parts refer to that location instead of copying it. For example, the xref:#root-instruction-file[root instruction file] describes all build commands in one section, not partly in a second section that a later change appended. Similarly, the maximum upload size is one named constant that the upload check and its error message both read, not two constants with the same value.
+. A xref:#part[part] holds the parts that cover the more specific areas within its own area: a directory holds directories and files, and a file holds named divisions. A specific area doesn't sit beside the general area it belongs to.
+. Each xref:#part[part] is as large as its role in the xref:#project-goal[project goal] requires and no larger. A minor case takes less code, documentation, and instruction text than a major one, and no part holds an abstraction, a configuration option, or an extension point that no current use needs.
+. xref:#part[Parts] that solve the same kind of problem solve it the same way. Two approaches coexist only where the problems differ. For example, either every xref:#callable[callable] reports an expected failure through a result type, or every callable raises an error for it, never a mix of both.
+
+[[production-imports]]
+=== Production Boundaries
+
+. Production code imports neither test code nor development-only dependencies. A xref:#check[check] walks every import of production code and fails on either kind.
+. Non-production identities have no production permissions. Tests use isolated data and credentials, so a test account can't access production data.
+. Production accepts neither development credentials nor default privileged credentials.
+
+[[generated-files]]
+=== Generated Files
+
+. No generated file carries a direct hand edit: a generated file changes only as the output of its declared generator. The xref:#governed-repository[governed repository] denies AI agents write access to generated files where the application that runs the AI agent supports the denial.
+. A xref:#check[check] reruns the declared generator and fails when the generated file differs from the output.
+. The xref:#governed-repository[governed repository] excludes generated files, identified by xref:#file-role[file role], from the xref:#check[checks] of the section xref:#code-rules[].
+
+[[governed-repository-configuration]]
+=== Governed Repository Configuration
+
+. Line endings, character encoding, indentation, and whitespace handling are fixed by configuration files committed to the xref:#governed-repository[governed repository]. A xref:#check[check] verifies every tracked file that the governed repository doesn't exclude by xref:#file-role[file role], such as binary assets, against that configuration and fails on the first deviation.
+. Where the programming language or platform provides a code formatter, the formatter is one of the xref:#check[checks], run under a committed configuration. The check formats every source file not exempt by xref:#file-role[file role] and fails when the output differs from the committed copy.
+. No secret sits in any commit. A xref:#check[check] scans the tracked content and the commit history for credentials, keys, and tokens.
+. The xref:#governed-repository[governed repository] lists every fake credential committed as a test fixture in a declared secret allowlist. The secret xref:#check[check] fails on any finding outside the secret allowlist.
+
+[[code-rules]]
+== Code Rules
+
+This section describes the state of the source code: its size, its types, its names, and the constructs banned from it.
+
+[[size-and-complexity-caps]]
+=== Size and Complexity Caps
+
+. Code respects the caps listed below, and each cap binds as an error in a static analyzer. A [[callable]]_callable_ is a source-code construct that can be invoked, such as a function, method, constructor, or a template fragment invoked by name.
++
+[cols="<3,>1",options="header"]
+|===
+|Measure |Cap
+|File length |500 lines
+|Callable length |50 lines
+|Parameters per callable |4
+|Cyclomatic complexity per callable |8
+|Control-structure nesting depth |3 levels
+|Line length |120 characters
+|===
+. The parameter cap doesn't bind on a xref:#callable[callable] that overrides another, because it doesn't choose its own parameter list. Every other cap binds.
+. Where no tool for the programming language or platform measures a cap, a script of the xref:#governed-repository[governed repository] measures that cap, and the script is a xref:#check[check].
+. Code that grows past a cap is refactored until every measured value meets the cap. A cap is never raised. A xref:#governed-repository[governed repository] may set caps stricter than the table and never sets looser ones.
+
+[[types-and-null]]
+=== Types and Null
+
+. Where the programming language or platform provides a static type checker, the type checker is one of the xref:#check[checks].
+. A xref:#callable[callable] doesn't return null and doesn't accept null where the programming language offers an optional or result type instead. A missing value is expressed as a typed value, such as an empty optional.
+
+[[error-handling]]
+=== Error Handling
+
+. A xref:#callable[callable] that can't do its job fails immediately with an error that says what went wrong. The callable doesn't fall back silently to a default.
+. An error response to an untrusted caller omits internal diagnostics, such as stack traces and private paths. Internal diagnostics retain the cause and a reference that connects the failure to the reported error.
+
+[[explicitness]]
+=== Explicitness
+
+. Code takes the explicit form wherever the programming language offers an implicit shortcut. Types are written even where the type checker infers them. Return types are declared, visibility is declared, and conversions between types are spelled out.
+. Every block is enclosed in braces where the programming language makes braces optional. A comparison uses the strict form where the programming language also offers a loose one. A conditional over a set of cases handles every case or declares an explicit default.
+
+[[immutability-and-composition]]
+=== Immutability and Composition
+
+. Data is immutable. A field is assigned once, when its object is created, and a local variable is assigned once. Changed state is expressed as a new value, not as an overwrite of the old one. A field stays writable only where a dependency must populate it after construction at run time, and the code itself never writes such a field. Anywhere else the only way to mutate is through a xref:#suppressions[suppression].
+. A concrete type is closed to inheritance where the programming language can express the closure. A type stays open only where a dependency must subclass it at run time.
+. New behavior is added by composing objects, not by inheriting. A type inherits only from a base that the programming language or a dependency requires - for example, the base error type.
+
+[[dependency-structure]]
+=== Dependency Structure
+
+. A [[dependency-unit]]_dependency unit_ is a named source-code division that can depend on another dependency unit, such as a module or package. The dependencies among the xref:#governed-repository[governed repository's] dependency units form a directed acyclic graph. A xref:#check[check] builds the graph from the code and fails on a cycle, naming the dependency units that lie on the cycle.
+. A cycle is broken by moving the shared concept into a xref:#dependency-unit[dependency unit] that both sides depend on, or by inverting one direction behind an abstraction that the depended-on dependency unit declares. A cycle is never declared acceptable.
+
+[[naming]]
+=== Naming
+
+. A name says plainly what the named thing is or does. One concept has one name everywhere in the xref:#governed-repository[governed repository].
+. A type name is by default a noun of the domain the type models - for example, `Order`, `MaskedToken`, or `RetryPolicy`. An agent noun built on a verb, such as `Compiler` or `Scheduler`, fits where the role itself is the concept. Where a domain type can own the operation instead, the operation belongs to that type - for example, masking belongs to `MaskedToken`, not to a `TokenMasker`. The suffixes `Service`, `Manager`, `Handler`, `Provider`, and `Util` are banned, and a xref:#governed-repository[governed repository] may extend the ban.
+. A name of one character is banned, except the placeholder that the programming language reserves for an unused value. For example, `maskedToken` says what `m` hides.
+. A name consists of full words. An abbreviation appears only where it's more recognizable than the full form - for example, `id` or `URL`, not `usrCfg`.
+
+[[banned-constructs]]
+=== Banned Constructs
+
+. A bare number in code is banned: a number appears only in the declaration of a named constant. The only exception is a short structural-value allowlist, such as 0 and 1, that the xref:#governed-repository[governed repository] declares.
+. Dead code is banned: a xref:#check[check] fails on an unused file, an unused xref:#callable[callable], an unused parameter, an unused dependency, and an unused export outside the declared public interface of the xref:#governed-repository[governed repository].
+. `TODO` and `FIXME` comments are banned.
+. A call to an API that its own supplier marks deprecated in the released artifact is banned.
+. A ban specific to one xref:#governed-repository[governed repository] becomes a xref:#check[check] when the check can verify it reliably, and it isn't restated in the xref:#instruction-file[instruction file].
+
+[[suppressions]]
+=== Suppressions
+
+. A _suppression_ is a machine-readable exception that turns one named rule off at the narrowest scope its tool supports. The suppression is a source annotation where the tool supports one. A tool that has no stable source-annotation form may use a declared configuration entry or baseline record instead.
+. Every suppression carries a concise justification in the source annotation, configuration, or baseline record that declares it.
+. A xref:#check[check] fails on a suppression without a justification, on one broader than its tool requires, and on one that no longer suppresses anything.
+. A [[suppression-ceiling]]_suppression ceiling_ is a declared limit on the suppression count of a xref:#governed-repository[governed repository]. A xref:#check[check] fails when the count passes the suppression ceiling. Whoever adds a suppression writes its justification, so the justification never stops one from being added. The suppression ceiling stops one, because it makes the next suppression cost the removal of an existing one.
+. The xref:#suppression-ceiling[suppression ceiling] is expressed against the size of the code rather than as a bare count, so it neither strangles a small xref:#governed-repository[governed repository] nor loosens as a large governed repository grows. A suppression ceiling of zero states that no suppression is permitted.
+. Every run of the xref:#verification-command[verification command] reports the suppression count and the distance left to the xref:#suppression-ceiling[suppression ceiling], so the trend is readable before the suppression ceiling is reached.
+
+[[typography]]
+=== Typography
+
+. The following characters are banned: the em dash, the en dash, typographic quotation marks, and the single-character ellipsis. The plain equivalents - the hyphen, the straight quotation mark, and three periods - stand in their place.
+. The banned characters are absent from every commit message and from every tracked file the xref:#governed-repository[governed repository] doesn't exclude by xref:#file-role[file role]. A xref:#check[check] scans those files by code point and fails on the first finding.
+
+[[security]]
+== Security
+
+These rules govern access, authentication, audit events, and data handling wherever the software implements those capabilities.
+
+[[authorization]]
+=== Authorization
+
+. [[permission-verification]]Each protected operation verifies the caller's permission for the target resource at a boundary the caller can't bypass.
+. A protected operation runs only when access is explicitly permitted. If permission can't be established, the operation is denied. Operations available without authentication are declared explicitly.
+
+[[authentication]]
+=== Authentication
+
+. Interactive authenticated sessions have a declared lifetime. The component that validates access enforces expiry and logout, so a saved session credential can't restore a terminated session.
+. Account disablement, permission removal, and credential revocation take effect within declared time limits. Existing sessions and credentials obey those limits.
+. A declared policy limits repeated authentication failures and specifies recovery conditions. The software enforces that policy.
+. Login and account-recovery failures reveal neither the existence of a private account nor which credential component was correct. Neither the response content, the status code, nor the response time distinguishes these failures from each other.
+
+[[audit-events]]
+=== Audit Events
+
+. Software records authentication outcomes, account and permission changes, and privileged operations that it performs. Each event identifies the actor where known, action, target, outcome, and an unambiguous timestamp.
+. Access controls protect audit records against unauthorized reading, alteration, and deletion.
+
+[[input-and-stored-data]]
+=== Input and Stored Data
+
+. Software validates untrusted input against the types, sizes, ranges, and domain constraints required by the operation. For example, an order quantity that must be positive rejects zero and negative values.
+. Every supported write path preserves the domain's rules for identity, uniqueness, relationships, and required values. Storage constraints enforce those rules where the storage system supports them.
+. Commands and expressions receive untrusted values as data rather than executable text.
+
+[[dependencies]]
+== Dependencies
+
+. This section governs the licenses and vulnerabilities of third-party packages used by the xref:#governed-repository[governed repository] and the freshness of dependency, plugin, and parent versions.
+. [[declared-coordinate]]A _declared coordinate_ is the identity and version of a dependency, plugin, or parent declared in a manifest of the xref:#governed-repository[governed repository] or an inherited manifest.
+. [[versioned-input]]A _versioned input_ is a xref:#declared-coordinate[declared coordinate] or a container image the xref:#harness[harness] owns and declares with a version tag and immutable digest.
+. [[resolved-set]]The _resolved set_ contains the packages identified by xref:#declared-coordinate[declared coordinates] and all packages they pull in.
+
+[[dependency-licenses]]
+=== Licenses
+
+. Every package in the xref:#resolved-set[resolved set] carries a license that appears on a license allowlist the xref:#governed-repository[governed repository] declares. A xref:#check[check] reads the license of each such package and fails on a license outside the license allowlist.
+. The license allowlist names license identifiers, not individual packages. A package whose license the xref:#check[check] can't resolve fails the check, like any package whose license lies outside the license allowlist.
+
+[[dependency-vulnerabilities]]
+=== Known Vulnerabilities
+
+. A vulnerability xref:#check[check] reads every package in the xref:#resolved-set[resolved set] and in each container image the xref:#governed-repository[governed repository] builds to ship against a public database. It fails when the database is unreachable and on each published vulnerability with no installed fix and no applied workaround, even a low-rated one. A system package's vulnerability in a container image fails only once a fix is available to the image, and the vulnerability check reports it until then.
+. A vulnerability is repaired by upgrading the package. A container image takes a fix for a system package of its base image only from a newer release of that base image.
+. Where no fix exists, a declared vulnerability allowlist entry mitigates the vulnerability. Each entry explains why the vulnerability can't be exploited, states a mitigation plan, and records its addition date. An unused entry fails the vulnerability xref:#check[check].
+
+[[compliance-report]]
+=== Compliance Report
+
+. Full verification writes a self-contained compliance report on the open source dependencies for a reviewer outside the project. A xref:#check[check] fails when the report can't be written.
+. The report names its source commit and is built from the data the license and vulnerability checks judge.
+. The report opens with its verdict.
+. The report lists every known vulnerability with its status and mitigation plan, every package of the xref:#resolved-set[resolved set] with its license and use, every copyleft package, and the license files the product ships.
+
+[[dependency-freshness]]
+=== Freshness
+
+. The freshness xref:#check[check] compares every xref:#versioned-input[versioned input] with its latest stable version. Its [[update-report]]_update report_ lists every newer stable version and names the declaring manifest for a xref:#declared-coordinate[declared coordinate] or the declaring property and replacement digest for a container image. Every build produces the report. A newer stable version doesn't fail the build on its own.
+. The [[freshness-bound]]_freshness bound_ applies only to xref:#declared-coordinate[declared coordinates] and is fixed at a gap of two major versions. A xref:#governed-repository[governed repository] doesn't configure it. A declared coordinate becomes noncompliant when its latest stable version is at least two major versions ahead. For example, version 71 fails when version 73 is available.
+. For a xref:#declared-coordinate[declared coordinate], the freshness xref:#check[check] uses the numeric major version. For a version beginning with a four-digit year from 2000 through 2099, it treats the year as the major version. The check excludes version schemes with neither a numeric major nor a leading year and doesn't inspect transitive packages in the xref:#resolved-set[resolved set].
+. Because the freshness xref:#check[check] reads public package and image registries, the section xref:#check-qualities[] excludes it from determinism. A gap below the xref:#freshness-bound[freshness bound] passes, and a gap that reaches it fails. An unreachable registry also fails the check.
+
+[[testing]]
+== Testing
+
+This section describes the state of the test suite and what it proves.
+
+[[real-components-only]]
+=== Real Components Only
+
+. [[substitute-criterion]]A [[real-component]]_real component_ is a component that implements the behavior of the protocol it stands for. A [[substitute]]_substitute_ is a component whose answers the test declares. The component's name decides nothing: an in-memory library component that implements a protocol is real, and a class inside the test tree whose answers a test sets is a substitute.
+. A test uses no xref:#substitute[substitutes]. It runs against xref:#real-component[real components]: a real database, a real server on a local port, or a real temporary file.
+. A service that exists only outside the machine is exercised through a local component that implements its protocol. The local component supplies the protocol's behavior on the machine that runs the test.
+. A xref:#check[check] fails on the construction of a xref:#substitute[substitute] in test code. The check names the libraries and framework declarations of the programming language or platform that install a substitute in place of a xref:#real-component[real component]. The check binds xref:#substitute-criterion[the substitute criterion] and not a name, so a local component stays available however its library is named.
+. A test-only imitation of a framework's web layer is a xref:#substitute[substitute] under xref:#substitute-criterion[the substitute criterion]. It skips the server, the serialization, the filter ordering, and the error handling a real request passes through, so a test written against it proves the handler ran rather than that the endpoint works. The framework's own request pipeline isn't an imitation. It's the code a live request runs, so an endpoint driven through it in the process under test is driven against a xref:#real-component[real component]. Driving that pipeline in process reaches neither the socket nor whatever the server wraps around it. At least one test therefore starts the real application on a local port, because a suite that never starts it can pass an application that doesn't start.
+. Test code passes the same xref:#check[static-analysis checks] as production code.
+
+[[security-tests]]
+=== Security Tests
+
+. Tests exercise permitted and denied access to protected operations. They assert that denied operations disclose no protected data and make no unauthorized state changes. For example, the owner can read a private document, while a caller without permission can't read or change it.
+. Tests cover the applicable rules of the section xref:#security[] through xref:#real-component[real components]. They exercise security failures, session termination, credential expiry, revoked access, rejected input, and recorded audit events for the features the software implements.
+
+[[coverage]]
+=== Coverage
+
+. Line coverage and branch coverage are at least 80% in every measured file. A file with no branches satisfies the branch floor.
+. An exclusion names something the coverage report measured. A xref:#check[check] fails on an exclusion that reaches nothing, because a pattern that matches no class excludes nothing and leaves the report reading exactly as it would have read without it.
+
+[[determinism]]
+=== Determinism
+
+. A test produces the same verdict on every run.
+. A test reaches no network beyond the machine it runs on. Every wait in a test is bounded by a timeout sized so that its expiry signals a defect of the code, not the speed of the machine.
+. A test reaches its verdict whatever order the test suite runs in.
+
+[[test-integrity]]
+=== Test Integrity
+
+. A xref:#check[check] fails when test code selects one test or test group to run instead of the complete suite. It also fails when a test is commented out. A test is skipped only by a declared rule that names a platform condition, never by an annotation in the test itself.
+. A test verifies one behavior and states that behavior in its name.
+. A test asserts an observable outcome. A xref:#check[check] fails on a test that reaches no assertion, so a test that drives the code without judging what the code produced reports as missing rather than as passing.
+. An assertion whose verdict doesn't depend on the code under test is banned, because no change to that code can make the assertion fail. A xref:#check[check] fails on an assertion whose operands are literals alone, such as an assertion that a constant is true.
+. Coverage counts the lines a test ran, not the behaviors a test judged. The floors of the section xref:#coverage[] and the rules above therefore bind together, and neither one stands in for the other.
+. A test fails when the behavior its name states is removed from the code under test. No xref:#check[automated check] verifies this rule reliably, so an xref:#instruction-file[instruction file] states it, and an inspection against the wording of that rule decides compliance.
+. Every commit that repairs an incorrect result or a security weakness carries a test that fails without the repair.
+
+[[version-control]]
+== Version Control
+
+This section describes the state of the commit history and of the continuous integration that guards the main branch.
+
+[[commit-messages]]
+=== Commit Messages
+
+. Every commit message passes a xref:#check[check]. Its commit header has the form `type: subject` or `type(scope): subject`. The commit type is one of `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, or `test`.
+. The commit subject holds 15 to 72 characters, ends without a period, and contains none of these words: `wip`, `tmp`, `temp`, `misc`, `stuff`, `asdf`, `fixup`.
+. A change that touches more than 2 files or changes more than 50 lines carries a commit body that states why the change was made.
++
+[source,text]
+----
+feat(obfuscation): mask bearer tokens in request headers
+
+Provider tokens leaked into the proxy logs through the header dump.
+Masking them in the header parser closes the leak for every consumer.
+----
+. No commit message attributes the change to an AI agent or to an AI agent session. No co-authorship trailer, sign-off address, session identifier, or generated-by signature that names an AI agent or the session that produced the change appears in any commit message. A xref:#check[check] scans each commit message for the known attribution markers and fails on a finding. Because no pattern can enumerate every AI agent, an xref:#instruction-file[instruction file] states the rule in prose as well, and an inspection against the wording of that rule decides a marker the check doesn't yet know.
+. The xref:#check[commit-message checks] are deterministic per commit, so the xref:#verification-command[verification command] applies them not only to new commits but to every commit reachable from the head of the main branch, back to and including the first commit, and fails when any commit violates one. Every commit satisfied the checks when it was recorded, so the commit history stays compliant by construction, and a failure signals a commit that reached the branch without the required verification.
+
+[[linear-history]]
+=== Linear History
+
+. The history is linear: no commit has more than one parent. A branch takes the work of another by a rebase or a cherry-pick.
+. A xref:#check[check] walks the commit history, back to and including the first commit. A commit with more than one parent fails the check.
+
+[[scouts]]
+== Scouts
+
+. [[scout]]A _scout_ is a procedure in which an AI agent searches a xref:#governed-repository[governed repository] for problems that no xref:#check[check] rejects and implements the repairs that a human approves. A human requests a scout by its name, for example after a series of large changes.
+. [[realistic-situation]]A _realistic situation_ is a situation that the users, the operators, or later changes of a xref:#governed-repository[governed repository] can be expected to produce.
+
+[[scout-procedure]]
+=== Scout Procedure
+
+Run these steps in order for every xref:#scout[scout]. The sections xref:#roadmap-scout[], xref:#sprawl-scout[], and xref:#bug-scout[] state what each scout searches for.
+
+. Give the section of this guideline that describes the xref:#scout[scout] to an AI subagent, the [[search-subagent]]_search subagent_. The search subagent reports each finding with its location, the problem, the consequence of the problem in a xref:#realistic-situation[realistic situation], and a proposed repair. It reports no finding whose consequence needs an unlikely combination of conditions.
+. Give the findings to a second AI subagent, the [[review-subagent]]_review subagent_, which starts without the context of the xref:#search-subagent[search subagent]. The review subagent checks each finding against the xref:#governed-repository[governed repository] itself and confirms, corrects, or rejects the finding. It rejects a finding without a xref:#realistic-situation[realistic situation] and a finding whose repair costs more than the consequence the repair prevents.
+. Present the findings that the xref:#review-subagent[review subagent] confirmed or corrected to the human who requested the xref:#scout[scout], each with a recommendation to implement or skip its repair. Where a xref:#check[check] or a rule of this guideline would prevent a whole kind of finding, not only the finding at hand, propose that check or rule. When no finding remains, report that the scout found nothing.
+. Implement the repairs that the human approves.
+
+[[roadmap-scout]]
+=== Roadmap Scout
+
+The roadmap xref:#scout[scout] compares the features of the xref:#governed-repository[governed repository] with the xref:#project-goal[project goal]. Its xref:#search-subagent[search subagent] reports findings of three kinds:
+
+. a feature that the xref:#project-goal[project goal] needs and the xref:#governed-repository[governed repository] lacks,
+. a feature that serves the project goal poorly in its current form,
+. a feature that doesn't serve the project goal.
+
+[[sprawl-scout]]
+=== Sprawl Scout
+
+. The sprawl xref:#scout[scout] inspects the code, the documentation, and the xref:#instruction-file[instruction files] of the xref:#governed-repository[governed repository] against the rules of the sections xref:#coherence[] and xref:#naming[].
+. The xref:#search-subagent[search subagent] surveys the directories, the files, and the headings of the documents and instruction files of the whole xref:#governed-repository[governed repository] before it judges any xref:#part[part], because a violation of the rules of the section xref:#coherence[] shows in the relation between parts. The search subagent compares the governed repository with the organization that a single design of the same features would give it.
+. The xref:#search-subagent[search subagent] reads every xref:#instruction-file[instruction file] in full, because separate changes often add remarks to instruction files without reshaping them.
+. A repair of the sprawl xref:#scout[scout] moves, merges, or shortens content and keeps the behavior of the software. A finding that would change the behavior belongs to the xref:#roadmap-scout[roadmap scout] or the xref:#bug-scout[bug scout].
+
+[[bug-scout]]
+=== Bug Scout
+
+. [[bug]]A _bug_ is a defect in the behavior of the software that a xref:#realistic-situation[realistic situation] exposes: an incorrect result, a security weakness, or use of time or memory beyond what the input requires. For example, a page that lists 1,000 orders with one database query per order sends 1,000 queries where one query is enough. The bug xref:#scout[scout] searches the code and the tests for bugs.
+. The bug xref:#scout[scout] also inspects the xref:#governed-repository[governed repository] against the rules of this guideline that the xref:#roadmap-scout[roadmap scout] and the xref:#sprawl-scout[sprawl scout] don't cover, such as the rules of the sections xref:#error-handling[], xref:#production-imports[], xref:#security[], and xref:#testing[]. For example, it checks that a signed-in customer can't change another customer's order, as the xref:#permission-verification[authorization rule] requires.
+
+[[about-the-document]]
+== About the Document
+
+. The source text of this document is written in the https://asciidoc.org[AsciiDoc^] markup language.
+. The source text of this document must follow the link:README-guideline-writing.adoc[Writing Guideline for Utilitarian Non-Fiction^]. The guideline is stored beside the source text in the same Git repository.
+. The https://github.com/ciechanowiec/adocent[`adocent`^] application lints, converts, and watches the source text of this document.
+. *Usage of https://github.com/ciechanowiec/adocent[`adocent`^]*
++
+`adocent usage` prints the complete https://github.com/ciechanowiec/adocent[`adocent`^] manual and JSON reference catalogs, producing a large output. Don't run it during routine writing. Use it only when command help and lint diagnostics don't resolve a specific usage problem. Save the output to a temporary file and read only the relevant sections. AI agents must not load the full output into their context.
+. *Linting*
++
+To lint the source text of this document, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent lint "{docname}{docfilesuffix}"
+----
+. *Converting*
++
+To convert this document to HTML, PDF, and DOCX, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent convert "{docname}{docfilesuffix}" --to html --to pdf --to docx
+----
+. *Watching*
++
+To open a live HTML preview of this document, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent watch "{docname}{docfilesuffix}"
+----
+
+ifdef::backend-html5[]
+ifndef::env-github[]
+++++
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js"></script>
+<script src="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo-footer.js"></script>
+++++
+endif::[]
+endif::[]

@@ -1,0 +1,454 @@
+<!-- The body of an Asciidoctor 2.0.26 rendering of a document that exercises the shapes the footer script
+     handles; the stylesheet link and the scripts the published documents add are left out. -->
+<div id="header">
+<h1>Synthetic Coverage Document</h1>
+<div class="details">
+<span id="author" class="author">Jane Writer</span><br>
+<span id="email" class="email"><a href="mailto:jane@example.com">jane@example.com</a></span><br>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_first_section_with_code_in_the_title">1. First Section with <code>code</code> in the Title</a>
+<ul class="sectlevel2">
+<li><a href="#_subsection_level_two">1.1. Subsection Level Two</a>
+<ul class="sectlevel3">
+<li><a href="#_level_three_heading">1.1.1. Level Three Heading</a>
+<ul class="sectlevel4">
+<li><a href="#_level_four_heading">1.1.1.1. Level Four Heading</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_second_section">2. Second Section</a>
+<ul class="sectlevel2">
+<li><a href="#_empty_parent">2.1. Empty Parent</a>
+<ul class="sectlevel3">
+<li><a href="#_child_one">2.1.1. Child One</a></li>
+<li><a href="#_child_two">2.1.2. Child Two</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph lead">
+<p>This preamble paragraph is a lead paragraph with <code>inline code</code> and a link to <a href="https://example.com">an external page</a> and a footnote.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>Second preamble paragraph with a mixed link <a href="https://example.com"><code>code</code> and words</a> and kbd:[Ctrl+C].</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_first_section_with_code_in_the_title"><a class="anchor" href="#_first_section_with_code_in_the_title"></a>1. First Section with <code>code</code> in the Title</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A paragraph referring to <a href="#second-section">Table title</a> and to <a href="#anchor-in-table">the table anchor</a> and to <a href="#label-target">[label-target]</a>.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
+</div>
+<div class="paragraph">
+<div class="title">A paragraph title</div>
+<p>A titled paragraph.</p>
+</div>
+<div id="label-target" class="paragraph">
+<p><strong>Purpose</strong></p>
+</div>
+<div class="paragraph">
+<p>The paragraph under a label.</p>
+</div>
+<div class="paragraph">
+<p>The configuration is the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">key: value
+other: 1   # a long line that might wrap because it is long enough to wrap in a narrow column of text</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>literal block
+  with indentation</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_subsection_level_two"><a class="anchor" href="#_subsection_level_two"></a>1.1. Subsection Level Two</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Ordered one</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Nested two</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>Nested three</p>
+<div class="olist upperalpha">
+<ol class="upperalpha" type="A">
+<li>
+<p>Nested four</p>
+<div class="olist upperroman">
+<ol class="upperroman" type="I">
+<li>
+<p>Nested five</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Nested six</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Nested seven</p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Ordered back</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Unordered one</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Nested unordered</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Third level</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Term</dt>
+<dd>
+<p>Definition of the term.</p>
+</dd>
+<dt class="hdlist1">Other term</dt>
+<dd>
+<p>Another definition with <code>code</code>.</p>
+</dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+Key
+</td>
+<td class="hdlist2">
+<p>Horizontal value</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="dlist source-fields">
+<dl>
+<dt class="hdlist1">Source</dt>
+<dd>
+<p><a href="https://example.com/source"><code>source</code> link</a></p>
+</dd>
+<dt class="hdlist1">Version</dt>
+<dd>
+<p><code>1.2.3</code></p>
+</dd>
+</dl>
+</div>
+<div class="sect3">
+<h4 id="_level_three_heading"><a class="anchor" href="#_level_three_heading"></a>1.1.1. Level Three Heading</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+An admonition note with <code>code</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+A tip.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+A warning with a list:
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>+
+* inside one
+* inside two</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Important text.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+Caution text.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_level_four_heading"><a class="anchor" href="#_level_four_heading"></a>1.1.1.1. Level Four Heading</h5>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Sidebar title</div>
+<div class="paragraph">
+<p>Sidebar content with <code>code</code>.</p>
+</div>
+<div class="paragraph">
+<p>Second sidebar paragraph.</p>
+</div>
+</div>
+</div>
+<div class="exampleblock good-example">
+<div class="title">Example 1. Good example</div>
+<div class="content">
+<div class="paragraph">
+<p>Example content.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">class A {}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock bad-example">
+<div class="title">Example 2. Bad example</div>
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>list in example</p>
+</li>
+<li>
+<p>last item</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 3. Plain example</div>
+<div class="content">
+<div class="paragraph">
+<p>Plain example paragraph.</p>
+</div>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>A quotation paragraph.</p>
+</div>
+<div class="paragraph">
+<p>Second quotation paragraph.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; Someone<br>
+<cite>Somewhere</cite>
+</div>
+</div>
+<div class="verseblock">
+<pre class="content">Verse line one
+Verse line two</pre>
+<div class="attribution">
+&#8212; Poet
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_second_section"><a class="anchor" href="#_second_section"></a>2. Second Section</h2>
+<div class="sectionbody">
+<table id="second-section" class="tableblock frame-all grid-all stripes-even stretch">
+<caption class="title">Table title</caption>
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a id="anchor-in-table"></a>alpha</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The alpha value with <code>code</code> and a <a href="https://example.com">link</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">beta</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The beta value.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">gamma</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>cell list</p>
+</li>
+<li>
+<p>items</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Foot</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Footer value</p></td>
+</tr>
+</tfoot>
+</table>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no header a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">b</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">c</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">d</p></td>
+</tr>
+</tbody>
+</table>
+<div class="imageblock">
+<div class="content">
+<img src="diagram.png" alt="Alt text">
+</div>
+<div class="title">Figure 1. Image title</div>
+</div>
+<div class="listingblock">
+<div class="title">Callouts</div>
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">puts "hi" <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The callout.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph text-center">
+<p>Centered paragraph.</p>
+</div>
+<hr>
+<div class="paragraph">
+<p>Final paragraph with <strong>strong</strong>, <em>emphasis</em>, <mark>mark</mark> and <sup>super</sup> <sub>sub</sub>.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup></p>
+</div>
+<div class="sect2">
+<h3 id="_empty_parent"><a class="anchor" href="#_empty_parent"></a>2.1. Empty Parent</h3>
+<div class="sect3">
+<h4 id="_child_one"><a class="anchor" href="#_child_one"></a>2.1.1. Child One</h4>
+<div class="paragraph">
+<p>Child one text.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_child_two"><a class="anchor" href="#_child_two"></a>2.1.2. Child Two</h4>
+<div class="paragraph">
+<p>Child two text.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. A footnote with a link to <a href="https://example.org" class="bare">https://example.org</a> and <code>code</code>.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. Second note.
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. Third note with a long text that wraps across more than one line in the footnotes area at the bottom of the page.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+</div>
+</div>

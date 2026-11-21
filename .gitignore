@@ -1,0 +1,117 @@
+# BEGIN AIRNESS MANAGED: generic
+# IDE & editors
+*.iml
+.idea/*
+# The contents of each .vscode directory rather than the directory, so a negation below can share a file.
+**/.vscode/*
+.fleet/
+
+# OS
+.DS_Store
+Thumbs.db
+~$*.doc*
+~$*.dot*
+~$*.xls*
+~$*.xlt*
+~$*.ppt*
+~$*.pps*
+~$*.pot*
+*.~vsd*
+*.laccdb
+*.docx.tmp
+.~lock.*#
+
+# Logs
+*.log
+*.log.[0-9]*
+*.logs*
+logs/
+log/
+
+# Python
+__pycache__/
+
+# Build output & caches
+target/
+dist/
+dist-tarballs/
+build/
+out/
+# JVM class files and Gradle's state, which every project ignores, Java or not, since adocent asks it of each
+# project it manages.
+*.class
+.gradle/
+
+# Supabase
+.supabase/
+supabase/.branches/
+supabase/.temp/
+
+# Terraform / Cloud
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+
+# Testing
+coverage/
+
+# Environment & secrets
+.env
+.env*.local
+*.pem
+
+# Database
+/.postgres-backup-*.sql
+
+# Drawio
+*.drawio.png.bkp
+*.drawio.png.dtmp
+
+# Compiled documentation
+README*.pdf
+README*.html
+README*.docx
+
+# Derived documentation exports
+*.docx-compat.adoc
+
+# IDE / tool exports
+repo.xml
+
+# Local Claude config
+claude/settings.local.json
+.claude/settings.local.json
+claude/scheduled_tasks.lock
+.claude/scheduled_tasks.lock
+
+# Agent worktrees, each a full checkout of the repository
+.claude/worktrees/
+
+# Playwright MCP browser-session artifacts
+.playwright-mcp/
+# END AIRNESS MANAGED: generic
+
+# BEGIN AIRNESS MANAGED: node
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Build output & caches
+*.tsbuildinfo
+.type-coverage/
+
+# Next.js
+.next/
+.turbo/
+.vercel
+next-env.d.ts
+
+# Testing
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+# END AIRNESS MANAGED: node

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>eu.ciechanowiec</groupId>
+        <artifactId>airness-parent</artifactId>
+        <version>1.0.13</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>linux_mantra</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>linux_mantra</name>
+    <description>Interactive setup scripts that provision a Linux and a macOS workstation</description>
+    <url>https://github.com/ciechanowiec/linux_mantra</url>
+    <inceptionYear>2022</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>MIT-0</name>
+            <url>https://spdx.org/licenses/MIT-0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Herman Ciechanowiec</name>
+            <email>herman@ciechanowiec.eu</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/ciechanowiec/linux_mantra.git</connection>
+        <developerConnection>scm:git:git@github.com:ciechanowiec/linux_mantra.git</developerConnection>
+        <url>https://github.com/ciechanowiec/linux_mantra</url>
+    </scm>
+
+    <properties>
+        <!--
+            The GitHub Pages site: the stylesheets and the footer script that AsciiDoc documents across the
+            author's repositories load from https://www.ciechanowiec.eu/linux_mantra/.
+        -->
+        <airness.node.projects>docs</airness.node.projects>
+        <!-- The package Airness analyzes as project-owned code; the repository holds no Java. -->
+        <airness.package.root>eu.ciechanowiec.linuxmantra</airness.package.root>
+    </properties>
+
+    <build>
+        <plugins>
+            <!--
+                Builds the GitHub Pages site into docs/target/site: the footer script bundled from its TypeScript
+                sources into a classic script, beside the two stylesheets. The Pages workflow publishes that
+                directory as the site root, so every file keeps the URL the documents already name.
+            -->
+            <plugin>
+                <groupId>eu.ciechanowiec</groupId>
+                <artifactId>airness-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>pages-site</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>node-run</goal>
+                        </goals>
+                        <configuration>
+                            <project>docs</project>
+                            <script>build</script>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

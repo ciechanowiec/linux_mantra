@@ -1,0 +1,18 @@
+# esbuild installs the binary of its platform, which bundles the served script.
+allowBuilds:
+  esbuild: true
+
+minimumReleaseAge: 1440
+
+minimumReleaseAgeStrict: true
+
+minimumReleaseAgeExclude:
+  - "@airness/node"
+
+# The installed harness approves the patched dependencies of its analyzers.
+overrides:
+  "eslint-plugin-functional@10.0.1>deepmerge-ts": "8.0.2"
+  "@typescript-eslint/typescript-estree@8.72.2>minimatch": "11.0.4"
+  "eslint-plugin-sonarjs@4.2.2>minimatch": "11.0.4"
+  "eslint@10.14.0>minimatch": "11.0.4"
+  "type-coverage-core@2.31.1>minimatch": "11.0.4"

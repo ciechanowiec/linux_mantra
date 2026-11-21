@@ -1,0 +1,142 @@
+/* ==========================================================================
+   Generated. Edit the theme sources, then re-run publish.py.
+   ========================================================================== */
+
+/* Only the hover previews live here. This sheet is linked from the body
+   and so overrides the document stylesheet; anything else kept in it would
+   quietly outrank the theme. */
+
+/* --- Hover previews (behaviour lives in adoc-docinfo-footer.js) ---------- */
+
+/* A preview belongs to the phrase it explains, so it sits close under it. */
+.fn-pop,
+.xref-preview {
+    margin-top: -4px;
+}
+
+.fn-pop {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    max-width: min(46rem, 90vw);
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--ad-pop-border);
+    border-top: 3px solid var(--ad-accent);
+    border-radius: var(--ad-radius);
+    background: var(--ad-pop-bg);
+    color: var(--ad-ink);
+    box-shadow: var(--ad-pop-shadow);
+    /* The preview is placed in a box whose width the script fixes against the
+       root font size, so it cannot simply take the body size: at the body size
+       the lines become too short to read. A 14px floor is clearly a step down
+       from the prose while staying a normal reading size. */
+    font-size: max(0.875rem, calc(var(--ad-body-size) * 0.8));
+    line-height: 1.35;
+    text-align: left;
+}
+
+/* Placed beside the text column instead of under the link, the box is aligned
+   to the line it belongs to and needs no vertical correction. */
+.fn-pop--side {
+    margin-top: 0;
+    max-width: none;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.xref-preview {
+    position: absolute;
+    z-index: 1001;
+    display: none;
+    width: 38rem;
+    max-height: min(32rem, 74vh);
+    overflow: auto;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--ad-pop-border);
+    border-top: 3px solid var(--ad-accent);
+    border-radius: var(--ad-radius);
+    background: var(--ad-pop-bg);
+    color: var(--ad-ink);
+    box-shadow: var(--ad-pop-shadow);
+    /* The preview is placed in a box whose width the script fixes against the
+       root font size, so it cannot simply take the body size: at the body size
+       the lines become too short to read. A 14px floor is clearly a step down
+       from the prose while staying a normal reading size. */
+    font-size: max(0.875rem, calc(var(--ad-body-size) * 0.8));
+    line-height: 1.35;
+    text-align: left;
+}
+
+.xref-preview__title {
+    font-weight: 700;
+    color: var(--ad-accent);
+}
+
+.xref-preview p,
+.xref-preview pre,
+.xref-preview ul,
+.xref-preview ol,
+.xref-preview dl {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: inherit;
+    line-height: inherit;
+    text-align: left;
+}
+
+/* A footnote marker means nothing in a preview: there is no footnote list to
+   jump to. The preview script drops the anchor but not what surrounds it - the
+   `sup`, whose square brackets are plain text nodes either side of it, left an
+   empty `[]` trailing the quoted passage; and the note's own marker span, whose
+   trailing "." was left heading the popped-up note. Hiding the marker in both
+   shapes removes every leftover. */
+.xref-preview sup.footnote,
+.xref-preview sup.footnoteref,
+.xref-preview .adfn-num,
+.fn-pop sup.footnote,
+.fn-pop sup.footnoteref,
+.fn-pop .adfn-num {
+    display: none;
+}
+
+.xref-preview__block + .xref-preview__block {
+    margin-top: 0.5rem;
+}
+
+.xref-preview pre {
+    white-space: pre-wrap;
+}
+
+.xref-preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.xref-preview ol,
+.xref-preview ul {
+    padding-left: 1.3rem;
+}
+
+.xref-preview ul.xref-preview__contents {
+    list-style: none;
+    padding-left: 0;
+}
+
+.xref-preview table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.xref-preview th,
+.xref-preview td {
+    padding: 0.2rem 0.35rem;
+    border: 1px solid var(--ad-rule);
+    /* The defined equivalent of the deprecated `word-break: break-word`. */
+    overflow-wrap: anywhere;
+    word-break: normal;
+    text-align: left;
+    vertical-align: top;
+}

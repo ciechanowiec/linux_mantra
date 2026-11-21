@@ -1,0 +1,10 @@
+{
+  "extends": "@airness/node/tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+  "exclude": ["node_modules", "dist", "target"]
+}
