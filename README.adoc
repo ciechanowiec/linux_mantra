@@ -11,22 +11,20 @@
 :toc: left
 :toclevels: 5
 :icons: font
-:docinfo: shared,private
 :linkcss:
 :sourcedir: {docdir}
-:pdf-theme: {sourcedir}/docs/themes/basic.yml
 :stylesdir: https://www.ciechanowiec.eu/linux_mantra/
 :stylesheet: adoc-css-style.css
+:source-highlighter: rouge
+:rouge-css: style
 :!table-caption:
 :!figure-caption:
 :!example-caption:
 
-ifdef::backend-html5+not-env-github[]
+ifdef::backend-html5[]
+ifndef::env-github[]
 ++++
 <link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
-<!-- Inlined so the IntelliJ AsciiDoc preview honors these rules: its webview blocks external CSS even in
-     UNSAFE mode, so the remote stylesheet above is dropped in the IDE preview. Mirrors rules already in
-     adoc-css-style.css for the published HTML - enforces [cols="..."] column widths and wraps long content. -->
 <style>
     table.tableblock {
         table-layout: fixed;
@@ -40,62 +38,164 @@ ifdef::backend-html5+not-env-github[]
 </style>
 ++++
 endif::[]
+endif::[]
 
-== Overview
+Linux Mantra sets up the author's personal development workstation on a freshly installed operating system. Two interactive Bash scripts, `linux_mantra.sh` for Ubuntu 26.04 and `mac_mantra.sh` for macOS 27, install the author's tools and apply the author's settings and files. Each script runs as a sequence of numbered procedures and waits for confirmation after each one.
 
-_Linux Mantra_ is a set of interconnected Bash/Lua scripts and configuration files, which perform automated fine-grained setup of personal Linux/Java/AEM development environment. Linux Mantra has been used on a daily basis for over a year. It has undergone rigorous testing and stands as one of the most sophisticated programs of its kind.
+[[purpose-and-scope]]
+== Purpose and Scope
 
-== Features
+. A freshly installed operating system lacks the tools, settings, and files that a developer gathers over years of work. Linux Mantra records them as code, so a reinstalled machine reaches the same state when one script runs on it. The setup is personal: anyone can run it, but the result fits the author's way of working. For other developers, Linux Mantra is an example of how to build a similar tool.
+. The scripts do four kinds of work:
+.. installing packages and applications, for example `curl`, Neovim, Docker, and Terraform,
+.. writing configuration, for example shell aliases in `~/.bashrc`,
+.. applying desktop and system settings, for example GNOME settings and the firewall,
+.. copying scripts and assets, for example fonts and the wallpaper.
 
-. Linux Mantra performs automized setup of personal Linux/Java/AEM development environment right after installation of an operating system. It installs basic packages (e.g. `curl`, `ffmpeg`, `xclip`, `traceroute`, `fzf`, `xdotool`, `tree`, `unzip`, `wget`, `htop`, `trash-cli`, `vim`), adjusts `.bashrc`, customizes fonts, fixes some bugs, sets up locale formats, mounts a decompiler, personalizes directories in `$HOME`, loads dumped `dconf`, configures terminal file manager (`xplr`), initiates often used Bash scripts, establishes GNOME extensions, modifies run modes (`.desktop`) of certain default applications, associates mime types etc.
-. With Linux Mantra, time required to perform the whole setup of personal Linux/Java/AEM development environment is usually less than 45 minutes (depends on the quality of internet connection).
-. Besides the initial setup after installation of an operating system, Linux Mantra can be used to keep record of the ongoing configuration changes in order to assure their reproducibility.
-. Linux Mantra was tested and can be run on Linux Ubuntu 26.x. Other Linux distributions might require adjustments of the program.
+[[repository-structure]]
+== Repository Structure
 
-== Program Architecture
+. A [[mantra-script]]_mantra script_ is a Bash file that drives the whole setup of one operating system, from the first command to the last. Every step is a shell command written out in full in the script.
+. The [[resources-directory]]_resources directory_ is the directory `resources` beside the xref:#mantra-script[mantra scripts] that holds the files they copy, load, or run, such as command scripts, saved desktop settings, and fonts. A mantra script looks for this directory next to its own file, so the two must stay side by side.
+. The diagram shows where the content of the repository ends up on the machine:
++
+[[repository-structure-diagram]]
+.Parts of the repository and their destinations on the machine
+image::.adocent/resources/visuals/repository-structure.drawio.png["The mantra script reads the resources directory, installs packages and applications, and writes the shell configuration. Command scripts are copied to ~/scripts, saved desktop settings are loaded into dconf or defaults, the file manager configuration is copied to ~/.config/xplr, and fonts, the decompiler, and the wallpaper are installed."]
 
-=== Open for Easy Modification
+[[run-sequence]]
+== Run Sequence
 
-Personal Linux/Java/AEM development environment is subject to continuous change, e.g. due to  obsolescence of some programs, software updates and need for new scripts. For that reason Linux Mantra is designed to be open for easy modification. Thanks to that, changes to the environment can be smoothly and handily implemented into Linux Mantra so that they will be reproducible during next setup.
+A [[procedure]]_procedure_ is a block of a xref:#mantra-script[mantra script] that sets up one tool or one area of the system, such as Git or Docker. A run executes the procedures from top to bottom. The first procedure, environment preparation, checks the machine, and the last, cleanup, removes temporary files:
 
-=== `linux_mantra.sh` and `resources`
+[[run-sequence-diagram]]
+.Run of `linux_mantra.sh` from start to reboot
+image::.adocent/resources/visuals/run-sequence.drawio.png[pdfwidth=100%,alt="The user starts the script. Environment preparation checks the machine, prepares ~/TEMP, and updates the system. A failed check ends the run with exit code 1. The middle procedures follow, and the answer n ends the run with exit code 0. Cleanup, number 20, comes last, and the user reboots."]
 
-. Linux Mantra consists of two interdependent parts: a bash script `linux_mantra.sh` and a directory `resources`. The first one is the script that drives the whole program from the very start till the very end. The directory `resources`, in turn, contains files that are used (copied, modified and triggered) by `linux_mantra.sh`.
-. `linux_mantra.sh` and `resources` must be sibling files, i.e. they must be located in the same directory.
-. `linux_mantra.sh` has hardcoded paths to files inside `resources`. It means that changes of files hierarchy inside `resources` must be appropriately reflected in `linux_mantra.sh`.
+[[environment-preparation]]
+=== Environment Preparation
 
-=== Code Blocks in `linux_mantra.sh`
+The first xref:#procedure[procedure] checks that the machine runs the operating system and release the xref:#mantra-script[mantra script] was written for, recreates the temporary directory `~/TEMP`, and updates the system packages. A failed check stops the script with exit code 1. Because the procedure deletes `~/TEMP` with all its content, the repository must not lie inside that directory.
 
-. `linux_mantra.sh` consists of set of code blocks, each of which is visually marked by a big comment-header.
-. The first code block is a set of common functions used throughout the script and the rest of blocks are procedural ones.
-. Every procedural code block starts with informing about the name of a procedure that now will be performed. In the end of every procedure the user is informed about completion, the script stops the execution to give the user time for facultative checks and prompts for continuation.
-. Procedural code blocks have numbers in headings. Those numbers represent sequence-priorities in which blocks should be run. Lower numbers (1, 2, 3...) mean higher priority, higher numbers (14, 15, 16...) mean lower priority and equal numbers (7, 7, 7...) mean the same priority. In some cases those priorities are very strict so that if the procedure with higher priority is not executed before the procedure with lower priority, the latter one will fail. In other cases those priorities are loosely coupled and arbitrary.
-. Linux Mantra files incorporate some code related to macOS as the basis for cross-platform solution. However, during the execution of Linux Mantra on a Linux machine, the macOS related code isn't executed and has no relevant impact on the flow of the program.
+[[confirmation-prompts]]
+=== Confirmation Prompts
 
-== How to Run
+. The pause after each xref:#procedure[procedure] lets the user check its result before the next procedure builds on it. A command that fails inside a procedure doesn't stop the xref:#mantra-script[mantra script], so the user finds a failure by reading the output before confirming.
+. Procedures follow a common skeleton. The Git xref:#procedure[procedure] of `linux_mantra.sh` shows it in shortened form:
++
+[source,bash]
+----
+# Excerpt: the banner, steps 2 and 4, and the email prompt are omitted.
+# The three functions called here are defined at the top of the script.
+procedureId="git"
+informAboutProcedureStart
 
-. By design, Linux Mantra performs _personalized_ setup. Moreover, that setup is _highly_ personalized. Technically, anyone can run Linux Mantra and achieve the result intended by the program, but due to the mentioned particular individualization, that result might not be satisfiable (e.g. someone might prefer different key bindings or wallpaper). Therefore, Linux Mantra isn't supposed to be a universal tool, but rather inspiration for creating other similar tools.
-. Before running Linux Mantra, perform installation of Linux Ubuntu 26.x. The installation should be done in a _minimal_ mode (i.e. without preinstalled set of additional packages like LibreOffice) and in an _erasing the disk_ mode, so that the operating system is clean. Among other options, choose _Install third-party software for graphics and Wi-Fi hardware_, _Download and install support for additional media formats_ and _Encrypt with a passphrase_.
-. Right after the first boot do not install any additional programs. Right after the first boot just download this repository as a `.zip` archive and unzip it.
-. Run `linux_mantra.sh` script located in the root of this repository. Run it as a usual user, without `sudo` (otherwise, incorrect `$HOME` variable might be set up).
-. Running `linux_mantra.sh` script will start and drive the whole execution of Linux Mantra. Running that script is the only thing required to perform the setup; accompanying files from the `resources` directory will be accessed by the script itself.
-. Follow the instructions and prompts that will appear in the terminal where `linux_mantra.sh` script is running.
-. `linux_mantra.sh` can be run from any path other than `$HOME/TEMP`. It resolves its actual path (and therefore - also the actual path of relative `resources`) itself.
-. Note that Linux Mantra isn't run in a fully automatic mode and requires certain interaction with the user (e.g. provision of an e-mail address). The reasons for that are security considerations and open for easy modification principle mentioned above. Another reason is also ineffectiveness of full automation: certain aspects of certain programs (e.g. the location of setting for the download target in the browser) are practically nondeterministic due to constant change of those programs.
+echo "1. Installing git..."
+sudo apt install git -y
 
-== License
+echo "3. Setting up a global git committer..."
+echo "Enter global git committer name (first name and surname, eg. John Doe):"
+read -r committerName
+git config --global user.name "${committerName}"
 
-The program is subject to MIT No Attribution License
+informAboutProcedureEnd
+promptOnContinuation
+----
+. The xref:#procedure[procedure] announces its start, runs numbered steps that can ask for input, announces its end, and asks `Proceed? [Y/n]`. The diagram shows the possible answers:
++
+[[procedure-anatomy-diagram]]
+.Steps of one procedure and the answers to its prompt
+image::.adocent/resources/visuals/procedure-anatomy.drawio.png["A procedure stores its name in procedureId, prints PROCEDURE STARTED, runs its numbered steps, and prints PROCEDURE FINISHED. The prompt Proceed? [Y/n] then starts the next procedure on Y, y, or Enter, stops the script with exit code 0 on N or n, and asks again on any other input."]
+. A stopped run has no resume point. Running the xref:#mantra-script[mantra script] again starts from the first xref:#procedure[procedure], and the procedures aren't designed to run twice.
+. Some settings belong to graphical applications whose menus change between versions, so the xref:#procedure[procedure] doesn't set them. It prints instructions and waits until the user completes them and presses Enter.
 
-Copyright © 2022-2026 Herman Ciechanowiec
+[[priority-numbers]]
+=== Priority Numbers
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
+The [[priority-number]]_priority number_ is the number in the banner of a xref:#procedure[procedure] that states its place in the order of dependencies, such as 4 in `4. GIT`. By convention, a procedure runs after every procedure with a lower number, and procedures that share a number may run in any order among themselves. The numbers tell a person who edits a xref:#mantra-script[mantra script] where a procedure may move. For example, the Vim procedure, number 6, installs Neovim with `brew`, which the Homebrew procedure, number 5, installs:
 
-The Software is provided 'as is', without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
+[[priority-numbers-diagram]]
+.Selected procedures of `linux_mantra.sh` ordered by priority number
+image::.adocent/resources/visuals/priority-numbers.drawio.png[pdfwidth=100%,alt="Environment preparation 1, basic utils 2, Homebrew 5, and Vim 6 run in that order. A group of procedures numbered 12, including fonts, firewall, Docker, locale, wallpaper, and MIME associations, follows in any internal order. IntelliJ IDEA 14 and cleanup 20 come last."]
 
-ifdef::backend-html5+not-env-github[]
+[[cleanup]]
+=== Cleanup
+
+The last xref:#procedure[procedure], number 20, returns to the directory where the run started and moves `~/TEMP` to the trash. A reboot then activates changes such as new GNOME extensions.
+
+[[linux-and-macos]]
+== Linux and macOS Variants
+
+Both xref:#mantra-script[mantra scripts] follow the run sequence described in the section xref:#run-sequence[]. They differ where the operating systems differ:
+
+[cols="1,2,2",options="header"]
+|===
+|Aspect |`linux_mantra.sh` |`mac_mantra.sh`
+|Shell configuration file |`~/.bashrc` |`~/.zshrc`
+|Desktop settings |`dconf load` of a saved settings file |`defaults` commands and saved preference files
+|===
+
+[[first-run]]
+== First Run on a Fresh Machine
+
+. Install Ubuntu 26.04 or macOS 27 from scratch. On Ubuntu, enable disk encryption, which the xref:#mantra-script[mantra script] requires.
+. Download this repository from GitHub as a `.zip` archive, unpack it outside `~/TEMP`, and start the mantra script for your system from a terminal in the unpacked directory:
++
+[source,bash]
+----
+bash linux_mantra.sh
+----
+. Run the xref:#mantra-script[mantra script] as your normal user, without `sudo`. The script calls `sudo` itself where needed, and under `sudo` your files can end up in the root user's home directory.
+. Answer the questions, confirm each xref:#procedure[procedure], and reboot after cleanup.
+
+[[reproducible-setup]]
+== Reproducible Setup Over Time
+
+A workstation keeps changing after its first setup: tools become obsolete, new versions appear, and new settings replace old ones. Linux Mantra stays useful only when each change on the live machine also reaches the repository. The diagram shows the cycle that records each change:
+
+[[maintenance-loop-diagram]]
+.Cycle that records changes of the live machine in the repository
+image::.adocent/resources/visuals/maintenance-loop.drawio.png["1. Change the live machine. 2. Capture the change with dconf dump, a defaults diff, or the changed configuration file. 3. Record it in a procedure or in the resources directory and commit. 4. The next fresh install reproduces the change, and the cycle starts again."]
+
+[[about-the-document]]
+== About the Document
+
+. The source text of this document is written in the https://asciidoc.org[AsciiDoc^] markup language.
+. The source text of this document must follow the link:README-guideline-writing.adoc[Writing Guideline for Utilitarian Non-Fiction^]. The guideline is stored beside the source text in the same Git repository.
+. The https://github.com/ciechanowiec/adocent[`adocent`^] application lints, converts, and watches the source text of this document.
+. *Usage of https://github.com/ciechanowiec/adocent[`adocent`^]*
++
+`adocent usage` prints the complete https://github.com/ciechanowiec/adocent[`adocent`^] manual and JSON reference catalogs, producing a large output. Don't run it during routine writing. Use it only when command help and lint diagnostics don't resolve a specific usage problem. Save the output to a temporary file and read only the relevant sections. AI agents must not load the full output into their context.
+. *Linting*
++
+To lint the source text of this document, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent lint "{docname}{docfilesuffix}"
+----
+. *Converting*
++
+To convert this document to HTML, PDF, and DOCX, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent convert "{docname}{docfilesuffix}" --to html --to pdf --to docx
+----
+. *Watching*
++
+To open a live HTML preview of this document, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent watch "{docname}{docfilesuffix}"
+----
+
+ifdef::backend-html5[]
+ifndef::env-github[]
 ++++
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js"></script>
 <script src="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo-footer.js"></script>
 ++++
+endif::[]
 endif::[]

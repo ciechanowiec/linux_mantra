@@ -1,0 +1,89 @@
+version: 0.0.1-SNAPSHOT
+
+guidelines: [en]
+
+document:
+  header: |-
+    :reproducible:
+    :doctype: article
+    :author: Herman Ciechanowiec
+    :email: herman@ciechanowiec.eu
+    :chapter-signifier:
+    :sectnums:
+    :sectnumlevels: 5
+    :sectanchors:
+    :toc: left
+    :toclevels: 5
+    :icons: font
+    :linkcss:
+    :sourcedir: {docdir}
+    :stylesdir: https://www.ciechanowiec.eu/linux_mantra/
+    :stylesheet: adoc-css-style.css
+    :source-highlighter: rouge
+    :rouge-css: style
+    :!table-caption:
+    :!figure-caption:
+    :!example-caption:
+  htmlPreamble: |-
+    ifdef::backend-html5[]
+    ifndef::env-github[]
+    ++++
+    <link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
+    <style>
+        table.tableblock {
+            table-layout: fixed;
+        }
+
+        table.tableblock td,
+        table.tableblock th {
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+    </style>
+    ++++
+    endif::[]
+    endif::[]
+  about: |-
+    == About the Document
+
+    . The source text of this document is written in the https://asciidoc.org[AsciiDoc^] markup language.
+    . The source text of this document must follow the link:README-guideline-writing.adoc[Writing Guideline for Utilitarian Non-Fiction^]. The guideline is stored beside the source text in the same Git repository.
+    . The https://github.com/ciechanowiec/adocent[`adocent`^] application lints, converts, and watches the source text of this document.
+    . *Usage of https://github.com/ciechanowiec/adocent[`adocent`^]*
+    +
+    `adocent usage` prints the complete https://github.com/ciechanowiec/adocent[`adocent`^] manual and JSON reference catalogs, producing a large output. Don't run it during routine writing. Use it only when command help and lint diagnostics don't resolve a specific usage problem. Save the output to a temporary file and read only the relevant sections. AI agents must not load the full output into their context.
+    . *Linting*
+    +
+    To lint the source text of this document, run this command from the directory containing the source text:
+    +
+    [source,bash,subs="attributes+"]
+    ----
+    adocent lint "{docname}{docfilesuffix}"
+    ----
+    . *Converting*
+    +
+    To convert this document to HTML, PDF, and DOCX, run this command from the directory containing the source text:
+    +
+    [source,bash,subs="attributes+"]
+    ----
+    adocent convert "{docname}{docfilesuffix}" --to html --to pdf --to docx
+    ----
+    . *Watching*
+    +
+    To open a live HTML preview of this document, run this command from the directory containing the source text:
+    +
+    [source,bash,subs="attributes+"]
+    ----
+    adocent watch "{docname}{docfilesuffix}"
+    ----
+  htmlFooter: |-
+    ifdef::backend-html5[]
+    ifndef::env-github[]
+    ++++
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js"></script>
+    <script src="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo-footer.js"></script>
+    ++++
+    endif::[]
+    endif::[]
+
+rules: {}

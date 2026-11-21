@@ -1,0 +1,2897 @@
+[.text-justify]
+= Writing Guideline for Utilitarian Non-Fiction
+:reproducible:
+:doctype: article
+:author: Herman Ciechanowiec
+:email: herman@ciechanowiec.eu
+:chapter-signifier:
+:sectnums:
+:sectnumlevels: 5
+:sectanchors:
+:toc: left
+:toclevels: 5
+:icons: font
+:linkcss:
+:sourcedir: {docdir}
+:stylesdir: https://www.ciechanowiec.eu/linux_mantra/
+:stylesheet: adoc-css-style.css
+:source-highlighter: rouge
+:rouge-css: style
+:!table-caption:
+:!figure-caption:
+:!example-caption:
+
+ifdef::backend-html5[]
+ifndef::env-github[]
+++++
+<link href="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo.css" rel="stylesheet">
+<style>
+    table.tableblock {
+        table-layout: fixed;
+    }
+
+    table.tableblock td,
+    table.tableblock th {
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
+++++
+endif::[]
+endif::[]
+
+ifdef::env-github[]
+:bad-icon: ❌
+:good-icon: ✅
+endif::[]
+ifdef::backend-docbook5[]
+:bad-icon: ❌
+:good-icon: ✅
+endif::[]
+ifndef::env-github[]
+ifndef::backend-docbook5[]
+:bad-icon: icon:times-circle[role=bad-icon]
+:good-icon: icon:check-circle[role=good-icon]
+endif::[]
+endif::[]
+
+[cols=">.^1h,<.^1"]
+// The two-row metadata table labels its rows in its first column, not its columns.
+// adocent-disable-next-line Structure.TableHeaders
+|===
+| Document last modified: | {docdatetime}
+| Document generated: | {localdatetime}
+|===
+
+== Abstract
+. This guideline sets requirements for [[utilitarian-non-fiction]]_utilitarian non-fiction_ - prose intended to convey accurate information. It covers document abstracts, evidence, organization, wording, examples, and final review, with additional conventions for https://asciidoc.org[AsciiDoc^]. The requirements promote precise claims, consistent terminology, and explanations that preserve meaning.
+. The guideline applies across fields, including law, science, accounting, business, marketing, technology, politics, and public administration. It covers documents whose purpose is to convey accurate information: reports, analyses, agreements, proposals, instructions, notices, product descriptions, policy papers, and other practical prose.
+. The writing rules describe what the document must contain and how it must be written.
+. The rules apply to documents in any language, and the examples are written in English. A rule whose application differs between languages states the difference for each language it covers. A rule limited to one language names that language in its heading. Language norms that the guideline doesn't address follow the standard norms of the document's language.
+
+[[document-focus]]
+== Abstracts and Subject Coverage
+
+A [[request-source]]_writing request_ is an instruction to produce a document.
+
+[[write-an-abstract]]
+=== Self-Contained Abstracts Where Appropriate
+
+. A document opens with a short abstract when a summary is useful and fits that kind of document. Reports, studies, specifications, and substantial guides can benefit from an abstract. A short notice, checklist, or form can begin directly when an abstract would repeat its content or interrupt its usual format.
+. [[abstract-content]]An abstract states the subject, purpose, and scope. It includes the main finding, conclusion, or recommendation when the document presents one. An abstract of a specification or guide summarizes the behavior or requirements described in the body.
+. An abstract is understandable without first reading the body. It states concrete content and contains only claims supported or developed in the document.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+This report discusses watering plants and several important considerations. The following sections compare watering bean plants once and twice a week in the same greenhouse. They explain that, after six weeks, the plants watered twice a week had a greater average dry mass. They also explain that the study covers one variety and one growing season.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The study compares two watering schedules for bean plants grown in the same greenhouse. After six weeks, plants watered twice a week had a greater average dry mass than plants watered once a week. The study covers one variety and one growing season.
+====
+
+[.good-example]
+.{good-icon} Good example: short notice without an abstract
+====
+The town library will close at 16:00 on 3 October 2026 for maintenance.
+====
+
+[[distribute-by-domain-not-by-prompt]]
+=== Distribution by Domain, Not by Writing Request
+
+. The document covers all important aspects of its subject, even when the xref:#request-source[writing request] mentions only some of them. The amount of detail given to each aspect reflects its importance, not merely its mention in the writing request.
+. An explicit instruction in the xref:#request-source[writing request] to focus on one aspect or give it more space takes priority.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+xref:#request-source[Writing request]: "Describe ways a town can reduce road accidents. Include street lighting."
+
+The document devotes most of its space to lamp types, brightness, and installation costs. It gives one closing sentence to crossings, road layout, vehicle speeds, and maintenance.
+
+The xref:#request-source[writing request] asks for ways to reduce road accidents, with lighting included. It doesn't ask for a lighting plan.
+====
+[.good-example]
+.{good-icon} Good example
+====
+The document groups measures under street layout, crossings, speed management, visibility, and maintenance. Lighting appears under visibility. Each group explains the problem it addresses and the evidence needed to choose a measure.
+
+A xref:#request-source[writing request] specifically focused on lighting would justify giving lighting most of the space.
+====
+
+[[claims-evidence-and-uncertainty]]
+== Claims, Evidence, and Uncertainty
+
+The document makes no claim beyond what the available information supports. [[citation]]Citations identify the sources behind claims so that those sources can be found and checked.
+
+[[dont-invent-facts]]
+=== No Invented Facts
+
+[[no-invented-facts]]Missing factual information is identified as unknown. Factual details, such as identifiers, paths, version numbers, quotations, citations, metrics, and dates, are never replaced with fabricated values. Explicitly marked illustrative values follow xref:#illustrative-case-labeling[the rules for illustrative cases] and make no claim about the actual subject.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The lease allows either party to end the agreement with 30 days' notice. (The supplied excerpt gives the rent and payment dates but says nothing about ending the agreement.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The excerpt states the rent and payment dates. The terms for ending the lease aren't included, so they must be checked in the complete agreement.
+====
+
+[[consistent-statements]]
+=== Statements Consistent Throughout the Document
+
+. [[consistency-rule]]The statements the document makes agree with each other wherever they appear, including in prose, headings, lists, tables, the xref:#abstract-content[abstract], examples, diagrams, captions, and code.
+. An author who changes a statement also corrects every statement that the change brings into disagreement.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The section _Opening Hours_ states that the pool opens at 07:00 on weekdays. The timetable in the section _Lane Booking_ still lists the first weekday lane slot at 06:30.
+
+(The opening time changed from 06:30 to 07:00, and the author updated only the section _Opening Hours_.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The section _Opening Hours_ states that the pool opens at 07:00 on weekdays. The timetable in the section _Lane Booking_ lists the first weekday lane slot at 07:00.
+====
+
+[[no-hedging]]
+=== Known Facts Stated Directly, Uncertainty Explained
+
+. Established facts are stated directly. Vague words that weaken a claim without explaining its limits are omitted.
+. An uncertain claim states what's unknown and why. A measurement or estimate gives its range and the evidence for that range when both are known.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// adocent-disable-next-line Prose.WeakeningWords
+The seedlings grew fairly well and were generally quite healthy.
+
+(The supplied trial record shows that 27 of 30 seedlings survived for six weeks and that their average height increased from 4 cm to 11 cm.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Twenty-seven of the 30 seedlings survived for six weeks. Their average height increased from 4 cm to 11 cm.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The repairs should cost a fairly small amount and will probably be finished soon.
+
+(The supplied correspondence records a roof inspection by the contractor but contains no price or completion date.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The contractor has inspected the roof but hasn't submitted a price or completion date.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The trial used one greenhouse. Whether the same growth would occur outdoors remains unknown.
+====
+
+[[no-false-universals]]
+=== Universal Wording Only for Claims That Always Hold
+
+A claim that reads as universal holds in every case it covers. If it holds only under certain conditions or has exceptions, those limits appear in the claim. An illustrative case isn't written as a universal claim. It carries an example label under the xref:#illustrative-case-labeling[rules for illustrative cases].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+Tenants may sublet the premises. (The agreement permits subletting only with the landlord's written consent.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Under this agreement, tenants may sublet the premises only with the landlord's written consent.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+Admission to the museum is free. (Special exhibitions have an admission fee.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Admission to the museum is free except for special exhibitions.
+====
+
+[[specific-numbers]]
+=== Quantities with Numbers, Units, and Conditions
+
+A quantity is stated with a number and unit, together with any conditions that affect it. Words such as _fast_, _small_, _large_, _many_, and _most_ aren't numbers. If the exact figure is unknown, the document says so. A range or rough estimate is given only when the evidence supports it.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+Many invoices remain unpaid, and some are overdue by a long time.
+
+(The supplied month-end record lists 120 invoices, of which 18 remain unpaid. Those 18 total EUR 8,400 and are each more than 30 days overdue.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+At month-end, 18 of the 120 invoices remain unpaid. Their total value is EUR 8,400, and each is more than 30 days overdue.
+====
+
+[[dates-and-times]]
+=== Dates with Named Months and Clear Times
+
+. Full dates in prose use the day, full month name in the document's language, and four-digit year. Examples are _31 August 2028_ in English and [.lang-pl]_31 sierpnia 2028 r._ in Polish. Month names follow the spelling and grammar of that language. The day has no leading zero or ordinal suffix. Headings, captions, tables, and fields in the xref:#source-list[source list] use the same format. A date known only to the month or year appears, for example, as _August 2028_, [.lang-pl]_sierpień 2028 r._, or _2028_.
+. Quotations, exact source titles, identifiers, and machine-readable data preserve their original or required date format, including ISO dates where applicable.
+. Times include a timezone offset or the timezone name when readers could be in different timezones or the timezone isn't clear from context. Durations are written in the ISO 8601 form `P30D` or with explicit units such as _30 calendar days_. Relative references - _yesterday_, _next week_, _Q3_, etc. - are avoided unless the reference point is the document's effective date and that date is stated.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The numeric date and inconsistent time form are deliberate faults.
+// adocent-disable-next-line Convention.DateFormat, Convention.Clock
+The public hearing begins on 2026-05-19 at 5pm.
+
+(The supplied notice identifies the timezone as Europe/Warsaw.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The public hearing begins on 19 May 2026 at 17:00 Europe/Warsaw.
+====
+
+[[sources-and-attribution]]
+=== Sources and Attribution
+
+A [[source]]_source_ is a document consulted during writing: provided with the xref:#request-source[writing request], or found and read while researching the document's subject.
+
+[[claim-classes]]
+==== Citations Only for Reported Claims and Inferences
+
+. [[origin-test]]A claim belongs to exactly one of three classes, based on where its content comes from. The author's confidence doesn't determine the class. A [[reported-claim]]_reported claim_ is a statement that restates what a xref:#source[source] says. An [[inferred-claim]]_inferred claim_ is a conclusion that the author derives from one or more sources. An [[author-supplied-claim]]_author-supplied claim_ is a statement the author makes on their own authority without drawing on a source, for example from expertise, common knowledge, or firsthand observation.
+
+. A xref:#reported-claim[reported claim] cites every source it restates. An xref:#inferred-claim[inferred claim] cites every source it draws on and is marked as an inference. A claim that rests on three sources, for example, cites all three. An xref:#author-supplied-claim[author-supplied claim] carries no citation. Every claim derived from a source carries a citation. Every claim without a citation must stand as author-supplied. A document containing only author-supplied claims - a style guide written from expertise, for example - carries no citations and no source list.
+
++
+.Claim classes and their citation duties
+....
++-----------------------+  +-----------------------+  +-----------------------+
+| reports source        |  | derives a conclusion  |  | originates with       |
+| content               |  | from sources          |  | author, no source     |
++-----------+-----------+  +-----------+-----------+  +-----------+-----------+
+            |                          |                          |
+            v                          v                          v
++-----------+-----------+  +-----------+-----------+  +-----------+-----------+
+| reported claim        |  | inferred claim        |  | author-supplied claim |
+| cite its sources      |  | cite its sources      |  | no citation           |
+|                       |  | mark as an inference  |  |                       |
++-----------------------+  +-----------------------+  +-----------------------+
+....
+
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+The council requires the park to open by 30 November 2026 within a budget of EUR 100,000. Completing the paths before planting would reduce the risk of damaging new plants. (The first sentence reports the project specification and the second draws a conclusion from the planned work, but neither identifies its source.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The opening date and budget cite the council's project specification. The proposed order of work is marked as an inference and cites the plan showing where paths and planting areas meet. The statement that the two activities need coordination is presented as the author's own judgment.
+====
+
+. An instruction in the xref:#request-source[writing request] can shape the document without becoming a claim in it. Following a length limit or giving a topic more space needs no citation. Claims that report or draw conclusions from information in the writing request follow the same citation rules as claims based on other xref:#source[sources].
++
+.Examples of following a writing request and using its information
+....
+                           +-----------------------+
+                           | writing request       |
+                           +-----------+-----------+
+                                       |
+            +--------------------------+--------------------------+
+            |                          |                          |
+            v                          v                          v
++-----------+-----------+  +-----------+-----------+  +-----------+-----------+
+| instruction followed  |  | information reported  |  | conclusion derived    |
+| not stated as a claim |  | reported claim        |  | inferred claim        |
+| no citation           |  | cite writing request  |  | cite writing request  |
+|                       |  |                       |  | mark as an inference  |
++-----------------------+  +-----------------------+  +-----------------------+
+....
++
+[.good-example]
+.{good-icon} Good example
+====
+The xref:#request-source[writing request] says: "+Write an event notice under 200 words. We expect 40 guests. Each of the four tables seats ten people.+"
+
+The notice follows the word limit without mentioning it. It reports the expected 40 guests and cites the xref:#request-source[writing request]. It marks the calculated capacity of 40 seats as an xref:#inferred-claim[inference] and cites the writing request for the table and seat counts.
+====
+
+. A xref:#reported-claim[reported claim] asserts no more than its quote states in the source's own words. A count, total, or other conclusion that the author derives from source material is an xref:#inferred-claim[inferred claim] unless the source already states it. A quote describing one item can't support a claim about the whole set.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+The survey recorded eight bird species. (The citation quotes the description of one species. That quotation supports neither the other species nor the count.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The count of eight is marked as an inference and cites the complete species list. If the survey itself states the total, the sentence reports that total and quotes the statement.
+====
+
+[[proposals-and-reports]]
+==== Proposals, Instructions, Decisions, and Commitments Distinguished from Reports
+
+[[introduced-and-reported-statements]]A document can introduce a proposal, give an instruction, or express an authorized decision or commitment. Such wording needs no citation. A statement reporting an existing proposal, instruction, decision, or commitment follows the citation rules. Factual claims and inferences used to justify what the document proposes or establishes follow those rules too.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A report states that the council approved Sunday opening without citing the decision.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+In the proposal, "We propose opening the library on Sundays" introduces a proposal and needs no citation. In the report, "The council approved Sunday opening" reports an existing decision and cites it. If the proposal uses survey findings to justify Sunday opening, those findings carry their citations.
+====
+
+[[closed-source-list]]
+==== Source Lists with All and Only Cited Sources
+
+. A document that cites sources ends with a [[source-list]]_source list_. The list is closed in both directions. Every citation in the text resolves to a listed source. Every listed source is cited at least once, so a source that no statement rests on is removed from the list. The xref:#request-source[writing request] is a citable source like any other.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+A footnote cites "the vendor's pricing sheet," but the document lists its sources nowhere, so the reader can't tell which file, which version, or which vendor. A closing "Further reading" section names three reports that no statement cites.
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The footnote points to an entry in the source list that identifies the vendor's pricing workbook and its version. The three reports that no statement cites are omitted from the source list.
+====
+
+. In AsciiDoc, the xref:#source-list[source list] follows the xref:#bibliography-markup[source list formatting rules].
+
+[[source-identity]]
+==== Details That Identify the Exact Source
+
+. Every listed source is identified precisely enough that the reader can obtain the exact artifact the author used - not a similar one, not a later revision. [[source-identity-dimensions]]The identity is stated in named fields of four groups. [[source-title]]`Title` is common to every source and names it. For example, it may contain a document's title, a standard's name, or a one-line description of an image. The three remaining groups are dimensions with one subsection each: the xref:#source-class-definition[class] states how the reader can reach the source, the xref:#source-type[type] names the kind of artifact, and the xref:#source-status-definition[status] states the artifact's standing.
++
+.The four groups of fields that identify a source
+....
+                  +--------------+
+                  | source entry |
+                  +--------+-----+
+                           |
+      +-------------+------+------+-------------+
+      |             |             |             |
+      v             v             v             v
++-----------+ +-----------+ +-----------+ +-----------+
+|   title   | |   class   | |   type    | |  status   |
+| the name  | | how the   | | what kind | | what      |
+| of the    | | reader    | | of        | | standing  |
+| source    | | reaches it| | artifact  | | it has    |
++-----------+ +-----------+ +-----------+ +-----------+
+....
+
+. An entry states its xref:#source-title[`Title`], every required field of its class and type, and the optional fields that apply, in the catalog order. The field names and controlled values are exact for the document's language. A required field whose value the author can't establish states the literal value `unknown`, so the reader sees a gap that was checked rather than skipped. An optional field whose value is unknown is omitted. A class field is never unknown, because it records the author's own acts, such as archiving, accessing sources, and receiving the xref:#request-source[writing request].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The numbers come from the pricing spreadsheet the customer sent. (Which file, which version, sent when, stored where? The claim can't be re-checked against the artifact the author used.)
+
+(The supplied workbook is titled _2026 Pricing Sheet_, names the customer's procurement office as owner, and is dated 20 May 2026. The author has archived it at `.adocent/resources/sources/pricing-sheet.xlsx` and calculated its digest.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The entry's fields read: `Title` - 2026 Pricing Sheet. `Type` - `Workbook`. `Owner` - the customer's procurement office. `Date` - 20 May 2026. `Archived as` - `.adocent/resources/sources/pricing-sheet.xlsx`. `SHA-256` - the digest of the archived bytes.
+====
+
+[[source-class]]
+===== Access and Archive Details for Each Source
+
+. A [[source-class-definition]]_class_ states how the reader can reach a source. Each of the four classes requires different access or archive details.
+.. An [[archived-file]]_archived file_ is any source that exists as a file or was captured as one. The class includes documents, workbooks, presentations, email files, images, and code, among others, wherever they came from. It also spans content with no file form of its own, saved to a file when it was consulted. Examples include a database extract, a retrieval from an external tool, and a page behind a login. The file is kept under `.adocent/resources/sources/` in the document repository and distributed with the document source. Its recorded path is relative to the document repository root, for example `.adocent/resources/sources/lease.pdf`. Its fields name the archive path (`Archived as`) and the digest of the archived bytes ([[sha256-field]]`SHA-256`).
+.. A [[web-source]]_web source_ is content that stays reachable at a URL. Its fields give [[source-url]]the address (`URL`) and the access date (`Accessed`). A page that needs credentials or a subscription is still a web source, and the `Access` field then names the requirement.
+.. A xref:#request-source[writing request] carries the fields `Request of` (its date) and `By` (the channel it arrived through). It stays outside the archive, carries no digest, and takes no type. Material pasted into or attached to the writing request - for example, a screenshot of a conversation, an interface, code, or an error, a photograph of an object, or a file - is saved as an xref:#archived-file[archived file]. It's listed in the source list only when the document cites it.
+.. A source that can't or must not be copied is declared with the field `Not archived`. Its value states the form of the canonical copy. Examples include a paper book, a licensed standard, a confidential case file, and a live production system.
+. When the document is kept in a version-control system, such as Git, its xref:#archived-file[archived files] are kept there with it. Anyone who opens the document later finds the same files the author read and quoted. The xref:#sha256-field[`SHA-256`] digest in each source's entry works like a fingerprint of the file: any change to the file changes the digest. A changed file no longer matches its entry until the digest is recalculated.
+
+[[source-types]]
+===== Required and Optional Details for Each Source Type
+
+. A [[source-type]]_type_ names what kind of artifact a source is and fixes the fields that describe it. The catalog of types is closed. It consists of the xref:#general-source-types[general types] and the xref:#legal-source-types[types of Polish and European Union legal sources]. A source that fits no listed type takes xref:#other-source-type[`Other`].
+. A required field records a property that every source of that type has. For example, every email has a sender and every image depicts something. Other fields are optional and appear when their values are known.
+
+[[general-source-types]]
+====== General Source Types
+
+A source takes one of these types unless it's a Polish act, ruling, position, or legislative material, or a European Union act or court ruling:
+
+[cols="1,2,2",options="header"]
+|===
+|Type |Required fields |Optional fields
+|[[contract-source-type]]`Contract` | |`Parties`, `Concluded on`, `Governing law`
+|[[general-legal-source-type]]`Legal source` |`Issuing body`, `Identifier` |`Date`
+|`Filing` |`Kind`, `Author`, `Addressee`, `Date` |`Case number`, `Parties`
+|`Official record` |`Register` |`Entry number`
+|`Financial record` |`Issuer` |`Kind`, `Number`, `Date`, `Amount`
+|`Correspondence` |`Participants` |`Platform`, `Sender`, `Addressee`, `Sent on`, `Time range`, `Subject`
+|`Email` |`Sender`, `Sent on` |`Recipients`, `Subject`, `Time range`
+|`Minutes` |`Held on` |`Participants`, `Recorder`
+|`Report` | |`Author`, `Date`, `Period covered`
+|`Specification` |`System` |`Author`, `Date`, `Version`
+|`Standard` |`Identifier` |`Issuing body`, `Year`, `Version`
+|`Publication` |`Authors` |`Year`, `Publisher`, `Edition`, `Editor`, `Volume`, `ISBN`, `DOI`
+|`Web page` | |`Site`, `Published on`
+|`Presentation` | |`Author`, `Date`, `Slides`
+|`Workbook` | |`Owner`, `Date`, `Sheets`
+|`Ticket` |`Tracker`, `Ticket number` |`Ticket state`
+|`Repository` |`Host and path` |`Commit`, `Branch`
+|`System output` |`System` |`Query`, `Captured on`
+|`Image` |`Depicts` |`Captured as`, `Captured on`, `Place`
+|`Recording` |`Medium` |`Date`, `Participants`, `Duration`
+|[[other-source-type]]`Other` |`Description` |`Date`, `Version`
+|===
+
+[[legal-source-types]]
+====== Polish and European Union Legal Source Types
+
+. The type of a source of Polish or European Union law follows the legal order the source belongs to and the source's category. The categories are acts, rulings or determinations of a court or authority, nonbinding positions of an authority, and material from the legislative process. A source of Polish or European Union law takes one of these types:
++
+[cols="1,2,2",options="header"]
+|===
+|Type |Required fields |Optional fields
+|`Polish legal act` |`Kind`, `Issuing body`, `Status` |`Character`, `Promulgated in`, `ELI`, `Law as of`, `Later amendments`
+|`Polish ruling or determination` |`Kind`, `Issuing body`, `Date`, `Case number` |`Finality`, `Bench`, `Promulgated in`, `ECLI`
+|`Polish authority position` |`Kind`, `Issuing body`, `Date` |`Case number`, `Addressee`, `Promulgated in`
+|`Polish legislative material` |`Kind`, `Issuing body`, `Date` |`Term`, `Print number`
+|`European Union legal act` |`Kind`, `Issuing body`, `Number`, `Promulgated in`, `Status` |`CELEX`, `ELI`, `Law as of`
+|`European Union court ruling` |`Kind`, `Issuing body`, `Date`, `Case number` |`Case name`, `ECLI`
+|===
+. A source from any other legal order takes the general xref:#general-legal-source-type[`Legal source`] type.
+
+[[source-status]]
+===== Draft and Final Sources Distinguished
+
+. A [[source-status-definition]]_status_ states the standing of the artifact in the `Status` field: `draft` for work in progress, or `final` for the released form - for example, executed, published, sent, or in force. Free elaboration follows the word, for example _draft v3 of 15 July 2026_ or _final, executed 30 July 2026_. An entry of the xref:#contract-source-type[`Contract` type] states its status always. Other entries state it whenever the standing is contestable.
+
+. A draft shows what was proposed. It doesn't establish what was agreed, released, or enacted. Those statements require the final source.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A memo cites the `docx` draft of a services agreement for the claim that the parties agreed to a 30-day payment term. The draft proposed the term. The signed agreement establishes what the parties agreed to.
+
+(The supplied signed PDF records execution on 30 July 2026.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The entry for the signed PDF carries `Status` - _final, executed 30 July 2026_. The memo cites it for the agreed term, and cites the draft entry only for the drafting history.
+====
+
+[[citation-scope]]
+==== Citations on Each Sentence Drawn from Sources
+
+The unit of citation is the sentence. A citation marker at the end of a sentence covers exactly that sentence. A marker placed inside a sentence covers the text from the previous marker in the same sentence - or from the sentence start - up to itself. The marker sits on exactly the text its source supports. When the fragments of one sentence rest on different sources, each fragment carries its own marker. When one sentence rests on several sources jointly, one marker cites them all. A paragraph derived from a single source repeats one shared citation on every sentence, and a sentence that lacks a citation therefore stays visibly bare.
+
+.Citation markers on individual sentences
+....
+one paragraph                       source list
++---------------------------+       +------------------+
+| reported claim [1]        +------>| source entry A   |
+| reported claim [1]        +------>|                  |
+| author-supplied claim     |       +------------------+
++---------------------------+
+....
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+One footnote at the end of a paragraph appears to support all three sentences about a proposed school building. The first reports planned capacity from the council decision. The second reports construction cost from the approved budget. The third recommends completing the playground first based on the construction schedule, but nothing distinguishes that inference from the reported facts.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The sentence about the school's planned capacity cites the council decision. The construction cost cites the approved budget. The recommendation to complete the playground first is marked as an inference and cites the construction schedule.
+====
+
+[[quote-and-locator]]
+==== Exact Quotes and Precise Source Locations
+
+. Every source cited by a claim carries a verbatim quote and a locator. The [[quote]]_quote_ is the source's exact wording that the claim rests on. The quoted words and their context must support every part of the claim. The [[locator]]_locator_ is the most specific address the source's format offers. A fixed-layout source can use a stable section number or name, a page, or both. A section locator is desirable when it takes the reader closer to the quoted text than the page alone, and the page can accompany it when the combination makes retrieval faster. The most common forms are the following:
+.. a section name or number, a page, or both for a fixed layout, such as a PDF or a printed book,
+.. a section name or number for an editable document,
+.. a sheet and row for a workbook,
+.. a file and line for code,
+.. a sender and timestamp for a message in a thread,
+.. a timestamp for a recording,
+.. a described region for an image.
+. The quote is omitted only where no wording exists to quote - a visual fact cited from an image. The locator then carries the reference alone. When a claim cites several sources, each source keeps its own quote and locator.
++
+.Source reference, locator, and quote
+....
+                           +-----------------------+
+                           | citation for a source |
+                           +-----------+-----------+
+                                       |
+            +--------------------------+--------------------------+
+            |                          |                          |
+            v                          v                          v
++-----------+-----------+  +-----------+-----------+  +-----------+-----------+
+| source reference      |  | locator               |  | quote                 |
+| identifies the entry  |  | identifies the place  |  | exact source words    |
+|                       |  |                       |  | unless none exist     |
+|                       |  |                       |  | to quote              |
++-----------------------+  +-----------------------+  +-----------------------+
+....
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+The footnote names the annual report and nothing else. Finding the revenue figure requires searching all 214 pages.
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The footnote names the annual report and the page containing the revenue entry, then quotes that entry. The locator leads directly to the figure being reported.
+====
+
+[[attribution-in-citation]]
+==== Source Names in Citations, Not Repeated in Prose
+
+A cited claim carries its attribution in the citation itself, so the prose states the fact and doesn't also name the source. Phrases such as _the specification says_, _the report lists_, or _the contract requires_ repeat what the citation already records, and they make the reader pass through the source's identity before reaching the claim. A source is named in the prose only when its identity is the point. The cases are a fact new or changed relative to another source, a reconciliation of two sources that disagree, a claim marked as one source's opinion rather than settled fact, or a xref:#cross-reference[cross-reference] to a fuller treatment.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The survey report says that 62% of respondents use the town library, and the council minutes state that Sunday opening was approved. (The citations already identify both sources.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Of the survey respondents, 62% use the town library. Sunday opening was approved. (Each sentence carries its citation. The prose names the survey or decision when comparing sources or explaining a change.)
+====
+
+[[organization]]
+== Organization
+
+The document presents its subject as a coherent whole, with related material grouped so that each topic can be understood, found, and referenced.
+
+[[topic-consolidation]]
+=== Each Topic in One Place Without Repetition
+
+. [[topic-consolidation-rule]]All statements about a topic appear together in one passage, the topic's [[topic-place]]_place_. The place can be a sentence, a paragraph, a group of paragraphs, a section, or a group of sections. Statements about the topic appear outside its place only in the xref:#outside-place-rule[cases listed below].
+. [[no-restatement]]Within the xref:#topic-place[place], each statement is made once. A later sentence doesn't reword it, and the paragraph doesn't end by summarizing it.
+. [[outside-place-rule]]A statement about a topic can appear outside the topic's xref:#topic-place[place] only in two cases.
+.. The xref:#abstract-content[abstract] repeats the statements it summarizes.
+.. Another passage repeats a statement when the passage can't be understood or acted on without that statement. Such a passage repeats only the statements it needs and carries a xref:#cross-reference[cross-reference] to each of them in the xref:#topic-place[place] of its topic.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A tenancy agreement covers the deposit in three sections. The section _Rent_ states the deposit amount, the section _Payments_ names the account that holds the deposit, and the section _Ending the Tenancy_ states when the landlord returns the deposit.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+A tenancy agreement has a section _Deposit_. It states the deposit amount, the account that holds the deposit, and the conditions for returning it.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The invoice is due 30 days after receipt. Payment must be made within 30 days of receiving the invoice.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The invoice is due 30 days after receipt.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The section _Late Payment_ explains that the landlord may deduct unpaid rent from the deposit. It also repeats the deposit amount, the account that holds the deposit, and the date of its return from the section _Deposit_.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The section _Late Payment_ explains that the landlord may deduct unpaid rent from the deposit and carries a xref:#cross-reference[cross-reference] to the section _Deposit_.
+====
+
+[[set-the-stage]]
+=== Topic Introduction Before the Details
+
+Before the details, the document explains what the topic is, why it matters, and how it relates to other topics. This introduction provides enough information to make the explanation understandable without turning into a separate discussion.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The plan introduces retention basins in three neighborhoods.
+
+(The supplied plan describes shallow areas that temporarily hold rainwater to reduce the amount reaching town drains during heavy rain. It specifies each basin's location, capacity, and maintenance.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+A retention basin is a shallow area that temporarily holds rainwater. The town plans basins in three neighborhoods to reduce the amount of water reaching its drains during heavy rain.
+====
+
+[[purpose-before-mechanism]]
+=== Purpose Before Mechanism
+
+A mechanism's purpose appears before its detailed description. The purpose statement takes one or two sentences and provides the basis for evaluating the mechanism.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The laboratory assigns each sample a number and places the same number on the container and result sheet. This keeps each result attached to the correct sample.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+To keep each result attached to the correct sample, the laboratory assigns a sample number. The number appears on both the container and the result sheet.
+====
+
+[[forward-order]]
+=== Definitions Before Use, Prerequisites Before Actions
+
+[[forward-order-rule]]Information flows from the general to the specific, from the prerequisite to the dependent, and from the cause to the consequence. The reader never needs a statement that the document hasn't yet made.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The notice period begins when the letter arrives. A notice period is the interval between notification that an agreement will end and the date it ends.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+A notice period is the interval between notification that an agreement will end and the date it ends. Under this agreement, the notice period begins when the letter arrives.
+====
+
+[[sections-and-headings]]
+=== Sections and Headings
+
+[[section-nesting]]
+==== Logical Nesting Within Five Levels, No Lone Subsections
+
+. [[logical-section-nesting]]Section nesting reflects the relationships between topics. A subsection develops a distinct part of its parent topic, and sibling subsections cover parallel parts. Subtopics that need their own explanation or need to be found separately have their own sections under that parent. They aren't placed beside their parent merely to keep the outline flat. A new level is omitted when it only repeats the parent's topic or separates a detail that belongs in the parent's prose.
++
+[.bad-example]
+.{bad-icon} Bad example: flattened topic groups
+====
+[source,asciidoc]
+----
+== Park Maintenance
+== Tree Inspections
+== Tree Pruning
+== Path Repairs
+== Path Cleaning
+----
+====
++
+[.bad-example]
+.{bad-icon} Bad example: unnecessary levels
+====
+[source,asciidoc]
+----
+== Park Maintenance
+=== Maintenance Activities
+==== Work Areas
+===== Trees
+====== Inspections
+====== Pruning
+===== Paths
+====== Repairs
+====== Cleaning
+----
+====
++
+[.good-example]
+.{good-icon} Good example: parent topics and subtopics
+====
+[source,asciidoc]
+----
+== Park Maintenance
+=== Trees
+==== Inspections
+==== Pruning
+=== Paths
+==== Repairs
+==== Cleaning
+----
+====
+
+. Subsections nest at most four levels below a top-level section, so a heading is at most five levels deep counting the top-level section. Further divisions beyond that limit use paragraphs or lists within the section they belong to.
++
+In AsciiDoc, a top-level section is written `==` and each deeper level adds one `=`, making `======` the deepest permitted heading:
++
+[source,asciidoc]
+----
+== 1
+=== 2
+==== 3
+===== 4
+====== 5
+----
+
+. [[no-lone-subsection]]A section has zero subsections, or two or more. A lone subsection is folded into its parent's prose, or a sibling is added when its topic is needed to cover the subject.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+== Park Maintenance
+=== Trees
+The maintenance team inspects trees each spring.
+----
+
+(One section contains one subsection.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Park Maintenance
+The maintenance team inspects trees each spring.
+----
+
+(The lone subsection is folded into the parent section.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Park Maintenance
+=== Trees
+The maintenance team inspects trees each spring.
+=== Paths
+The maintenance team repairs damaged paths before the summer season.
+----
+
+(Separate case: the supplied maintenance plan also states that the team repairs damaged paths before summer. Those two maintenance topics justify sibling subsections.)
+====
+
+[[headings-as-promises]]
+==== Headings That Match Their Section Content
+
+A heading announces exactly what the section contains. The section delivers exactly that, no more and no less. For example, a section titled "Rent Payments" describes rent payments. It doesn't also describe building repairs. Material that doesn't belong under the heading goes under the heading of its own topic.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A section titled "Rent Payments" explains payment dates, then moves to reporting a broken window and arranging repairs.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The "Rent Payments" section explains payment dates. The "Repairs" section explains how to report a broken window and arrange repairs.
+====
+
+[[heading-labels]]
+==== Short, Distinct, Self-Explanatory Headings
+
+A heading is short enough to scan as a label in the table of contents. It names the distinguishing topic, and the body provides the explanation. The table of contents gives a clear overview of the document without requiring the section text. Headings at the same level use distinct wording so that a xref:#cross-reference[cross-reference] to a heading identifies one target.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+Two sections at the same level are titled "Results." One describes soil samples and the other describes household interviews.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The sections are titled "Soil Sample Results" and "Household Interview Results."
+====
+
+[[declarative-headings]]
+==== Headings as Noun Phrases, Not Questions
+
+A heading names its section's topic as a noun phrase, such as "Waste Collection" or "Weekly Waste Collection." A heading isn't a question ("When's Waste Collected?") and doesn't open with an interrogative lead-in ("How to Sort Packaging"). A question in a heading withholds the information the heading exists to give, and it reads as a teaser in a table of contents. The material a question-style heading gestures at belongs in the body. The heading states the topic outright.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The headings are _Why Recycle?_, _Collection Is Weekly_, and _How to Sort Packaging_.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The headings are _Recycling Benefits_, _Weekly Waste Collection_, and _Packaging Sorting_.
+====
+
+[[self-contained-prose]]
+==== Prose Understandable Without Its Headings
+
+. A heading is a navigational label, not part of the prose. The body reads correctly when every heading is removed: no sentence depends on its heading for a subject, a referent, or a qualifier. The body doesn't restate the heading.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+Heading: "Payment Deadline." Body: "It's 30 days after receipt." Without the heading, the sentence names neither the payment nor the item received.
+
+(The supplied payment terms measure the deadline from receipt of the invoice.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+Heading: "Payment Deadline." Body: "Payment is due 30 days after the invoice is received."
+====
+
+. In AsciiDoc, the requirements for prose under headings also apply to bold xref:#paragraph-header[paragraph headers].
+
+[[paragraphs-lists-and-tables]]
+=== Paragraphs, Lists, and Tables
+
+[[one-paragraph-one-topic]]
+==== One Topic per Paragraph
+
+[[single-topic-rule]]A paragraph develops one thought, for example a claim followed by its elaboration, qualifications, and consequences. When the topic shifts, the paragraph ends. A paragraph that introduces a second, parallel topic must be split, even when the two topics are related.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The rainfall gauge is emptied at 09:00 each day, and the rainfall is recorded in millimeters. Seeds are stored in sealed bags in a cool room.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The rainfall gauge is emptied at 09:00 each day. The rainfall is recorded in millimeters.
+
+Seeds are stored in sealed bags in a cool room.
+====
+
+[[lists-for-enumerable-content]]
+==== Genuine Lists and Numbered Explanations
+
+. A [[genuine-list]]_genuine list_ presents the members of one set as parallel fragments. Each item either names a member of the set or completes the sentence begun by the introduction.
++
+[.good-example]
+.{good-icon} Good example: naming members of a set
+====
+The service enforces the following requirements:
+
+. request validation,
+. response encryption.
+====
++
+[.good-example]
+.{good-icon} Good example: completing the introduction's sentence
+====
+The service rejects a request when:
+
+. the token is missing,
+. the token has expired.
+
+Each item completes a sentence: "The service rejects a request when the token is missing."
+====
+
+. [[list-introductions]]The introduction immediately precedes the genuine list and ends with a colon. It may contain _the following_. In a table cell, a concise label may serve as the introduction. _The following_ may also introduce tables, figures, and code listings.
+. Genuine-list items begin with a lowercase letter and end with commas, except that the final item ends with a period. Proper nouns, acronyms, quoted labels, and case-sensitive tokens keep their required capitalization.
+. A genuine list has at least two items at every level. A lone item's content is written in prose, following the xref:#no-lone-subsection[rule against lone subsections]. An item introducing a nested genuine list serves as that list's introduction and ends with a colon.
+. [[numbered-prose-introductions]]Numbered explanations make separate statements in complete sentences. An introduction to these explanations states their shared subject, purpose, or conditions and ends with a period. It doesn't announce them with _the following_.
++
+[.bad-example]
+.{bad-icon} Bad example: announcing numbered explanations
+====
+// The forward-pointing introduction is deliberate here.
+// adocent-disable-next-line Structure.NumberedProseIntroduction
+The following two requirements apply.
+
+. The service validates requests.
+. The service encrypts responses.
+====
++
+[.good-example]
+.{good-icon} Good example: introducing numbered explanations directly
+====
+The service enforces two requirements.
+
+. The service validates requests.
+. The service encrypts responses.
+====
+. In AsciiDoc, genuine lists and numbered explanations follow the xref:#numbering-hierarchy[numbering hierarchy]. Numbered explanations are written as xref:#numbered-paragraph[numbered paragraphs].
+
+[[exhaustive-lists]]
+==== Complete Lists or Clearly Marked Samples
+
+A list is either complete or explicitly marked as incomplete. When the list enumerates the members of a set, all members appear. When the list is a sample, it opens or closes with a phrase that signals that other items exist, such as _among others_, _the most common are..._, or _see §X for the full list_. A list that looks complete but omits members is a defect: a reader who acts on the listed items as the full set acts on a false premise.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The museum sells adult and child tickets. (It also sells family tickets, but the list appears complete.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The museum sells adult, child, and family tickets.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+For example, the museum sells adult and child tickets. The full price list also includes family tickets.
+====
+
+[[tables-for-multidimensional-comparison]]
+==== Tables for Comparing Items Across Several Properties
+
+A table is used when each item has the same set of attributes and the reader will compare across attributes. A table isn't used as a layout device for text that isn't tabular. Each column has a header. Each row is independent.
+
+[.good-example]
+.{good-icon} Good example
+====
+[cols="<2,>1,>1,>1",options="header"]
+|===
+|Expense |Budget (EUR) |Actual (EUR) |Difference (EUR)
+|Room hire |500 |500 |0
+|Printing |300 |240 |-60
+|Transport |200 |230 |30
+|===
+
+A positive difference means spending above budget.
+====
+
+[[cross-references]]
+=== Named or Numbered Targets for Cross-References
+
+. [[general-cross-reference-requirements]]In every document format, a [[cross-reference]]_cross-reference_ targets another document or a specific part of a document, such as a section, table, figure, or defined term. A cross-reference across sections identifies its target by number, title, or concise descriptive wording. The words _above_ and _below_ are permitted only when the target is in the same paragraph or list.
++
+[.bad-example]
+.{bad-icon} Bad example: xref:#cross-reference[cross-reference] to another section
+====
+The appeal follows the procedure discussed earlier.
+====
++
+[.good-example]
+.{good-icon} Good example: xref:#cross-reference[cross-reference] to another section
+====
+The appeal follows the submission procedure in section 5.3.
+====
+
+. In AsciiDoc, a xref:#cross-reference[cross-reference] follows the xref:#general-cross-reference-requirements[general requirements]. For targets within the document, the sections xref:#explicit-anchors[] and xref:#internal-references-with-xref[] add requirements for the target's anchor and the cross-reference markup.
+
+[[section-reference-qualifiers]]
+=== Section Labels Beside Titles in Cross-References
+
+. In running prose, a xref:#cross-reference[cross-reference] that displays a section title has a word naming the kind of target beside it. The word appears once, not on both sides of the title. A title that already identifies the target, such as _Section 2_ or _Appendix A_, needs no added word. A list containing only cross-references, such as a table of contents, can show section titles without the added word.
+.. In English, _section_ or _appendix_ appears before or after the title, whichever fits the target: _the section Payment Dates_ or _the Payment Dates section_. A group may share a plural: _the sections Payment Dates and Late Payments_.
+.. In Polish, [.lang-pl]_sekcja_ or [.lang-pl]_załącznik_ appears before the title and is inflected to fit the sentence, while the title stays in the nominative: [.lang-pl]_w sekcji Terminy płatności_. A group may share a plural: [.lang-pl]_w sekcjach Terminy płatności i Opóźnione płatności_.
+
+. A xref:#cross-reference[cross-reference] uses concise link text when the full title makes the sentence harder to read. The link text identifies the target and fits the surrounding sentence. For example, _Follow the payment schedule_ can carry a cross-reference to a section titled _Payment Dates and Methods_. The heading remains informative in the table of contents. The link text fits the passage where it appears.
+
+[[terminology-and-language]]
+== Terminology and Language
+
+Concepts have stable names, and the wording expresses each point precisely.
+
+[[terms-and-names]]
+=== Terms and Names
+
+[[strict-nomenclature]]
+==== One Name per Concept Throughout the Document
+
+. Every concept has one [[canonical-term]]_canonical term_ used throughout the document. For example, the rule covers deliverables, actors, operations, states, boundaries, and units across prose, headings, lists, tables, diagrams, captions, and xref:#cross-reference[cross-reference] link text.
+. Two names are kept only when they refer to different concepts. Different uses, owners, results, or lifecycles can justify different names. Two terms that name the same concept are replaced with one.
+. A comma-separated list, slash pair, or parenthetical alias is a violation when all terms name the same concept and the sentence gains no information from listing them.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The invoice is issued on delivery. The bill states the amount due. The payment request must be paid within 30 days. (All three terms name the same document.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The invoice is issued on delivery. It states the amount due and must be paid within 30 days.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The study calls the same group "participants," "respondents," and "subjects" without explaining a distinction.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The study calls the group "participants" throughout.
+====
+
+[[defined-terms]]
+==== Special Meanings Defined at First Use
+
+A [[defined-term]]_defined term_ has a meaning fixed by the document. Its definition appears at the first use of that meaning. The definition says what kind of concept the term names and what distinguishes that concept from others of the same kind: _X is Y that Z_. Later uses keep the same meaning.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A deposit is money paid at the beginning.
+
+(The supplied agreement describes a rental deposit held by the landlord as security for the tenant's obligations.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+A _rental deposit_ is a sum held by the landlord as security for the tenant's obligations under the agreement.
+====
+
+[[capitalization-of-defined-terms]]
+==== Consistent Capitalization of Defined Terms
+
+A xref:#defined-term[defined term] is capitalized consistently with its definition. For example, when the term is defined as _Approved Budget_, it's written _Approved Budget_ throughout, not _approved budget_ or `approved_budget`. When `approved_budget` is also the name of a cell range in a spreadsheet, both forms appear and the document distinguishes them.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A project's _Approved Budget_ is the spending limit authorized by its board. The finance team compares actual spending with the approved budget. (The defined term changes capitalization.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+A project's _Approved Budget_ is the spending limit authorized by its board. The finance team compares actual spending with the Approved Budget.
+====
+
+[[acronyms-and-abbreviations]]
+==== Unfamiliar Acronyms Expanded at First Use
+
+An unfamiliar acronym is expanded at its first occurrence in the document in the form _Expanded Form (ACRONYM)_, and again at its first occurrence in each top-level section. A document may instead expand each acronym only once. After each expansion, the acronym is used until another expansion is required. Acronyms more recognizable than their expansions, such as DNA, UTC, and PDF, need not be expanded, except where the expansion adds information the reader needs.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The unexplained abbreviations are the deliberate fault in this example.
+// adocent-disable-next-line Terminology.Acronyms
+The charity compares its income with GNI and reports its work with local CSOs.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The charity compares its income with gross national income (GNI), the total income earned by a country's residents. It also reports its work with civil society organizations (CSOs), such as neighborhood associations.
+====
+
+[[consistent-spelling]]
+==== Consistent Spelling Variants
+
+When a word has two accepted spellings, choose one for the document. Keep that spelling when adding an ending, such as a plural ending. Preserve the spelling of quoted words, code identifiers, and proper names.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// Mixing the accepted variants is the deliberate defect.
+// adocent-disable-next-line English.ConsistentSpelling
+The adviser sent the report. A second advisor approved it.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The adviser sent the report. A second adviser approved it.
+====
+
+[[american-spelling]]
+==== American Spelling in English Prose
+
+Author-written English uses American spelling. Verbatim quotations, technical identifiers, and established proper names preserve their original spelling.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// British spellings are the fault demonstrated by this bad example.
+// adocent-disable-next-line English.AmericanSpelling, English.ConsistentSpelling
+The colour of the label was recognised by the team travelling to the theatre.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The color of the label was recognized by the team traveling to the theater.
+====
+
+
+[[other-language-wording]]
+==== Wording in Another Language Marked as Such
+
+. A word, phrase, or passage written in a language other than the document's language is marked with its language. The mark tells a reader which language the wording belongs to, and it tells a checking tool to read the wording with the spelling and grammar of that language rather than of the document. A word borrowed from another language needs no mark if it's now an ordinary word of the document's language and is listed in its dictionaries. For example, _software_ in a Polish document and _kindergarten_ in an English one are left unmarked.
+. In AsciiDoc, the mark is the role `lang-` followed by the language code. A span with no formatting carries the role in front of a pair of `+#+` characters, as in `+[.lang-pl]#Terminy płatności#+`, and a pair of `+##+` characters marks a span inside a word. The role also stands in front of italic text, as in `+[.lang-pl]_31 sierpnia 2028 r._+`, when the wording is italicized for its own reason. A `[.lang-pl]` line directly above a paragraph or a delimited block marks the whole block.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The invoice header reads Terminy płatności above the table.
+----
+
+(The Polish title isn't marked, so an English spelling check reports both of its words.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The invoice header reads [.lang-pl]#Terminy płatności# above the table.
+----
+====
+
+[[concrete-vocabulary]]
+==== Specific Descriptions Instead of Vague Labels
+
+The wording is specific enough to have one clear meaning in context. It describes what a concept does or what it provides, rather than using vague labels such as _flexible_, _robust_, _advanced_, _modern_, _premium_, _seamless_, or _intelligent_ without explanation.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The membership offers flexible access and a seamless experience in modern facilities.
+
+(The supplied membership terms allow swimming-pool use from 06:00 to 22:00 every day, include two exercise classes in the monthly fee, and permit cancellations up to 12 hours before a class.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Members can use the swimming pool from 06:00 to 22:00 every day. The monthly fee includes two exercise classes, and bookings can be canceled up to 12 hours before a class.
+====
+
+[[plain-names-for-plain-things]]
+==== Plain Terms Instead of Elaborate Synonyms
+
+. The document uses the established, plain term when it has the same meaning as a more elaborate term. A different term is justified only when it expresses a real difference in meaning.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The wordy substitutes for ordinary words are deliberate here.
+// adocent-disable-next-line Prose.TooWordy
+The parties shall utilize the premises for the aforementioned commercial activities.
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The parties must use the premises for the previously specified commercial activities.
+====
+. The following pairs illustrate further cases where the plain form is usually correct:
+// The pair names the wordy form it advises against.
+// adocent-disable-next-line Prose.TooWordy
+.. _use_ over _utilize_,
+.. _buy_ over _procure_ (when no formal procurement process is meant),
+.. _start_ over _commence_,
+.. _help_ over _facilitate_ (when help is meant),
+.. _people_ over _human resources_ (when referring to people rather than the department).
+
+[[sentences-and-voice]]
+=== Sentences and Voice
+
+[[one-sentence-one-thought]]
+==== One Point per Sentence
+
+A sentence develops one coherent point. Clauses may state a cause and its consequence, a condition and its outcome, or a contrast when that relationship is the point. Clauses that introduce independent topics whose relationship is unstated belong in separate sentences.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The rainfall gauge recorded 18 mm during the storm, and the field station renewed its insurance policy for another year.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The rainfall gauge recorded 18 mm during the storm.
+
+The field station renewed its insurance policy for another year.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The northern site received 18 mm of rain, while the southern site received 6 mm.
+
+(The contrast between sites is one point.)
+====
+
+[[active-voice-and-named-actor]]
+==== Active Voice with Named Actors
+
+A sentence names the actor that performs the action. Passive voice is reserved for cases where the actor is genuinely unknown, irrelevant, or the topic of the sentence. For example, "The sample was damaged" is acceptable when the cause is unknown.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The invoices are checked and the payments are approved. (Who performs each action?)
+
+(The supplied procedure assigns invoice checks to the bookkeeper and payment approval to the finance director.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The bookkeeper checks the invoices. The finance director approves the payments.
+====
+
+[[direct-verbs]]
+==== Direct Verbs Instead of Wordy Noun Phrases
+
+Actions are expressed with direct verbs instead of longer phrases built from nouns. For example, _perform an analysis of_ becomes _analyze_. _Make a decision about_ becomes _decide_. _Provide support for_ becomes _support_.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The buried verbs are the deliberate fault in this example.
+// adocent-disable-next-line Prose.BuriedVerb
+The committee performs an assessment of the bids and makes a decision about the award.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The committee assesses the bids and decides which bidder receives the contract.
+====
+
+[[affirmative-before-negative]]
+==== Affirmative Statements Before Negative Statements
+
+A claim states what a concept is or does before it states what it isn't or doesn't do. The affirmative gives the reader the fact to hold. The negation then refines the fact by ruling out an alternative the reader might otherwise assume. A negation placed first forces the reader to carry a list of exclusions with nothing yet to attach them to.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The grant doesn't cover wages or travel. It pays for laboratory equipment.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The grant pays for laboratory equipment. It doesn't cover wages or travel.
+====
+
+[[avoid-parentheses]]
+==== Separate Sentences Instead of Parentheses
+
+Information in parentheses is written as a separate sentence if it matters and omitted if it doesn't. Quotations and technical notation keep the parentheses their source or format requires.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The annual membership (EUR 60) includes entry to exhibitions.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Annual membership costs EUR 60. It includes entry to exhibitions.
+====
+
+[[no-semicolons]]
+==== No Semicolons in Author-Written Prose
+
+Author-written prose contains no semicolons. Statements are written as separate sentences or joined by a word that explains their relationship.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The semicolon between statements is the deliberate fault.
+// adocent-disable-next-line Prose.Semicolons
+The annual membership includes entry to exhibitions; workshops cost extra.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The annual membership includes entry to exhibitions. Workshops cost extra.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// Semicolons are prohibited between list items as well as between statements.
+// adocent-disable-next-line Prose.Semicolons
+The grant covers seeds; tools; and irrigation equipment.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The grant covers seeds, tools, and irrigation equipment.
+====
+
+[[natural-phrasing]]
+==== Plain Wording Without Stilted Expressions
+
+// The listed expressions are language specimens, not descriptions of objects.
+// adocent-disable-next-line Readability.ConcreteVocabulary, Prose.TooWordy, Prose.Formal
+The wording follows the natural phrasing of a careful practitioner. It excludes stilted expressions such as _herein_, _aforementioned_, _leverage_, _utilize_, _whilst_, and _thereof_.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The wordy legalisms are the deliberate fault in this example.
+// adocent-disable-next-line Prose.TooWordy
+Herein, the aforementioned findings shall be utilized to inform the subsequent allocation of resources.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The findings will guide the later allocation of resources.
+====
+
+[[tense-and-mood]]
+==== Verb Tenses That Match Event Times
+
+Current conditions and recurring processes are described in the present tense, for example "The shop opens at 09:00." Completed events are described in the past tense, for example "The study measured rainfall during May." Planned events are described in the future tense, for example "The council will review the proposal in June." Instructions take the imperative, for example "Sign the application before submitting it."
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The team collected the samples on 3 March 2028 and measures them on 4 March 2028. (Both activities were completed before the report was written.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The team collected the samples on 3 March 2028 and measured them on 4 March 2028.
+====
+
+[[person]]
+==== Third-Person Descriptions, Direct Instructions, Limited Author Pronouns
+
+. Descriptions use the third person by default, for example _The committee reviews applications_.
+. Instructions address the reader as _you_ or use direct commands, such as _Sign the form_.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+We attach the receipts. The applicant then signs the form. One must keep a copy, and you send the original to the office.
+
+(All four steps are instructions for the applicant.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+Attach the receipts, sign the form, and keep a copy. Send the original to the office.
+====
+
+. The authors may use first-person pronouns only when identifying their involvement matters to the meaning.
+
+[[pronoun-antecedents]]
+==== Concept Names per Paragraph, Unambiguous Pronouns and Shorthand
+
+. [[paragraph-concept-names]]When a new paragraph mentions a concept already discussed in an earlier paragraph, the first mention repeats the name instead of using a pronoun or shorthand.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+The tenant pays a rental deposit and monthly rent.
+
+This amount is returned when the agreement ends.
+
+(The supplied agreement identifies the rental deposit as the amount returned.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The tenant pays a rental deposit and monthly rent.
+
+The rental deposit is returned when the agreement ends.
+====
+
+. [[pronoun-reference-rule]]Within a paragraph, a pronoun or shorthand has one clear reference in the same sentence or the immediately preceding sentence. The name is repeated when the reference would otherwise be ambiguous.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+The tenant spoke to the landlord after he inspected the roof. (Who inspected it?)
+
+(The supplied inspection record names the landlord as the inspector.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The landlord inspected the roof. The tenant then spoke to the landlord.
+====
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+The library proposes longer opening hours and lower fees. This idea takes priority.
+
+(The supplied proposal identifies lower fees as the priority.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The library proposes longer opening hours and lower fees. Lower fees take priority.
+====
+
+[[concision-and-tone]]
+=== Concision and Tone
+
+[[razor-sentences]]
+==== No Unnecessary Sentences
+
+A sentence is omitted if removing it loses no necessary information and leaves the text clear.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+There are several important things to consider when reporting advertising costs. Let us look at them. The first thing is the total amount spent. The campaign cost EUR 12,000.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The campaign cost EUR 12,000.
+====
+
+[.good-example]
+.{good-icon} Good example: a useful xref:#list-introductions[list introduction]
+====
+The fee includes:
+
+. course materials,
+. the examination.
+====
+
+[[no-marketing]]
+==== Specific Information Instead of Promotional Labels
+
+The prose doesn't use promotional labels to make a concept sound impressive. It states what the concept does, how it performs, or what results it achieves.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The promotional labels are the fault demonstrated by this bad example.
+// adocent-disable-next-line Prose.Jargon
+The industry-leading water bottle delivers world-class durability for every adventure.
+
+(The supplied product sheet gives a capacity of 750 ml, a weight of 280 g, a replaceable screw cap, and stainless-steel construction. It provides no comparative durability evidence.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The bottle holds 750 ml, weighs 280 g, and has a replaceable screw cap. The product sheet lists the material as stainless steel.
+====
+
+[[no-filler-phrases]]
+==== No Filler Phrases
+
+// The filler phrases are mentioned as examples of wording to remove.
+// adocent-disable-next-line Prose.EmptyLeadIn
+The prose excludes phrases that announce structure without providing content: _It's important to note that_, _It should be mentioned that_, _As we will see_, _In other words_, _Basically_, _Essentially_, _At the end of the day_, etc. The sentence following the filler is usually fine on its own.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The filler phrases are the deliberate fault in this example.
+// adocent-disable-next-line Prose.EmptyLeadIn
+It's important to note that, basically, the museum is, at the end of the day, closed on Mondays.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The museum is closed on Mondays.
+====
+
+[[no-empty-transitions]]
+==== Transitions That Explain Real Connections
+
+A transition word explains a real connection between statements. Words such as _therefore_ and _thus_ introduce a conclusion that follows from the preceding statements. Words such as _also_ and _furthermore_ add another relevant point. A transition that doesn't help explain the connection is omitted.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The consultation opens on 1 April 2026. Furthermore, comments can be sent by post. Moreover, comments can be submitted online. Additionally, the consultation closes on 30 April 2026.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The consultation runs from 1 to 30 April 2026. Comments can be sent by post or submitted online.
+====
+
+[[no-throat-clearing]]
+==== Openings with Content, Not Empty Announcements
+
+[[content-first-openings]]Sections, paragraphs, and sentences begin with content. Openings contain no announcements of upcoming explanations, apologies for the subject's difficulty, or greetings that merely acknowledge the xref:#request-source[writing request]. An opening xref:#abstract-content[abstract], when appropriate, states the document's substance. A restatement of the writing request or heading supplies no new information.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+In this section, we will now turn our attention to the important subject of venue costs. The venue costs EUR 500 per day, including chairs and cleaning.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The venue costs EUR 500 per day, including chairs and cleaning.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The exclamation is deliberate.
+// adocent-disable-next-line Prose.Exclamation
+Sure! I'd be happy to explain the difference between revenue and profit. Let me walk you through it.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Revenue is the income from sales. Profit is the amount left after expenses are deducted.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+You asked about the proposed bus route. Here is a description of the proposed bus route. It would connect the railway station, hospital, and town center, with buses every 20 minutes.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The proposed route connects the railway station, hospital, and town center. Buses would run every 20 minutes.
+====
+
+[[no-redundant-qualifiers]]
+==== No Redundant Qualifiers
+
+// The qualifiers and pleonasms are mentioned as examples of wording to remove.
+// adocent-disable-next-line Readability.ConcreteVocabulary, Prose.TooWordy, Prose.WeakeningWords
+Qualifiers that don't narrow the claim are omitted: _very_, _really_, _actually_, _literally_, _quite_, _truly_, etc. Pleonasms are omitted: _end result_, _final outcome_, _advance planning_, _future plans_, _added bonus_, _past history_, etc. The shorter form has the same meaning.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The redundant phrases and qualifiers are deliberate here.
+// adocent-disable-next-line Prose.TooWordy, Prose.WeakeningWords
+The actual end result is that the future plans for the exhibition will literally have to be revised.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The plan for the exhibition must be revised.
+====
+
+[[no-patronizing]]
+==== No Claims That a Task Is Easy
+
+A task carries no label such as _easy_, _simple_, _straightforward_, _obvious_, or _trivial_. Expressions such as _just_, _simply_, and _merely_ are omitted when they minimize the reader's task. Its steps provide the information needed to judge its difficulty.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The minimizing labels are the deliberate fault in this example.
+// adocent-disable-next-line Prose.Patronizing
+Returning the parcel is straightforward - just follow the simple process. Place the return form inside the parcel, attach the prepaid label, and take the parcel to a collection point.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Place the return form inside the parcel. Attach the prepaid label and take the parcel to a collection point.
+====
+
+[[dont-annotate-rule-application]]
+==== No Commentary on Applying This Guideline
+
+The document contains no commentary about applying this guideline. A statement such as "Under section 3.2, I'll use direct verbs here" describes the editing process and adds nothing to the subject.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+Following the guideline, I'll use direct verbs and keep this concise. Here is a description of the proposed opening hours. The proposal extends library opening hours to 20:00 on weekdays.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The proposal extends library opening hours to 20:00 on weekdays.
+====
+
+[[inclusive-language]]
+==== People Described Without Irrelevant Identity Labels
+
+Actors and examples carry no gender, ethnicity, or other identity attributes unless those attributes belong to the topic. A person of unspecified gender takes the singular pronoun _they_. [[example-name-variety]]Example names come from a variety of traditions. Terms name the actual work or position without demeaning a group. For example, _chair_ names the person leading a meeting, and _staffing_ describes assigning people to work.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+Each volunteer receives his badge at the entrance. He must return it before leaving.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Each volunteer receives a badge at the entrance and returns it before leaving.
+====
+
+[[literal-wording]]
+==== Literal Wording Instead of Figurative Expressions
+
+Author-written prose uses literal wording. Metaphors, figurative idioms, and wordplay are omitted. Established field terms may be used in their precise technical sense, even if their origin is figurative.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The committee struck out with its first funding application.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The committee received no funding from its first application.
+====
+
+[.good-example]
+.{good-icon} Good example: an established field term
+====
+The cash flow forecast lists expected receipts and payments by month.
+====
+
+[[translatable-phrasing]]
+==== Translatable Phrasing Without Local Assumptions
+
+A document that may be translated avoids culture-specific references. Currency, units, and date formats are written in forms that don't presuppose a single locale. Example names follow xref:#example-name-variety[the requirement to draw from different traditions].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The fee is $100.
+
+(The supplied price list specifies Canadian dollars.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The fee is 100 Canadian dollars.
+====
+
+[[plain-typography]]
+==== Straight Quotes, Hyphens, and Three Periods for Ellipses
+
+Author-written source prose uses straight double and single quotation marks, plain hyphens, and three periods for an ellipsis. Verbatim quotations and technical literals preserve their exact characters, because a changed character can alter the evidence or identifier.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The author replaces straight quotation marks with typographic quotation marks and uses a single-character ellipsis to mark an omission.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[subs="specialcharacters"]
+The invitation reads "Doors open at 18:00." The evening's program begins with "Welcome..."
+====
+
+[[examples-and-presentation]]
+== Examples and Presentation
+
+Examples and visual representations explain the subject without relying on information absent from the document.
+
+[[show-then-tell]]
+=== Explanations Before Examples
+
+. [[illustration-requirement]]A concept that can be illustrated has an example. The explanation comes before the example and makes sense on its own.
+
+. When a concept has important boundary cases, the examples include a typical case and at least one boundary case.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+An average is calculated from the observations.
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The average is the sum of the observations divided by their number. For rainfall measurements of 3 mm, 4 mm, and 5 mm, the average is 4 mm: (3 + 4 + 5) / 3.
+
+A missing measurement isn't a zero. If the third measurement is missing, the average of the two recorded measurements is 3.5 mm: (3 + 4) / 2.
+====
+
+[[realistic-examples]]
+=== Realistic Examples from the Fields Covered
+
+Examples use recognizable situations and plausible details, such as an invoice for printing, a rainfall measurement, a delivery agreement, or a council decision. Concrete names and values take the place of empty placeholders such as "Company X" and "some amount" when those details explain the point. Examples reflect the range of fields the document covers. Realistic examples carry information about typical usage. Placeholder examples don't.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The vague and wordy placeholders are the fault demonstrated by this bad example.
+// adocent-disable-next-line Prose.TooWordy
+Company X will deliver some items to Company Y at a later date.
+
+(The supplied order names Harbor Printing as supplier and Riverside Museum as recipient. It specifies 500 exhibition catalogs by 30 September 2026, each with 48 pages and a card cover.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Harbor Printing will deliver 500 copies of the exhibition catalog to Riverside Museum by 30 September 2026. Each copy will have 48 pages and a card cover.
+====
+
+[[mark-illustrative-cases]]
+=== Examples Labeled Without Implying All Cases Are Covered
+
+[[illustrative-case-labeling]]An illustrative value, figure, or scenario carries an example label such as _for example_, _for instance_, or _one possible case_. The label shows that the case illustrates the concept and that other cases may exist. Giving several examples doesn't imply that they cover every possible case.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A shop spends EUR 2,000 a month on advertising. (A single illustrative budget is presented as the amount every shop spends.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Advertising budgets depend on the campaign and the shop's finances. For example, a shop might allocate EUR 2,000 to a month-long campaign.
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+Poor plant growth is caused by too little water or too little light. (Two possible causes are presented as if they were the only ones.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+Poor plant growth has different causes. For example, a plant may get too little water or too little light.
+====
+
+[[diagrams-and-prose]]
+=== ASCII Diagrams for Relationships, Prose for Behavior
+
+. [[visual-explanation-rule]]The document uses diagrams when they make relationships clearer than prose. It describes in prose what happens, in what order, and under what conditions.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+The museum director supervises the head of collections, the education manager, and the head of visitor services. The head of collections supervises the conservator. The education manager supervises the workshop coordinator. The head of visitor services supervises the reception team.
+====
++
+[.good-example]
+.{good-icon} Good example: museum supervision
+====
+....
+                               +--------------------------+
+                               |     museum director      |
+                               +-------------+------------+
+                                             |
+              +------------------------------+------------------------------+
+              |                              |                              |
+              v                              v                              v
++--------------------------+   +--------------------------+   +--------------------------+
+|   head of collections    |   |    education manager     |   | head of visitor services |
++-------------+------------+   +-------------+------------+   +-------------+------------+
+              |                              |                              |
+              v                              v                              v
++--------------------------+   +--------------------------+   +--------------------------+
+|       conservator        |   |   workshop coordinator   |   |      reception team      |
++--------------------------+   +--------------------------+   +--------------------------+
+....
+
+Each arrow points from a supervisor to the role they supervise.
+====
+
+. English diagram text uses only ASCII. Polish diagram text may also use Polish letters. Drawing strokes always use ASCII.
+. [[ascii-diagrams]]Every diagram labels its elements and uses consistent connectors. Each arrow has one direction and connects two named elements. ASCII diagrams align boxes, labels, and connectors and use one consistent set of box characters.
+
+[[alt-text-and-captions]]
+=== Captions and Text Alternatives for Every Figure
+
+Every figure has a caption that states what the figure shows. An inline icon or a decorative image isn't a figure. Every figure also carries a textual equivalent: alt text for short captions, or accompanying prose for figures that carry information not reproducible in alt text. A reader using a screen reader or reading a print copy without the figure should be able to extract the same information from the text alone.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+`image::monthly-sales.png[]` (The chart has no caption or text describing its figures. It plots sales of EUR 10,000 in January, EUR 12,000 in February, and EUR 9,000 in March.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+`image::monthly-sales.png["Sales were EUR 10,000 in January, EUR 12,000 in February, and EUR 9,000 in March.",title="Monthly sales in the first quarter"]`
+====
+
+[[part-2]]
+=== Software Documentation
+
+This section covers software interfaces, network protocols, code examples, and related operating procedures. Its specialized requirements apply when the document describes those subjects.
+
+[[show-then-tell-technical-form]]
+==== Concrete Software Examples with Boundary Cases
+
+Software content satisfies the xref:#illustration-requirement[example requirement] with a concrete artifact, such as a code snippet, a request/response pair, a configuration file, a query, or a diagram. Examples of software boundary cases include empty inputs, missing inputs, concurrent access, partial failures, and error conditions.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,python]
+----
+result = order_service.find_by_number(order_number)
+order_service.cancel(result, reason=cancellation_reason)
+print(result.status)
+----
+
+(The supplied API example uses order number `ORD-2026-00471` and cancellation reason `customer_request`. It shows the resulting status as `CANCELED`.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,python]
+----
+order = order_service.find_by_number("ORD-2026-00471")
+order_service.cancel(order, reason="customer_request")
+print(order.status)  # "CANCELED"
+----
+====
+
+[[show-the-wire]]
+==== Complete Protocol Messages, Not Prose Summaries
+
+Descriptions of network behavior satisfy the xref:#illustration-requirement[example requirement] with actual bytes - for example, HTTP requests and responses, JSON payloads, SQL statements, or protocol frames - rather than a prose summary. The reader can then copy-paste and verify. Prose descriptions of network behavior tend to omit details such as headers, status codes, content types, or escaping rules that turn out to matter.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The client sends a `POST` request with the order data and receives the created order back.
+====
+
+[.bad-example]
+.{bad-icon} Bad example: incomplete request
+====
+The supplied API documentation includes the following request and response:
+
+// The request without body framing is the deliberate fault in this example.
+// adocent-disable Markup.SourceSyntax
+[source,http]
+----
+POST /api/orders HTTP/1.1
+Host: shop.example.com
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOi...
+
+{"customer_id": "C-4711", "items": [{"sku": "SKU-001", "quantity": 2}]}
+----
+// adocent-enable Markup.SourceSyntax
+
+This request omits a complete credential and HTTP body framing. It's incomplete and can't be replayed as shown.
+
+The response below illustrates response syntax only. It doesn't establish that the incomplete request succeeds.
+
+[source,http]
+----
+HTTP/1.1 201 Created
+Location: /api/orders/ORD-2026-00471
+Content-Type: application/json
+
+{"order_number": "ORD-2026-00471", "status": "PENDING_PAYMENT", "total": "59.80"}
+----
+====
+
+[[self-contained-snippets]]
+==== Code Snippets That Work as Shown
+
+A code snippet compiles, parses, or runs as shown. Imports, package declarations, and necessary boilerplate are either included or explicitly elided with a comment such as `// imports omitted`. Snippets that combine several concerns into a fragment that doesn't run are a hidden cost: readers spend time reconstructing the missing parts.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,python]
+----
+client.send(payload)
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The supplied API example provides the client setup, payload, and expected response status:
+
+[source,python]
+----
+# imports omitted
+client = Client(endpoint="https://api.example.com", timeout=5.0)
+payload = {"event": "user.signed_up", "user_id": "U-12345"}
+response = client.send(payload)
+assert response.status_code == 202
+----
+====
+
+[[code-markup]]
+==== Code and Identifiers in Monospaced Type
+
+. [[technical-literal-formatting]]Technical literals, such as code, identifiers, version numbers, file paths, configuration keys, and protocol headers, are set in a monospaced font. Identifiers are written exactly as they appear in code, including case.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+Call commit to persist the changes.
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+Call `commit` to persist the changes.
+====
+
+. In AsciiDoc, inline code is enclosed in backticks. Code blocks are tagged with a language for syntax highlighting.
++
+[.good-example]
+.{good-icon} Good example: AsciiDoc source
+====
+[source,asciidoc]
+----
+Call `commit` to persist the changes.
+----
+====
+
+[[part-4]]
+== AsciiDoc Markup and Formatting
+
+This section defines how the document represents its prose, xref:#cross-reference[cross-references], and citations in AsciiDoc. The requirements for the wording remain those of the preceding sections.
+
+[[paragraph-on-one-line]]
+=== Paragraphs on One Source Line
+
+Each paragraph, including the text of a list item, is written on one source line. AsciiDoc joins consecutive lines into one paragraph, so a line break inside a paragraph changes nothing in the output and makes the source harder to read and edit. Lines that must stand apart, such as an address, are written as a list, a table, or a https://docs.asciidoctor.org/asciidoc/latest/blocks/verses/[`[verse\]` block^] instead of with hard line breaks.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The clinic records each appointment.
+A reminder is sent the day before the appointment.
+Cancellations are recorded separately.
+
+. Cancellations +
+A cancelled appointment is released to the waiting list.
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The clinic records each appointment. A reminder is sent the day before the appointment. Cancellations are recorded separately.
+
+. A cancelled appointment is released to the waiting list.
+----
+====
+
+[[verbatim-block-format]]
+=== Verbatim Blocks Without Shared Indentation
+
+[[verbatim-block-indentation]]Verbatim blocks, such as diagrams and code listings, have no indentation shared by every line with text. The block's formatting supplies the left spacing. Indentation inside the block is kept where the code or diagram requires it.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+// The indentation shared by all lines is the deliberate fault.
+// adocent-disable Markup.VerbatimFlushLeft
+[source,python]
+----
+    amounts = [20, 30]
+    total = sum(amounts)
+----
+// adocent-enable Markup.VerbatimFlushLeft
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,python]
+----
+amounts = [20, 30]
+total = sum(amounts)
+----
+====
+
+[[numbered-paragraphs]]
+=== Paragraph Numbering and List Nesting
+
+A [[numbered-paragraph]]_numbered paragraph_ is a paragraph written as an item of an AsciiDoc ordered list, so that the renderer prefixes it with a number or letter. Numbering makes each paragraph an addressable unit: for example, a review comment or a xref:#cross-reference[cross-reference] names item 2.3 instead of "the second sentence of the fourth paragraph." A numbered paragraph is ordinary prose, with full sentences developing one topic under the xref:#single-topic-rule[single-topic rule]. Its sentences use normal capitalization and punctuation. A numbered paragraph may end with a colon when it directly introduces an attached table, block image, listing, literal block, or quote block. Numbering a paragraph doesn't make it an item in a xref:#genuine-list[genuine list].
+
+[[number-every-paragraph]]
+==== Numbered Paragraphs in Sections with Multiple Paragraphs
+
+When the body of a section contains two or more paragraphs, its paragraphs are xref:#numbered-paragraph[numbered paragraphs]. One opening paragraph may remain unnumbered when it introduces their shared purpose, scope, or conditions. That introduction ends with a period and directly precedes the numbered paragraphs. A section whose body is a single paragraph is written as plain prose.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+== Deliveries
+
+Orders received by noon are packed the same day. Later orders are packed the next working day.
+
+Parcels travel by the carrier named on the order confirmation.
+
+Damaged parcels are recorded in the delivery log.
+----
+
+(Three paragraphs have no stable numbers for xref:#cross-reference[cross-references].)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Deliveries
+
+. Orders received by noon are packed the same day. Later orders are packed the next working day.
+. Parcels travel by the carrier named on the order confirmation.
+. Damaged parcels are recorded in the delivery log.
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Deliveries
+
+Orders received by noon are packed the same day. Later orders are packed the next working day.
+----
+
+(Separate case: the section covers packing times alone. A single paragraph needs no number.)
+====
+
+[[numbering-depth]]
+==== Paragraph and List Numbering Within Seven Ordered Levels
+
+. [[numbering-hierarchy]]xref:#numbered-paragraph[Numbered paragraphs] and xref:#genuine-list[genuine lists] share one hierarchy of at most seven levels. Every level uses ordered markers.
++
+In AsciiDoc, an item's marker has one dot for each nesting level:
++
+[source,asciidoc]
+----
+. 1
+.. 2
+... 3
+.... 4
+..... 5
+...... 6
+....... 7
+----
+. Material that would require an eighth level is restructured. The top of the subtree becomes a subsection heading under the xref:#section-nesting[section-nesting rule], or intermediate levels that don't carry real hierarchy are removed.
++
+[.bad-example]
+.{bad-icon} Bad example: an eighth level
+====
+[source,asciidoc]
+----
+...... The archive groups records by year.
+....... Signed agreements are kept separately from drafts.
+........ Each agreement carries its reference number.
+----
+
+(The excerpt begins at level six. The last item introduces a prohibited eighth level.)
+====
++
+[.good-example]
+.{good-icon} Good example: two items at level seven
+====
+[source,asciidoc]
+----
+...... The archive groups records by year.
+....... Signed agreements are kept separately from drafts.
+....... Each agreement carries its reference number.
+----
+
+(The excerpt begins at level six. Both requirements appear at level seven.)
+====
+
+[[no-lone-numbered-paragraph]]
+==== At Least Two Items per Numbering Level
+
+At every nesting level, a xref:#numbered-paragraph[numbered paragraph] has at least one sibling at the same level under the same parent. A level holds zero items or two or more. A lone item means the numbering does no work because nothing at that level can be ordered against it. Content is reorganized to avoid numbering levels with only one item.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+. The laboratory labels each sample before storage.
+.. The label states the collection date.
+. Samples with unreadable labels are set aside.
+----
+
+(The nested item has no sibling.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. The laboratory labels each sample before storage. The label states the collection date.
+. Samples with unreadable labels are set aside.
+----
+
+(The lone item is folded into its parent.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. The laboratory labels each sample before storage.
+.. The label states the collection date.
+.. The label names the collection site.
+. Samples with unreadable labels are set aside.
+----
+
+(Separate case: the supplied labeling procedure also requires the collection site on the label. The nested items now list two distinct label fields.)
+====
+
+[[paragraph-headers]]
+==== Optional Paragraph Headers in Bold Sentence Case
+
+A xref:#numbered-paragraph[numbered paragraph] may open with a [[paragraph-header]]_paragraph header_ - a bold phrase that names the paragraph's topic. The header stands alone on the item's line. The paragraph's text follows as a continuation under the xref:#continuation-attachment[continuation rule] or as nested numbered paragraphs. A paragraph header uses sentence case: the first word and any proper nouns, acronyms, or identifiers are capitalized, while ordinary words that follow remain lowercase. It never uses title case and never ends with a punctuation mark. A header is due when it helps the reader scan, for example when the paragraph is long and holds several sentences or the item heads a group of nested items whose shared topic needs a name. A header is omitted when it adds nothing: for example, a paragraph of one or two sentences doesn't restate its topic in bold if the section heading already states that topic. A paragraph header is the one place where bold appears in body text - see the xref:#inline-markup-roles[inline-formatting rules].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+. *Payment Approval Rules*
++
+The finance director approves payments above EUR 5,000.
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. *Payment approval rules*
++
+The finance director approves payments above EUR 5,000.
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Exhibition Arrangements
+
+. The exhibition runs from 1 to 30 June 2026.
+. *Admission*
++
+Tickets are sold at the entrance. Each ticket covers one visit, and admission ends 30 minutes before closing. Group visits must be booked in advance.
+. *Loans*
++
+The museum records each borrowed object when it arrives. The record names its owner, describes its condition, and gives the agreed return date.
+----
+
+(The short opening needs no paragraph header. The two longer paragraphs cover distinct arrangements.)
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+== Meeting Times
+
+. *Opening time* The meeting begins at 09:00.
+. *Closing time* The meeting ends at 12:00.
+----
+
+(The headers repeat the short statements.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Meeting Times
+
+. The meeting begins at 09:00.
+. The meeting ends at 12:00.
+----
+====
+
+[[continuation-content]]
+==== List Continuations for Content on the Same Topic
+
+. [[continuation-attachment]]Content whose meaning is strongly bound to the preceding xref:#numbered-paragraph[numbered paragraph] is attached to that paragraph with a list continuation - a line holding a single `+` - instead of being numbered. Examples of attached blocks include a paragraph that elaborates the item, a code listing, an image, a table, or an admonition. The continuation signals that the item's topic continues. Content that starts a new topic isn't attached - it takes its own number.
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. The monthly report compares spending with the budget:
++
+[cols="<2,>1,>1",options="header"]
+|===
+|Expense |Budget (EUR) |Actual (EUR)
+|Printing |300 |240
+|Transport |200 |230
+|===
++
+A difference is calculated as actual spending minus the budget.
+. The treasurer signs the report before circulation.
+----
+
+(The table and its explanation belong to the comparison. Signing the report is a separate topic.)
+====
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+. The report states total spending for the month.
++
+The meeting room holds 40 people.
+----
+
+(Room capacity is a separate topic and needs its own paragraph.)
+====
+. A continuation paragraph followed by deeper-level xref:#numbered-paragraph[numbered paragraphs] needs one more `{plus}` line between the paragraph and the first deeper item. That `{plus}` ends the continuation paragraph and attaches the deeper items to the same parent. Without either that line or a separating blank line, the renderer can absorb the deeper item markers into the continuation paragraph. A blank line may render correctly but doesn't satisfy this guideline's required `{plus}` notation. A following item at the same level needs no such `{plus}` - its marker ends the continuation paragraph on its own.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+. The clerk checks each application before registration.
++
+The same checks apply to paper and online applications.
+.. The applicant has signed the form.
+.. The applicant has supplied a contact address.
+----
+
+(The deeper list markers are swallowed into the continuation paragraph because its closing continuation marker is missing.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+. The clerk checks each application before registration.
++
+The same checks apply to paper and online applications.
++
+.. The applicant has signed the form.
+.. The applicant has supplied a contact address.
+----
+====
+
+[[explicit-anchors]]
+=== Explicit Anchors on the Most Precise Targets
+
+. A part of the text that a xref:#cross-reference[cross-reference] targets carries an explicit anchor, written with double brackets, for example `+[[kebab-case-id]]+`. The first applicable case below determines the smallest target that fully defines the referenced concept. The anchor sits:
+.. immediately before the word, without a space or line break, if a single word fully defines the concept,
+.. immediately before the first word of the sentence or list item, without a space or line break, if one sentence or item fully defines the concept,
+.. immediately before the paragraph's first word, without a space or line break, if one paragraph fully defines the concept,
+.. on a separate line above the table or figure, if the entire table or figure defines the concept,
+.. on a separate line above a titled literal or listing block, if that entire block is the target,
+.. on a separate line directly above the section heading, if the entire section defines the concept.
+. Between the anchor and its table, figure, or titled literal or listing block, only the block's title and block attributes may appear. No blank line separates the anchor from the block.
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+See xref:#access-table[the access table].
+
+[[access-table]]
+.Access table
+[cols="1,1",options="header"]
+|===
+|Role |Access
+|Reader |Read
+|===
+----
+(The anchor identifies the whole table. The table's title and settings appear between the anchor and the table, with no blank lines.)
+====
+. A [[reference-label]]_reference label_ is the default text assigned to an anchor for a citation or xref:#cross-reference[cross-reference] that supplies no link text.
++
+[.good-example]
+.{good-icon} Good example
+====
+In `+[[annual-report,Riverside Museum Annual Report 2026]]+`, `annual-report` is the anchor ID and _Riverside Museum Annual Report 2026_ is the xref:#reference-label[reference label]. A citation written as `+<<annual-report>>+` displays _Riverside Museum Annual Report 2026_.
+====
+. [[anchor-labels]]Section anchors and ordinary non-section anchors contain only the anchor ID, for example `+[[payment-dates]]+`. Only entries in the xref:#source-list[source list] include xref:#reference-label[reference labels], as specified by the xref:#bibliography-markup[source list formatting rules].
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+[[rent-payments,Rent Payments]]
+=== Rent Payments
+
+[[payment-date,the payment date]]Rent is due on the first day of each month.
+----
+
+(The section anchor and the ordinary non-section anchor both declare prohibited xref:#reference-label[reference labels].)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+[[rent-payments]]
+=== Rent Payments
+
+[[payment-date]]Rent is due on the first day of each month.
+----
+
+(Both anchors contain only their IDs.)
+====
+. [[anchor-id-format]]An anchor ID is a lowercase kebab-case name in the document's language, and it names the content, not the content's position. Letters with diacritics are replaced with their base ASCII letters, for example `terminy-platnosci` for [.lang-pl]_Terminy płatności_. An explicit ID survives retitling. An auto-generated ID is derived from the heading text, so renaming the heading silently breaks every xref:#cross-reference[cross-reference] that targets it.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+== Rental Agreement
+
+Payment terms are described in <<_rent_payments>>.
+
+=== Rent Payments
+
+Rent is due on the first day of each month.
+
+A _rental deposit_ is a sum held as security for the tenant's obligations. The deposit under this agreement is EUR 1,000.
+----
+
+(The automatically generated target changes when the heading changes.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+== Rental Agreement
+
+Payment terms are described in the section xref:#rent-payments[].
+
+[[rent-payments]]
+=== Rent Payments
+
+[[rent-payment-schedule]]Rent is due on the first day of each month.
+
+A [[rental-deposit]]_rental deposit_ is a sum held as security for the tenant's obligations. [[deposit-amount]]The deposit under this agreement is EUR 1,000.
+----
+
+(The section, payment schedule, defined term, and amount each have an explicit target.)
+====
+
+[[internal-references-with-xref]]
+=== Definition Cross-References in Each Paragraph
+
+. [[reused-concept-links]]When a paragraph uses a concept defined elsewhere in the document, the first mention of that concept carries a xref:#cross-reference[cross-reference] to its definition. The cross-reference uses `xref` and the definition's explicit anchor. Later mentions in the same paragraph may remain unlinked.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The tenant pays a rental deposit.
+----
+
+(The rental deposit is defined elsewhere, but its first mention here has no xref:#cross-reference[cross-reference].)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The tenant pays a xref:#rental-deposit[rental deposit].
+----
+
+(The first mention of the rental deposit carries a xref:#cross-reference[cross-reference] to its definition.)
+====
+
+. For definition cross-references, each prose paragraph has its own first-use scope, including a paragraph in a table cell or attached by a list continuation. Source-line wrapping doesn't start a new scope.
+
+. [[no-section-heading-self-references]]A xref:#cross-reference[cross-reference] never targets the current section's heading. Cross-references to definitions and other anchors within that section are allowed.
+
+. A xref:#cross-reference[cross-reference] to a section may use empty brackets, for example `+xref:#rent-payments[]+`, to display the section's title. [[anchor-reference-text]]A cross-reference to any other anchor, including an entry in the xref:#source-list[source list], includes explicit link text inside the `xref` brackets. Link text can't consist of whitespace alone. Citations follow the xref:#citation-footnotes[citation-footnote conventions].
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+[[submission-date]]The submission date is 15 May 2026.
+
+The application must arrive by xref:#submission-date[].
+----
+
+(The target is a statement, so the xref:#cross-reference[cross-reference] needs explicit link text.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+[[submission-date]]The submission date is 15 May 2026.
+
+The application must arrive by xref:#submission-date[the submission date].
+----
+
+(The xref:#cross-reference[cross-reference] states its link text explicitly.)
+====
+
+[[bibliography-markup]]
+=== Source List Entries with Anchors and Fields
+
+. The xref:#source-list[source list] is the document's final section, titled _Sources_ in English and [.lang-pl]_Źródła_ in Polish, with the block anchor `+[[sources]]+` directly above its heading. Each source is one ordered-list item whose anchor contains both its ID and a xref:#reference-label[reference label], in the form `+[[id,Reference Label]]+`. The xref:#anchor-reference-text[non-section-reference rule] still requires explicit link text for any `xref` that targets the entry. The anchor ID is lowercase kebab-case, under the xref:#anchor-id-format[anchor-naming rules]. The native https://docs.asciidoctor.org/asciidoc/latest/sections/bibliography/[AsciiDoc bibliography attribute^], `[bibliography]`, isn't used, because its rendering bypasses the reference labels.
+
+. The xref:#reference-label[reference label] gives enough context to recognize the source and stays readable when repeated in citations. It includes identifying details, such as the source's subject, author or organization, and year, without reproducing the full entry. The reference label is unique among the entries and different from the anchor ID. The item line carries the reference label alone, in italics.
++
+[.bad-example]
+.{bad-icon} Bad example: too vague
+====
+The source is labeled _Handbook_.
+
+(The xref:#reference-label[reference label] doesn't identify the organization or work.)
+====
++
+[.bad-example]
+.{bad-icon} Bad example: too detailed
+====
+The source is labeled _Riverside Museum Visitor Handbook, Fourth Edition, Published by the Museum Council in 2026, With Entry Prices, Opening Hours, and Exhibition Descriptions_.
+
+(The xref:#reference-label[reference label] is cumbersome when repeated in citations.)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+The source is labeled _Riverside Museum Visitor Handbook, 2026_.
+
+(The xref:#reference-label[reference label] identifies the organization, subject, and year.)
+====
+
+. The entry's fields follow the item line, one per line, each written as a `Key::` marker and its value, opened by the attribute line `[horizontal.source-fields]` that renders the record small and two-columned. Literal values, such as the archive path and the digest, stay monospaced.
+
+. The entry lists its fields in this order:
+.. xref:#source-title[`Title`],
+.. xref:#source-type[`Type`],
+.. the xref:#source-types[fields for the source's type], in their listed order,
+.. the xref:#source-status-definition[`Status`] field,
+.. the xref:#source-class[class fields], in their listed order.
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+[[sources]]
+== Sources
+
+. [[delivery-agreement,Harbor Printing Catalog Agreement, 2026]]_Harbor Printing Catalog Agreement, 2026_
+[horizontal.source-fields]
+Title:: Catalog Printing Agreement
+Type:: Contract
+Parties:: Harbor Printing and Riverside Museum
+Concluded on:: 15 June 2026
+Status:: final, signed 15 June 2026
+Archived as:: `.adocent/resources/sources/delivery-agreement.pdf`
+SHA-256:: `+9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08+`
+
+. [[visitor-handbook,Riverside Museum Visitor Handbook, 2026]]_Riverside Museum Visitor Handbook, 2026_
+[horizontal.source-fields]
+Title:: Riverside Museum Visitor Handbook, 2026
+Type:: Publication
+Authors:: Museum Council
+Year:: 2026
+Edition:: 4th
+Not archived:: paper book
+----
+====
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+* [[[delivery-agreement]]] The agreement sent at some point. SHA-256: abc.
+----
+
+(The entry has no readable xref:#reference-label[reference label], complete fields, or usable digest.)
+====
+
+[[citation-footnotes]]
+=== Citation Footnotes with Source, Location, and Quote
+
+. A [[citation-footnote]]_citation footnote_ identifies the sources that support a claim. It contains at least one source item for each cited source. When a claim needs passages from different locations in the same source, separate items for that source are permitted within the same citation footnote, each with its own locator and quote.
+
+. Each source item starts with a reference to an entry in the xref:#source-list[source list]. The reference uses double angle brackets around the entry's anchor ID, for example `+<<delivery-agreement>>+`, and displays the entry's xref:#reference-label[reference label]. The xref:#locator[locator] follows the reference after a comma and a space. The xref:#quote[quote] follows the locator after a colon and a space. A semicolon and a space separate source items:
++
+[source,asciidoc]
+----
+The supplier will deliver 500 catalogs by 30 September 2026.footnote:delivery[<<delivery-agreement>>, clause 2: "+deliver 500 catalogs by 2026-09-30+".]
+
+The delivery deadline is 30 September 2026.footnote:delivery[]
+
+The first delivery provides half the hall's seating capacity.footnote:capacity[Inferred from: <<delivery-agreement>>, clause 3: "+the first delivery contains 50 chairs+"; <<venue-plan>>, p. 2: "+the hall holds 100 chairs+".]
+----
+
+. [[footnote-reuse]]The empty-bracket form re-cites an earlier footnote under the same number, so a paragraph derived from one source repeats its citation per sentence without repeating the text. The prefix `Inferred from:` distinguishes the xref:#origin-test[claim classes]: with it the footnote cites the premises of an xref:#inferred-claim[inference], without it the footnote backs a xref:#reported-claim[reported claim].
+
+. The xref:#quote[quote] is enclosed in quotation marks, with a plus sign immediately inside each quotation mark. The quotation marks remain visible, and the quote uses the body font. The plus signs prevent AsciiDoc substitutions from changing the quoted wording.
+
+. The xref:#quote[quote] retains the source's wording even when that wording doesn't follow the document's language rules.
+
+. A closing square bracket inside a xref:#quote[quote] is written as `\]` so it doesn't end the footnote.
+
+. A footnote is an ordinary footnote if its body doesn't open with a reference to an entry in the xref:#source-list[source list]. No rule of this section restricts an ordinary footnote.
+. A claim based on a xref:#web-source[web source] uses a xref:#citation-footnote[citation footnote] to cite the source's entry in the xref:#source-list[source list]. The entry gives the web address in its xref:#source-url[`URL`] field. A direct link to the web source doesn't replace the citation footnote.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The museum https://museum.example.com/visit[opens at 10:00^].
+----
+
+(The link opens the web page but provides no xref:#citation-footnote[citation footnote].)
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The museum opens at 10:00.footnote:opening-hours[<<visitor-information>>, Opening hours: "+The museum opens at 10:00.+".]
+----
+
+(The `visitor-information` entry in the xref:#source-list[source list] records `https://museum.example.com/visit` in its xref:#source-url[`URL`] field.)
+====
+
+[[footnote-punctuation]]
+=== Periods for Citation Footnotes, Sentence Punctuation Otherwise
+
+A xref:#citation-footnote[citation footnote] ends with a period after its last source item. An ordinary footnote ends with the punctuation its final sentence requires: a period or a question mark. It ends with an exclamation mark only when that mark closes quoted text. Reusing a footnote with `+footnote:id[]+` adds no new text, so no punctuation is added inside the brackets.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The hall holds 100 people.footnote:[The count includes the speakers]
+
+The estimate includes delivery.footnote:[Does the estimate include installation.]
+
+The supplier will deliver 500 catalogs by 30 September 2026.footnote:delivery[<<delivery-agreement>>, clause 2: "+deliver 500 catalogs by 2026-09-30+"]
+----
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The hall holds 100 people.footnote:[The count includes the speakers.]
+
+The estimate includes delivery.footnote:[Does the estimate include installation?]
+
+The supplier will deliver 500 catalogs by 30 September 2026.footnote:delivery[<<delivery-agreement>>, clause 2: "+deliver 500 catalogs by 2026-09-30+".]
+
+The delivery deadline is 30 September 2026.footnote:delivery[]
+----
+====
+
+[[link-text-carries-the-claim]]
+=== External Links on the Claims They Support
+
+. An external link wraps the phrase that the linked source substantiates, so the sentence keeps its meaning when the markup is stripped. Link text such as _here_ or _this page_, and a bare URL pasted mid-sentence, carries no information about the target.
++
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The council collects household waste every Tuesday. The collection times are listed here: https://council.example.com/waste/schedule.
+----
+====
++
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The council https://council.example.com/waste/schedule[collects household waste every Tuesday^].
+----
+
+(The link text carries the information about the collection schedule.)
+====
+
+. A link that leads the reader away from the document ends with `^`. In HTML, this requests a separate browsing context. The browser decides whether to use a tab or a window.
+
+[[inline-formatting-semantics]]
+=== Distinct Uses for Italics, Bold, and Monospaced Text
+
+[[inline-markup-roles]]Each inline mark has one role. A monospaced span marks technical literals, such as paths, domains, IP addresses, file extensions, version numbers, configuration keys, HTTP headers, or identifiers, as the xref:#technical-literal-formatting[code-formatting rule] prescribes. Italics mark a term of art, a foreign-language term, the proper name of a product or interface element, a word mentioned as a word, and a word that carries emphasis. Bold is used only for xref:#paragraph-header[paragraph headers].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+[source,asciidoc]
+----
+The *approved budget* is stored in _budget.csv_ under the heading *Approved Budget*.
+----
+
+(The term and heading name are bold, although neither is a xref:#paragraph-header[paragraph header]. The filename is italicized instead of monospaced.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+[source,asciidoc]
+----
+The _approved budget_ is stored in `budget.csv` under the heading _Approved Budget_.
+----
+====
+
+[[final-review]]
+== Final Review
+
+Before delivery, read the finished document in its rendered form and run the review procedures of this section in the order in which they appear.
+
+. Each procedure depends on the results of the ones before it.
+. Run each procedure during writing as well, whenever the material it checks has changed. The final review is the last run of a procedure, not its first.
+. A requester can also name one procedure by its heading. That procedure then runs alone, on the document as it stands.
+. After a correction, repeat the checks the correction affects, on the changed passage and on the content that depends on it. A procedure ends when its checks find nothing left to correct.
+
+[[independent-verification]]
+=== Independent Review When Available
+
+Verification is strongest when the reviewer didn't write the text. An author who verifies their own citations reads each claim already believing it, and that belief survives a sympathetic re-reading, so a real defect slips past. A reviewer holds no such belief if they have never seen the draft or receive only the claim, the quote, and the source. That reviewer catches what the author overlooks. An independent reviewer, whether a second person or an AI subagent, runs the verification where one is available. Otherwise, the author runs it, because a self-check, though weaker, beats none.
+
+[[verify-citations]]
+=== Review of Every Citation Against Its Source
+
+. Take the xref:#citation[citations] one at a time and apply the next four steps to each. The last step then looks for claims that carry no citation.
+. Open the cited xref:#source[source] at its xref:#locator[locator], and for a xref:#citation[citation] of the xref:#request-source[writing request] open the original request. Never work from a memory of the source. Where a source can't be consulted, tell the requester and restore access or cite another source that supports the claim. Where the claim stays unverifiable, state the gap or remove the claim.
+. Find the xref:#quote[quote] word for word and read what surrounds it. For a visual fact, inspect the region the xref:#locator[locator] identifies. Where the wording or the location isn't there, search the rest of the xref:#source[source] for the intended support. Repair the quote and the locator where that support stands elsewhere in the source.
+. [[citation-support-check]]Compare the claim with the evidence found.
+.. A xref:#reported-claim[reported claim] holds when the evidence and its context, including the source's xref:#source-status-definition[status], support every part of it.
+.. An xref:#inferred-claim[inferred claim] holds when the evidence supports each premise and the conclusion follows from those premises together.
+. Keep a xref:#citation[citation] whose claim holds. [[unsupported-verdict]]A citation whose claim fails either check receives the _unsupported_ verdict. Narrow or correct the claim until the evidence supports it, or cite a xref:#source[source] that does. Where no source supports the claim, state the gap or remove the claim under the xref:#no-invented-facts[prohibition on invented facts]. A removed claim takes its citation with it.
+. Classify every statement that carries no xref:#citation[citation] by the xref:#origin-test[origin test] and the xref:#introduced-and-reported-statements[distinction between introducing and reporting]. Cite each xref:#reported-claim[reported claim] and xref:#inferred-claim[inferred claim] found, then verify the new xref:#citation[citation] by the steps above.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The draft cites page 41 of the accounts for equipment spending of EUR 90,000. The author remembers that amount and accepts the citation. Page 41 lists planned purchases. The recorded expenditure is on page 12 and is EUR 30,000.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The author opens the accounts and checks the recorded expenditure before reviewing the claim. The record gives EUR 30,000 for equipment. The claim is corrected to that amount and category, and its citation points to the expenditure record.
+====
+
+[[verify-consistency]]
+=== Review of Statement Consistency
+
+. Collect the statements the document makes, including those in prose, headings, lists, tables, the xref:#abstract-content[abstract], examples, diagrams, captions, and code. Group them by topic. A statement about several topics belongs to the group of each of them.
+. Compare the statements within each group under the xref:#consistency-rule[consistency rule], and record each contradiction found.
+. Settle each contradiction and correct every statement that disagrees with the result. Ask the requester about each contradiction left unsettled. Where the requester's answer doesn't settle it either, state the disputed matter as unknown under the xref:#no-invented-facts[prohibition on invented facts].
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The reviewer finds that the introduction says every branch opens on Saturdays, while the section _Branch Hours_ lists one branch as closed on Saturdays. The reviewer corrects the branch list to match the introduction without checking the timetable.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The reviewer checks the current timetable, which shows the Riverside branch closed on Saturdays. The reviewer corrects the introduction to state that every branch except Riverside opens on Saturdays.
+====
+
+[[verify-topic-placement]]
+=== Review of Topic Placement
+
+. List the topics of the document. For each topic, find every statement about it, including statements in prose, headings, lists, tables, the xref:#abstract-content[abstract], examples, diagrams, captions, and code.
+. Choose a xref:#topic-place[place] for each topic, and move into it each statement about the topic that the place doesn't yet contain.
+. Apply the xref:#outside-place-rule[rule for statements outside their topic's place] to each statement repeated outside the xref:#topic-place[place] of its topic.
+.. Keep a statement repeated in the xref:#abstract-content[abstract] when the abstract summarizes it.
+.. Remove any other repeated statement and read its passage without it.
+.. Leave the statement removed when the passage can still be understood and acted on. Otherwise, restore the statement and add a xref:#cross-reference[cross-reference] to it in the xref:#topic-place[place] of its topic if the passage lacks one.
+. Re-read each passage that gained or lost statements, and correct the defects that the changes introduced.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+A dishwasher manual covers detergent in the sections _Installation_, _Daily Use_, and _Troubleshooting_. The reviewer adds a cross-reference from each of these sections to the other two.
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The reviewer gathers the detergent instructions in a new section _Detergent_ and removes them from the section _Installation_. The section _Daily Use_ replaces them with a cross-reference to the section _Detergent_. The section _Troubleshooting_ keeps one sentence on excess detergent, because the foam fault it diagnoses can't be explained without it. That sentence carries a cross-reference to the section _Detergent_.
+====
+
+[[verify-every-paragraph]]
+=== Review of Each Paragraph's Topic and Connections
+
+. Check each paragraph against the xref:#single-topic-rule[one-paragraph-one-topic rule] by the steps below, and check each table cell of more than one sentence the same way.
+. [[paragraph-topic-check]]State the paragraph's topic in one sentence and read each sentence against it.
+. [[sentence-contribution-check]]Remove or move each sentence that doesn't develop the paragraph's topic.
+.. Remove a sentence that contributes nothing to the document.
+.. Move a sentence that contributes to the document into the paragraph whose topic it develops, or into a new paragraph where no paragraph covers it.
+. Test the causes, conditions, and other connections the paragraph states against the facts. Correct or remove a connection the facts don't support, and leave those facts as they stand.
+. [[sentence-order-check]]Order the sentences under the xref:#forward-order-rule[ordering rule]. Put the governing claim before its evidence and consequences, a cause before its effect, and a prerequisite before what depends on it.
+
+[.bad-example]
+.{bad-icon} Bad example
+====
+The library is open six days a week because it lends books, provides study desks, and hosts community meetings.
+
+(The listed activities don't establish the reason for the opening schedule.)
+====
+
+[.good-example]
+.{good-icon} Good example
+====
+The library is open six days a week. It lends books, provides study desks, and hosts community meetings.
+
+(The paragraph describes the library's services without inventing a cause for its opening schedule.)
+====
+
+[[verify-nomenclature]]
+=== Review of Terminology Consistency
+
+. Collect the terms the document uses, in prose, headings, lists, tables, diagrams, captions, and xref:#cross-reference[cross-reference] link text, under the xref:#strict-nomenclature[nomenclature rule]. Read each use in its context to establish which concept it names.
+. Give each concept its own xref:#canonical-term[canonical term] where one term names several concepts, and update the uses that change. Settle this before the next step, because a term naming several concepts can't be matched against other terms.
+. Compare the terms that appear to name one concept. Choose one xref:#canonical-term[canonical term] and replace the others where the uses confirm that the terms do name one concept. Keep the terms apart where they name related but distinct concepts.
+. Search the document for each replaced term and update the uses that still name the same concept. Re-read the edited passages to confirm that the replacements keep their meaning.
+
+[[about-the-document]]
+== About the Document
+
+. The source text of this document is written in the https://asciidoc.org[AsciiDoc^] markup language.
+. The source text of this document must follow the link:README-guideline-writing.adoc[Writing Guideline for Utilitarian Non-Fiction^]. The guideline is stored beside the source text in the same Git repository.
+. The https://github.com/ciechanowiec/adocent[`adocent`^] application lints, converts, and watches the source text of this document.
+. *Usage of https://github.com/ciechanowiec/adocent[`adocent`^]*
++
+`adocent usage` prints the complete https://github.com/ciechanowiec/adocent[`adocent`^] manual and JSON reference catalogs, producing a large output. Don't run it during routine writing. Use it only when command help and lint diagnostics don't resolve a specific usage problem. Save the output to a temporary file and read only the relevant sections. AI agents must not load the full output into their context.
+. *Linting*
++
+To lint the source text of this document, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent lint "{docname}{docfilesuffix}"
+----
+. *Converting*
++
+To convert this document to HTML, PDF, and DOCX, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent convert "{docname}{docfilesuffix}" --to html --to pdf --to docx
+----
+. *Watching*
++
+To open a live HTML preview of this document, run this command from the directory containing the source text:
++
+[source,bash,subs="attributes+"]
+----
+adocent watch "{docname}{docfilesuffix}"
+----
+
+ifdef::backend-html5[]
+ifndef::env-github[]
+++++
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js"></script>
+<script src="https://www.ciechanowiec.eu/linux_mantra/adoc-docinfo-footer.js"></script>
+++++
+endif::[]
+endif::[]
