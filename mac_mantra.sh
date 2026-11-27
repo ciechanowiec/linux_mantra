@@ -1029,13 +1029,14 @@ fi
 # Local commands such as `rm -rf`, `sudo` or `find -exec` are deliberately not
 # denied, matching Codex's danger-full-access setup in configure_codex.sh. The
 # subtracted list drops deny entries written by older mantra versions.
-# The status line keeps the working directory visible below the prompt; the
-# path in the startup banner scrolls away. Claude Code pipes session JSON to
-# the command on stdin, and the shell expands $HOME when the command runs, so
-# the home prefix shows as ~. Unquoted jq filter: the program is single-quoted.
+# The status line keeps the working directory and Git branch visible below
+# the prompt; the path in the startup banner scrolls away. The command runs
+# resources/scripts/claude_statusline.sh, which the mantra copies to ~/scripts
+# with the other helper scripts. Claude Code runs the command through a shell
+# each time it refreshes the status line, so the ~ resolves then.
 jq '. * {
   "theme": "auto",
-  "statusLine": { "type": "command", "command": "jq -r .workspace.current_dir | sed \"s|^$HOME|~|\"" },
+  "statusLine": { "type": "command", "command": "~/scripts/claude_statusline.sh" },
   "autoMemoryEnabled": false,
   "attribution": { "commit": "", "pr": "" },
   "permissions": { "defaultMode": "bypassPermissions" },
