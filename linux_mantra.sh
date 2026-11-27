@@ -543,8 +543,13 @@ fi
 # Local commands such as `rm -rf`, `sudo` or `find -exec` are deliberately not
 # denied, matching Codex's danger-full-access setup in configure_codex.sh. The
 # subtracted list drops deny entries written by older mantra versions.
+# The status line keeps the working directory visible below the prompt; the
+# path in the startup banner scrolls away. Claude Code pipes session JSON to
+# the command on stdin, and the shell expands $HOME when the command runs, so
+# the home prefix shows as ~. Unquoted jq filter: the program is single-quoted.
 jq '. * {
   "theme": "auto",
+  "statusLine": { "type": "command", "command": "jq -r .workspace.current_dir | sed \"s|^$HOME|~|\"" },
   "autoMemoryEnabled": false,
   "attribution": { "commit": "", "pr": "" },
   "permissions": { "defaultMode": "bypassPermissions" },
