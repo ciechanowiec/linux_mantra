@@ -235,8 +235,13 @@ if [[ -f "${COLIMA_TEMPLATE_DESTINATION_FILE}" ]]; then
   esac
 fi
 echo "Sizing the Colima virtual machine against the host's capabilities..."
-# CPU: half of the host's logical cores (the other half stays with macOS).
-COLIMA_CPU=$(( $(sysctl -n hw.logicalcpu) / 2 ))
+# CPU: the host's logical cores minus a reserve for macOS of a quarter of them, at least two.
+# A virtual CPU is only a host thread that costs nothing while idle, so unlike memory,
+# CPU is not halved: the reserve just keeps the macOS UI responsive under full load.
+hostLogicalCpu=$(sysctl -n hw.logicalcpu)
+hostCpuReserve=$(( hostLogicalCpu / 4 ))
+[[ "${hostCpuReserve}" -lt 2 ]] && hostCpuReserve=2
+COLIMA_CPU=$(( hostLogicalCpu - hostCpuReserve ))
 [[ "${COLIMA_CPU}" -lt 1 ]] && COLIMA_CPU=1
 # Memory: half of the host's RAM in GiB (hw.memsize is reported in bytes).
 COLIMA_MEMORY=$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 / 2 ))
