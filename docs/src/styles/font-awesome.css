@@ -1,0 +1,5 @@
+/* The icon stylesheet Asciidoctor links from the styles directory, as
+   `{stylesdir}/font-awesome.css`, when a document's header turns
+   `iconfont-remote` off. It serves Font Awesome 4.7, the release Asciidoctor
+   writes its icon classes for, from this site. */
+@import "vendor/font-awesome/css/font-awesome.min.css";

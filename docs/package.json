@@ -11,13 +11,21 @@
     "build": "node scripts/build.ts",
     "format": "airness-node format"
   },
+  "dependencies": {
+    "@asciidoctor/core": "4.3.0",
+    "@fontsource-variable/source-serif-4": "5.3.1",
+    "@fontsource/playfair-display": "5.3.0",
+    "@fontsource/source-code-pro": "5.3.1",
+    "@fortawesome/fontawesome-free": "7.2.0",
+    "font-awesome": "4.7.0",
+    "tocbot": "4.36.8"
+  },
   "devDependencies": {
     "@airness/node": "1.0.13",
     "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.0.5",
     "esbuild": "0.28.2",
     "happy-dom": "21.0.4",
-    "tocbot": "4.36.8",
     "typescript": "6.0.3",
     "vitest": "5.0.5"
   },

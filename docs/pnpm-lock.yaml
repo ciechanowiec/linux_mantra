@@ -14,6 +14,28 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@asciidoctor/core':
+        specifier: 4.3.0
+        version: 4.3.0
+      '@fontsource-variable/source-serif-4':
+        specifier: 5.3.1
+        version: 5.3.1
+      '@fontsource/playfair-display':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/source-code-pro':
+        specifier: 5.3.1
+        version: 5.3.1
+      '@fortawesome/fontawesome-free':
+        specifier: 7.2.0
+        version: 7.2.0
+      font-awesome:
+        specifier: 4.7.0
+        version: 4.7.0
+      tocbot:
+        specifier: 4.36.8
+        version: 4.36.8
     devDependencies:
       '@airness/node':
         specifier: 1.0.13
@@ -30,9 +52,6 @@ importers:
       happy-dom:
         specifier: 21.0.4
         version: 21.0.4
-      tocbot:
-        specifier: 4.36.8
-        version: 4.36.8
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -54,6 +73,15 @@ packages:
   '@asamuzakjp/dom-selector@10.0.6':
     resolution: {integrity: sha512-thWv2/7bV1vrCp+tNo8eR8GfpmFh5PhYmDPMNqoYQsPyhLSd8UhV+IZTpKIQ1TGvKKTIV0h9xwEgx7mpx81Zjw==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
+
+  '@asciidoctor/core@4.3.0':
+    resolution: {integrity: sha512-GjUCNKhhMp7Sbp70biHN7dNS9DvnOqdO1Z4XflgQX7NZ9+GtpFglTaZ8R+VlrL9XqzuJ9KJDcq8FlMD8CSzXDw==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      highlight.js: ^11.0.0
+    peerDependenciesMeta:
+      highlight.js:
+        optional: true
 
   '@axe-core/playwright@4.14.0':
     resolution: {integrity: sha512-SGUhG5PIHd2eMdpgBF2PyQLOhX+qyDR2PT4cmoS4Qk2ak+jX/rrSvst9l0PGv5WTHolKpUMvVmoHpr4cZgf1RQ==}
@@ -478,6 +506,19 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@fontsource-variable/source-serif-4@5.3.1':
+    resolution: {integrity: sha512-4Rtay22SC4lMvw11r/+9kxANB6P3M0X8s1NudBC2v0J1KU2y3DcMoNcT3lBoZ/CqLirzf+StlO6UlJilyrvaUg==}
+
+  '@fontsource/playfair-display@5.3.0':
+    resolution: {integrity: sha512-uJSABalvdWc10fEPppQjQocamT21LEyRfzzWfRfqbkPz+sRv+kKpYDKyluBUskvJREkJTos9epj1WjQROGu99Q==}
+
+  '@fontsource/source-code-pro@5.3.1':
+    resolution: {integrity: sha512-qsJEkwJWXYP/9clmtt3BsIlZ+Lr4cuRgNAgu0vyZdCgESMRMhRkAmEFFHHNM81VdeURqg5D5+Rr3bALDFav78A==}
+
+  '@fortawesome/fontawesome-free@7.2.0':
+    resolution: {integrity: sha512-3DguDv/oUE+7vjMeTSOjCSG+KeawgVQOHrKRnvUuqYh1mfArrh7s+s8hXW3e4RerBA1+Wh+hBqf8sJNpqNrBWg==}
+    engines: {node: '>=6'}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -1674,6 +1715,10 @@ packages:
 
   flatted@3.4.4:
     resolution: {integrity: sha512-5+ybhBZANEJxaH3X5evAFatUxLfEHSr7n6kYJ+1Qd0mUqr4eu9gIf6GDbWHf8RJijHrjjO8G+la14SlL2SeS1Q==}
+
+  font-awesome@4.7.0:
+    resolution: {integrity: sha512-U6kGnykA/6bFmg1M/oT9EkFeIYv7JlX3bozwQJWiiLz6L0w3F5vBVPxHlwyX/vtNq1ckcpRKOB9f2Qal/VtFpg==}
+    engines: {node: '>=0.10.3'}
 
   formatly@0.11.4:
     resolution: {integrity: sha512-TeCC10lP8KCgoX+Fe5lryILIT0/Dy+nP0OSVnsuB5CwXoLuOdqxCYlPFF1inR8S/zTy1ec7TjhS2TeRKWzzImA==}
@@ -2879,6 +2924,8 @@ snapshots:
       is-potential-custom-element-name: 1.0.1
       lru-cache: 11.5.3
 
+  '@asciidoctor/core@4.3.0': {}
+
   '@axe-core/playwright@4.14.0(playwright-core@1.64.1)':
     dependencies:
       axe-core: 4.14.1
@@ -3192,6 +3239,14 @@ snapshots:
       levn: 0.4.1
 
   '@exodus/bytes@1.16.0': {}
+
+  '@fontsource-variable/source-serif-4@5.3.1': {}
+
+  '@fontsource/playfair-display@5.3.0': {}
+
+  '@fontsource/source-code-pro@5.3.1': {}
+
+  '@fortawesome/fontawesome-free@7.2.0': {}
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -4260,6 +4315,8 @@ snapshots:
       hookified: 1.15.1
 
   flatted@3.4.4: {}
+
+  font-awesome@4.7.0: {}
 
   formatly@0.11.4:
     dependencies:

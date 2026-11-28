@@ -1,6 +1,9 @@
-@import "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Source+Code+Pro:wght@400;600&display=swap";
-@import "https://cdn.jsdelivr.net/gh/asciidoctor/asciidoctor@2.0/data/stylesheets/asciidoctor-default.css";
-@import "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css";
+/* The faces, the default sheet and the icons are served from this site, beside
+   this stylesheet, so a document asks no other origin for them. The build takes
+   each from the dependency that publishes it. */
+@import "vendor/fonts/fonts.css";
+@import "vendor/asciidoctor/asciidoctor-default.css";
+@import "vendor/fontawesome-free/css/all.min.css";
 
 /* ==========================================================================
    Shared AsciiDoc document stylesheet, maintained in this repository.
@@ -113,6 +116,22 @@ a:hover {
 
 a.anchor {
     border-bottom: 0;
+}
+
+/* The default sheet marks a focused link with a thin dotted outline, which
+   covers too little of the link to be found. A keyboard-focused link gets a
+   solid ring instead; a pointer click draws none, so a reader using a mouse
+   sees no change. */
+a[href]:focus-visible {
+    outline: 2px solid var(--ad-link);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* The contents branches clip what lies outside them, which would cut an outer
+   ring off the sides of an entry, so the ring is drawn inside the entry. */
+#toc a[href]:focus-visible {
+    outline-offset: -2px;
 }
 
 /* The footnote marker is a navigation handle, not prose, so it carries no rule.
@@ -436,8 +455,12 @@ body.toc2 {
         overflow: hidden;
     }
 
+    /* A collapsed branch has no height, but its links would still take keyboard
+       focus where no one can see them. Hiding it takes them out of the tab
+       order without changing what is drawn. */
     .is-collapsed {
         max-height: 0;
+        visibility: hidden;
     }
 
     .is-active-link {
@@ -746,6 +769,23 @@ tt {
     padding: 0.85em 1.1em;
     font-size: 0.8em;
     line-height: 1.55;
+}
+
+/* Rouge writes its GitHub theme into each token's style attribute, over the
+   theme's own fill. Two of its colours stand just below the 4.5:1 that text
+   needs on that fill: the Rouge 3 attribute teal, which adocent renders with,
+   on #f8f8f8, and the Rouge 4 comment grey on #f6f8fa. Each takes the nearest
+   colour that reaches 4.5:1, a shift no reader can see. Each selector names the
+   exact declaration Rouge writes, and only an important declaration outranks
+   it. */
+pre.rouge span[style*="color: #008080"] {
+    /* biome-ignore lint/complexity/noImportantStyles: only an important declaration outranks the colour Rouge writes into the element's own style attribute */
+    color: #007f7f !important;
+}
+
+pre.rouge span[style*="color: #6e7781"] {
+    /* biome-ignore lint/complexity/noImportantStyles: only an important declaration outranks the colour Rouge writes into the element's own style attribute */
+    color: #6a737d !important;
 }
 
 pre > code {

@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { describe, expect, it } from 'vitest'
 import { element } from './support'
 
-// The whole footer script over a real Asciidoctor rendering, with tocbot loaded first as the documents load it.
+// The whole footer script over a real Asciidoctor rendering, with the tocbot it bundles and no global copy.
 describe('the footer script over a rendered document', (): void => {
   it('applies every behaviour of the original script', async (): Promise<void> => {
     document.body.insertAdjacentHTML('beforeend', await readFile('tests/fixtures/rendered-document.txt', 'utf8'))
@@ -17,6 +17,9 @@ describe('the footer script over a rendered document', (): void => {
       ),
       mixedLinkText: document.querySelectorAll('#content a .ad-link-text').length > 0,
       markerTitles: document.querySelectorAll('a.footnote[title]').length,
+      landmarks: ['#header', '#toc', '#content', '#footnotes', '#footer'].map(
+        (selector: string): string | null | undefined => document.querySelector(selector)?.getAttribute('role'),
+      ),
     }).toEqual({
       heading: '1. ',
       tocbot: '1. First Section with code in the Title',
@@ -24,6 +27,7 @@ describe('the footer script over a rendered document', (): void => {
       externalTargets: true,
       mixedLinkText: true,
       markerTitles: 0,
+      landmarks: ['banner', 'navigation', 'main', 'region', 'contentinfo'],
     })
   })
 })
