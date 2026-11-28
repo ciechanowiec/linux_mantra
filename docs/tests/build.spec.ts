@@ -73,7 +73,12 @@ describe('the site build', (): void => {
       }),
     )
     const asciidoctor: string = await built(path.join(VENDOR, ASCIIDOCTOR_STYLESHEET))
-    expect([same.every(Boolean), asciidoctor.startsWith('/*! Asciidoctor default stylesheet')]).toEqual([true, true])
+    // A rule for every identified division of the body would turn the hover previews into page columns.
+    expect([
+      same.every(Boolean),
+      asciidoctor.startsWith('/*! Asciidoctor default stylesheet'),
+      asciidoctor.includes('body>div[id]'),
+    ]).toEqual([true, true, false])
   })
 
   it('declares the families, weights and styles the theme sets, each naming a font file served beside it', async (): Promise<void> => {

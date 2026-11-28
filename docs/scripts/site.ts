@@ -34,7 +34,10 @@ const SOURCE_CODE_PRO: string = directoryOf(import.meta.resolve('@fontsource/sou
 const ASCIIDOCTOR_PACKAGE: string = '@asciidoctor/core'
 
 // The package of Asciidoctor.js exports only its processor, so its stylesheet is found from the package root: the
-// last `node_modules/@asciidoctor/core` directory on the path of the module the package resolves to.
+// last `node_modules/@asciidoctor/core` directory on the path of the module the package resolves to. Release 3.0
+// carries the stylesheet of Asciidoctor 2.0, which the documents loaded before; the stylesheet of release 4 styles
+// every identified division of the body as a centred page column, and the hover previews the footer script appends
+// to the body are such divisions.
 const ASCIIDOCTOR_MODULE: string = fileURLToPath(import.meta.resolve('@asciidoctor/core'))
 
 /** A file a dependency publishes, and where under the vendor directory the site serves it. */
@@ -116,8 +119,9 @@ const asciidoctorStylesheet = (): string => {
   const root: string = path.join('node_modules', ASCIIDOCTOR_PACKAGE)
   return path.join(
     ASCIIDOCTOR_MODULE.slice(0, ASCIIDOCTOR_MODULE.lastIndexOf(root) + root.length),
-    'data',
-    'asciidoctor-default.css',
+    'dist',
+    'css',
+    'asciidoctor.css',
   )
 }
 

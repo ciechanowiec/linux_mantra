@@ -12,7 +12,7 @@
     "format": "airness-node format"
   },
   "dependencies": {
-    "@asciidoctor/core": "4.3.0",
+    "@asciidoctor/core": "3.0.4",
     "@fontsource-variable/source-serif-4": "5.3.1",
     "@fontsource/playfair-display": "5.3.0",
     "@fontsource/source-code-pro": "5.3.1",
