@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { columnRight, distanceToPopover, openedPreview } from '@/preview-motion'
+import { distanceToPopover, openedPreview, textRight } from '@/preview-motion'
 import { element, render } from './support'
 
 describe('what the previews read from the page', (): void => {
@@ -17,9 +17,15 @@ describe('what the previews read from the page', (): void => {
     expect([distanceToPopover(undefined, pointer), distanceToPopover(element('#closed'), pointer)]).toEqual([0, 0])
   })
 
-  it('takes the anchor edge for the column of a document without a content element', (): void => {
+  it('takes the anchor edge for the text of a document without a content element', (): void => {
     render('<p id="anchor">text</p>')
     const anchor: DOMRect = new DOMRect(10, 20, 30, 40)
-    expect(columnRight(document, anchor)).toBe(40)
+    expect(textRight(document, globalThis, anchor)).toBe(40)
+  })
+
+  it('ends the text where the padding of the content column begins', (): void => {
+    render('<div id="content" style="position: absolute; left: 0; width: 600px; padding-right: 30px"></div>')
+    const anchor: DOMRect = new DOMRect(10, 20, 30, 40)
+    expect(textRight(document, globalThis, anchor)).toBe(element('#content').getBoundingClientRect().right - 30)
   })
 })

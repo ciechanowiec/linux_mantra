@@ -4,15 +4,16 @@ import { type Memory, memoryOf } from './memory'
 import {
   AWAY_TOLERANCE_PX,
   announceOpen,
+  centredBeside,
   centredTop,
-  columnRight,
   distanceToPopover,
   hideDelay,
-  marginBeside,
   openedPreview,
   type Placement,
   PREVIEW_OPEN_EVENT,
   pin,
+  roomBeside,
+  textRight,
 } from './preview-motion'
 
 // Footnote hover preview: a footnote carries the citation for the statement it hangs off, so following one
@@ -163,17 +164,20 @@ const belowMarker = (anchor: Edges, popover: HTMLElement, viewport: View, viewpo
 
 const place = (scene: Scene, link: Element, popover: HTMLElement): Placement => {
   const anchor: DOMRect = link.getBoundingClientRect()
-  const right: number = columnRight(scene.root, anchor)
+  const right: number = textRight(scene.root, scene.view, anchor)
   // clientWidth, not innerWidth: the latter counts the scrollbar, which would let the note sit under it.
   const viewportWidth: number = scene.root.documentElement.clientWidth
-  const margin: number = marginBeside(viewportWidth, right, GAP_PX)
+  const margin: number = roomBeside(viewportWidth, right)
   if (margin < SIDE_MIN_WIDTH_PX) {
     return belowMarker(anchor, popover, scene.view, viewportWidth)
   }
   popover.classList.add(SIDE_CLASS)
   popover.style.setProperty('width', `${String(Math.min(margin, SIDE_MAX_WIDTH_PX))}px`)
-  // Centred on the marker.
-  return { left: right + GAP_PX, top: centredTop(anchor, popover.offsetHeight, scene.view.innerHeight, GAP_PX) }
+  // Centred on the marker, and in the margin between the text and the edge of the page.
+  return {
+    left: centredBeside(viewportWidth, right, popover.offsetWidth),
+    top: centredTop(anchor, popover.offsetHeight, scene.view.innerHeight, GAP_PX),
+  }
 }
 
 const show = (scene: Scene, link: Element): void => {

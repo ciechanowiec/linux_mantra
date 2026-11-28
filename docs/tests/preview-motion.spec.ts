@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { distanceToBox } from '@/geometry'
-import { centredTop, hideDelay, marginBeside, widthWithin } from '@/preview-motion'
+import { centredBeside, centredTop, hideDelay, roomBeside, widthWithin } from '@/preview-motion'
 
 const BOX: { left: number; top: number; right: number; bottom: number } = {
   left: 100,
@@ -41,8 +41,18 @@ describe('the geometry the previews share', (): void => {
     ]).toEqual([12, 788])
   })
 
-  it('gives the margin beside the column after a gap on either side', (): void => {
-    expect(marginBeside(1400, 900, 12)).toBe(476)
+  it('gives the room beside the text after the same gap from the text and from the page edge', (): void => {
+    expect([roomBeside(1400, 900), roomBeside(1000, 980)]).toEqual([464, -16])
+  })
+
+  it('centres a preview that fills the room, leaving the same gap from the text and from the page edge', (): void => {
+    const left: number = centredBeside(1400, 900, 464)
+    expect([left - 900, 1400 - (left + 464)]).toEqual([18, 18])
+  })
+
+  it('centres a preview narrower than the room, so the wider gaps stay equal too', (): void => {
+    const left: number = centredBeside(2000, 1000, 520)
+    expect([left, left - 1000, 2000 - (left + 520)]).toEqual([1240, 240, 240])
   })
 
   it('gives the viewport width after a gap at either edge', (): void => {

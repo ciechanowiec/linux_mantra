@@ -1,4 +1,4 @@
-import { elementById, type View } from './dom'
+import { cssPixels, elementById, orElse, type View } from './dom'
 import { distanceToBox } from './geometry'
 
 // What the footnote preview and the internal-link preview share: how long a closing preview lingers, how far
@@ -98,30 +98,47 @@ export const centredTop = (anchor: VerticalSpan, height: number, viewportHeight:
   return Math.min(Math.max(gap, top), Math.max(gap, viewportHeight - height - gap))
 }
 
-/**
- * The right edge of the content column. The margin starts there rather than at the right edge of the block the
- * anchor sits in: an indented block (an admonition, a nested list) sits inside the column, and a preview pinned to
- * its edge would still overlap prose belonging to the column.
- * @param root the document
- * @param anchor the box of what opened the preview, whose edge stands in where the document has no column
- * @returns the right edge, in viewport coordinates
- */
-export const columnRight = (root: Document, anchor: DOMRect): number => {
-  const content: Element | null = elementById(root, 'content')
-  return content ? content.getBoundingClientRect().right : anchor.right
-}
+/** The space a preview beside the text keeps from the text, and as much from the edge of the page. */
+const SIDE_GAP_PX: number = 18
 
 const BOTH_SIDES: number = 2
 
 /**
- * The width a preview may take in the margin beside the content column, once it keeps a gap on either side.
- * @param viewportWidth the width of the viewport
- * @param right the right edge of the content column
- * @param gap the gap kept on each side of the preview
- * @returns the width in pixels, negative where the column leaves no margin
+ * The right edge of the text of the content column: the column's edge less its padding. The margin starts there
+ * rather than at the right edge of the block the anchor sits in: an indented block (an admonition, a nested list)
+ * sits inside the column, and a preview pinned to its edge would still overlap prose belonging to the column.
+ * @param root the document
+ * @param view the window the document is shown in, which resolves the column's padding
+ * @param anchor the box of what opened the preview, whose edge stands in where the document has no column
+ * @returns the right edge, in viewport coordinates
  */
-export const marginBeside = (viewportWidth: number, right: number, gap: number): number =>
-  viewportWidth - right - BOTH_SIDES * gap
+export const textRight = (root: Document, view: View, anchor: DOMRect): number => {
+  const content: Element | null = elementById(root, 'content')
+  return content
+    ? content.getBoundingClientRect().right - orElse(cssPixels(view.getComputedStyle(content).paddingRight), 0)
+    : anchor.right
+}
+
+/**
+ * The width the margin beside the text leaves a preview that keeps the same gap from the text and from the edge of
+ * the page.
+ * @param viewportWidth the width of the page, without its scrollbar
+ * @param textEdge the right edge of the text
+ * @returns the width in pixels, negative where the text leaves no margin
+ */
+export const roomBeside = (viewportWidth: number, textEdge: number): number =>
+  viewportWidth - textEdge - BOTH_SIDES * SIDE_GAP_PX
+
+/**
+ * The left edge of a preview centred in the margin beside the text, so that the space between the text and the
+ * preview equals the space between the preview and the edge of the page.
+ * @param viewportWidth the width of the page, without its scrollbar
+ * @param textEdge the right edge of the text
+ * @param boxWidth the width the preview is drawn at
+ * @returns the left edge, in viewport coordinates
+ */
+export const centredBeside = (viewportWidth: number, textEdge: number, boxWidth: number): number =>
+  textEdge + (viewportWidth - textEdge - boxWidth) / BOTH_SIDES
 
 /**
  * The width of the viewport once a gap is kept at either edge.

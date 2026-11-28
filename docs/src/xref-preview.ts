@@ -3,15 +3,16 @@ import { type Memory, memoryOf } from './memory'
 import {
   AWAY_TOLERANCE_PX,
   announceOpen,
+  centredBeside,
   centredTop,
-  columnRight,
   distanceToPopover,
   hideDelay,
-  marginBeside,
   openedPreview,
   type Placement,
   PREVIEW_OPEN_EVENT,
   pin,
+  roomBeside,
+  textRight,
   widthWithin,
 } from './preview-motion'
 import { previewContentOf, targetOf } from './xref-content'
@@ -167,22 +168,25 @@ const belowLink = (scene: Scene, anchor: DOMRect, popover: HTMLElement, viewport
 }
 
 // An internal link sits mid-sentence, so the lines around it are the context the reader is holding while they
-// look. Preferred placement is the margin beside the text column, where nothing is covered at all; where the window
+// look. Preferred placement is the margin beside the text, where nothing is covered at all; where the window
 // is too narrow for that, below the link, and above it only when there is no room below.
 const place = (scene: Scene, link: Element, popover: HTMLElement): Placement => {
   const anchor: DOMRect = link.getBoundingClientRect()
-  const right: number = columnRight(scene.root, anchor)
+  const right: number = textRight(scene.root, scene.view, anchor)
   // clientWidth, not innerWidth: the latter counts the scrollbar, which would let the preview sit under it.
   const viewportWidth: number = scene.root.documentElement.clientWidth
-  const margin: number = marginBeside(viewportWidth, right, GAP_PX)
+  const margin: number = roomBeside(viewportWidth, right)
   const minSideWidth: number =
     popover.querySelector(RIGID_CONTENT_SELECTOR) === null ? SIDE_MIN_WIDTH_PX : SIDE_MIN_WIDTH_RIGID_PX
   if (margin < minSideWidth) {
     return belowLink(scene, anchor, popover, viewportWidth)
   }
   popover.style.setProperty('width', `${String(Math.min(margin, SIDE_MAX_WIDTH_PX))}px`)
-  // Centred on the link.
-  return { left: right + GAP_PX, top: centredTop(anchor, popover.offsetHeight, scene.view.innerHeight, GAP_PX) }
+  // Centred on the link, and in the margin between the text and the edge of the page.
+  return {
+    left: centredBeside(viewportWidth, right, popover.offsetWidth),
+    top: centredTop(anchor, popover.offsetHeight, scene.view.innerHeight, GAP_PX),
+  }
 }
 
 const show = (scene: Scene, link: Element): void => {
